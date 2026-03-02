@@ -139,9 +139,9 @@ def main():
 
     # --- Phase 1: Fetch parent issues ---
     parent_fields = (
-        "summary,status,issuetype,assignee,customfield_10015,duedate,customfield_10016,customfield_10107,timetracking"
+        "summary,status,issuetype,assignee,{{START_DATE_FIELD}},duedate,customfield_10016,customfield_10107,timetracking"
     )
-    subtask_fields = "summary,status,issuetype,parent,assignee,priority,customfield_10015,duedate,timetracking"
+    subtask_fields = "summary,status,issuetype,parent,assignee,priority,{{START_DATE_FIELD}},duedate,timetracking"
     result = api.get_sprint_issues(sprint_id, fields=parent_fields, max_results=50)
     all_issues = result.get("issues", [])
 
@@ -157,7 +157,7 @@ def main():
         if itype not in PARENT_TYPES:
             continue
 
-        start = parse_date(f.get("customfield_10015"))
+        start = parse_date(f.get("{{START_DATE_FIELD}}"))
         due = f.get("duedate")
         size_obj = f.get("customfield_10107")
         size = size_obj.get("value") if isinstance(size_obj, dict) else size_obj
@@ -259,7 +259,7 @@ def main():
         # Use extended parent due if applicable
         effective_p_due = parent_extensions.get(parent_key, p_due)
 
-        sub_start = parse_date(f.get("customfield_10015"))
+        sub_start = parse_date(f.get("{{START_DATE_FIELD}}"))
         sub_due = f.get("duedate")
         tt = f.get("timetracking", {}) or {}
         oe = tt.get("originalEstimate", "")
@@ -275,7 +275,7 @@ def main():
                 missing_in_group = [
                     x
                     for x in siblings
-                    if not parse_date(x.get("fields", {}).get("customfield_10015"))
+                    if not parse_date(x.get("fields", {}).get("{{START_DATE_FIELD}}"))
                     or not x.get("fields", {}).get("duedate")
                 ]
                 if missing_in_group:
@@ -283,7 +283,7 @@ def main():
                     dates = distribute_dates(len(missing_in_group), p_start, effective_p_due)
                     if idx < len(dates):
                         new_start, new_due = dates[idx]
-                        update_fields["customfield_10015"] = new_start
+                        update_fields["{{START_DATE_FIELD}}"] = new_start
                         update_fields["duedate"] = new_due
         else:
             # Check HR8 violations — only flag start-before-parent (subtask too early)
@@ -306,7 +306,7 @@ def main():
                     if new_due < new_start:
                         new_due = new_start
                     if new_start != sub_start:
-                        update_fields["customfield_10015"] = new_start
+                        update_fields["{{START_DATE_FIELD}}"] = new_start
                     if new_due != sub_due:
                         update_fields["duedate"] = new_due
 
@@ -319,7 +319,7 @@ def main():
 
         if update_fields:
             reason_parts = []
-            if "customfield_10015" in update_fields or "duedate" in update_fields:
+            if "{{START_DATE_FIELD}}" in update_fields or "duedate" in update_fields:
                 reason_parts.append("dates")
             if "timetracking" in update_fields:
                 reason_parts.append(f"OE={update_fields['timetracking']['originalEstimate']}")
@@ -369,19 +369,35 @@ def main():
     updated = []
     errors = []
 
+    # Print plan (always sequential — no I/O)
     for key, fields_to_update, reason in fixes:
         field_desc = ", ".join(f"{k}={v}" for k, v in fields_to_update.items())
-        print(f"{'→' if dry_run else '✅'} {key:<10} | {reason:<20} | {field_desc}")
+        print(f"{'→' if dry_run else '⏳'} {key:<10} | {reason:<20} | {field_desc}")
 
-        if not dry_run:
+    if not dry_run:
+        # Apply all updates concurrently — each is an independent PATCH call
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _apply(fix: tuple) -> tuple[str, str | None]:
+            key, fields, _ = fix
             try:
-                api.update_fields(key, fields_to_update)
-                updated.append(key)
-            except Exception as e:
-                print(f"   ❌ ERROR: {e}")
-                errors.append(f"{key}: {e}")
-        else:
-            updated.append(key)
+                api.update_fields(key, fields)
+                return key, None
+            except Exception as exc:
+                return key, str(exc)
+
+        print()
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            # map() preserves order; each result printed as it completes
+            for key, err in pool.map(_apply, fixes):
+                if err:
+                    print(f"   ❌ {key}: {err}")
+                    errors.append(f"{key}: {err}")
+                else:
+                    print(f"   ✅ {key}")
+                    updated.append(key)
+    else:
+        updated = [key for key, _, _ in fixes]
 
     # Summary
     print(f"\n{'=' * 70}")

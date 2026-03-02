@@ -81,9 +81,12 @@ def main():
     issues = fetch_all_sprint_issues(api, args.sprint)
     print(f"Found {len(issues)} issues in sprint {args.sprint}\n")
 
-    updated = []
     skipped = []
     errors = []
+
+    # Phase A: Analysis — compute updates (no I/O, fast)
+    work_items: list[tuple[str, dict, str, str, str, str | None]] = []
+    # Each item: (key, update_fields, field_desc, summary, issue_type, size_letter)
 
     for issue in issues:
         key = issue.get("key", "?")
@@ -126,19 +129,38 @@ def main():
             continue
 
         field_desc = ", ".join(f"{k}={v}" for k, v in update_fields.items())
-        marker = "  ->" if dry_run else "  ok"
-        print(f"{marker} {key:<10} {issue_type:<10} {status:<16} Size={size_letter or '-':<3} | {field_desc}")
+        work_items.append((key, update_fields, field_desc, summary, issue_type, size_letter))
+
+    # Phase B: Print plan (always sequential — no I/O)
+    for key, update_fields, field_desc, summary, issue_type, size_letter in work_items:
+        marker = "  ->" if dry_run else "  ⏳"
+        print(f"{marker} {key:<10} {issue_type:<10} Size={size_letter or '-':<3} | {field_desc}")
         print(f"     {summary}")
 
-        if not dry_run:
+    # Phase C: Apply concurrently (or dry-run skip)
+    updated = []
+    if not dry_run and work_items:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _apply(item: tuple) -> tuple[str, str | None]:
+            key, uf = item[0], item[1]
             try:
-                api.update_fields(key, update_fields)
-                updated.append(key)
-            except Exception as e:
-                print(f"     ERROR: {e}")
-                errors.append(f"{key}: {e}")
-        else:
-            updated.append(key)
+                api.update_fields(key, uf)
+                return key, None
+            except Exception as exc:
+                return key, str(exc)
+
+        print()
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            for key, err in pool.map(_apply, work_items):
+                if err:
+                    print(f"     ❌ {key}: {err}")
+                    errors.append(f"{key}: {err}")
+                else:
+                    print(f"     ✅ {key}")
+                    updated.append(key)
+    elif dry_run:
+        updated = [item[0] for item in work_items]
 
     # Summary
     print(f"\n{'=' * 60}")

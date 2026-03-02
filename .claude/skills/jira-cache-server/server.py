@@ -777,17 +777,27 @@ async def handle_cache_refresh(args: dict) -> str:
 
     refreshed = []
 
-    # Refresh specific issues
+    # Refresh specific issues — concurrent HTTP via asyncio.to_thread
     issue_keys = args.get("issue_keys", [])
-    for key in issue_keys:
-        try:
-            issue = _timed_upstream(f"refresh({key})", jira_api.get_issue, key)
-            c.put_issue(key, issue)
-            if embeddings and embeddings.available:
-                embeddings.store_embedding(key, _embedding_text(issue))
-            refreshed.append(key)
-        except Exception as e:
-            logger.error("Failed to refresh %s: %s", key, e)
+    if issue_keys:
+        async def _refresh_one(key: str) -> tuple[str, dict | None]:
+            try:
+                t0 = time.perf_counter()
+                issue = await asyncio.to_thread(jira_api.get_issue, key)
+                logger.info("Upstream refresh(%s): %.1fms", key, (time.perf_counter() - t0) * 1000)
+                return key, issue
+            except Exception as exc:
+                logger.error("Failed to refresh %s: %s", key, exc)
+                return key, None
+
+        refresh_results = await asyncio.gather(*[_refresh_one(k) for k in issue_keys])
+        # Store serially — SQLite conn not safe from multiple threads concurrently
+        for key, issue in refresh_results:
+            if issue:
+                c.put_issue(key, issue)
+                if embeddings and embeddings.available:
+                    embeddings.store_embedding(key, _embedding_text(issue))
+                refreshed.append(key)
 
     # Refresh sprint
     sprint_id = args.get("sprint_id")
