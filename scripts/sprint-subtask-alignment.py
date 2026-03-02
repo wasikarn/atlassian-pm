@@ -388,7 +388,6 @@ def main():
 
         print()
         with ThreadPoolExecutor(max_workers=5) as pool:
-            # map() preserves order; each result printed as it completes
             for key, err in pool.map(_apply, fixes):
                 if err:
                     print(f"   ❌ {key}: {err}")

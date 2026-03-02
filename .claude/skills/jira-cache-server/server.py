@@ -580,16 +580,19 @@ async def handle_cache_get_issues(args: dict) -> str:
         fetch_results = await asyncio.gather(*[_fetch_one(k) for k in missing_keys])
 
         # Store results serially — SQLite conn is not safe to use from multiple threads concurrently
+        new_issues = []
         for key, issue, _err in fetch_results:
             if issue:
                 c.put_issue(key, issue)
-                if embeddings and embeddings.available:
-                    embeddings.store_embedding(key, _embedding_text(issue))
+                new_issues.append(issue)
                 upstream_issues.append(issue)
             else:
                 stale = c.get_issue_stale(key)
                 if stale:
                     upstream_issues.append(stale)
+        # Batch encode + store embeddings off the event loop (model inference is CPU-bound)
+        if new_issues and embeddings and embeddings.available:
+            await asyncio.to_thread(embeddings.store_batch, new_issues)
 
     all_issues = found_issues + upstream_issues
 
@@ -792,12 +795,15 @@ async def handle_cache_refresh(args: dict) -> str:
 
         refresh_results = await asyncio.gather(*[_refresh_one(k) for k in issue_keys])
         # Store serially — SQLite conn not safe from multiple threads concurrently
+        refreshed_issues = []
         for key, issue in refresh_results:
             if issue:
                 c.put_issue(key, issue)
-                if embeddings and embeddings.available:
-                    embeddings.store_embedding(key, _embedding_text(issue))
+                refreshed_issues.append(issue)
                 refreshed.append(key)
+        # Batch encode + store embeddings off the event loop (model inference is CPU-bound)
+        if refreshed_issues and embeddings and embeddings.available:
+            await asyncio.to_thread(embeddings.store_batch, refreshed_issues)
 
     # Refresh sprint
     sprint_id = args.get("sprint_id")

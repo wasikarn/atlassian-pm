@@ -106,7 +106,7 @@ def hr5_add_pending(session_id: str, child_key: str, parent_key: str) -> None:
 
 
 def hr5_get_pending(session_id: str) -> list:
-    return _load(session_id).get("hr5_pending", [])
+    return list(_load(session_id).get("hr5_pending", []))
 
 
 def hr5_add_known_subtask(session_id: str, child_key: str) -> None:
@@ -174,8 +174,8 @@ def vs_add_subtask(session_id: str, story_key: str, subtask_key: str, summary: s
 def vs_get_coverage(session_id: str) -> dict:
     state = _load(session_id)
     return {
-        "story_acs": state.get("vs_story_acs", {}),
-        "subtasks": state.get("vs_subtasks", {}),
+        "story_acs": dict(state.get("vs_story_acs", {})),
+        "subtasks": dict(state.get("vs_subtasks", {})),
     }
 
 
