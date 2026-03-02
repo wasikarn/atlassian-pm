@@ -10,21 +10,31 @@ from pathlib import Path
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
 
+# In-process read cache — avoids redundant file reads when a hook calls
+# multiple state functions in one execution (each hook is its own subprocess,
+# so this cache is discarded when the process exits).
+_cache: dict[str, dict] = {}
+
 
 def _state_file(session_id: str) -> Path:
     return STATE_DIR / f"{session_id or 'default'}.json"
 
 
 def _load(session_id: str) -> dict:
+    if session_id in _cache:
+        return _cache[session_id]
     f = _state_file(session_id)
     try:
-        return json.loads(f.read_text()) if f.exists() else {}
+        state = json.loads(f.read_text()) if f.exists() else {}
     except Exception:
-        return {}
+        state = {}
+    _cache[session_id] = state
+    return state
 
 
 def _save(session_id: str, state: dict) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
+    _cache[session_id] = state
     _state_file(session_id).write_text(json.dumps(state))
 
 

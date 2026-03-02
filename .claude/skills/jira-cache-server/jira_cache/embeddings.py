@@ -259,15 +259,18 @@ class EmbeddingStore:
             logger.error("Batch embedding encode failed: %s", e)
             return 0
 
-        # Phase 3: Batch store with single commit
+        # Phase 3: Batch store with executemany + single commit
         count = 0
         try:
-            for (key, _), vec in zip(items, vectors, strict=True):
-                self.conn.execute(
-                    "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
-                    (key, _serialize_f32(vec)),
-                )
-                count += 1
+            rows = [
+                (key, _serialize_f32(vec))
+                for (key, _), vec in zip(items, vectors, strict=True)
+            ]
+            self.conn.executemany(
+                "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
+                rows,
+            )
+            count = len(rows)
             self.conn.commit()
             logger.info("Batch stored %d embeddings (single commit)", count)
         except Exception as e:

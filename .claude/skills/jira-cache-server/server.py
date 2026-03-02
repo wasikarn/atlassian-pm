@@ -25,6 +25,7 @@ Usage:
     uv run server.py
 """
 
+import asyncio
 import json
 import logging
 import re
@@ -43,7 +44,7 @@ if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
 # Local imports (jira_cache to avoid namespace collision with atlassian-scripts/lib)
-from jira_cache.cache import JiraCache, strip_noise
+from jira_cache.cache import JiraCache, extract_adf_text, strip_noise
 from jira_cache.embeddings import EmbeddingStore
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
@@ -101,8 +102,6 @@ def _embedding_text(issue: dict) -> str:
     if isinstance(desc_raw, str):
         desc = desc_raw[:500]
     elif isinstance(desc_raw, dict):
-        from jira_cache.cache import extract_adf_text
-
         desc = (extract_adf_text(desc_raw) or "")[:500]
     return f"{summary} {desc}".strip()[:500]
 
@@ -565,19 +564,29 @@ async def handle_cache_get_issues(args: dict) -> str:
     # Batch get from cache
     found_issues, missing_keys = c.get_issues_batch(issue_keys, max_age_hours=max_age)
 
-    # Fetch missing from upstream
+    # Fetch missing from upstream — concurrent HTTP via asyncio.to_thread
     upstream_issues = []
     if missing_keys and jira_api:
-        for key in missing_keys:
+        async def _fetch_one(key: str) -> tuple[str, dict | None, str | None]:
             try:
-                issue = _timed_upstream(f"get_issue({key})", jira_api.get_issue, key, fields=fields)
+                t0 = time.perf_counter()
+                issue = await asyncio.to_thread(jira_api.get_issue, key, fields=fields)
+                logger.info("Upstream get_issue(%s): %.1fms", key, (time.perf_counter() - t0) * 1000)
+                return key, issue, None
+            except Exception as exc:
+                logger.error("Failed to fetch %s: %s", key, exc)
+                return key, None, str(exc)
+
+        fetch_results = await asyncio.gather(*[_fetch_one(k) for k in missing_keys])
+
+        # Store results serially — SQLite conn is not safe to use from multiple threads concurrently
+        for key, issue, _err in fetch_results:
+            if issue:
                 c.put_issue(key, issue)
                 if embeddings and embeddings.available:
                     embeddings.store_embedding(key, _embedding_text(issue))
                 upstream_issues.append(issue)
-            except Exception as e:
-                logger.error("Failed to fetch %s: %s", key, e)
-                # Try stale fallback
+            else:
                 stale = c.get_issue_stale(key)
                 if stale:
                     upstream_issues.append(stale)
@@ -691,7 +700,7 @@ async def handle_cache_sprint_issues(args: dict) -> str:
                 upstream_offset += len(issues)
 
             results = {"issues": all_issues, "total": len(all_issues)}
-            c.put_search(jql, fields, 50, results)
+            c.put_search(jql, fields, 50, results, sprint_id=sprint_id)
             if embeddings and embeddings.available:
                 embeddings.store_batch(all_issues)
             source = "upstream"

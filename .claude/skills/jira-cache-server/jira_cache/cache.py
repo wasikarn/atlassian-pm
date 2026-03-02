@@ -709,9 +709,11 @@ class JiraCache:
         """Remove all issues for a sprint, related searches, and the sprint itself."""
         with self._lock:
             cursor = self.conn.execute("DELETE FROM issues WHERE sprint_id = ?", (sprint_id,))
-            # Clear search cache entries referencing this sprint
+            # M3: Use indexed sprint_id column (fast) for rows stored after v3 migration
+            self.conn.execute("DELETE FROM searches WHERE sprint_id = ?", (sprint_id,))
+            # Legacy fallback: rows without sprint_id set (pre-v3 or missing put_search sprint_id arg)
             self.conn.execute(
-                "DELETE FROM searches WHERE jql LIKE ?",
+                "DELETE FROM searches WHERE sprint_id IS NULL AND jql LIKE ?",
                 (f"%sprint = {sprint_id}%",),
             )
             self.conn.execute("DELETE FROM sprints WHERE sprint_id = ?", (sprint_id,))

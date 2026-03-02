@@ -22,6 +22,10 @@ from pathlib import Path
 # ── Constants ──────────────────────────────────────────────────────────────
 
 LOG_DIR = Path.home() / ".claude" / "hooks-logs"
+try:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass  # non-fatal: logging must never break a hook
 
 # Matches: acli jira workitem create|edit --from-json <path>
 ACLI_FROM_JSON_RE = re.compile(
@@ -50,7 +54,6 @@ def log_event(hook_name: str, level: str, data: dict) -> None:
         data:      Additional key-value pairs to include in the log entry
     """
     try:
-        LOG_DIR.mkdir(parents=True, exist_ok=True)
         now = datetime.now(UTC)
         log_file = LOG_DIR / f"{now.strftime('%Y-%m-%d')}.jsonl"
         entry = {"ts": now.isoformat(), "hook": hook_name, "level": level, **data}
