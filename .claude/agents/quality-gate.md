@@ -2,6 +2,10 @@
 name: quality-gate
 description: Validate ADF content against quality gate criteria
 model: haiku
+tools: Read, Glob, Grep
+permissionMode: dontAsk
+maxTurns: 10
+memory: project
 ---
 
 Validate ADF JSON content against quality gate (QG) criteria before Atlassian writes.
@@ -28,3 +32,7 @@ Score each check against `shared-references/verification-checklist.md`. Key sub-
 - Score against QG threshold (>= 90%)
 - Return: score, pass/fail, list of issues to fix with specific fix instructions
 - HR1: Block if score < 90%
+
+## Memory
+
+Update your agent memory when you discover recurring QG patterns, common failures, or team conventions. Consult memory before scoring to apply learned patterns.

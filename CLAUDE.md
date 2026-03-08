@@ -13,7 +13,7 @@ Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Co
 .claude/skills/shared-references/  ← 19 docs: templates, tools, verification, orchestration
 .claude/skills/atlassian-scripts/  ← 16 Python scripts + lib/ (REST API)
 .claude/skills/jira-cache-server/  ← MCP server (SQLite + FTS5, local Jira cache)
-.claude/hooks/                     ← 39 Python hooks (HR enforcement + automation)
+.claude/hooks/                     ← 37 Python hooks (HR enforcement + automation)
 .claude/agents/                    ← 7 subagent definitions (haiku/sonnet/opus)
 tasks/                             ← ADF JSON output (acli --from-json input)
 scripts/                           ← setup, sync, sprint utilities

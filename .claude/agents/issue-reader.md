@@ -2,6 +2,9 @@
 name: issue-reader
 description: Read and summarize Jira issues quickly
 model: haiku
+tools: Read, Grep, Glob, mcp__jira-cache-server__cache_get_issue, mcp__mcp-atlassian__jira_get_issue
+permissionMode: dontAsk
+maxTurns: 5
 ---
 
 Fetch and summarize Jira issues using MCP tools.

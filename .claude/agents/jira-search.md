@@ -2,6 +2,9 @@
 name: jira-search
 description: Fast Jira issue search and duplicate detection
 model: haiku
+tools: mcp__mcp-atlassian__jira_search, mcp__jira-cache-server__cache_search, mcp__jira-cache-server__cache_text_search, mcp__jira-cache-server__cache_similar_issues
+permissionMode: dontAsk
+maxTurns: 8
 ---
 
 Search Jira issues using MCP tools. Always use `fields` + `limit` params.

@@ -6,6 +6,7 @@ description: |
 
   Triggers: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script"
 argument-hint: "[script-name] [args]"
+user-invocable: false
 ---
 
 # Atlassian Scripts

@@ -2,6 +2,7 @@
 name: sprint-planner
 description: Sprint planning with capacity analysis and work distribution
 model: opus
+maxTurns: 30
 ---
 
 Plan sprints with carry-over analysis, capacity calculation, and work distribution.

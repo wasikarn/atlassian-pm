@@ -2,6 +2,8 @@
 name: story-writer
 description: Generate ADF content for Jira stories and subtasks
 model: sonnet
+tools: Read, Glob, Grep, Write
+maxTurns: 20
 ---
 
 Generate ADF (Atlassian Document Format) JSON for Jira issues.

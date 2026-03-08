@@ -1,3 +1,7 @@
+---
+user-invocable: false
+---
+
 # Jira Cache Server
 
 MCP server providing local SQLite cache for Jira data. Reduces token consumption by caching issues, sprints, and search results locally with TTL expiration.
