@@ -30,8 +30,8 @@ PLACEHOLDERS = {
     "JIRA_SITE": "100-stars.atlassian.net",
     "CONFLUENCE_SITE": "100-stars.atlassian.net",
     "SPACE_KEY": "BEP",
-    "START_DATE_FIELD": "customfield_10015",
-    "SPRINT_FIELD": "customfield_10020",
+    "START_DATE_FIELD": "{{START_DATE_FIELD}}",
+    "SPRINT_FIELD": "{{SPRINT_FIELD}}",
     "COMPANY": "Tathep",
     "COMPANY_LOWER": "tathep",
 }
@@ -77,7 +77,7 @@ def get_replacement_patterns(values: dict, revert: bool = False) -> list[tuple[s
                         (rf'project_key="{re.escape(actual_value)}"', f'project_key="{placeholder}"'),
                         (rf'space_key:\s*"{re.escape(actual_value)}"', f'space_key: "{placeholder}"'),
                         (rf'space_key="{re.escape(actual_value)}"', f'space_key="{placeholder}"'),
-                        # Issue key pattern BEP-XXX (but not in URLs or smart links)
+                        # Issue key pattern {{PROJECT_KEY}}-XXX (but not in URLs or smart links)
                         (rf"(?<!/browse/){re.escape(actual_value)}-XXX", f"{placeholder}-XXX"),
                     ]
                 )

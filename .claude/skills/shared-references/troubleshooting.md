@@ -347,7 +347,7 @@ There are **3 distinct** expand/collapse mechanisms in Confluence Cloud. Do NOT 
 - `tracked_code_block(collapse=True)` — used for TypeScript/JSON blocks in Sections 4-8 (long pseudocode, models, API responses)
 - Forge `guest-params > index` still counts code blocks inside Expand macros correctly
 
-**Script reference:** `scripts/confluence/create-player-architecture-page.py`
+**Script reference:** `scripts/confluence/create_player_architecture_page.py`
 
 - `code_block(code, language, title, collapse)` — line 127
 - `tracked_code_block(code, language, title, collapse)` — line 142 (with Forge index tracking)
@@ -368,7 +368,7 @@ This is a **persistent Confluence bug** — happens on every storage format upda
 - View mode: "Error loading the extension!" where panel should be
 - Only affects `success`, `error`, `warning`, `note` macros (not `info`)
 
-**Fix (automatic):** `scripts/confluence/create-player-architecture-page.py` includes `_fix_page_panels()` which runs after every `_update_page()`:
+**Fix (automatic):** `scripts/confluence/create_player_architecture_page.py` includes `_fix_page_panels()` which runs after every `_update_page()`:
 
 1. Fetches page body in `atlas_doc_format` via v2 API
 2. Finds `bodiedExtension` nodes with panel-type `extensionKey`
@@ -458,7 +458,7 @@ The Mermaid plugin is a **Forge app** (`mermaid-diagram`). It requires **two ele
 
 **Step 2: Forge extension (renderer)** — can be constructed programmatically using `mermaid_diagram()`.
 
-**Reference implementation:** `scripts/confluence/create-player-architecture-page.py`
+**Reference implementation:** `scripts/confluence/create_player_architecture_page.py`
 
 - `mermaid_diagram(code, page_id)` — generates code block + Forge `ac:adf-extension` macro
 - `tracked_code_block()` — wrapper for non-mermaid code blocks that increments global counter

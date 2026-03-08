@@ -115,14 +115,14 @@ fi
 echo ""
 echo "[4/4] Configuring git filters..."
 CURRENT_SMUDGE=$(cd "$PROJECT_DIR" && git config --get filter.project-config.smudge 2>/dev/null || true)
-EXPECTED_SMUDGE="python3 scripts/git-filter.py --smudge"
+EXPECTED_SMUDGE="python3 scripts/git_filter.py --smudge"
 
 if [ "$CURRENT_SMUDGE" = "$EXPECTED_SMUDGE" ]; then
   echo "  already configured"
 else
   cd "$PROJECT_DIR"
-  git config filter.project-config.smudge "python3 scripts/git-filter.py --smudge"
-  git config filter.project-config.clean "python3 scripts/git-filter.py --clean"
+  git config filter.project-config.smudge "python3 scripts/git_filter.py --smudge"
+  git config filter.project-config.clean "python3 scripts/git_filter.py --clean"
   echo "  configured (auto placeholder conversion)"
 fi
 

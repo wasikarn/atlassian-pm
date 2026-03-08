@@ -280,15 +280,21 @@ Claude will fetch sprint data, calculate capacity, analyze carry-over, prioritiz
 
 scripts/
 ├── setup.sh                        <- Setup script (idempotent)
-├── git-filter.py                   <- Git smudge/clean filter (auto placeholder conversion)
-├── configure-project.py            <- Manual placeholder ↔ real value converter
-├── fix-table-format.py             <- Markdown table formatter
-├── update-sprint-goals.py          <- Sprint goals updater
+├── git_filter.py                   <- Git smudge/clean filter (auto placeholder conversion)
+├── configure_project.py            <- Manual placeholder ↔ real value converter
+├── parse_mcp_output.py             <- MCP output parser
 ├── sync-skills                     <- Sync skills+agents to ~/.claude/ (supports --dry-run, --remove)
-├── clear-sprint-dates.py           <- Batch clear start/due dates from sprint
-├── sprint-set-fields.py            <- Set SP/OE from Size field for sprint
-├── sprint-rank-by-date.py          <- Re-rank sprint issues by date
-└── sprint-subtask-alignment.py     <- HR8 subtask date/OE alignment check
+├── sprint/                         <- Sprint utilities
+│   ├── clear_sprint_dates.py       <- Batch clear start/due dates
+│   ├── sprint_set_fields.py        <- Set SP/OE from Size field
+│   ├── sprint_rank_by_date.py      <- Re-rank sprint issues by date
+│   ├── sprint_subtask_alignment.py <- HR8 subtask date/OE alignment
+│   └── update_sprint_goals.py      <- Sprint goals updater
+├── confluence/                     <- Confluence page scripts
+│   ├── create_player_architecture_page.py
+│   ├── test_mermaid_animation.py
+│   └── test_mermaid_forge.py
+└── archive/                        <- One-off scripts (kept as reference)
 
 tasks/                              <- Generated ADF JSON outputs (gitignored)
 CLAUDE.md                           <- Agent instructions (passive context)
@@ -317,7 +323,7 @@ Git staging:           {{PROJECT_KEY}}-XXX    ← always placeholders
 ```text
 .claude/project-config.json.template   ← tracked in git (safe placeholders)
 .claude/project-config.json            ← gitignored (your real values)
-scripts/git-filter.py                  ← git smudge/clean filter (auto conversion)
+scripts/git_filter.py                  ← git smudge/clean filter (auto conversion)
 .git/hooks/pre-commit                  ← blocks commits with sensitive data
 ```
 
@@ -350,7 +356,7 @@ vi .claude/project-config.json
 ./scripts/setup.sh
 ```
 
-> **Manual override:** `python scripts/configure-project.py --apply` / `--revert --apply` for debugging or bulk conversion without git filters.
+> **Manual override:** `python scripts/configure_project.py --apply` / `--revert --apply` for debugging or bulk conversion without git filters.
 
 ## Tips
 

@@ -283,7 +283,7 @@ e2@{ animation: fast }
 | Real-time events | Indicate live/streaming connections |
 | Before/After | Animate "new" edges, keep "old" static |
 
-**Test script:** `scripts/confluence/test-mermaid-animation.py` — creates test page on Confluence with 4 animation variants.
+**Test script:** `scripts/confluence/test_mermaid_animation.py` — creates test page on Confluence with 4 animation variants.
 
 ---
 
@@ -318,7 +318,7 @@ Requires **two elements** — see `troubleshooting.md` "Mermaid Diagrams" sectio
 
 ### Programmatic Creation
 
-Reference: `scripts/confluence/create-player-architecture-page.py`
+Reference: `scripts/confluence/create_player_architecture_page.py`
 
 ```python
 # mermaid_diagram(code, page_id) — generates code block + Forge macro
@@ -431,5 +431,5 @@ Use `sequenceDiagram` instead of flowchart for request/response patterns.
 ## Related
 
 - Confluence Mermaid rendering: [troubleshooting.md](troubleshooting.md) → "Mermaid Diagrams" section
-- Reference implementation: `scripts/confluence/create-player-architecture-page.py`
+- Reference implementation: `scripts/confluence/create_player_architecture_page.py`
 - Forge macro details: `troubleshooting.md` → Instance IDs table

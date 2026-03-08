@@ -11,7 +11,7 @@ Handles two MCP output formats:
 Usage:
   python3 scripts/parse-mcp-output.py <file>                   # default table
   python3 scripts/parse-mcp-output.py <file> --status "In Progress,TO FIX"
-  python3 scripts/parse-mcp-output.py <file> --assignee joakim
+  python3 scripts/parse-mcp-output.py <file> --assignee {{SLOT_3}}
   python3 scripts/parse-mcp-output.py <file> --fields key,summary,status
   python3 scripts/parse-mcp-output.py <file> --json            # raw JSON output
   python3 scripts/parse-mcp-output.py <file> --csv             # CSV output
@@ -46,8 +46,8 @@ FIELD_EXTRACTORS: dict[str, callable] = {
     "labels": lambda i: (
         ",".join(i.get("labels", [])) if isinstance(i.get("labels"), list) else str(i.get("labels", ""))
     ),
-    "start_date": lambda i: _custom_field_value(i, "customfield_10015"),
-    "sprint": lambda i: _custom_field_value(i, "customfield_10020"),
+    "start_date": lambda i: _custom_field_value(i, "{{START_DATE_FIELD}}"),
+    "sprint": lambda i: _custom_field_value(i, "{{SPRINT_FIELD}}"),
     "duedate": lambda i: i.get("duedate", ""),
     "created": lambda i: i.get("created", "")[:10],
     "updated": lambda i: i.get("updated", "")[:10],

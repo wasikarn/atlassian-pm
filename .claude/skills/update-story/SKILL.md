@@ -98,7 +98,7 @@ MCP: jira_search(jql: "parent = {{PROJECT_KEY}}-XXX", fields: "summary,status,{{
 # - missing OE → estimate from summary keywords (2h-4h)
 
 # Or run batch fix:
-Bash: python3 scripts/sprint/sprint-subtask-alignment.py --sprint <id>
+Bash: python3 scripts/sprint/sprint_subtask_alignment.py --sprint <id>
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after each subtask date fix.

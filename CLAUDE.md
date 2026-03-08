@@ -83,7 +83,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Parent (Epic) | `jira_set_parent.py` (REST) | MCP/acli silently ignore parent field on existing issues |
 | Issue Links | MCP `jira_create_issue_link` | Blocks/Relates · `jira_create_remote_issue_link` (web) |
 | Sprint | Agile REST via `JiraAPI._request()` | MCP can't move to backlog |
-| Sprint batch | `scripts/sprint/` utilities | `clear-sprint-dates`, `sprint-set-fields`, `sprint-rank-by-date`, `sprint-subtask-alignment` |
+| Sprint batch | `scripts/sprint/` utilities | `clear_sprint_dates`, `sprint_set_fields`, `sprint_rank_by_date`, `sprint_subtask_alignment` |
 | Cache | MCP `jira-cache-server` (8 tools) | `force_refresh=true` after web edits or "ล่าสุด/refresh/stale" |
 
 ### Field & ADF Quick Reference

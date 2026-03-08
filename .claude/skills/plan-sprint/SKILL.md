@@ -311,7 +311,7 @@ Bash: acli jira workitem assign -k "{{PROJECT_KEY}}-XXX" -a "email@domain.com" -
 
 ```text
 # After all assignments complete, run subtask alignment validation:
-Bash: python3 scripts/sprint/sprint-subtask-alignment.py --sprint <target_sprint_id>
+Bash: python3 scripts/sprint/sprint_subtask_alignment.py --sprint <target_sprint_id>
 
 # Reviews: dates within parent range, missing OE, missing dates
 # If violations found → run with --apply to auto-fix
