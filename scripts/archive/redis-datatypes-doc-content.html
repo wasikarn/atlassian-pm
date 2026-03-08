@@ -1,8 +1,8 @@
 <table data-layout="wide">
 <colgroup><col style="width: 100px;" /><col style="width: 300px;" /></colgroup>
 <tbody>
-<tr><td><p><strong>Parent Guide</strong></p></td><td><p><a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167729">Redis Sorted Set Pattern</a> · <a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167695">ADR: Redis Key-Value Design Convention</a></p></td></tr>
-<tr><td><p><strong>Related Task</strong></p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3302">BEP-3302</a> — Migrate CacheService to Bentocache</p></td></tr>
+<tr><td><p><strong>Parent Guide</strong></p></td><td><p><a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167729">Redis Sorted Set Pattern</a> · <a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167695">ADR: Redis Key-Value Design Convention</a></p></td></tr>
+<tr><td><p><strong>Related Task</strong></p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3302">BEP-3302</a> — Migrate CacheService to Bentocache</p></td></tr>
 <tr><td><p><strong>Total Effort</strong></p></td><td><p><strong>30 SP</strong> (14 tickets: 4 Sorted Set + 10 Other Data Types)</p></td></tr>
 <tr><td><p><strong>Source</strong></p></td><td><p><a href="https://redis.io/docs/latest/develop/data-types/">Redis Data Types Reference</a></p></td></tr>
 </tbody>
@@ -49,10 +49,10 @@
 <th><p><strong>Redis Type</strong></p></th>
 </tr></thead>
 <tbody>
-<tr><td><p>1</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3314">BEP-3314</a></p></td><td><p>Rate Limiter Sliding Window (Lua script)</p></td><td><p>2</p></td><td><p>P1</p></td><td><p>Sorted Set + Lua</p></td></tr>
-<tr><td><p>2</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3315">BEP-3315</a></p></td><td><p>PlaySchedule Frequency Count (ZCOUNT)</p></td><td><p>3</p></td><td><p>P2</p></td><td><p>Sorted Set</p></td></tr>
-<tr><td><p>3</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3316">BEP-3316</a></p></td><td><p>Billboard Revenue Ranking (ZINCRBY)</p></td><td><p>2</p></td><td><p>P2</p></td><td><p>Sorted Set</p></td></tr>
-<tr><td><p>4</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3317">BEP-3317</a></p></td><td><p>Campaign Cost TTL + Per-Campaign Lock</p></td><td><p>2</p></td><td><p>P1</p></td><td><p>String (EXPIRE fix)</p></td></tr>
+<tr><td><p>1</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3314">BEP-3314</a></p></td><td><p>Rate Limiter Sliding Window (Lua script)</p></td><td><p>2</p></td><td><p>P1</p></td><td><p>Sorted Set + Lua</p></td></tr>
+<tr><td><p>2</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3315">BEP-3315</a></p></td><td><p>PlaySchedule Frequency Count (ZCOUNT)</p></td><td><p>3</p></td><td><p>P2</p></td><td><p>Sorted Set</p></td></tr>
+<tr><td><p>3</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3316">BEP-3316</a></p></td><td><p>Billboard Revenue Ranking (ZINCRBY)</p></td><td><p>2</p></td><td><p>P2</p></td><td><p>Sorted Set</p></td></tr>
+<tr><td><p>4</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3317">BEP-3317</a></p></td><td><p>Campaign Cost TTL + Per-Campaign Lock</p></td><td><p>2</p></td><td><p>P1</p></td><td><p>String (EXPIRE fix)</p></td></tr>
 </tbody>
 </table>
 
@@ -68,16 +68,16 @@
 <th><p><strong>Redis Type</strong></p></th>
 </tr></thead>
 <tbody>
-<tr><td><p>5</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3320">BEP-3320</a></p></td><td><p>Fix CacheService KEYS → SCAN (production blocking bug)</p></td><td><p>1</p></td><td><p>🔴 P0</p></td><td><p>String (SCAN)</p></td></tr>
-<tr><td><p>6</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3321">BEP-3321</a></p></td><td><p>Notification Unread Count Cache (HINCRBY)</p></td><td><p>3</p></td><td><p>P1</p></td><td><p>Hash</p></td></tr>
-<tr><td><p>7</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3322">BEP-3322</a></p></td><td><p>Multi-Session Management (SADD/SREM)</p></td><td><p>2</p></td><td><p>P2</p></td><td><p>Set</p></td></tr>
-<tr><td><p>8</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3323">BEP-3323</a></p></td><td><p>Billboard Proximity Search (GEOADD/GEOSEARCH)</p></td><td><p>3</p></td><td><p>P2</p></td><td><p>Geo</p></td></tr>
-<tr><td><p>9</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3324">BEP-3324</a></p></td><td><p>Unique View Counting (PFADD/PFCOUNT)</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>HyperLogLog</p></td></tr>
-<tr><td><p>10</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3325">BEP-3325</a></p></td><td><p>Pusher Log Buffering (LPUSH + Batch Flush)</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>List</p></td></tr>
-<tr><td><p>11</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3326">BEP-3326</a></p></td><td><p>Outbox Polling → Pub/Sub Trigger</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>Pub/Sub</p></td></tr>
-<tr><td><p>12</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3327">BEP-3327</a></p></td><td><p>Daily Active User Tracking (SETBIT/BITCOUNT)</p></td><td><p>1</p></td><td><p>P3</p></td><td><p>Bitmap</p></td></tr>
-<tr><td><p>13</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3328">BEP-3328</a></p></td><td><p>Billboard Metadata Cache (HSET/HGET)</p></td><td><p>1</p></td><td><p>P3</p></td><td><p>Hash</p></td></tr>
-<tr><td><p>14</p></td><td><p><a href="https://{{JIRA_SITE}}/browse/BEP-3329">BEP-3329</a></p></td><td><p>Analytics Accumulation (HINCRBY + Daily Flush)</p></td><td><p>3</p></td><td><p>P3</p></td><td><p>Hash</p></td></tr>
+<tr><td><p>5</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3320">BEP-3320</a></p></td><td><p>Fix CacheService KEYS → SCAN (production blocking bug)</p></td><td><p>1</p></td><td><p>🔴 P0</p></td><td><p>String (SCAN)</p></td></tr>
+<tr><td><p>6</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3321">BEP-3321</a></p></td><td><p>Notification Unread Count Cache (HINCRBY)</p></td><td><p>3</p></td><td><p>P1</p></td><td><p>Hash</p></td></tr>
+<tr><td><p>7</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3322">BEP-3322</a></p></td><td><p>Multi-Session Management (SADD/SREM)</p></td><td><p>2</p></td><td><p>P2</p></td><td><p>Set</p></td></tr>
+<tr><td><p>8</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3323">BEP-3323</a></p></td><td><p>Billboard Proximity Search (GEOADD/GEOSEARCH)</p></td><td><p>3</p></td><td><p>P2</p></td><td><p>Geo</p></td></tr>
+<tr><td><p>9</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3324">BEP-3324</a></p></td><td><p>Unique View Counting (PFADD/PFCOUNT)</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>HyperLogLog</p></td></tr>
+<tr><td><p>10</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3325">BEP-3325</a></p></td><td><p>Pusher Log Buffering (LPUSH + Batch Flush)</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>List</p></td></tr>
+<tr><td><p>11</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3326">BEP-3326</a></p></td><td><p>Outbox Polling → Pub/Sub Trigger</p></td><td><p>2</p></td><td><p>P3</p></td><td><p>Pub/Sub</p></td></tr>
+<tr><td><p>12</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3327">BEP-3327</a></p></td><td><p>Daily Active User Tracking (SETBIT/BITCOUNT)</p></td><td><p>1</p></td><td><p>P3</p></td><td><p>Bitmap</p></td></tr>
+<tr><td><p>13</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3328">BEP-3328</a></p></td><td><p>Billboard Metadata Cache (HSET/HGET)</p></td><td><p>1</p></td><td><p>P3</p></td><td><p>Hash</p></td></tr>
+<tr><td><p>14</p></td><td><p><a href="https://100-stars.atlassian.net/browse/BEP-3329">BEP-3329</a></p></td><td><p>Analytics Accumulation (HINCRBY + Daily Flush)</p></td><td><p>3</p></td><td><p>P3</p></td><td><p>Hash</p></td></tr>
 </tbody>
 </table>
 
@@ -107,7 +107,7 @@
 <li><strong>ioredis direct</strong> = specialized data structures (ZADD, HINCRBY, GEOADD, PFADD, SETBIT, etc.)</li>
 <li><strong>ทั้งสองอยู่ร่วมกันได้</strong> — share Redis connection เดียวกัน, แบ่ง scope ชัดเจน</li>
 </ul>
-<p>ดู <a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167729">parent guide</a> section 9.3 สำหรับ scope แบ่งระหว่าง Bentocache กับ ioredis</p>
+<p>ดู <a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167729">parent guide</a> section 9.3 สำหรับ scope แบ่งระหว่าง Bentocache กับ ioredis</p>
 
 <hr />
 <h2>Redis Data Types Not Used (Future Consideration)</h2>
@@ -130,8 +130,8 @@
 <h2>References</h2>
 <ul>
 <li><a href="https://redis.io/docs/latest/develop/data-types/">Redis Data Types (Official Docs)</a></li>
-<li><a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167729">Redis Sorted Set Pattern Guide (Parent)</a></li>
-<li><a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167695">ADR: Redis Key-Value Design Convention</a></li>
-<li><a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/165019651">Redis Sorted Set: 4 Optimization Tickets</a></li>
-<li><a href="https://{{JIRA_SITE}}/browse/BEP-3302">BEP-3302: Bentocache Migration</a></li>
+<li><a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167729">Redis Sorted Set Pattern Guide (Parent)</a></li>
+<li><a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167695">ADR: Redis Key-Value Design Convention</a></li>
+<li><a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/165019651">Redis Sorted Set: 4 Optimization Tickets</a></li>
+<li><a href="https://100-stars.atlassian.net/browse/BEP-3302">BEP-3302: Bentocache Migration</a></li>
 </ul>

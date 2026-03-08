@@ -74,9 +74,9 @@ def ac_panel(title, given, when, then, panel_type="success"):
 def ref_table(refs):
     return table(["Type", "Link"], refs, "#eae6ff")
 
-PATTERN_GUIDE_LINK = "https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167729"
-ADR_LINK = "https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/164167695"
-BEP_3302_LINK = "https://{{JIRA_SITE}}/browse/BEP-3302"
+PATTERN_GUIDE_LINK = "https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167729"
+ADR_LINK = "https://100-stars.atlassian.net/wiki/spaces/BEP/pages/164167695"
+BEP_3302_LINK = "https://100-stars.atlassian.net/browse/BEP-3302"
 
 # ============================================================
 # TICKET DEFINITIONS
@@ -571,7 +571,7 @@ TICKETS = [
                 heading(2, "5. 🔗 Reference"),
                 ref_table([
                     [[plain("Redis Docs")], [link("Hash commands", "https://redis.io/docs/latest/develop/data-types/hashes/")]],
-                    [[plain("Related")], [link("BEP-3315", "https://{{JIRA_SITE}}/browse/BEP-3315"), plain(" — PlaySchedule ZCOUNT (same service)")]],
+                    [[plain("Related")], [link("BEP-3315", "https://100-stars.atlassian.net/browse/BEP-3315"), plain(" — PlaySchedule ZCOUNT (same service)")]],
                 ]),
             ]
         }
@@ -657,12 +657,12 @@ def main():
         print(f"  [{i}/{len(TICKETS)}] {summary} ({sp} SP)")
 
         if dry_run:
-            created.append({"key": f"{{PROJECT_KEY}}-XXXX", "summary": summary, "sp": sp})
+            created.append({"key": f"BEP-XXXX", "summary": summary, "sp": sp})
             continue
 
         try:
             result = api.create_issue(
-                project_key="{{PROJECT_KEY}}",
+                project_key="BEP",
                 issue_type="Task",
                 summary=summary,
                 additional_fields={

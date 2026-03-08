@@ -391,7 +391,7 @@ def build_adf():
                     [
                         link_text(
                             "BEP-3197",
-                            "https://{{JIRA_SITE}}/browse/BEP-3197",
+                            "https://100-stars.atlassian.net/browse/BEP-3197",
                         ),
                         plain(" — Backend APIs & Infrastructure"),
                     ],
@@ -401,7 +401,7 @@ def build_adf():
                     [
                         link_text(
                             "BEP-3165",
-                            "https://{{JIRA_SITE}}/browse/BEP-3165",
+                            "https://100-stars.atlassian.net/browse/BEP-3165",
                         ),
                         plain(" — Fix checkCoupon() maxPerUser Bug"),
                     ],

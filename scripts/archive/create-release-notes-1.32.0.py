@@ -13,10 +13,10 @@ from lib.api import ConfluenceAPI
 PARENT_PAGE_ID = "119799810"   # "Release Notes" parent page
 SPACE_KEY = "BEP"
 VERSION_ID = "10268"
-RELEASE_URL = f"https://{{JIRA_SITE}}/projects/BEP/versions/{VERSION_ID}"
-TITLE = "Release Notes - {{COMPANY}} Platform - 1.32.0 - Feb 20"
+RELEASE_URL = f"https://100-stars.atlassian.net/projects/BEP/versions/{VERSION_ID}"
+TITLE = "Release Notes - Tathep Platform - 1.32.0 - Feb 20"
 
-JIRA_BASE = "https://{{JIRA_SITE}}/browse"
+JIRA_BASE = "https://100-stars.atlassian.net/browse"
 
 
 def jira_link(key: str) -> str:
@@ -78,7 +78,7 @@ CONTENT = f"""
     <tr>
       <td data-highlight-colour="#F4F5F7"><p><strong>Contributors</strong></p></td>
       <td>
-        <p>{{SLOT_1}} · {{SLOT_2}} · {{SLOT_3}} · {{SLOT_4}} · {{SLOT_5}} · {{SLOT_6}} · {{SLOT_7}}</p>
+        <p>BIG-TATHEP · K.Thanainun · joakim · wanchalerm · Natthakarn · kanya · Kanthisorn</p>
       </td>
     </tr>
   </tbody>
@@ -184,7 +184,7 @@ def main():
     )
 
     page_id = result.get("id")
-    url = f"https://{{JIRA_SITE}}/wiki/spaces/{SPACE_KEY}/pages/{page_id}"
+    url = f"https://100-stars.atlassian.net/wiki/spaces/{SPACE_KEY}/pages/{page_id}"
     print(f"\n✓ Created: {url}")
     return url
 

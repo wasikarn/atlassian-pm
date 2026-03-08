@@ -321,12 +321,12 @@ def build_parent_content(page_id: str = ARCH_PAGE_ID) -> str:
     sections.append(info_panel(
         "<p>"
         "<strong>Status:</strong> " + status_macro("DRAFT", "Yellow") + "<br/>"
-        "<strong>Author:</strong> {{SLOT_1}}<br/>"
+        "<strong>Author:</strong> BIG-TATHEP<br/>"
         "<strong>Date:</strong> 2026-02-20<br/>"
         "<strong>Related:</strong> "
-        '<a href="https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/81592324">Player Doc</a>'
+        '<a href="https://100-stars.atlassian.net/wiki/spaces/BEP/pages/81592324">Player Doc</a>'
         " | "
-        '<a href="https://{{JIRA_SITE}}/browse/BEP-3335">BEP-3335 Redis Optimization Epic</a>'
+        '<a href="https://100-stars.atlassian.net/browse/BEP-3335">BEP-3335 Redis Optimization Epic</a>'
         "</p>"
     ))
 
@@ -399,8 +399,8 @@ def build_page_1(page_id: str) -> str:
     # BEP-2998: Impression Delivery Accuracy
     sections.append(warning_panel(
         "<p><strong>Impression Delivery Accuracy (Under-Delivery Problem)</strong> "
-        '&mdash; <a href="https://{{JIRA_SITE}}/browse/BEP-2998">BEP-2998</a> '
-        '(Epic: <a href="https://{{JIRA_SITE}}/browse/BEP-2134">BEP-2134</a>)</p>'
+        '&mdash; <a href="https://100-stars.atlassian.net/browse/BEP-2998">BEP-2998</a> '
+        '(Epic: <a href="https://100-stars.atlassian.net/browse/BEP-2134">BEP-2134</a>)</p>'
         "<ul>"
         "<li>กำหนด impression target 15 plays/hr &rarr; ระบบเล่น ~13-15 (<strong>under-delivery up to 13%</strong>)</li>"
         "<li>กำหนด 100 plays/day &rarr; ระบบเล่น ~90-100 (<strong>under-delivery up to 10%</strong>)</li>"
@@ -4194,7 +4194,7 @@ def _update_page(api, page_id: str, content: str, title: str | None = None):
     api.update_page(page_id=page_id, title=t, content=content, version=version)
     new_ver = version + 1
     print(f"  Updated: {t} (v{version} -> v{new_ver})")
-    print(f"  URL: https://{{JIRA_SITE}}/wiki/spaces/{SPACE_KEY}/pages/{page_id}")
+    print(f"  URL: https://100-stars.atlassian.net/wiki/spaces/{SPACE_KEY}/pages/{page_id}")
     # Fix Confluence ADF panel bug: storage→ADF conversion sometimes creates
     # bodiedExtension instead of native panel for success/error/warning macros.
     # This causes "Error loading the extension!" in view mode.

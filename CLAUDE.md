@@ -16,7 +16,7 @@ Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Co
 .claude/hooks/                     ← 37 Python hooks (HR enforcement + automation)
 .claude/agents/                    ← 7 subagent definitions (haiku/sonnet/opus)
 tasks/                             ← ADF JSON output (acli --from-json input)
-scripts/                           ← setup, sync, sprint utilities
+scripts/                           ← setup, sync + sprint/, confluence/, archive/
 ```
 
 ## Project Settings
@@ -83,7 +83,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Parent (Epic) | `jira_set_parent.py` (REST) | MCP/acli silently ignore parent field on existing issues |
 | Issue Links | MCP `jira_create_issue_link` | Blocks/Relates · `jira_create_remote_issue_link` (web) |
 | Sprint | Agile REST via `JiraAPI._request()` | MCP can't move to backlog |
-| Sprint batch | `scripts/` utilities | `clear-sprint-dates`, `sprint-set-fields`, `sprint-rank-by-date`, `sprint-subtask-alignment` |
+| Sprint batch | `scripts/sprint/` utilities | `clear-sprint-dates`, `sprint-set-fields`, `sprint-rank-by-date`, `sprint-subtask-alignment` |
 | Cache | MCP `jira-cache-server` (8 tools) | `force_refresh=true` after web edits or "ล่าสุด/refresh/stale" |
 
 ### Field & ADF Quick Reference

@@ -319,7 +319,7 @@ def main():
             version=version,
         )
         print(f"  Updated to v{version + 1}")
-        url = f"https://{{JIRA_SITE}}/wiki/spaces/{SPACE_KEY}/pages/{page_id_arg}"
+        url = f"https://100-stars.atlassian.net/wiki/spaces/{SPACE_KEY}/pages/{page_id_arg}"
         print(f"  URL: {url}")
         return
 
@@ -356,7 +356,7 @@ def main():
     )
     print(f"  Updated with animation diagrams")
 
-    url = f"https://{{JIRA_SITE}}/wiki/spaces/{SPACE_KEY}/pages/{page_id}"
+    url = f"https://100-stars.atlassian.net/wiki/spaces/{SPACE_KEY}/pages/{page_id}"
     print(f"  URL: {url}")
     print(f"\n  To delete: go to page → ⋯ → Delete")
 

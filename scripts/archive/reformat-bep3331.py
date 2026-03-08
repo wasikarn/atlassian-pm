@@ -301,18 +301,18 @@ def build_adf():
                 th("Type", "Link"),
                 td(
                     "Related (per-coupon daily limit)",
-                    [link_text("BEP-3330", "https://{{JIRA_SITE}}/browse/BEP-3330")],
+                    [link_text("BEP-3330", "https://100-stars.atlassian.net/browse/BEP-3330")],
                 ),
                 td(
                     "Technical Note",
                     [link_text(
                         "Coupon Daily Limit — maxPerUserPerDay",
-                        "https://{{JIRA_SITE}}/wiki/spaces/BEP/pages/165052419",
+                        "https://100-stars.atlassian.net/wiki/spaces/BEP/pages/165052419",
                     )],
                 ),
                 td(
                     "Epic",
-                    [link_text("BEP-3197", "https://{{JIRA_SITE}}/browse/BEP-3197"),
+                    [link_text("BEP-3197", "https://100-stars.atlassian.net/browse/BEP-3197"),
                      plain(" — Backend APIs & Infrastructure")],
                 ),
                 td(
