@@ -6,14 +6,14 @@
 
 Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
 
-**Structure:** `.claude/skills/` — 20 skills (`SKILL.md` → phases → `shared-references/`) + `atlassian-scripts/` (17 Python scripts) + `jira-cache-server/` (MCP) + `shared-references/` (19 docs)
+**Structure:** `.claude/skills/` — 22 skills (`SKILL.md` → phases → `shared-references/`) + `atlassian-scripts/` (16 Python scripts) + `jira-cache-server/` (MCP) + `shared-references/` (19 docs)
 
 ```text
 .claude/skills/{name}/SKILL.md     ← skill entry (reads shared-references/)
 .claude/skills/shared-references/  ← 19 docs: templates, tools, verification, orchestration
-.claude/skills/atlassian-scripts/  ← 19 Python scripts + lib/ (REST API)
+.claude/skills/atlassian-scripts/  ← 16 Python scripts + lib/ (REST API)
 .claude/skills/jira-cache-server/  ← MCP server (SQLite + FTS5, local Jira cache)
-.claude/hooks/                     ← 37 Python hooks (HR enforcement + automation)
+.claude/hooks/                     ← 39 Python hooks (HR enforcement + automation)
 .claude/agents/                    ← 7 subagent definitions (haiku/sonnet/opus)
 tasks/                             ← ADF JSON output (acli --from-json input)
 scripts/                           ← setup, sync, sprint utilities
@@ -78,9 +78,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Sub-task | Two-Step: MCP create → acli edit | `parent` doesn't work with acli |
 | Script | `update_jira_description.py` (REST) | `/atlassian-scripts` for format |
 | Confluence | MCP (read/simple), Python scripts (code/macros) | `audit_confluence_pages.py` (audit) |
-| Page appearance | `content-appearance-published` property (v2 API) | Controls width only. Font-size depends on content complexity — pages with Forge macros render at 16px, simple pages at 13px. Do NOT set for consistency |
-| Mermaid diagram | Code block (`language=mermaid`) + Forge `ac:adf-extension` | Programmatic: `mermaid_diagram()` in `scripts/create-player-architecture-page.py` — wraps code block in Expand macro (source hidden), Forge renderer outside (diagram visible). Manual: `/expand` + `/mermaid` in editor. **CRITICAL:** `guest-params > index` counts ALL code blocks on page (including inside Expand) — use `tracked_code_block()` for non-mermaid code blocks |
-| ADF panel fix | `fix_confluence_panels.py` or auto in `_update_page()` | After storage format update, Confluence may convert `success`/`error`/`warning`/`note` macros to broken `bodiedExtension`. Fix reads ADF via v2 API and converts to native `panel` |
+| Confluence (advanced) | See `shared-references/troubleshooting.md` | Page appearance, Mermaid diagrams, ADF panel fix — details in troubleshooting + `mermaid-guide.md` |
 | Explore | Task(Explore) | Always before creating subtasks |
 | Parent (Epic) | `jira_set_parent.py` (REST) | MCP/acli silently ignore parent field on existing issues |
 | Issue Links | MCP `jira_create_issue_link` | Blocks/Relates · `jira_create_remote_issue_link` (web) |
@@ -109,12 +107,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | `limit > 50` → error | Max 50, use pagination `start_at` |
 | Sibling tool call errored | One parallel MCP call failed → all cancelled. Fix failing call first |
 | Prefer `/jira-story-full` | `/jira-search-issues` → `/jira-story-full` → `/jira-verify-issue` |
-| Mermaid diagram not rendering | Need BOTH: code block (`language=mermaid`) + Forge `ac:adf-extension`. `mermaid_diagram()` wraps code block in Expand macro + Forge renderer outside. `guest-params > index` counts ALL code blocks on page (including inside Expand macros) |
-| Mermaid source code visible | `collapse=true` does NOT work on Mermaid code blocks — use Expand macro (`ac:name="expand"`) to wrap code block. `mermaid_diagram()` does this automatically |
-| Mermaid parse error on Confluence | Task names/labels must NOT contain `×` `±` `:` (time) `()` — use ASCII equivalents (`x`, `+-`, `-`, remove parens). Applies to ALL diagram types, not just Gantt |
-| Mermaid edge animation | Flowchart only. Syntax: `e1@-->` (edge ID) + `e1@{ animation: fast/slow }` (metadata). NOT supported on sequenceDiagram, stateDiagram, gantt. `&` syntax (`D & E e1@-->`) only animates ONE edge — must split into separate edges. Confirmed working on Confluence Forge v11.12.2 |
-| Page font-size too large (16px) | Pages with Forge macros (Mermaid, etc.) always render at 16px. `content-appearance-published` controls width only, NOT font. Cannot force 13px compact mode on complex pages |
-| "Error loading the extension!" on panels | Confluence storage→ADF bug: `ac:structured-macro` for `success`/`error`/`warning`/`note` panels sometimes converts to `bodiedExtension` instead of native `panel` → fails to render. Fix: `_fix_page_panels()` in architecture script auto-fixes via v2 ADF API. Standalone: `fix_confluence_panels.py` |
+| Mermaid / Confluence issues | See `mermaid-guide.md` + `.claude/rules/mermaid.md` + `troubleshooting.md` for rendering, animation, panels, font-size |
 
 ## References
 
@@ -124,7 +117,7 @@ Key shared references (loaded by skills on demand):
 - Tools: @.claude/skills/shared-references/tools.md
 - Troubleshooting: @.claude/skills/shared-references/troubleshooting.md
 
-Other refs: `.claude/skills/shared-references/CLAUDE.md` (full index of 20 docs) | **Scripts:** `atlassian-scripts/SKILL.md`
+Other refs: `.claude/skills/shared-references/` (19 docs, indexed by `templates.md`) | **Scripts:** `atlassian-scripts/SKILL.md`
 - Mermaid diagrams: @.claude/skills/shared-references/mermaid-guide.md
 
 ## Core Principles
