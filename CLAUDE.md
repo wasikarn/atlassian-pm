@@ -6,7 +6,7 @@
 
 Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
 
-**Structure:** `.claude/skills/` — 22 skills (`SKILL.md` → phases → `shared-references/`) + `atlassian-scripts/` (16 Python scripts) + `jira-cache-server/` (MCP) + `shared-references/` (19 docs)
+**Structure:** `.claude/skills/` — 23 skills (`SKILL.md` → phases → `shared-references/`) + `atlassian-scripts/` (16 Python scripts) + `jira-cache-server/` (MCP) + `shared-references/` (19 docs)
 
 ```text
 .claude/skills/{name}/SKILL.md     ← skill entry (reads shared-references/)

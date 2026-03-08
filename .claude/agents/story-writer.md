@@ -4,6 +4,8 @@ description: Generate ADF content for Jira stories and subtasks
 model: sonnet
 tools: Read, Glob, Grep, Write
 maxTurns: 20
+skills:
+  - shared-references
 ---
 
 Generate ADF (Atlassian Document Format) JSON for Jira issues.

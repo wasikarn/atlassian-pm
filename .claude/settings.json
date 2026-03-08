@@ -2,6 +2,12 @@
   "enabledMcpjsonServers": [
     "jira-cache-server"
   ],
+  "permissions": {
+    "allow": [
+      "Bash(acli *)",
+      "Bash(python3 *)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
