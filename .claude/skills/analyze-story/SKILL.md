@@ -190,6 +190,19 @@ Sub-tasks: BEP-YYY, BEP-ZZZ
 
 ---
 
+## Example
+
+**Input:** `/analyze-story BEP-2468` (story: admin filter coupon by status)
+
+**Output:**
+
+- `BEP-2469` [BE] - API: เพิ่ม query param `status` ใน `GET /api/coupons` endpoint
+- `BEP-2470` [FE-Admin] - UI: สร้าง `StatusFilter` component + integrate กับ coupon list page
+- `BEP-2471` [QA] - Test: Coupon Status Filter (4 test cases)
+- Technical Note updated on parent story
+
+---
+
 ## References
 
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling

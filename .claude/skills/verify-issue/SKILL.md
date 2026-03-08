@@ -8,7 +8,7 @@ description: |
 
   Supports: --with-subtasks (batch + alignment check), --fix (auto-fix + format migration)
 
-  Triggers: "verify", "validate", "check quality", "improve", "migrate format"
+  Triggers: "verify", "validate", "check quality", "improve", "migrate format", "QG score", "quality gate"
 argument-hint: "[issue-key] [--with-subtasks] [--fix]"
 ---
 
@@ -163,6 +163,25 @@ Quality: wiki → ADF, EN → Thai
 | `/analyze-story` | `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` |
 | `/story-full` | `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` |
 | `/improve-issue` (legacy) | → Use `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks --fix` instead |
+
+---
+
+## Example
+
+**Input:** `/verify-issue BEP-2468 --with-subtasks`
+
+**Output:**
+
+```
+QG Score: 92/100
+✅ ADF structure valid
+✅ Panel types correct (info, success)
+✅ INVEST: Independent, Valuable, Testable
+⚠️ AC2 missing Given/When/Then format (-5)
+⚠️ File path `src/pages/coupon.tsx` not found in codebase (-3)
+Subtasks: 3/3 aligned with parent ACs
+Recommendation: Fix AC2 format, verify file path
+```
 
 ---
 

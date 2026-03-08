@@ -122,6 +122,20 @@ ACs: N | Scope: [services]
 
 ---
 
+## Example
+
+**Input:** "สร้าง story สำหรับ admin filter coupon by status"
+
+**Output:**
+
+- Story `BEP-2468`: [FE-Admin] - เพิ่ม filter coupon ตาม status (Coupon Status Filter)
+- AC1: Display — แสดง filter options (active/inactive/expired) บน coupon list
+- AC2: Filter — กดเลือก status แล้วแสดงเฉพาะ coupon ที่ตรง
+- AC3: Reset — กด clear filter แล้วกลับมาแสดงทั้งหมด
+- VS: `vs1-coupon-filter` | Size: S (2 SP)
+
+---
+
 ## References
 
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling

@@ -7,7 +7,7 @@ description: |
 
   Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Review → Execute
 
-  Triggers: "plan sprint", "sprint planning"
+  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution"
 argument-hint: "[--sprint <id>] [--carry-over-only]"
 ---
 
@@ -32,8 +32,7 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 
 ## ⚠️ Critical: Capacity Before Assignment
 
-> **Always calculate team capacity BEFORE assigning individual tasks.**
-> This prevents over-committing sprints and ensures balanced workload distribution.
+> Calculate team capacity BEFORE assigning individual tasks — skipping this step causes over-committed sprints and unbalanced workloads.
 
 **Order of Operations:**
 
@@ -346,6 +345,27 @@ Subtask alignment: [X checked, Y fixed]
 | ------ | ------------- |
 | `--sprint <id>` | Specify target sprint ID (if not specified → find the next future sprint) |
 | `--carry-over-only` | Carry-over analysis only (no assign/move) — Phase 1-3 only |
+
+---
+
+## Example
+
+**Input:** `/plan-sprint --sprint 640`
+
+**Output:**
+
+```
+Sprint 33 (Mar 10-21) | Capacity: 35 tickets
+Carry-over: 4 tickets (BEP-3050, BEP-3051, BEP-3055, BEP-3060)
+New work: 31 tickets from backlog
+Assignments:
+  {{SLOT_1}}: 6 tickets (review + complex BE)
+  {{SLOT_2}}: 8 tickets (BE focus)
+  {{SLOT_3}}: 10 tickets (FE-Web + FE-Admin)
+  {{SLOT_4}}: 7 tickets (FE-Admin + coupon)
+  {{SLOT_5}}: 4 tickets (Mobile + FE-Web)
+Risk: BEP-3055 blocks 3 downstream tickets
+```
 
 ---
 

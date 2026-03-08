@@ -161,6 +161,23 @@ Created: BEP-NEW
 
 ---
 
+## Example
+
+**Input:** `/story-cascade BEP-2468 "เพิ่ม AC สำหรับ pagination บน coupon list"`
+
+**Output:**
+
+```
+Impact Analysis: 2 sub-tasks affected
+Updated:
+  ✅ BEP-2468 Story: +AC4 (Pagination)
+  ✅ BEP-2469 [BE]: +scope item — paginate API response
+  ✅ BEP-2470 [FE-Admin]: +scope item — pagination component
+  ⏭️ BEP-2471 [QA]: no change needed (test plan covers pagination)
+```
+
+---
+
 ## References
 
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling

@@ -4,6 +4,8 @@ disable-model-invocation: true
 description: |
   Create Epic + Epic Doc from product vision with a 5-phase PM workflow
   Use when creating a new initiative, have a product vision, or need RICE prioritization
+
+  Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE"
 argument-hint: "[epic-title]"
 ---
 
@@ -112,6 +114,19 @@ Epic Doc: [link] | Epic: [link]
 
 - ❌ Do not nest tables inside panels (will error)
 - ✅ Use paragraphs or bulletList inside panels instead
+
+---
+
+## Example
+
+**Input:** "สร้าง epic สำหรับระบบ coupon management ทั้งหมด"
+
+**Output:**
+
+- Epic `BEP-2800`: [Platform] - ระบบจัดการ Coupon (Coupon Management System)
+  - RICE: R=8 I=7 C=0.8 E=3 → Score 14.9
+  - Scope: 5 stories (Create, List, Redeem, Report, Settings)
+- Epic Doc: Confluence page with overview, business value, VS plan
 
 ---
 

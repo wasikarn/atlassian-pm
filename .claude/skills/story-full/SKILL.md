@@ -9,7 +9,7 @@ description: |
 
   Composite: No need to copy-paste issue keys, context preserved throughout workflow
 
-  Triggers: "story full", "create story + subtasks", "full workflow"
+  Triggers: "story full", "create story + subtasks", "full workflow", "create story with subtasks", "story and subtasks"
 argument-hint: "[story-description]"
 ---
 
@@ -279,6 +279,23 @@ Sub-tasks: BEP-YYY [BE], BEP-ZZZ [FE-Admin]
 | --- | --- | --- |
 | Separate | `/create-story` + `/analyze-story` | Lost between |
 | Combined | `/story-full` | Preserved |
+
+---
+
+## Example
+
+**Input:** "สร้าง story + subtasks สำหรับ admin ดู ad report แบบ monthly"
+
+**Output:**
+
+- Story `BEP-3100`: [FE-Admin] - ดู Ad Report แบบรายเดือน (Monthly Ad Report)
+  - AC1: Display — แสดง report table with impression, click, revenue per billboard
+  - AC2: Filter — เลือกเดือน/ปี แล้ว report อัปเดตตามช่วงเวลา
+  - AC3: Export — กดปุ่ม export ได้ไฟล์ CSV
+- Sub-tasks:
+  - `BEP-3101` [BE] - API endpoint `GET /api/reports/monthly` with date range filter
+  - `BEP-3102` [FE-Admin] - Monthly report page + table component
+  - `BEP-3103` [FE-Admin] - CSV export from report data
 
 ---
 

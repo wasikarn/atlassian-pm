@@ -225,6 +225,20 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
 
 ---
 
+## Example
+
+**Input:** `/create-task tech-debt "refactor coupon service ให้ใช้ repository pattern"`
+
+**Output:**
+
+- Task `BEP-2950`: [BE] - Refactor Coupon Service to Repository Pattern (Tech Debt)
+  - Context: coupon service มี direct DB query กระจายใน controller — ยากต่อ testing
+  - Scope: `src/modules/coupon/coupon.service.ts`, `coupon.repository.ts` (new)
+  - AC1: Extract — ย้าย DB queries จาก service ไป repository
+  - AC2: Test — unit test ครอบคลุม repository methods
+
+---
+
 ## References
 
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling

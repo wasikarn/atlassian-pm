@@ -13,6 +13,15 @@ Claude Code ──stdio──> jira-cache-server ──REST API──> Jira Clou
 
 **Key constraint:** MCP servers cannot call other MCP servers. This server uses JiraAPI (REST API v3) directly for upstream fetches, reusing `atlassian-scripts/lib/` for auth + API client.
 
+## When to Use
+
+- **Read issues** → `cache_get_issue` instead of MCP `jira_get_issue` (saves ~80% tokens because cached responses are compact)
+- **Search** → `cache_search` / `cache_text_search` (instant local search, no API roundtrip)
+- **Sprint overview** → `cache_sprint_issues` (full sprint in one call with pagination)
+- **Dedup check** → `cache_similar_issues` (semantic similarity via embeddings)
+- **After MCP writes** → `cache_invalidate(issue_key)` (HR6: stale reads corrupt verify/cascade/planning)
+- **Stale data / user says "ล่าสุด"** → `cache_refresh(issue_key, force_refresh=true)`
+
 ## Tools (8)
 
 | Tool | Description | Upstream? |
