@@ -159,7 +159,6 @@ Quality: wiki → ADF, EN → Thai
 
 | After Command | Verify With |
 | --- | --- |
-| `/create-story` | `/verify-issue {{PROJECT_KEY}}-XXX` |
 | `/analyze-story` | `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` |
 | `/story-full` | `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` |
 | `/improve-issue` (legacy) | → Use `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks --fix` instead |

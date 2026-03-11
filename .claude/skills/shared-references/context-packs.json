@@ -9,7 +9,7 @@
         "vertical-slice-guide.md",
         "writing-style.md"
       ],
-      "skills": ["create-story", "story-full", "update-story"]
+      "skills": ["story-full", "update-story"]
     },
     "subtask": {
       "description": "Create/update subtasks (TA workflow)",
@@ -19,7 +19,7 @@
         "tools.md",
         "vertical-slice-guide.md"
       ],
-      "skills": ["analyze-story", "update-subtask", "story-cascade"]
+      "skills": ["analyze-story", "update-subtask"]
     },
     "epic": {
       "description": "Create/update epics (PM workflow)",
@@ -86,7 +86,7 @@
         "tools.md",
         "skill-orchestration.md"
       ],
-      "skills": ["sync-alignment", "story-cascade"]
+      "skills": ["sync-alignment"]
     },
     "doc": {
       "description": "Create/update Confluence pages",
@@ -95,6 +95,16 @@
         "tools.md"
       ],
       "skills": ["create-doc", "update-doc"]
+    },
+    "blueprint": {
+      "description": "Multi-perspective feature blueprint on Confluence",
+      "files": [
+        "verification-checklist.md",
+        "vertical-slice-guide.md",
+        "writing-style.md",
+        "tools.md"
+      ],
+      "skills": ["feature-blueprint"]
     }
   },
   "base_path": ".claude/skills/shared-references/"

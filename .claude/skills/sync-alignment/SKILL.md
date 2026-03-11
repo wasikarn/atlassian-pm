@@ -196,21 +196,10 @@ Post-sync: `rm tasks/sync-*.json tasks/sync-*.md` → `/verify-issue {{PROJECT_K
 
 ---
 
-## sync-alignment vs story-cascade
+## When to Use
 
-| Feature | `/story-cascade` | `/sync-alignment` |
-| --- | --- | --- |
-| Scope | Jira only | Jira + Confluence |
-| Direction | Story → Sub-tasks (down) | Bidirectional (any → all) |
-| Starting point | Story only | Epic / Story / Sub-task / Confluence |
-| Confluence sync | No | Yes (Tech Notes + Epic Doc) |
-| Use case | Quick Jira-only cascade | Full artifact alignment |
-| Phases | 8 | 8 |
-
-> **When to use which:**
->
-> - `/story-cascade` — After editing a Story, cascade only to Jira sub-tasks (fast)
-> - `/sync-alignment` — Need to sync everything including Confluence (comprehensive)
+> `/sync-alignment` handles both Jira-only cascades (Story → Sub-tasks) and full artifact sync (+ Confluence).
+> If only Jira sub-tasks need updating, it skips Confluence phases automatically.
 
 ---
 

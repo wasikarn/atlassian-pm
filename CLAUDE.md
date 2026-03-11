@@ -31,8 +31,9 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 
 | Command | Description |
 | --- | --- |
+| `/feature-blueprint` | Multi-perspective blueprint (PO×Domain×TL×Eng×QA) → Confluence doc + backlog map |
+| `/refine-feature` | Multi-role debate (PO×TL×Eng×QA) → refined stories |
 | `/jira-create-epic` | Create Epic from product vision + Epic Doc |
-| `/jira-create-story` | Create User Story from requirements |
 | `/jira-create-task` | Create Task (tech-debt, bug, chore, spike) |
 | `/jira-analyze-story {{PROJECT_KEY}}-XXX` | Analyze Story → Sub-tasks + Technical Note |
 | `/jira-create-testplan {{PROJECT_KEY}}-XXX` | Create Test Plan → [QA] Sub-task |
@@ -40,8 +41,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | `/jira-update-{epic,story,task,subtask}` | Edit single issue — scope, AC, format |
 | `/confluence-update-doc PAGE-ID` | Update/Move Confluence page |
 | `/jira-story-full` | Create Story + Sub-tasks in one go (preferred) |
-| `/jira-story-cascade {{PROJECT_KEY}}-XXX` | Update Story + cascade to Sub-tasks |
-| `/jira-sync-alignment {{PROJECT_KEY}}-XXX` | Sync all artifacts bidirectional |
+| `/jira-sync-alignment {{PROJECT_KEY}}-XXX` | Sync all artifacts bidirectional (Story+Sub-tasks, or +Confluence) |
 | `/jira-assign {{PROJECT_KEY}}-XXX name` | Quick assign issue (HR3-safe, uses acli) |
 | `/jira-plan-sprint` | Sprint planning: carry-over + capacity + assign |
 | `/jira-dependency-chain` | Dependency analysis, critical path, swim lanes |
@@ -57,10 +57,11 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Phase | Flow | Notes |
 | --- | --- | --- |
 | **Search first** | `/jira-search-issues` | Always run before creating (dedup) |
-| **Create** | PM `/jira-create-epic` → PO `/jira-create-story` → TA `/jira-analyze-story` → QA `/jira-create-testplan` | QA optional |
-| **Combined** | `/jira-story-full` = `/jira-create-story` + `/jira-analyze-story` in one go | Preferred |
+| **Blueprint** | `/feature-blueprint` → `/create-epic` → `/story-full` | Greenfield features needing architecture review |
+| **Refine** | `/refine-feature` → `/story-full` | Use for unclear/complex/multi-service features |
+| **Create** | PM `/jira-create-epic` → `/jira-story-full` → QA `/jira-create-testplan` | QA optional |
 | **Update single** | `/jira-update-{epic,story,task,subtask}` | One issue |
-| **Update cascade** | `/jira-story-cascade` = Story + Sub-tasks | `/jira-sync-alignment` if Confluence too |
+| **Update cascade** | `/jira-sync-alignment` = Story + Sub-tasks (+ Confluence if exists) | Replaces old story-cascade |
 | **Standalone** | `/jira-create-task`, `/confluence-create-doc`, `/confluence-update-doc` | |
 | **Planning** | `/jira-plan-sprint` | Reads Jira, assigns work |
 | **Verify** | `/jira-verify-issue` | Always run after creating/updating |

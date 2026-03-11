@@ -7,21 +7,22 @@
 
 | Intent | Skill Chain | Gate |
 | --- | --- | --- |
+| Feature blueprint | `/feature-blueprint` → `/create-epic` → `/story-full` → verify | ≥ 90% (Confluence) |
+| Refine feature | `/search-issues` → `/refine-feature` → `/story-full` → verify | N/A (pre-creation) |
 | Create epic | `/search-issues` → `/create-epic` → verify | ≥ 90% |
 | Create story | `/search-issues` → `/story-full` → verify | ≥ 90% |
 | Create task | `/search-issues` → `/create-task` → verify | ≥ 90% |
 | Analyze story | `/analyze-story` → verify `--with-subtasks` | ≥ 90% |
 | Test plan | `/create-testplan` → verify | ≥ 90% |
 | Update single | `/update-{epic,story,task,subtask}` → verify | ≥ 90% |
-| Update cascade | `/story-cascade` → verify `--with-subtasks` | ≥ 90% |
-| Sync all | `/sync-alignment` → verify `--with-subtasks` | ≥ 90% |
+| Update cascade | `/sync-alignment` → verify `--with-subtasks` | ≥ 90% |
 | Plan sprint | `/plan-sprint` → `/dependency-chain` | N/A |
 
 **Rules:**
 
 - Always `/search-issues` before creating (dedup)
 - Always `/verify-issue` after creating/editing
-- Prefer `/story-full` over separate `/create-story` + `/analyze-story`
+- Use `/story-full` for new stories (combines PO + TA). Use `/analyze-story` only for existing stories needing subtasks
 
 ## HARD RULES
 
@@ -96,6 +97,7 @@ Story ACs covered by subtask objectives. Epic scope reflected in child Stories. 
 | S1-S5 Story Quality | 6 | Story |
 | ST1-ST5 Subtask Quality | 5 | Sub-task |
 | QA1-QA5 QA Quality | 5 | QA Sub-task |
+| B1-B8 Blueprint Quality | 8 (or 5 for S-tier) | Blueprint (Confluence) |
 | E1-E4 Epic Quality | 4 | Epic |
 | A1-A6 Alignment | 6 | `--with-subtasks` only |
 
@@ -108,15 +110,17 @@ Full checklist: `shared-references/verification-checklist.md`
 ```text
 New requirement?
 ├─ Yes → /search-issues (dedup)
-│        ├─ Duplicate found → /update-* or /story-cascade
-│        └─ No duplicate → /story-full (preferred)
+│        ├─ Duplicate found → /update-* or /sync-alignment
+│        └─ No duplicate
+│             ├─ Greenfield / architecture needed / new domain → /feature-blueprint → /create-epic → /story-full
+│             ├─ Unclear scope / multi-service / high-risk → /refine-feature → /story-full
+│             └─ Clear scope / single-service → /story-full (preferred)
 └─ No → Edit existing
          ├─ Single issue → /update-{type}
-         ├─ Story + subtasks → /story-cascade
-         └─ + Confluence → /sync-alignment
+         └─ Story + subtasks (± Confluence) → /sync-alignment
 ```
 
-### story-full vs Separate?
+### story-full vs analyze-story?
 
 ```text
 /story-full (default)
@@ -124,24 +128,24 @@ New requirement?
 ├─ Use when: new story from scratch
 └─ Output: Story + Sub-tasks in one go
 
-Separate /create-story + /analyze-story
-├─ Use when: story already exists, only need subtasks
-└─ Use when: story needs PO review before TA
+/analyze-story (existing story only)
+├─ Use when: story already exists in Jira, only need subtasks
+└─ Skips story creation, starts from impact analysis
 ```
 
 ## Pre/Post Conditions
 
 | Skill | Pre-condition | Post-condition |
 | --- | --- | --- |
+| `/feature-blueprint` | Feature idea / concept | Confluence page + backlog map → `/create-epic` → `/story-full` |
+| `/refine-feature` | `/search-issues` | Refined stories → `/story-full` |
 | `/create-epic` | `/search-issues` | `/verify-issue` >= 90% |
-| `/create-story` | `/search-issues` | `/verify-issue` >= 90% |
 | `/story-full` | `/search-issues` | `/verify-issue --with-subtasks` >= 90% |
 | `/analyze-story` | Story exists | `/verify-issue --with-subtasks` >= 90% |
 | `/create-testplan` | Story exists | `/verify-issue` >= 90% |
 | `/create-task` | `/search-issues` | `/verify-issue` >= 90% |
 | `/update-{type}` | Issue exists | `/verify-issue` >= 90% |
-| `/story-cascade` | Story changed | `/verify-issue --with-subtasks` >= 90% |
-| `/sync-alignment` | Artifacts exist | `/verify-issue --with-subtasks` >= 90% |
+| `/sync-alignment` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
 | `/plan-sprint` | Sprint exists | — |
 | `/dependency-chain` | Sprint planned | — |
 

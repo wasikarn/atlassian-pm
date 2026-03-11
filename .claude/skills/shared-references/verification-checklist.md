@@ -304,6 +304,88 @@
 
 ---
 
+## Blueprint Quality Checks
+
+### B1: Executive Summary
+
+```text
+□ 1 paragraph (not bullet list)
+□ Mentions problem being solved
+□ Mentions proposed solution
+□ Mentions who benefits
+```
+
+### B2: Business Case
+
+```text
+□ Problem narrative present
+□ ≥2 user scenarios with persona + goal + outcome
+□ Non-goals / no-gos listed
+□ Appetite defined (sprints or effort range)
+□ Success metrics defined
+```
+
+### B3: Domain Analysis
+
+```text
+□ ≥1 bounded context identified
+□ ≥1 domain event mapped (Command → Event)
+□ Entities have key attributes listed
+□ Aggregates have invariants defined
+□ Context map shows integration patterns
+```
+
+### B4: Architecture & Design
+
+```text
+□ Alternatives Considered has ≥2 options
+□ Each option has pros and cons
+□ Chosen approach has explicit rationale
+□ New services/patterns documented
+□ Migration complexity assessed
+```
+
+### B5: Technical Specification
+
+```text
+□ File paths are real (Glob-validated, not generic)
+□ Endpoints have HTTP methods + status codes
+□ Data contracts specified (request/response)
+□ DB changes documented (tables, columns, constraints)
+□ Code reuse opportunities identified
+```
+
+### B6: Risks & Edge Cases
+
+```text
+□ ≥3 risks with severity + mitigation
+□ ≥2 edge cases documented
+□ Rabbit holes identified
+□ Open questions listed with owners
+□ No unresolved "blocker" questions
+```
+
+### B7: Test Strategy
+
+```text
+□ Test approach per affected layer
+□ ≥3 critical test scenarios
+□ Happy path + unhappy path covered
+□ Performance/security test needs assessed
+```
+
+### B8: Delivery Plan
+
+```text
+□ VS plan exists with slice labels
+□ Stories mapped to VS labels
+□ Sprint estimate present
+□ Dependency ordering documented
+□ Team assignment suggestions (if applicable)
+```
+
+---
+
 ## Hierarchy Alignment Checks (`--with-subtasks` only)
 
 > **Principle:** Use only actual fetched data — never guess under any circumstances.
@@ -404,12 +486,6 @@
 
 ```text
 /verify-issue {{PROJECT_KEY}}-XXX --fix
-```
-
-### After Creating Story
-
-```text
-/create-story → /verify-issue {{PROJECT_KEY}}-XXX
 ```
 
 ### After Full Workflow

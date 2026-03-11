@@ -92,7 +92,7 @@ argument-hint: "[epic-title]"
 ## Epic Created: [Title] ({{PROJECT_KEY}}-XXX)
 RICE Score: X | Stories: N planned
 Epic Doc: [link] | Epic: [link]
-→ Use /create-story to continue
+→ Use /story-full to continue
 ```
 
 ---

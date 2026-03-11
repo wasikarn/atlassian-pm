@@ -273,12 +273,12 @@ Sub-tasks: BEP-YYY [BE], BEP-ZZZ [FE-Admin]
 
 ---
 
-## Benefits vs Separate Commands
+## Benefits vs Separate Workflow
 
-| Approach | Commands | Context |
+| Approach | When | Context |
 | --- | --- | --- |
-| Separate | `/create-story` + `/analyze-story` | Lost between |
-| Combined | `/story-full` | Preserved |
+| `/story-full` | New story from scratch (default) | Preserved across all phases |
+| `/analyze-story` | Story already exists, need subtasks only | Starts from Phase 5 |
 
 ---
 
