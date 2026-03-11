@@ -153,3 +153,10 @@ Rules causing **silent failures**, **data corruption**, or **irreversible damage
 **Subagents:** Use `.claude/agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
+
+## Efficiency
+
+- **No redundant reads:** Track files already read this session. Never re-read `shared-references/` files — summarize on first read and reference the summary.
+- **Deliverable-first:** Every skill invocation must produce its deliverable (ADF JSON, Jira issue, report) within the session. Do not end at research/planning phase.
+- **Simple patterns:** Prefer `*.md` over complex globs unless precision is explicitly needed. Default to the simplest pattern that works.
+- **Validate before commit:** Skill/rule files — check frontmatter fields are supported, `allowed-tools` includes needed tools, no typos in hook commands. Run markdownlint on `*.md` changes.
