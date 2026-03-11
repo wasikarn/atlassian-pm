@@ -1,6 +1,7 @@
 ---
 name: dependency-chain
 context: fork
+allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |
   Sprint dependency analysis: build dependency graphs, identify critical paths, generate parallel
   execution plans (swim lanes) per team member, and suggest decoupling strategies.

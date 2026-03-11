@@ -1,6 +1,7 @@
 ---
 name: verify-issue
 context: fork
+allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |
   Verify and improve issue quality (ADF format, INVEST, language, hierarchy alignment) with a 6-phase workflow
 

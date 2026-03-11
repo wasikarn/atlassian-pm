@@ -2,6 +2,7 @@
 name: activity-report
 context: fork
 model: haiku
+allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |
   Generate activity report from claude-mem database showing past work sessions, observations, and effort.
   Default: today. Supports date ranges, project filters, observation type filters.

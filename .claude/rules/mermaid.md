@@ -1,3 +1,10 @@
+---
+paths:
+  - "scripts/confluence/**/*.py"
+  - ".claude/skills/shared-references/mermaid-guide.md"
+  - "agent_docs/mermaid/**/*.md"
+---
+
 ## Mermaid Diagrams
 
 When creating or editing Mermaid diagrams, read the relevant official docs BEFORE writing diagram code:
