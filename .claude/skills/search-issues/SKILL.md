@@ -4,11 +4,15 @@ context: fork
 model: haiku
 allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |
-  Search for existing issues before creating new ones (prevent duplicates) with a 3-phase workflow
+  Search for existing Jira issues to prevent duplicates — invoke proactively whenever the user
+  wants to create any new issue (story/task/epic/subtask) before they start creating.
+  3-phase workflow with JQL + semantic similarity check.
 
-  Supports: keyword search, JQL query, filters (sprint, assignee, status, type)
+  Supports: keyword search, JQL query, issue key, filters (sprint, assignee, status, type)
 
-  Triggers: "search", "find", "find issue", "does it already exist"
+  Triggers: "search", "find", "find issue", "does it already exist", "look for", "check if exists",
+  "before creating", "is there already", "find related", "search sprint", "search backlog",
+  "any similar issues", "ค้นหา", "มี issue อยู่แล้วไหม"
 argument-hint: "[keyword] [--filters]"
 ---
 
