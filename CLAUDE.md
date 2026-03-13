@@ -6,18 +6,7 @@
 
 Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
 
-**Structure:** `.claude/skills/` — 23 skills (`SKILL.md` → phases → `shared-references/`) + `atlassian-scripts/` (16 Python scripts) + `jira-cache-server/` (MCP) + `shared-references/` (19 docs)
-
-```text
-.claude/skills/{name}/SKILL.md     ← skill entry (reads shared-references/)
-.claude/skills/shared-references/  ← 19 docs: templates, tools, verification, orchestration
-.claude/skills/atlassian-scripts/  ← 16 Python scripts + lib/ (REST API)
-.claude/skills/jira-cache-server/  ← MCP server (SQLite + FTS5, local Jira cache)
-.claude/hooks/                     ← 37 Python hooks (HR enforcement + automation)
-.claude/agents/                    ← 7 subagent definitions (haiku/sonnet/opus)
-tasks/                             ← ADF JSON output (acli --from-json input)
-scripts/                           ← setup, sync + sprint/, confluence/, archive/
-```
+**Structure:** `SKILL.md` → phases → `shared-references/` (19 docs) | `atlassian-scripts/` (16 scripts) | `jira-cache-server/` (MCP) | `hooks/` (37) | `agents/` (7) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
 
 ## Project Settings
 
@@ -57,13 +46,13 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Phase | Flow | Notes |
 | --- | --- | --- |
 | **Search first** | `/jira-search-issues` | Always run before creating (dedup) |
-| **Blueprint** | `/feature-blueprint` → `/create-epic` → `/story-full` | Greenfield features needing architecture review |
-| **Refine** | `/refine-feature` → `/story-full` | Use for unclear/complex/multi-service features |
+| **Blueprint** | `/feature-blueprint` → `/create-epic` → `/story-full` | Greenfield / architecture review |
+| **Refine** | `/refine-feature` → `/story-full` | Unclear/complex/multi-service |
 | **Create** | PM `/jira-create-epic` → `/jira-story-full` → QA `/jira-create-testplan` | QA optional |
 | **Update single** | `/jira-update-{epic,story,task,subtask}` | One issue |
 | **Update cascade** | `/jira-sync-alignment` = Story + Sub-tasks (+ Confluence if exists) | Replaces old story-cascade |
 | **Standalone** | `/jira-create-task`, `/confluence-create-doc`, `/confluence-update-doc` | |
-| **Planning** | `/jira-plan-sprint` | Reads Jira, assigns work |
+| **Planning** | `/jira-plan-sprint` | |
 | **Verify** | `/jira-verify-issue` | Always run after creating/updating |
 
 **Full orchestration:** `shared-references/skill-orchestration.md`
@@ -79,12 +68,12 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | Sub-task | Two-Step: MCP create → acli edit | `parent` doesn't work with acli |
 | Script | `update_jira_description.py` (REST) | `/atlassian-scripts` for format |
 | Confluence | MCP (read/simple), Python scripts (code/macros) | `audit_confluence_pages.py` (audit) |
-| Confluence (advanced) | See `shared-references/troubleshooting.md` | Page appearance, Mermaid diagrams, ADF panel fix — details in troubleshooting + `mermaid-guide.md` |
+| Confluence (advanced) | See `troubleshooting.md` + `mermaid-guide.md` | Page appearance, Mermaid, ADF panels |
 | Explore | Task(Explore) | Always before creating subtasks |
 | Parent (Epic) | `jira_set_parent.py` (REST) | MCP/acli silently ignore parent field on existing issues |
 | Issue Links | MCP `jira_create_issue_link` | Blocks/Relates · `jira_create_remote_issue_link` (web) |
 | Sprint | Agile REST via `JiraAPI._request()` | MCP can't move to backlog |
-| Sprint batch | `scripts/sprint/` utilities | `clear_sprint_dates`, `sprint_set_fields`, `sprint_rank_by_date`, `sprint_subtask_alignment` |
+| Sprint batch | `scripts/sprint/` | `clear_sprint_dates.py`, `sprint_set_fields.py`, `sprint_rank_by_date.py`, `sprint_subtask_alignment.py`, `update_sprint_goals.py` |
 | Cache | MCP `jira-cache-server` (8 tools) | `force_refresh=true` after web edits or "ล่าสุด/refresh/stale" |
 
 ### Field & ADF Quick Reference
@@ -107,19 +96,11 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 | `project_key_or_id` → error | Use `project_key` |
 | `limit > 50` → error | Max 50, use pagination `start_at` |
 | Sibling tool call errored | One parallel MCP call failed → all cancelled. Fix failing call first |
-| Prefer `/jira-story-full` | `/jira-search-issues` → `/jira-story-full` → `/jira-verify-issue` |
 | Mermaid / Confluence issues | See `mermaid-guide.md` + `.claude/rules/mermaid.md` + `troubleshooting.md` for rendering, animation, panels, font-size |
 
 ## References
 
-Key shared references (loaded by skills on demand):
-- Templates: @.claude/skills/shared-references/templates.md
-- Writing style: @.claude/skills/shared-references/writing-style.md
-- Tools: @.claude/skills/shared-references/tools.md
-- Troubleshooting: @.claude/skills/shared-references/troubleshooting.md
-
-Other refs: `.claude/skills/shared-references/` (19 docs, indexed by `templates.md`) | **Scripts:** `atlassian-scripts/SKILL.md`
-- Mermaid diagrams: @.claude/skills/shared-references/mermaid-guide.md
+Loaded on demand from `.claude/skills/shared-references/` (19 docs, indexed by `templates.md`). **Scripts:** `atlassian-scripts/SKILL.md`
 
 ## Core Principles
 
@@ -135,20 +116,20 @@ Rules causing **silent failures**, **data corruption**, or **irreversible damage
 
 | Rule | Constraint |
 | --- | --- |
-| **HR1** QG ≥ 90% | NEVER write to Jira/Confluence before QG pass. Flow: Explore → ADF → QG ≥ 90% → MCP shell (no desc) → acli edit. All create/update skills. |
+| **HR1** QG ≥ 90% | NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit. |
 | **HR2** JQL parent | NEVER `ORDER BY` with `parent =`, `parent in`, `key in (...)` — parser error |
 | **HR3** Assignee | MCP assignee silently fails. Use `acli jira workitem assign -k "KEY" -a "email" -y` |
 | **HR4** Confluence macros | MCP HTML-escapes macros → raw XML. Use `update_page_storage.py` for ToC/Children/Code |
-| **HR5** Subtask parent | MCP may silently ignore parent → orphan. (1) MCP create with parent, (2) verify parent set, (3) acli edit |
+| **HR5** Subtask parent | MCP may silently ignore parent → orphan. MCP create+verify parent → acli edit. |
 | **HR6** Cache invalidate | After any MCP write → `cache_invalidate(issue_key)`. Stale reads corrupt verify/cascade/planning |
 | **HR7** Sprint ID | NEVER hardcode. Always `jira_get_sprints_from_board()`. Wrong sprint = silent failure |
-| **HR8** Subtask alignment | Dates within parent range. SP sum reasonable vs parent. Misalignment → wrong capacity/burndown |
+| **HR8** Subtask alignment | Dates within parent range. SP sum ≈ parent. Misalignment → wrong burndown. |
 | **HR9** Desc alignment | Story ACs covered by subtask objectives. Epic scope in children. `/verify-issue --with-subtasks` (A1-A6) |
-| **HR10** Subtask sprint | NEVER set `{{SPRINT_FIELD}}` on subtasks. Inherited from parent. API error + cascade failure |
+| **HR10** Subtask sprint | NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent. API error + cascade failure. |
 
 ## Context Management
 
-**Compaction:** When context is compacted, ALWAYS preserve: (1) list of modified files + issue keys, (2) pending HR5/HR6 operations, (3) current phase of active skill workflow, (4) sprint IDs looked up this session. Hooks re-inject HR reminders automatically via `post-compact-reinject.py`.
+**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post-compact-reinject.py`.
 
 **Subagents:** Use `.claude/agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
 
@@ -156,7 +137,7 @@ Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
 ## Efficiency
 
-- **No redundant reads:** Track files already read this session. Never re-read `shared-references/` files — summarize on first read and reference the summary.
-- **Deliverable-first:** Every skill invocation must produce its deliverable (ADF JSON, Jira issue, report) within the session. Do not end at research/planning phase.
-- **Simple patterns:** Prefer `*.md` over complex globs unless precision is explicitly needed. Default to the simplest pattern that works.
-- **Validate before commit:** Skill/rule files — check frontmatter fields are supported, `allowed-tools` includes needed tools, no typos in hook commands. Run markdownlint on `*.md` changes.
+- **No redundant reads:** Summarize `shared-references/` on first read — never re-read same file.
+- **Deliverable-first:** Every skill must produce its deliverable (ADF JSON, issue, report) within the session — don't stop at research phase.
+- **Simple patterns:** Prefer `*.md` over complex globs. Default to simplest pattern that works.
+- **Validate before commit:** Check frontmatter fields, `allowed-tools`, hook commands. Run markdownlint on `*.md` changes.
