@@ -3,8 +3,12 @@
 Single state file per session at /tmp/claude-hooks-state/{session_id}.json.
 Used by HR6 (cache invalidation), HR7 (sprint lookup), search tracking,
 cache-prefer (cache-first reads), and qmd (codebase search).
+
+File locking via fcntl.flock prevents race conditions when parallel
+subagents access the same state file concurrently.
 """
 
+import fcntl
 import json
 from pathlib import Path
 
@@ -18,6 +22,10 @@ _cache: dict[str, dict] = {}
 
 def _state_file(session_id: str) -> Path:
     return STATE_DIR / f"{session_id or 'default'}.json"
+
+
+def _lock_file(session_id: str) -> Path:
+    return STATE_DIR / f"{session_id or 'default'}.lock"
 
 
 def _load(session_id: str) -> dict:
@@ -34,8 +42,23 @@ def _load(session_id: str) -> dict:
 
 def _save(session_id: str, state: dict) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    _cache[session_id] = state
-    _state_file(session_id).write_text(json.dumps(state))
+    lock = _lock_file(session_id)
+    lock.touch(exist_ok=True)
+    with open(lock, "r") as lf:
+        fcntl.flock(lf, fcntl.LOCK_EX)
+        try:
+            # Re-read under lock to merge concurrent writes
+            f = _state_file(session_id)
+            try:
+                disk_state = json.loads(f.read_text()) if f.exists() else {}
+            except Exception:
+                disk_state = {}
+            # Merge: our state wins for keys we touched
+            disk_state.update(state)
+            _cache[session_id] = disk_state
+            f.write_text(json.dumps(disk_state))
+        finally:
+            fcntl.flock(lf, fcntl.LOCK_UN)
 
 
 # ── HR6: Cache invalidation tracking ──────────────────

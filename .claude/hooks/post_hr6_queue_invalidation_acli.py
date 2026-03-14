@@ -21,7 +21,7 @@ from hooks_state import hr6_add_pending
 # Patterns that indicate a Jira write via acli
 ACLI_WRITE_PATTERNS = [
     r"acli\s+jira\s+workitem\s+(create|edit|assign)",
-    r"acli\s+jira\s+issue\s+(update|create|delete|assign)",
+    r"acli\s+jira\s+issue\s+(update|create|delete|assign|transition|comment)",
 ]
 
 

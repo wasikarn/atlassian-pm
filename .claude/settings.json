@@ -76,8 +76,13 @@
         ]
       },
       {
-        "matcher": "mcp__mcp-atlassian__jira_create_issue",
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre_search_before_create.py",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre_hr5_parent_verify_block.py",
@@ -86,7 +91,7 @@
         ]
       },
       {
-        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_update_issue",
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue",
         "hooks": [
           {
             "type": "command",
@@ -116,6 +121,16 @@
         ]
       },
       {
+        "matcher": "mcp__mcp-atlassian__jira_transition_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre_transition_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Glob|Grep",
         "hooks": [
           {
@@ -128,16 +143,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__mcp-atlassian__jira_create_issue",
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
         "hooks": [
           {
             "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post_hr5_parent_verify_remind.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post_search_before_create.py",
             "timeout": 5
           },
           {
@@ -153,7 +163,7 @@
         ]
       },
       {
-        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic",
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic",
         "hooks": [
           {
             "type": "command",

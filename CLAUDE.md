@@ -6,7 +6,7 @@
 
 Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
 
-**Structure:** `SKILL.md` → phases → `shared-references/` (19 docs) | `atlassian-scripts/` (16 scripts) | `jira-cache-server/` (MCP) | `hooks/` (37) | `agents/` (7) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
+**Structure:** `SKILL.md` → phases → `shared-references/` (22 docs) | `atlassian-scripts/` (16 scripts) | `jira-cache-server/` (MCP) | `hooks/` (37) | `agents/` (7) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
 
 ## Project Settings
 

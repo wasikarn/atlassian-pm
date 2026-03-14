@@ -280,246 +280,20 @@ acli jira issue get BEP-1
 
 For MCP: Use `jira_get_issue(issue_key: "BEP-1")`
 
----
+## Confluence & Mermaid Errors
 
-## Confluence Scripts Errors
+Full Confluence troubleshooting (scripts, MCP limitations, Mermaid, panels, page appearance): see `mermaid-guide.md` and `.claude/rules/mermaid.md`
 
-### Python Script Errors
+Quick reference:
 
-| Error | Cause | Solution |
-| --- | --- | --- |
-| `SSL: CERTIFICATE_VERIFY_FAILED` | macOS SSL cert issue | Scripts already have SSL bypass built in - if still encountering, check Python version |
-| `401 Unauthorized` | Invalid credentials | Check `~/.config/atlassian/.env` |
-| `404 Not Found` | Wrong page ID | Verify page ID from URL |
-| `ModuleNotFoundError` | Missing module | Scripts use stdlib only (no pip install needed) |
-
-### MCP Confluence Limitations
-
-| Issue | Cause | Solution |
-| --- | --- | --- |
-| Code blocks not syntax highlighted | MCP renders as `<pre class="highlight">` | Run `fix_confluence_code_blocks.py --page-id` after MCP create/update |
-| Macros displayed as text | MCP doesn't understand storage format | Use `update_page_storage.py` |
-| Cannot move page | MCP has no move API | Use `move_confluence_page.py` |
-| Mermaid diagram not rendering | Code block alone won't render | Need BOTH: code block (`language=mermaid`) + Forge `ac:adf-extension` macro — see below |
-| Page font-size 16px instead of 13px | Forge macros force standard renderer | Pages with Forge extensions (Mermaid, etc.) render at 16px (`is-full-width`/`is-full-page`). Simple pages render at 13px (`is-max`). Cannot override via API — content complexity determines renderer mode |
-| `content-appearance-published` doesn't change font | Property controls width only | `"full-width"` = wider content area. Font-size is separate: determined by Confluence's internal renderer selection based on page content |
-| "Error loading the extension!" on panels | Storage→ADF conversion bug | Confluence converts `ac:structured-macro` for `success`/`error`/`warning`/`note` to `bodiedExtension` instead of native `panel`. Fix: `fix_confluence_panels.py --page-id` or auto-fix in `_update_page()` — see below |
-
-### Expand/Collapse Mechanisms in Confluence
-
-There are **3 distinct** expand/collapse mechanisms in Confluence Cloud. Do NOT confuse them:
-
-| Mechanism | Storage Format | Default State | Use For |
-| --- | --- | --- | --- |
-| **Expand macro** | `ac:structured-macro ac:name="expand"` | Collapsed | Wrapping arbitrary content (text, tables, images) in a collapsible section |
-| **Code block collapse** | `<ac:parameter ac:name="collapse">true</ac:parameter>` on `ac:name="code"` | Expanded (unless `collapse=true`) | Hiding long code blocks, showing only the header |
-| **Manual toggle** | Built-in Confluence Cloud UI | Expanded | Users can click any code block header to toggle |
-
-**Expand macro syntax:**
-
-```xml
-<ac:structured-macro ac:name="expand" ac:schema-version="1">
-  <ac:parameter ac:name="title">Click to expand</ac:parameter>
-  <ac:rich-text-body>
-    <p>Hidden content here</p>
-  </ac:rich-text-body>
-</ac:structured-macro>
-```
-
-**Code block collapse syntax:**
-
-```xml
-<ac:structured-macro ac:name="code" ac:schema-version="1">
-  <ac:parameter ac:name="language">typescript</ac:parameter>
-  <ac:parameter ac:name="title">My Code</ac:parameter>
-  <ac:parameter ac:name="collapse">true</ac:parameter>
-  <ac:plain-text-body><![CDATA[...code...]]></ac:plain-text-body>
-</ac:structured-macro>
-```
-
-**Code block collapse header format:** Shows `[Language] [Title or first line]` with a toggle triangle (▶/▼).
-
-**Important:** `collapse=true` does **NOT** work on Mermaid code blocks — parameter is ignored, source code remains visible. Use Expand macro instead.
-
-**Current usage in architecture pages (165019751):**
-
-- `mermaid_diagram()` — wraps code block in **Expand macro** (source hidden by default, "▶ Mermaid Source"), Forge renderer outside (diagram always visible)
-- `tracked_code_block(collapse=True)` — used for TypeScript/JSON blocks in Sections 4-8 (long pseudocode, models, API responses)
-- Forge `guest-params > index` still counts code blocks inside Expand macros correctly
-
-**Script reference:** `scripts/confluence/create_player_architecture_page.py`
-
-- `code_block(code, language, title, collapse)` — line 127
-- `tracked_code_block(code, language, title, collapse)` — line 142 (with Forge index tracking)
-- `mermaid_diagram(code, page_id)` — line 151 (Expand macro + Forge renderer)
-
-### ADF Panel Conversion Bug
-
-**Problem:** When updating a Confluence page via storage format API (v1), Confluence converts the storage XML to ADF (Atlas Document Format) internally. Some panel macros (`success`, `error`, `warning`, `note`) are **inconsistently** converted:
-
-- `ac:structured-macro ac:name="info"` → ADF `panel` (native, renders correctly)
-- `ac:structured-macro ac:name="success"` → ADF `bodiedExtension` (broken, shows "Error loading the extension!")
-
-This is a **persistent Confluence bug** — happens on every storage format update, not randomly.
-
-**Symptoms:**
-
-- Edit mode: page looks correct (panels visible)
-- View mode: "Error loading the extension!" where panel should be
-- Only affects `success`, `error`, `warning`, `note` macros (not `info`)
-
-**Fix (automatic):** `scripts/confluence/create_player_architecture_page.py` includes `_fix_page_panels()` which runs after every `_update_page()`:
-
-1. Fetches page body in `atlas_doc_format` via v2 API
-2. Finds `bodiedExtension` nodes with panel-type `extensionKey`
-3. Converts to native ADF `panel` node with correct `panelType`
-4. Updates page via v2 ADF API
-
-**Fix (standalone):** `fix_confluence_panels.py --page-id PAGE_ID`
-
-**Fix (manual):** Edit the page in Confluence UI, delete the error block, re-insert the panel macro, save.
-
-**API calls used:**
-
-```bash
-# Read ADF
-GET /wiki/api/v2/pages/{page_id}?body-format=atlas_doc_format
-
-# Update with fixed ADF
-PUT /wiki/api/v2/pages/{page_id}
-{
-  "id": "PAGE_ID",
-  "status": "current",
-  "title": "Page Title",
-  "body": {
-    "representation": "atlas_doc_format",
-    "value": "{...ADF JSON...}"
-  },
-  "version": {"number": N+1}
-}
-```
-
-**ADF node transformation:**
-
-```json
-// BEFORE (broken)
-{"type": "bodiedExtension", "attrs": {"extensionType": "com.atlassian.confluence.macro.core", "extensionKey": "success"}, "content": [...]}
-
-// AFTER (fixed)
-{"type": "panel", "attrs": {"panelType": "success"}, "content": [...]}
-```
-
-### Page Appearance Properties
-
-**`content-appearance-published`** — controls content width via v2 API.
-
-| Value | Renderer Class | Content Width | Font (body) |
-| --- | --- | --- | --- |
-| not set | `is-full-page` (complex) or `is-max` (simple) | default | 16px or 13px |
-| `"full-width"` | `is-full-width` (complex) or `is-max` (simple) | 100% viewport | 16px or 13px |
-| `"fixed-width"` | same as not set | default | 16px or 13px |
-
-> **Font-size is NOT controlled by this property.** Confluence selects `is-max` (compact, 13px) for simple pages and `is-full-page`/`is-full-width` (standard, 16px) for pages with Forge extensions.
-
-**API:**
-
-```bash
-# Set full-width
-POST /wiki/api/v2/pages/{page_id}/properties
-{"key": "content-appearance-published", "value": "full-width"}
-
-# Remove (revert to default)
-DELETE /wiki/api/v2/pages/{page_id}/properties/{prop_id}
-
-# List properties
-GET /wiki/api/v2/pages/{page_id}/properties
-```
-
-### Mermaid Diagrams (Confluence)
-
-The Mermaid plugin is a **Forge app** (`mermaid-diagram`). It requires **two elements** to render:
-
-1. **Code block** (`language=mermaid`) — the diagram source text
-2. **Forge `ac:adf-extension` macro** — the renderer (placed after code block)
-
-> **Code block alone does NOT render.** The Forge macro reads the code block via `guest-params > index`. **CRITICAL:** index counts ALL code blocks on the page (not just mermaid ones).
-
-**Step 1: Code block (source)**
-
-```xml
-<ac:structured-macro ac:name="code" ac:schema-version="1">
-  <ac:parameter ac:name="language">mermaid</ac:parameter>
-  <ac:parameter ac:name="title">Diagram Title</ac:parameter>
-  <ac:plain-text-body><![CDATA[flowchart TD
-    A --> B
-    B --> C]]></ac:plain-text-body>
-</ac:structured-macro>
-```
-
-**Step 2: Forge extension (renderer)** — can be constructed programmatically using `mermaid_diagram()`.
-
-**Reference implementation:** `scripts/confluence/create_player_architecture_page.py`
-
-- `mermaid_diagram(code, page_id)` — generates code block + Forge `ac:adf-extension` macro
-- `tracked_code_block()` — wrapper for non-mermaid code blocks that increments global counter
-- Global `_code_block_count` tracks position for Forge `guest-params > index`
-
-**Two workflows for Mermaid diagrams:**
-
-**A) Programmatic (preferred for scripts with multiple diagrams):**
-
-1. Use `mermaid_diagram(code, page_id)` — generates code block + Forge macro with correct index
-2. Use `tracked_code_block()` for ALL non-mermaid code blocks (maintains index counter)
-3. Counter resets at start of `build_content()` — indices are sequential across all code blocks
-
-**B) Manual (for one-off edits):**
-
-1. User inserts `/mermaid` macro in Confluence editor with dummy content → Save
-2. Script updates the code block's `CDATA` content with actual diagram text
-3. Forge macro auto-reads updated code block on next page view
-
-**Instance IDs ({{JIRA_SITE}}):**
-
-| Parameter | Value |
+| Issue | Solution |
 | --- | --- |
-| app-id | `23392b90-4271-4239-98ca-a3e96c663cbb` |
-| environment-id | `63d4d207-ac2f-4273-865c-0240d37f044a` |
-| installation-id | `5c245bad-32e8-4c74-aa1c-6d227f18fa22` |
-| cloud-id | `85ad5bd2-ef9c-477e-b000-062f1421d0c0` |
-
-**Common mistakes:**
-
-| Mistake | Why it fails |
-| --- | --- |
-| Code block only (no Forge macro) | Displays as raw code text, not a rendered diagram |
-| `ac:name="mermaid-cloud"` | Not a valid macro — renders as unknown macro error |
-| `ac:name="mermaid-diagram"` as `ac:structured-macro` | This is the Forge `ac:adf-extension` key — cannot be constructed as `ac:structured-macro` |
-| Wrong Forge `guest-params > index` | Index must count ALL code blocks on page, not just mermaid — use `tracked_code_block()` counter |
-
-### Script Locations
-
-```text
-.claude/skills/atlassian-scripts/scripts/
-├── create_confluence_page.py   → Create/update with code blocks
-├── update_confluence_page.py   → Find/replace text
-├── move_confluence_page.py     → Move page(s) to new parent
-├── update_page_storage.py      → Add macros (ToC, Children)
-└── fix_confluence_code_blocks.py → Fix broken code blocks
-```
-
-### Credentials File
-
-```bash
-# Check credentials
-cat ~/.config/atlassian/.env
-
-# Expected format:
-CONFLUENCE_URL=https://{{JIRA_SITE}}/wiki
-CONFLUENCE_USERNAME=your-email@example.com
-CONFLUENCE_API_TOKEN=your-api-token
-```
-
----
+| Code blocks not highlighted | `fix_confluence_code_blocks.py --page-id` |
+| Macros as text | `update_page_storage.py` |
+| Cannot move page | `move_confluence_page.py` |
+| Mermaid not rendering | Need code block + Forge `ac:adf-extension` macro (see `mermaid-guide.md`) |
+| "Error loading extension!" on panels | `fix_confluence_panels.py --page-id` (ADF panel conversion bug) |
+| `401 Unauthorized` (scripts) | Check `~/.config/atlassian/.env` |
 
 ## Quick Fixes
 
@@ -528,12 +302,8 @@ CONFLUENCE_API_TOKEN=your-api-token
 | Description ugly format | Use `acli --from-json` not MCP |
 | Thai characters broken | Ensure UTF-8 encoding |
 | Inline code not rendering | Use `marks: [{"type": "code"}]` |
-| Panel wrong color | Check: info (blue), success (green), warning (yellow), error (red) |
-
----
+| Panel wrong color | info (blue), success (green), warning (yellow), error (red) |
 
 ## Related
 
-- ADF format details: `templates.md`
-- Tool selection: `tools.md`
-- Atlassian scripts: `../atlassian-scripts/SKILL.md`
+- ADF format: `templates.md` · Tool selection: `tools.md` · Scripts: `../atlassian-scripts/SKILL.md`

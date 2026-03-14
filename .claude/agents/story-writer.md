@@ -3,6 +3,7 @@ name: story-writer
 description: Generate ADF content for Jira stories and subtasks
 model: sonnet
 tools: Read, Glob, Grep, Write
+memory: project
 maxTurns: 20
 skills:
   - shared-references
