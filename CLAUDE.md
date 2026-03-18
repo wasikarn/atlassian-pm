@@ -133,7 +133,7 @@ Rules causing **silent failures**, **data corruption**, or **irreversible damage
 
 **Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post-compact-reinject.py`.
 
-**Subagents:** Use `.claude/agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
+**Subagents:** Use `.claude/agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
