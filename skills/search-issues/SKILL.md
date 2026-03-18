@@ -3,7 +3,7 @@ name: search-issues
 disable-model-invocation: true
 context: fork
 model: haiku
-compatibility: [jira-cache-server, mcp-atlassian]
+x-compatibility: [jira-cache-server, mcp-atlassian]
 allowed-tools: Read, Glob, Grep, Bash, Agent, mcp__mcp-atlassian__jira_search, mcp__jira-cache-server__cache_search, mcp__jira-cache-server__cache_text_search, mcp__jira-cache-server__cache_similar_issues
 description: |
   Search for existing Jira issues to prevent duplicates — invoke proactively whenever the user

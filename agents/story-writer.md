@@ -5,6 +5,7 @@ model: sonnet
 tools: Read, Glob, Grep, Write
 memory: project
 maxTurns: 20
+permissionMode: dontAsk
 skills:
   - shared-references
 ---

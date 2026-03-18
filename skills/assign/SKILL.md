@@ -1,7 +1,7 @@
 ---
 name: assign
 disable-model-invocation: true
-compatibility: [acli]
+x-compatibility: [acli]
 description: |
   Quick assign a Jira issue to a team member using acli (bypasses MCP silent failure)
 

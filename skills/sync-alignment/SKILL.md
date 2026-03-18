@@ -2,7 +2,7 @@
 name: sync-alignment
 disable-model-invocation: true
 context: fork
-compatibility: [jira-cache-server, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [jira-cache-server, mcp-atlassian, mcp-confluence, acli]
 description: |
   Sync all related artifacts (Epic, Story, Sub-tasks, QA, Confluence) using an 8-phase workflow
 

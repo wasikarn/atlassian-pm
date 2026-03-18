@@ -6,6 +6,7 @@ tools: Read, Glob, Grep, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, 
 skills:
   - shared-references
 maxTurns: 30
+permissionMode: dontAsk
 ---
 
 Plan sprints with carry-over analysis, capacity calculation, and work distribution.

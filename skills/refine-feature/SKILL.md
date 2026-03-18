@@ -2,7 +2,7 @@
 name: refine-feature
 disable-model-invocation: true
 context: fork
-compatibility: [jira-cache-server, mcp-atlassian]
+x-compatibility: [jira-cache-server, mcp-atlassian]
 description: |
   Multi-role debate for refining features and user stories — 4 perspectives challenge each other
   PO (scope/value) × Tech Lead (feasibility/risk) × Engineer (implementation/effort) × QA (edge cases/testability)

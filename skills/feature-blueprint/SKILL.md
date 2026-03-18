@@ -2,7 +2,7 @@
 name: feature-blueprint
 disable-model-invocation: true
 context: fork
-compatibility: [jira-cache-server, mcp-atlassian]
+x-compatibility: [jira-cache-server, mcp-atlassian]
 description: |
   Multi-perspective feature blueprint on Confluence — 5 roles debate (PO, Domain Expert, Tech Lead, Engineer, QA).
   Outputs: structured Confluence page + backlog map for downstream /create-epic + /story-full.
