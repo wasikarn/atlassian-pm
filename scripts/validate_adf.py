@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pre-flight ADF quality gate check.
 
-Usage: python3 scripts/validate_adf.py tasks/bep-XXXX-task-update.json
+Usage: python3 scripts/validate_adf.py tasks/abc-XXXX-task-update.json
 
 Runs the same AdfValidator + detect_issue_type that the HR1 hook uses,
 but shows per-check breakdown so you can fix issues BEFORE attempting
