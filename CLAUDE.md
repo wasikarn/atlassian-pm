@@ -6,7 +6,7 @@
 
 Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
 
-**Structure:** `SKILL.md` → phases → `shared-references/` (22 docs) | `atlassian-scripts/` (16 scripts) | `jira-cache-server/` (MCP) | `hooks/` (37) | `agents/` (7) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
+**Structure:** `SKILL.md` → phases → `shared-references/` (23 docs) | `atlassian-scripts/` (16 scripts) | `jira-cache-server/` (MCP) | `hooks/` (39) | `agents/` (8) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
 
 ## Project Settings
 
@@ -100,7 +100,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 
 ## References
 
-Loaded on demand from `.claude/skills/shared-references/` (19 docs, indexed by `templates.md`). **Scripts:** `atlassian-scripts/SKILL.md`
+Loaded on demand from `.claude/skills/shared-references/` (23 docs, indexed by `templates.md`). **Scripts:** `atlassian-scripts/SKILL.md`
 
 ## Core Principles
 

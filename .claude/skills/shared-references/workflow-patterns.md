@@ -156,10 +156,13 @@ If user selects "Annotate" → follow up asking which numbered items to change a
 
 ## HR Quick Reference
 
+> Full definitions, examples, enforcement details: [hr-rules.md](hr-rules.md)
+> Full hook inventory: [hooks-reference.md](hooks-reference.md)
+
 | HR | Rule | Enforcement |
 |----|------|-------------|
-| HR1 | QG ≥ 90% before Atlassian writes | Hook: `hr1-qg-before-write.py` |
-| HR3 | Assignee via `acli` only (never MCP) | Hook: `hr3-block-mcp-assignee.py` |
-| HR5 | Two-Step + Verify Parent | Hook: `hr5-verify-parent-reminder.py` |
-| HR6 | `cache_invalidate(key)` after every write | Hook: `hr6-cache-invalidate.py` |
-| HR7 | Sprint ID lookup, never hardcode | Hook: `hr7-sprint-id-guard.py` |
+| HR1 | QG ≥ 90% before Atlassian writes | `pre_hr1_quality_gate.py` |
+| HR3 | Assignee via `acli` only (never MCP) | `pre_hr3_block_mcp_assignee.py` |
+| HR5 | Two-Step + Verify Parent | `pre_hr5_parent_verify_block.py` + `post_hr5_parent_verify_remind.py` |
+| HR6 | `cache_invalidate(key)` after every write | `post_hr6_queue_invalidation.py` + `pre_hr6_stale_read_guard.py` |
+| HR7 | Sprint ID lookup, never hardcode | `pre_hr7_sprint_id_guard.py` |

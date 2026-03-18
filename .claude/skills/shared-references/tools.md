@@ -160,12 +160,15 @@ acli jira workitem get {{PROJECT_KEY}}-XXX
 
 ## Effort Sizing
 
-| Size | Description | Action |
-| --- | --- | --- |
-| S | < 2 days | Single sub-task |
-| M | 2-5 days | Single sub-task |
-| L | 5-10 days | Consider splitting |
-| XL | > 10 days | Must split |
+> Canonical size guide: [templates-story.md](templates-story.md#story-best-practices)
+
+| Size | Duration | Hours | SP | Action |
+| --- | --- | --- | --- | --- |
+| XS | < 0.5 day | < 4h | 1 | Single sub-task |
+| S | 0.5-1 day | 4-8h | 2 | Single sub-task |
+| M | 1-2 days | 8-16h | 3 | Single sub-task — Ideal |
+| L | 2-4 days | 16-32h | 5 | Consider splitting (SPIDR) |
+| XL | > 4 days | > 32h | 8 | Must split — use SPIDR |
 
 ---
 

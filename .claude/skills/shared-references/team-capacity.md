@@ -197,11 +197,12 @@ Priority order:
 ## Jira Field Integration
 
 > Fields used for machine-queryable capacity tracking (replaces manual ADF extraction)
+> **Field IDs:** See `project-config.json → custom_fields` (SSOT for all Jira field IDs)
 
 ### Field Mapping
 
-| Concept | Jira Field ID | Type | Set On |
-|---------|--------------|------|--------|
+| Concept | Jira Field | Type | Set On |
+|---------|-----------|------|--------|
 | Story Points | `customfield_10016` | Numeric (1,2,3,5,8,13) | Story, Task |
 | Size (T-shirt) | `customfield_10107` | Select (XS/S/M/L/XL) | Story, Task |
 | Original Estimate | `timetracking` | Time (`{"originalEstimate":"4h"}`) | Subtask |

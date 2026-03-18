@@ -26,71 +26,29 @@
 
 ## HARD RULES
 
-> Rules that if violated cause **silent failures**, **data corruption**, or **irreversible damage**.
-> Every skill MUST respect these rules. No exceptions.
-> Canonical definitions + examples: `shared-references/hr-rules.md`
+> Full definitions, examples, enforcement: [hr-rules.md](hr-rules.md)
+> Hooks enforce HR2-HR7, HR10 automatically — violations are blocked.
 
-### HR1. Quality Gate ≥ 90% Before Atlassian Writes
+| HR | Rule (one-liner) |
+|----|-----------------|
+| HR1 | QG ≥ 90% before any Atlassian write |
+| HR2 | No ORDER BY with `parent =` / `parent in` in JQL |
+| HR3 | Assignee via `acli` only — MCP silently fails |
+| HR4 | Confluence macros via `update_page_storage.py` only |
+| HR5 | Subtask = Two-Step (MCP create → verify parent → acli edit) |
+| HR6 | `cache_invalidate(key)` after every MCP write |
+| HR7 | Sprint ID always via `jira_get_sprints_from_board()` — never hardcode |
+| HR8 | Subtask dates within parent range; SP sum ≈ parent |
+| HR9 | Story ACs covered by subtask objectives; run `/verify-issue --with-subtasks` |
+| HR10 | Never set sprint field on subtasks — inherited from parent |
 
-> **NEVER create or edit issues on Jira/Confluence before passing QG ≥ 90%.** No "create first, fix later".
-
-```text
-BEFORE sending to Atlassian:
-1. Explore codebase (real file paths — no generic paths)
-2. Generate ADF JSON (template-compliant, panels, Given/When/Then)
-3. Self-check against shared-references/verification-checklist.md
-4. Score: Technical X/5 | Quality X/6 | Overall X%
-5. If < 90% → auto-fix → re-score (max 2 attempts)
-6. If >= 90% → proceed to Atlassian
-7. If still < 90% after 2 fixes → ask user
-8. MCP create shell (summary + parent ONLY — no description)
-9. acli edit --from-json (ADF description from step 2)
-10. After Atlassian write → cache_invalidate(issue_key)
-```
-
-**Why:** MCP `jira_create_issue` writes wiki markup descriptions directly to Jira, bypassing QG.
-
-### HR2. JQL `parent` — No ORDER BY
-
-NEVER add `ORDER BY` to JQL with `parent =`, `parent in`, or `key in (...)` — parser error, zero results.
-
-### HR3. MCP Assignee — Use acli Only
-
-`jira_update_issue` with assignee silently succeeds but does nothing. Use `acli jira workitem assign`.
-
-### HR4. Confluence Macros — Use Script Only
-
-MCP HTML-escapes `<ac:structured-macro>` → broken rendering. Use `update_page_storage.py`.
-
-### HR5. Subtask = Two-Step + Verify Parent
-
-MCP may silently ignore parent field → orphan subtask. Always: (1) MCP create with parent, (2) verify parent set via `jira_get_issue`, (3) acli edit for ADF.
-
-### HR6. Cache Invalidate After Every Write
-
-After any MCP write → `cache_invalidate(issue_key)`. Stale data causes wrong verify/cascade/planning results.
-
-### HR7. Sprint ID — Always Lookup, Never Hardcode
-
-Use `jira_get_sprints_from_board()` — hardcoded IDs cause tickets to land in wrong sprint silently.
-
-### HR8. Subtask Size + Dates Must Align with Parent
-
-Subtask dates within parent date range. Points sum reasonable vs parent estimate. Misalignment breaks capacity/burndown.
-
-### HR9. Related Ticket Descriptions Must Align
-
-Story ACs covered by subtask objectives. Epic scope reflected in child Stories. Linked tickets reference each other. `/verify-issue --with-subtasks` checks alignment (A1-A6).
-
-### Scoring Reference
+### QG Scoring Reference
 
 | Score | Status | Action |
 | --- | --- | --- |
 | 90-100% | Pass | Send to Atlassian |
 | 70-89% | Warning | Auto-fix, then re-score |
 | < 70% | Fail | Must fix, ask user if stuck |
-
-### What Gets Scored
 
 | Check | Max | Applies To |
 | --- | --- | --- |
@@ -102,7 +60,7 @@ Story ACs covered by subtask objectives. Epic scope reflected in child Stories. 
 | E1-E4 Epic Quality | 4 | Epic |
 | A1-A6 Alignment | 6 | `--with-subtasks` only |
 
-Full checklist: `shared-references/verification-checklist.md`
+Full checklist: [verification-checklist.md](verification-checklist.md)
 
 ## Decision Trees
 

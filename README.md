@@ -161,7 +161,7 @@ Open Claude Code in this project and type `/command`.
 | ------- | ----------- |
 | `/jira-story-full` | Create Story + Sub-tasks in one go (PO + TA combined) |
 | `/jira-create-epic` | Create Epic + Confluence Epic Doc with RICE scoring |
-| `/jira-create-story` | Create User Story from requirements (5-phase PO workflow) |
+| `/jira-story-full` | Create Story + Sub-tasks in one go (preferred) |
 | `/jira-create-task` | Create Task: `tech-debt`, `bug`, `chore`, or `spike` |
 | `/jira-analyze-story {{PROJECT_KEY}}-XXX` | Read Story → explore codebase → create Sub-tasks |
 | `/jira-create-testplan {{PROJECT_KEY}}-XXX` | Create Test Plan + [QA] Sub-tasks from Story |
@@ -174,7 +174,7 @@ Open Claude Code in this project and type `/command`.
 | `/jira-update-epic {{PROJECT_KEY}}-XXX` | Edit Epic — adjust scope, RICE, metrics |
 | `/jira-update-task {{PROJECT_KEY}}-XXX` | Edit Task — migrate format, add details |
 | `/jira-update-subtask {{PROJECT_KEY}}-XXX` | Edit Sub-task — format, content |
-| `/jira-story-cascade {{PROJECT_KEY}}-XXX` | Update Story + cascade to all Sub-tasks |
+| `/jira-sync-alignment {{PROJECT_KEY}}-XXX` | Sync Story + Sub-tasks bidirectional (+ Confluence if exists) |
 
 ### Jira — Sync & Quality
 
@@ -233,8 +233,7 @@ Claude will fetch sprint data, calculate capacity, analyze carry-over, prioritiz
 
 ```text
 /jira-update-story {{PROJECT_KEY}}-XXX      → Edit Story only
-/jira-story-cascade {{PROJECT_KEY}}-XXX     → + cascade to Sub-tasks
-/jira-sync-alignment {{PROJECT_KEY}}-XXX    → + sync Confluence docs
+/jira-sync-alignment {{PROJECT_KEY}}-XXX    → + cascade to Sub-tasks + sync Confluence docs
 ```
 
 ### Analyze Dependencies
@@ -255,7 +254,6 @@ Claude will fetch sprint data, calculate capacity, analyze carry-over, prioritiz
 ├── update-{epic,story,task,subtask,doc}/
 ├── analyze-story/
 ├── story-full/                     <- Composite: PO + TA in one workflow
-├── story-cascade/                  <- Update + cascade to sub-tasks
 ├── sync-alignment/                 <- Bidirectional sync (Jira + Confluence)
 ├── plan-sprint/                    <- Sprint planning: carry-over + capacity + assign
 ├── dependency-chain/               <- Critical path + swim lane analysis
@@ -268,8 +266,8 @@ Claude will fetch sprint data, calculate capacity, analyze carry-over, prioritiz
 │   └── jira_cache/                 <- cache.py + embeddings.py
 ├── atlassian-scripts/              <- Python REST API scripts
 │   ├── lib/                        <- auth, jira_api, converters, exceptions
-│   └── scripts/                    <- 7 utility scripts
-└── shared-references/              <- Reusable docs loaded by skills (16 files)
+│   └── scripts/                    <- 16 utility scripts
+└── shared-references/              <- Reusable docs loaded by skills (23 files)
     ├── templates.md                <- All ADF templates (Epic, Story, Sub-task, Task)
     ├── dependency-frameworks.md    <- CPM, swim lane rules, risk scoring
     ├── tools.md                    <- Tool selection guide

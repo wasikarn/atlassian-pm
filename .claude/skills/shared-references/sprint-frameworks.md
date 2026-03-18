@@ -111,11 +111,13 @@ Stories must deliver **end-to-end user value** across all layers (UI → API →
 
 ### Anti-patterns
 
-| Anti-pattern | Problem | Fix |
-| --- | --- | --- |
-| Shell-only story (UI has no logic) | No value → INVEST fail | Add minimal happy path or reframe as Walking Skeleton |
-| Layer split (BE separated from FE) | Must wait for other layers → blocked | Combine BE+FE in single story |
-| Tab-split (Active tab / History tab) | Single tab has no context | Split by business rule instead |
+> Full anti-pattern catalog: [vertical-slice-guide.md](vertical-slice-guide.md)
+
+| Anti-pattern | Fix |
+| --- | --- |
+| Shell-only story | Add happy path or reframe as Walking Skeleton |
+| Layer split (BE / FE separated) | Combine BE+FE in single story |
+| Tab-split | Split by business rule instead |
 
 ### Sprint Assignment Strategy
 
@@ -231,15 +233,9 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 ## Task Decomposition
 
 > Source: [monday.com](https://monday.com/blog/rnd/sprint-backlog/)
+> Subtask size guide: [templates-subtask.md](templates-subtask.md#subtask-best-practices)
 
-### Rule: Subtask ≤ 1 day
-
-| Size | Duration | Action |
-| --- | --- | --- |
-| XS | < 4h | Appropriate |
-| S | 4-8h (1 day) | Appropriate |
-| M | 1-2 days | Should split |
-| L | > 2 days | Must split |
+### Rule: Subtask ≤ 1 day (M = 4-8h max)
 
 ### Decomposition Checklist
 
