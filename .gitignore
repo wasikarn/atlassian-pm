@@ -26,3 +26,15 @@ tasks/
 .claude/skills/jira-cache-server/.coverage
 /.idea/
 /tmp/
+
+# Linter cache
+.ruff_cache/
+
+# Claude Code ephemeral
+.claude/plans/
+
+# Agent output dirs (contents generated, dir structure preserved via .gitkeep)
+agent_docs/completed/*
+agent_docs/analyses/*
+!agent_docs/completed/.gitkeep
+!agent_docs/analyses/.gitkeep
