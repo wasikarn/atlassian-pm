@@ -1,6 +1,7 @@
 ---
 name: create-doc
 disable-model-invocation: true
+compatibility: [mcp-atlassian, mcp-confluence]
 description: |
   Create Confluence page from template with a 4-phase workflow
   Supports: tech-spec, adr, parent (category page)

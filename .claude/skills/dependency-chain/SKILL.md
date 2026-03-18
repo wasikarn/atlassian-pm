@@ -1,7 +1,9 @@
 ---
 name: dependency-chain
+disable-model-invocation: true
 context: fork
-allowed-tools: Read, Glob, Grep, Bash, Agent
+compatibility: [jira-cache-server, mcp-atlassian]
+allowed-tools: Read, Glob, Grep, Bash, Agent, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__jira-cache-server__cache_get_issue, mcp__jira-cache-server__cache_sprint_issues, mcp__jira-cache-server__cache_search
 description: |
   Sprint dependency analysis: build dependency graphs, identify critical paths, generate parallel
   execution plans (swim lanes) per team member, and suggest decoupling strategies.

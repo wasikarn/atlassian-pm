@@ -1,6 +1,7 @@
 ---
 name: update-doc
 disable-model-invocation: true
+compatibility: [mcp-confluence]
 description: |
   Update an existing Confluence page with a 5-phase workflow
   Supports: content update, section update, status change, move

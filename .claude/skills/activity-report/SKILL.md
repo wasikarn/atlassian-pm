@@ -1,7 +1,9 @@
 ---
 name: activity-report
+disable-model-invocation: true
 context: fork
 model: haiku
+compatibility: [claude-mem]
 allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |
   Generate activity report from claude-mem database showing past work sessions, observations, and effort.

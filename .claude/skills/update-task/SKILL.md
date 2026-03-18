@@ -1,6 +1,7 @@
 ---
 name: update-task
 disable-model-invocation: true
+compatibility: [jira-cache-server, mcp-atlassian, acli]
 description: |
   Update an existing Jira Task with a 6-phase update workflow
 

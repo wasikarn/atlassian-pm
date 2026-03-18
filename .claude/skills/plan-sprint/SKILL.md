@@ -2,6 +2,7 @@
 name: plan-sprint
 disable-model-invocation: true
 context: fork
+compatibility: [jira-cache-server, mcp-atlassian, acli]
 description: |
   Sprint Planning using an 8-phase workflow
 

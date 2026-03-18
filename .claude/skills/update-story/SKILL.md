@@ -1,6 +1,7 @@
 ---
 name: update-story
 disable-model-invocation: true
+compatibility: [jira-cache-server, mcp-atlassian, acli]
 description: |
   Update an existing User Story with a 6-phase update workflow
 

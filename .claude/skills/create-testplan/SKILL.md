@@ -1,6 +1,7 @@
 ---
 name: create-testplan
 disable-model-invocation: true
+compatibility: [jira-cache-server, mcp-atlassian, acli]
 description: |
   Create Test Plan + [QA] Sub-task from User Story with a 5-phase QA workflow
 
