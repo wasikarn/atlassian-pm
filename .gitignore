@@ -26,9 +26,6 @@ mcp-servers/jira-cache-server/.coverage
 /.idea/
 /tmp/
 
-# One-off historical scripts (kept in git history, excluded from fresh clones)
-scripts/archive/
-
 # Linter cache
 .ruff_cache/
 
