@@ -1,0 +1,11 @@
+{
+  "name": "atlassian-pm",
+  "version": "1.0.0",
+  "description": "Agile Jira/Confluence automation: story creation, sprint planning, quality gates, HR enforcement",
+  "author": { "name": "Tathep" },
+  "license": "MIT",
+  "keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

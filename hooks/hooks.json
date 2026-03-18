@@ -1,4 +1,5 @@
 {
+	"description": "HR enforcement hooks and workflow automation for atlassian-pm plugin",
 	"hooks": {
 		"PreToolUse": [
 			{
@@ -6,17 +7,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_adf_structure_validate.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_adf_structure_validate.py",
 						"timeout": 10
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_event_ac_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_event_ac_check.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr1_quality_gate.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr1_quality_gate.py",
 						"timeout": 10
 					}
 				]
@@ -26,12 +27,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr3_block_mcp_assignee.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr3_block_mcp_assignee.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr10_subtask_sprint_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr10_subtask_sprint_guard.py",
 						"timeout": 5
 					}
 				]
@@ -41,7 +42,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr2_jql_order_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr2_jql_order_guard.py",
 						"timeout": 5
 					}
 				]
@@ -51,7 +52,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr4_confluence_macro_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr4_confluence_macro_guard.py",
 						"timeout": 5
 					}
 				]
@@ -61,7 +62,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr6_stale_read_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr6_stale_read_guard.py",
 						"timeout": 5
 					}
 				]
@@ -71,12 +72,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_search_before_create.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_search_before_create.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr5_parent_verify_block.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr5_parent_verify_block.py",
 						"timeout": 5
 					}
 				]
@@ -86,7 +87,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_hr7_sprint_id_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr7_sprint_id_guard.py",
 						"timeout": 5
 					}
 				]
@@ -96,7 +97,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_field_preset_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_field_preset_guard.py",
 						"timeout": 5
 					}
 				]
@@ -106,7 +107,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_cache_prefer.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_cache_prefer.py",
 						"timeout": 5
 					}
 				]
@@ -116,7 +117,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_transition_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_transition_guard.py",
 						"timeout": 5
 					}
 				]
@@ -126,7 +127,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/pre_qmd_auto_search.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_qmd_auto_search.py",
 						"timeout": 10
 					}
 				]
@@ -138,17 +139,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr5_parent_verify_remind.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr5_parent_verify_remind.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_workflow_chain_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_workflow_chain_suggest.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_vs_integrity_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_vs_integrity_track.py",
 						"timeout": 5
 					}
 				]
@@ -158,7 +159,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr6_queue_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_queue_invalidation.py",
 						"timeout": 5
 					}
 				]
@@ -168,7 +169,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_search_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_search_track.py",
 						"timeout": 5
 					}
 				]
@@ -178,7 +179,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr7_sprint_lookup_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr7_sprint_lookup_track.py",
 						"timeout": 5
 					}
 				]
@@ -188,7 +189,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr6_confirm_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_confirm_invalidation.py",
 						"timeout": 5
 					}
 				]
@@ -198,7 +199,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_auto_parse_large_output.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_auto_parse_large_output.py",
 						"timeout": 15
 					}
 				]
@@ -208,7 +209,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_subtask_alignment_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_subtask_alignment_suggest.py",
 						"timeout": 5
 					}
 				]
@@ -218,7 +219,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_cache_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_cache_suggest.py",
 						"timeout": 5
 					}
 				]
@@ -228,17 +229,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr5_parent_verify_clear.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr5_parent_verify_clear.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_event_model_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_event_model_track.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_vs_integrity_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_vs_integrity_track.py",
 						"timeout": 5
 					}
 				]
@@ -248,7 +249,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_cache_checked_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_cache_checked_track.py",
 						"timeout": 5
 					}
 				]
@@ -258,7 +259,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_explore_fallback_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_explore_fallback_suggest.py",
 						"timeout": 10
 					}
 				]
@@ -268,12 +269,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_auto_verify_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_auto_verify_suggest.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr6_queue_invalidation_acli.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_queue_invalidation_acli.py",
 						"timeout": 5
 					}
 				]
@@ -283,7 +284,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_qmd_usage_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_qmd_usage_track.py",
 						"timeout": 5
 					}
 				]
@@ -294,7 +295,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/stop_hr6_unflushed_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/stop_hr6_unflushed_check.py",
 						"timeout": 10
 					},
 					{
@@ -310,7 +311,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/start_prerequisite_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_prerequisite_check.py",
 						"timeout": 5
 					}
 				]
@@ -320,7 +321,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/start_compact_reinject.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_compact_reinject.py",
 						"timeout": 10
 					}
 				]
@@ -331,7 +332,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/compact_pre_save.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/compact_pre_save.py",
 						"timeout": 10
 					}
 				]
@@ -343,7 +344,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$CLAUDE_PROJECT_DIR\"/hooks/post_hr6_confirm_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_confirm_invalidation.py",
 						"timeout": 5
 					}
 				]

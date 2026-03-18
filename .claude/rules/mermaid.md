@@ -1,7 +1,7 @@
 ---
 paths:
   - "scripts/confluence/**/*.py"
-  - ".claude/skills/shared-references/mermaid-guide.md"
+  - "skills/shared-references/mermaid-guide.md"
   - "agent_docs/mermaid/**/*.md"
 ---
 
@@ -16,7 +16,7 @@ When creating or editing Mermaid diagrams, read the relevant official docs BEFOR
 - **Packet**: `agent_docs/mermaid/packet.md` — network packet structure, bit ranges (v11.0.0+)
 - **Gantt**: `agent_docs/mermaid/gantt.md` — tasks, sections, milestones, excludes, compact mode, date formats
 
-Project-specific patterns and Confluence constraints: `.claude/skills/shared-references/mermaid-guide.md`
+Project-specific patterns and Confluence constraints: `skills/shared-references/mermaid-guide.md`
 
 ### Edge Animation (Flowchart only)
 

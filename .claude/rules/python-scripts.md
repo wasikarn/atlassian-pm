@@ -1,8 +1,8 @@
 ---
 paths:
   - "scripts/**/*.py"
-  - ".claude/hooks/**/*.py"
-  - ".claude/skills/atlassian-scripts/**/*.py"
+  - "hooks/**/*.py"
+  - "skills/atlassian-scripts/**/*.py"
 ---
 
 # Python Script Conventions

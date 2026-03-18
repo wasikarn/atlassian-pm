@@ -39,7 +39,9 @@ from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
 # Add atlassian-scripts to path for JiraAPI + auth reuse
-_scripts_dir = Path(__file__).resolve().parent.parent / "atlassian-scripts"
+# Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/skills/atlassian-scripts)
+# Fallback for standalone testing: resolve relative to new location (mcp-servers/jira-cache-server/ -> root -> skills/)
+_scripts_dir = Path(__file__).resolve().parent.parent.parent / "skills" / "atlassian-scripts"
 if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 

@@ -14,6 +14,7 @@ Import pattern in hooks:
 """
 
 import json
+import os
 import re
 import sys
 from datetime import UTC, datetime
@@ -21,7 +22,7 @@ from pathlib import Path
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
-LOG_DIR = Path.home() / ".claude" / "hooks-logs"
+LOG_DIR = Path(os.environ.get("CLAUDE_PLUGIN_DATA", str(Path.home() / ".claude"))) / "hooks-logs"
 try:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 except OSError:
