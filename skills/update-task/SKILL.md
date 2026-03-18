@@ -152,7 +152,7 @@ acli jira workitem edit --from-json tasks/bep-xxx-update.json --yes
 **Changes:**
 - [list of changes applied]
 
-🔗 [View in Jira](https://{{JIRA_SITE}}/browse/BEP-XXX)
+🔗 [View in Jira](https://{{JIRA_SITE}}/browse/ABC-XXX)
 
 → Use /verify-issue {{PROJECT_KEY}}-XXX to check quality
 ```

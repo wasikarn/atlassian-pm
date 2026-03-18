@@ -42,17 +42,17 @@ What do you need?
 | Operation | Tool | Command/Syntax |
 | --- | --- | --- |
 | **Search issues** | MCP | `jira_search(jql: "project = BEP AND ...")` |
-| **Get issue details** | MCP | `jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX", fields: "summary,status,description")` |
+| **Get issue details** | MCP | `jira_get_issue(issue_key: "ABC-XXX", fields: "summary,status,description")` |
 
 > ⚠️ **IMPORTANT:** Always use the `fields` parameter to prevent token limit errors!
 >
 > ```python
 > # ❌ Bad - may exceed token limit if the issue has too much data
-> jira_get_issue(issue_key="{{PROJECT_KEY}}-XXX")
+> jira_get_issue(issue_key="ABC-XXX")
 >
 > # ✅ Good - specify only the fields you need
 > jira_get_issue(
->     issue_key="{{PROJECT_KEY}}-XXX",
+>     issue_key="ABC-XXX",
 >     fields="summary,status,description,issuetype,parent",
 >     comment_limit=5
 > )
@@ -60,16 +60,16 @@ What do you need?
 
 | **Create issue** | acli | `acli jira workitem create --from-json file.json` |
 | **Update description** | acli | `acli jira workitem edit --from-json file.json --yes` |
-| **Update other fields** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", fields: {...})` |
-| **Assign issue** | acli | `acli jira workitem assign -k "{{PROJECT_KEY}}-XXX" -a "email@..." -y` |
-| **Create issue link** | MCP | `jira_create_issue_link(link_type: "Relates", inward_issue: "BEP-X", outward_issue: "BEP-Y")` |
-| **Get transitions** | MCP | `jira_get_transitions(issue_key: "{{PROJECT_KEY}}-XXX")` |
-| **Transition issue** | MCP | `jira_transition_issue(issue_key: "{{PROJECT_KEY}}-XXX", ...)` |
-| **Set dates** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", additional_fields: {"{{START_DATE_FIELD}}": "YYYY-MM-DD", "duedate": "YYYY-MM-DD"})` |
-| **Set story points** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", additional_fields: {"customfield_10016": 5})` |
-| **Set size** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", additional_fields: {"customfield_10107": {"value": "M"}})` |
-| **Set original estimate** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", additional_fields: {"timetracking": {"originalEstimate": "4h"}})` |
-| **Move to sprint** | MCP | `jira_update_issue(issue_key: "{{PROJECT_KEY}}-XXX", additional_fields: {"{{SPRINT_FIELD}}": 123})` |
+| **Update other fields** | MCP | `jira_update_issue(issue_key: "ABC-XXX", fields: {...})` |
+| **Assign issue** | acli | `acli jira workitem assign -k "ABC-XXX" -a "email@..." -y` |
+| **Create issue link** | MCP | `jira_create_issue_link(link_type: "Relates", inward_issue: "ABC-X", outward_issue: "ABC-Y")` |
+| **Get transitions** | MCP | `jira_get_transitions(issue_key: "ABC-XXX")` |
+| **Transition issue** | MCP | `jira_transition_issue(issue_key: "ABC-XXX", ...)` |
+| **Set dates** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"{{START_DATE_FIELD}}": "YYYY-MM-DD", "duedate": "YYYY-MM-DD"})` |
+| **Set story points** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"customfield_10016": 5})` |
+| **Set size** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"customfield_10107": {"value": "M"}})` |
+| **Set original estimate** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"timetracking": {"originalEstimate": "4h"}})` |
+| **Move to sprint** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"{{SPRINT_FIELD}}": 123})` |
 | **Get sprints** | MCP | `jira_get_sprints_from_board(board_id: "2", state: "future")` |
 
 > **BEP Board/Sprint Info:** Board ID `2` · Use `jira_get_sprints_from_board` to get current Sprint IDs
@@ -146,14 +146,14 @@ What do you need to do?
 # Create new issue
 acli jira workitem create --from-json tasks/bep-xxx.json
 
-# Update existing issue (requires "issues": ["{{PROJECT_KEY}}-XXX"] in JSON)
+# Update existing issue (requires "issues": ["ABC-XXX"] in JSON)
 acli jira workitem edit --from-json tasks/bep-xxx.json --yes
 
 # List issues
 acli jira workitem list --project BEP --limit 10
 
 # Get issue details
-acli jira workitem get {{PROJECT_KEY}}-XXX
+acli jira workitem get ABC-XXX
 ```
 
 ---

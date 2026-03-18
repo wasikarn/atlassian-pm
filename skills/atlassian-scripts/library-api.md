@@ -76,16 +76,16 @@ api = JiraAPI(
 
 # High-level: fix description with find/replace
 had_changes, count = api.fix_description(
-    "BEP-2819",
+    "ABC-2819",
     [("billboard_ids", "billboard_codes")],
     dry_run=False,
 )
 
 # Low-level: get ADF, modify, update
-issue = api.get_issue("BEP-2819")
+issue = api.get_issue("ABC-2819")
 description = issue["fields"]["description"]  # ADF dict
 # ... modify ADF ...
-api.update_description("BEP-2819", description)
+api.update_description("ABC-2819", description)
 ```
 
 ### Custom Exceptions
@@ -104,7 +104,7 @@ except PageNotFoundError as e:
 
 # Jira
 try:
-    issue = jira_api.get_issue("BEP-9999")
+    issue = jira_api.get_issue("ABC-9999")
 except IssueNotFoundError as e:
     print(f"Issue not found: {e.issue_key}")
 

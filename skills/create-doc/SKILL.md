@@ -80,7 +80,7 @@ Generate markdown content based on template
 [Brief description of what this spec covers]
 
 ## Related Issues
-- [{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/BEP-XXX)
+- [ABC-XXX](https://{{JIRA_SITE}}/browse/ABC-XXX)
 
 ---
 

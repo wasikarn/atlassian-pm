@@ -14,7 +14,7 @@
 | `unknown field "parent"` | acli does not support the parent field | Use Two-Step Workflow: MCP create + acli edit |
 | `missing required field` | Incomplete JSON | Check all required fields present |
 | `invalid JSON syntax` | Malformed JSON | Validate JSON structure |
-| `issues field required` | Edit without issue key | Add `"issues": ["{{PROJECT_KEY}}-XXX"]` for edits |
+| `issues field required` | Edit without issue key | Add `"issues": ["ABC-XXX"]` for edits |
 
 **Create vs Edit JSON:**
 
@@ -26,7 +26,7 @@
 }
 ```
 
-Note: CREATE has no "issues" field, EDIT requires `"issues": ["{{PROJECT_KEY}}-XXX"]`.
+Note: CREATE has no "issues" field, EDIT requires `"issues": ["ABC-XXX"]`.
 
 ### Subtask Creation (Two-Step Workflow)
 
@@ -40,7 +40,7 @@ jira_create_issue({
   project_key: "{{PROJECT_KEY}}",
   summary: "[TAG] - Description",
   issue_type: "Subtask",
-  additional_fields: { parent: { key: "{{PROJECT_KEY}}-XXX" } }
+  additional_fields: { parent: { key: "ABC-XXX" } }
 })
 
 // Epic child (Story/Task) — parent is a string
@@ -48,17 +48,17 @@ jira_create_issue({
   project_key: "{{PROJECT_KEY}}",
   summary: "Story title",
   issue_type: "Story",
-  additional_fields: { parent: "BEP-2883" }
+  additional_fields: { parent: "ABC-2883" }
 })
 ```
 
-> ⚠️ **Parent format:** Subtask = `{parent: {key: "{{PROJECT_KEY}}-XXX"}}` (object) / Epic child = `{parent: "BEP-2883"}` (string)
+> ⚠️ **Parent format:** Subtask = `{parent: {key: "ABC-XXX"}}` (object) / Epic child = `{parent: "ABC-2883"}` (string)
 
 **Step 2: Update description with acli**
 
 ```json
 {
-  "issues": ["BEP-YYY"],
+  "issues": ["ABC-YYY"],
   "description": { "type": "doc", "version": 1, "content": [...] }
 }
 ```
@@ -106,7 +106,7 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 | Error | Cause | Solution |
 | --- | --- | --- |
 | `JQL syntax error` | Invalid query | Check JQL operators and field names |
-| `Expecting ')' but got 'ORDER'` | ORDER BY with parent query | Use `"Parent Link" = {{PROJECT_KEY}}-XXX ORDER BY...` instead of `parent = {{PROJECT_KEY}}-XXX ORDER BY...` |
+| `Expecting ')' but got 'ORDER'` | ORDER BY with parent query | Use `"Parent Link" = ABC-XXX ORDER BY...` instead of `parent = ABC-XXX ORDER BY...` |
 | `Field not found` | Wrong field name | Use `issuetype` not `type` for search |
 | `No issues found` | Empty result | Broaden search criteria |
 
@@ -114,7 +114,7 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 
 | Error | Cause | Solution |
 | --- | --- | --- |
-| `Issue not found` | Wrong key | Verify format: `{{PROJECT_KEY}}-XXX` |
+| `Issue not found` | Wrong key | Verify format: `ABC-XXX` |
 | `Cannot read property` | Issue deleted | Issue may have been removed |
 | `Rate limited` | Too many requests | Wait and retry |
 | `exceeds maximum allowed tokens` | Issue has too much data | Use `fields` parameter to limit fetched fields |
@@ -141,7 +141,7 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 
 | Error | Cause | Solution |
 | --- | --- | --- |
-| `expected 'key' to be string` / `parent not specified` | Parent format wrong | Use `additional_fields={"parent": {"key": "{{PROJECT_KEY}}-XXX"}}` — object, not string |
+| `expected 'key' to be string` / `parent not specified` | Parent format wrong | Use `additional_fields={"parent": {"key": "ABC-XXX"}}` — object, not string |
 | Subtask + sprint field → `cannot be associated to a sprint` | Subtasks inherit sprint from parent | Remove sprint field from subtask — inherits automatically |
 
 ### Agile API Errors
@@ -162,7 +162,7 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 
 | Error | Cause | Solution |
 | --- | --- | --- |
-| `Expecting ')' but got 'ORDER'` | ORDER BY with `parent =` query | Use `parent = {{PROJECT_KEY}}-XXX` without ORDER BY, or `"Parent Link" = {{PROJECT_KEY}}-XXX ORDER BY...` |
+| `Expecting ')' but got 'ORDER'` | ORDER BY with `parent =` query | Use `parent = ABC-XXX` without ORDER BY, or `"Parent Link" = ABC-XXX ORDER BY...` |
 | `key in (...) ORDER BY` → parse error | ORDER BY not allowed with key in | Remove `ORDER BY` when using `key in (...)` syntax |
 
 > 🚨 **NEVER add ORDER BY to `parent =` or `key in (...)` queries — they always cause parse errors**
@@ -188,11 +188,11 @@ Output has been saved to /path/to/tool-results/...
 
 ```python
 # ❌ Bad - fetches all fields, causing excessive data
-jira_get_issue(issue_key="{{PROJECT_KEY}}-XXX")
+jira_get_issue(issue_key="ABC-XXX")
 
 # ✅ Good - specify only the fields you need
 jira_get_issue(
-    issue_key="{{PROJECT_KEY}}-XXX",
+    issue_key="ABC-XXX",
     fields="summary,status,description,issuetype,parent",
     comment_limit=5
 )
@@ -275,10 +275,10 @@ jira_get_issue(
 cat tasks/issue.json | jq .
 
 # Test acli connection
-acli jira issue get BEP-1
+acli jira issue get ABC-1
 ```
 
-For MCP: Use `jira_get_issue(issue_key: "BEP-1")`
+For MCP: Use `jira_get_issue(issue_key: "ABC-1")`
 
 ## Confluence & Mermaid Errors
 

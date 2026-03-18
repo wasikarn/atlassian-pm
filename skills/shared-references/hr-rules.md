@@ -35,8 +35,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr2_jql_order_guard.py` (blocks the tool call)
 
-- ✅ `parent = BEP-123`
-- ❌ `parent = BEP-123 ORDER BY created DESC`
+- ✅ `parent = ABC-123`
+- ❌ `parent = ABC-123 ORDER BY created DESC`
 - ✅ `project = BEP AND issuetype = Story ORDER BY created DESC` (no parent filter)
 
 ---
@@ -49,8 +49,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr3_block_mcp_assignee.py` (blocks MCP assignee updates)
 
-- ✅ `acli jira workitem assign -k "BEP-123" -a "email" -y`
-- ❌ `jira_update_issue(issue_key="BEP-123", additional_fields={"assignee": {"accountId": "..."}})`
+- ✅ `acli jira workitem assign -k "ABC-123" -a "email" -y`
+- ❌ `jira_update_issue(issue_key="ABC-123", additional_fields={"assignee": {"accountId": "..."}})`
 
 ---
 
@@ -75,7 +75,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr5_parent_verify_block.py` (blocks next subtask if prior unverified), `post_hr5_parent_verify_remind.py` (injects reminder after create), `post_hr5_parent_verify_clear.py` (auto-clears after confirmed)
 
-- ✅ `jira_create_issue(parent={"key":"BEP-123"})` → `jira_get_issue(fields="parent")` → confirm → `acli edit --from-json`
+- ✅ `jira_create_issue(parent={"key":"ABC-123"})` → `jira_get_issue(fields="parent")` → confirm → `acli edit --from-json`
 - ❌ Create 5 subtasks back-to-back without verifying parent links
 
 ---
@@ -88,7 +88,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `post_hr6_queue_invalidation.py` (queues keys after MCP writes), `pre_hr6_stale_read_guard.py` (blocks cache reads for pending keys), `stop_hr6_unflushed_check.py` (blocks session exit if pending)
 
-- ✅ `jira_update_issue(...)` → `cache_invalidate(issue_key="BEP-123", force_refresh=true)`
+- ✅ `jira_update_issue(...)` → `cache_invalidate(issue_key="ABC-123", force_refresh=true)`
 - ❌ Update issue → immediately read from `cache_get_issue` without invalidating
 
 ---
@@ -145,4 +145,4 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 **Enforcement:** `pre_hr10_subtask_sprint_guard.py` (blocks update if issue is detected as subtask)
 
 - ✅ Set sprint on the parent Story → subtasks inherit automatically
-- ❌ `jira_update_issue(issue_key="BEP-456", additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})` where BEP-456 is a subtask
+- ❌ `jira_update_issue(issue_key="ABC-456", additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})` where ABC-456 is a subtask

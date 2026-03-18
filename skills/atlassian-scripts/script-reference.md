@@ -173,7 +173,7 @@ Verify content across multiple Confluence pages for presence/absence of specifie
 ```bash
 # Single page
 python3 .claude/skills/atlassian-scripts/scripts/audit_confluence_pages.py \
-  --page-id 987654321 --should-have "BEP-2883" --should-not-have "2025-01-21"
+  --page-id 987654321 --should-have "ABC-2883" --should-not-have "2025-01-21"
 
 # Batch from JSON config
 python3 .claude/skills/atlassian-scripts/scripts/audit_confluence_pages.py --config audit.json
@@ -201,12 +201,12 @@ Preserves all formatting (panels, tables, marks, code blocks).
 ```bash
 # Single issue
 python3 .claude/skills/atlassian-scripts/scripts/update_jira_description.py \
-  --issue BEP-2819 --find "old" --replace "new"
+  --issue ABC-2819 --find "old" --replace "new"
 
 # Batch: --config fixes.json | --dry-run | --verbose
 ```
 
-Config: `{"BEP-2819": [["old","new"]], "BEP-2755": [["old1","new1"],["old2","new2"]]}`
+Config: `{"ABC-2819": [["old","new"]], "ABC-2755": [["old1","new1"],["old2","new2"]]}`
 
 | Argument | Description |
 | --- | --- |
@@ -283,19 +283,19 @@ Post-write verifier — reads back from Jira API to confirm writes took effect.
 ```bash
 # Verify parent link
 python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
-  BEP-1234 --check parent --expected-parent BEP-1200
+  ABC-1234 --check parent --expected-parent ABC-1200
 
 # Verify assignee
 python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
-  BEP-1234 --check assignee
+  ABC-1234 --check assignee
 
 # Multiple issues + checks
 python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
-  BEP-1234 BEP-1235 --check parent,assignee,description
+  ABC-1234 ABC-1235 --check parent,assignee,description
 
 # JSON output
 python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
-  BEP-1234 --check parent --json
+  ABC-1234 --check parent --json
 ```
 
 ### Arguments
@@ -333,15 +333,15 @@ Unified write pipeline with all HARD RULES enforced at every step.
 ```bash
 # Create subtask (full 5-step pipeline)
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
-  --parent BEP-1200 --adf tasks/sub.json --assignee user@email.com
+  --parent ABC-1200 --adf tasks/sub.json --assignee user@email.com
 
 # Update description only
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py update-description \
-  --issue BEP-1234 --adf tasks/fixed.json --type story
+  --issue ABC-1234 --adf tasks/fixed.json --type story
 
 # Dry run (validate only, no writes)
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
-  --parent BEP-1200 --adf tasks/sub.json --dry-run
+  --parent ABC-1200 --adf tasks/sub.json --dry-run
 ```
 
 ### Subcommands
@@ -389,7 +389,7 @@ Track workflow phases and enforce prerequisites across multi-step skill workflow
 ```bash
 # Start workflow
 python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
-  start story-full BEP-1200
+  start story-full ABC-1200
 
 # Record quality gate pass
 python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
@@ -417,7 +417,7 @@ python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py cleanup
 
 | Command | Description |
 | --- | --- |
-| `start <workflow> <context>` | Start new workflow (e.g., `story-full BEP-1200`) |
+| `start <workflow> <context>` | Start new workflow (e.g., `story-full ABC-1200`) |
 | `pass-gate <gate> <score>` | Record gate pass with score |
 | `advance <phase>` | Mark phase as completed, advance to next |
 | `check <gate>` | Check if prerequisite met (exit code) |
@@ -464,11 +464,11 @@ What do you need to do?
     │     └─ validate_adf.py tasks/story.json --type story [--fix]
     │
     ├─ Verify writes took effect (HR3/HR5/HR6)
-    │     └─ verify_write.py BEP-1234 --check parent,assignee
+    │     └─ verify_write.py ABC-1234 --check parent,assignee
     │
     ├─ Create subtask (full pipeline)
-    │     └─ jira_write.py create-subtask --parent BEP-1200 --adf tasks/sub.json
+    │     └─ jira_write.py create-subtask --parent ABC-1200 --adf tasks/sub.json
     │
     └─ Track workflow state
-          └─ workflow_checkpoint.py start story-full BEP-1200
+          └─ workflow_checkpoint.py start story-full ABC-1200
 ```

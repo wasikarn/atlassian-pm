@@ -479,17 +479,17 @@
 ### Verify Story + Sub-tasks
 
 ```text
-/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+/verify-issue ABC-XXX --with-subtasks
 ```
 
 ### Verify and Auto-Fix
 
 ```text
-/verify-issue {{PROJECT_KEY}}-XXX --fix
+/verify-issue ABC-XXX --fix
 ```
 
 ### After Full Workflow
 
 ```text
-/story-full → /verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+/story-full → /verify-issue ABC-XXX --with-subtasks
 ```

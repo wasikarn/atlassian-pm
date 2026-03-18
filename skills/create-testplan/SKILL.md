@@ -82,7 +82,7 @@ argument-hint: "[issue-key]"
 > **Step 1:** MCP `jira_create_issue` → summary: `[QA] - Test: [Feature Name]`, parent: `{{PROJECT_KEY}}-XXX`
 > **Step 2:** `acli jira workitem edit --from-json tasks/bep-xxx-qa.json --yes`
 >
-> ⚠️ EDIT JSON uses `"issues": ["BEP-QQQ"]` (not `"parent"` or `"parentKey"`)
+> ⚠️ EDIT JSON uses `"issues": ["ABC-QQQ"]` (not `"parent"` or `"parentKey"`)
 
 Panel colors: see [ADF Core Rules](../shared-references/templates-core.md) — success=happy, warning=edge, error=error
 
@@ -94,10 +94,10 @@ Panel colors: see [ADF Core Rules](../shared-references/templates-core.md) — s
 ```text
 ## QA Complete: [Title] ({{PROJECT_KEY}}-XXX)
 
-[QA] Sub-task: BEP-QQQ (N scenarios)
+[QA] Sub-task: ABC-QQQ (N scenarios)
 Coverage: X ACs → Y test scenarios (100%)
 
-→ /verify-issue BEP-QQQ to verify
+→ /verify-issue ABC-QQQ to verify
 ```
 
 ---
@@ -119,11 +119,11 @@ Coverage: X ACs → Y test scenarios (100%)
 
 ## Example
 
-**Input:** `/create-testplan BEP-2468` (story: admin filter coupon by status)
+**Input:** `/create-testplan ABC-2468` (story: admin filter coupon by status)
 
 **Output:**
 
-- `BEP-2471` [QA] - Test: Coupon Status Filter
+- `ABC-2471` [QA] - Test: Coupon Status Filter
   - TC1: Filter active — กรอง active แล้วแสดงเฉพาะ active coupons
   - TC2: Filter expired — กรอง expired แล้วแสดงเฉพาะ expired coupons
   - TC3: Clear filter — กด clear แล้วกลับมาแสดงทั้งหมด

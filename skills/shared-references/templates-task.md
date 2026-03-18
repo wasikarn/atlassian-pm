@@ -120,7 +120,7 @@
           {"type": "tableRow", "content": [
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Related Issue"}]}]},
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "{{PROJECT_KEY}}-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/BEP-XXX"}}]}
+              {"type": "text", "text": "ABC-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/ABC-XXX"}}]}
             ]}]}
           ]}
         ]

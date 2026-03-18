@@ -31,7 +31,7 @@ argument-hint: "[story-description]"
 | 2. Write Story | `story_narrative`, `acs[]`, `scope`, `dod` |
 | 3. INVEST | `invest_score`, `vs_validated` |
 | 3b. QG Story | `story_adf_json`, `story_qg_score` |
-| 4. Create Story | `story_key` ({{PROJECT_KEY}}-XXX) |
+| 4. Create Story | `story_key` (ABC-XXX) |
 | 5. Impact | `services_impacted[]`, `vs_verified` |
 | 6. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
 | 7. Design | `subtask_designs[]` |
@@ -49,7 +49,7 @@ argument-hint: "[story-description]"
 
 - Ask: Who? What? Why? Constraints?
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
-- If Epic exists → `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")` + read VS plan + Problem narrative
+- If Epic exists → `MCP: jira_get_issue(issue_key: "ABC-XXX")` + read VS plan + Problem narrative
 - **VS Assignment:** Which vertical slice? (`vs1-skeleton`, `vs2-*`, `vs-enabler`)
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of requirements + VS assignment.
 
@@ -109,14 +109,14 @@ acli jira workitem create --from-json tasks/story.json
 
 **Labels (MANDATORY):** Feature label + VS label (e.g., `coupon-web`, `vs2-collect-e2e`)
 
-**Capture story key → {{PROJECT_KEY}}-XXX**
+**Capture story key → ABC-XXX**
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after create.
 
 **Set story estimation fields:**
 
 ```text
-MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
+MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
   "customfield_10016": <SP>,                  # Story Points (XS=1,S=2,M=3,L=5,XL=8)
   "customfield_10107": {"value": "<SIZE>"},   # Size
   "{{START_DATE_FIELD}}": "YYYY-MM-DD",          # Start Date
@@ -237,16 +237,16 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 
 ```text
 # Step 1: Create shells (parallel)
-MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"{{PROJECT_KEY}}-XXX"}, timetracking:{originalEstimate:"4h"}}})
-MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"{{PROJECT_KEY}}-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
 
 # Step 2: Verify parent (HR5) — DO NOT SKIP
-MCP: jira_get_issue(issue_key: "BEP-YYY", fields: "parent") → confirm parent.key = "{{PROJECT_KEY}}-XXX"
-MCP: jira_get_issue(issue_key: "BEP-ZZZ", fields: "parent") → confirm parent.key = "{{PROJECT_KEY}}-XXX"
+MCP: jira_get_issue(issue_key: "ABC-YYY", fields: "parent") → confirm parent.key = "ABC-XXX"
+MCP: jira_get_issue(issue_key: "ABC-ZZZ", fields: "parent") → confirm parent.key = "ABC-XXX"
 # If parent missing → fix via REST API before continuing
 
 # Step 2b: Set subtask dates + OE (HR8 alignment — dates must be within parent range)
-MCP: jira_update_issue(issue_key="BEP-YYY", additional_fields={
+MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
   "timetracking": {"originalEstimate": "<N>h"},
   "{{START_DATE_FIELD}}": "YYYY-MM-DD",  # Start Date (≥ parent start)
   "duedate": "YYYY-MM-DD"             # Due Date (≤ parent due)
@@ -266,10 +266,10 @@ acli jira workitem edit --from-json tasks/subtask-fe.json --yes
 
 ```text
 ## Story Full Complete
-Story: {{PROJECT_KEY}}-XXX
-Sub-tasks: BEP-YYY [BE], BEP-ZZZ [FE-Admin]
-→ /create-testplan {{PROJECT_KEY}}-XXX for QA
-→ /verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+Story: ABC-XXX
+Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
+→ /create-testplan ABC-XXX for QA
+→ /verify-issue ABC-XXX --with-subtasks
 ```
 
 ---
@@ -289,14 +289,14 @@ Sub-tasks: BEP-YYY [BE], BEP-ZZZ [FE-Admin]
 
 **Output:**
 
-- Story `BEP-3100`: [FE-Admin] - ดู Ad Report แบบรายเดือน (Monthly Ad Report)
+- Story `ABC-3100`: [FE-Admin] - ดู Ad Report แบบรายเดือน (Monthly Ad Report)
   - AC1: Display — แสดง report table with impression, click, revenue per billboard
   - AC2: Filter — เลือกเดือน/ปี แล้ว report อัปเดตตามช่วงเวลา
   - AC3: Export — กดปุ่ม export ได้ไฟล์ CSV
 - Sub-tasks:
-  - `BEP-3101` [BE] - API endpoint `GET /api/reports/monthly` with date range filter
-  - `BEP-3102` [FE-Admin] - Monthly report page + table component
-  - `BEP-3103` [FE-Admin] - CSV export from report data
+  - `ABC-3101` [BE] - API endpoint `GET /api/reports/monthly` with date range filter
+  - `ABC-3102` [FE-Admin] - Monthly report page + table component
+  - `ABC-3103` [FE-Admin] - CSV export from report data
 
 ---
 

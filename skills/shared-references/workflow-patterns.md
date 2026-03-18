@@ -57,7 +57,7 @@ MCP: jira_create_issue({
   project_key: "{{PROJECT_KEY}}",
   summary: "[TAG] - Description",
   issue_type: "Subtask",
-  additional_fields: {parent: {key: "{{PROJECT_KEY}}-XXX"}}
+  additional_fields: {parent: {key: "ABC-XXX"}}
 })
 ```
 

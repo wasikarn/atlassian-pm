@@ -110,7 +110,7 @@ Bash: python3 scripts/sprint/sprint_subtask_alignment.py --sprint <id>
 ## Story Updated: [Title] ({{PROJECT_KEY}}-XXX)
 Changes: [list]
 Subtask alignment: [X subtasks checked, Y adjusted]
-→ May need: /update-subtask BEP-YYY
+→ May need: /update-subtask ABC-YYY
 → May need: /sync-alignment {{PROJECT_KEY}}-XXX (for auto cascade)
 ```
 

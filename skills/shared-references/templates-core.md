@@ -24,7 +24,7 @@
 
 ```json
 {
-  "issues": ["{{PROJECT_KEY}}-XXX"],
+  "issues": ["ABC-XXX"],
   "description": { "type": "doc", "version": 1, "content": [...] }
 }
 ```
@@ -151,7 +151,7 @@ Row highlighting: use `"attrs": {"background": "HEX"}` on `tableCell` (same patt
 
 ```json
 {
-  "issues": ["{{PROJECT_KEY}}-XXX"],
+  "issues": ["ABC-XXX"],
   "description": {
     "type": "doc",
     "version": 1,
@@ -181,7 +181,7 @@ Row highlighting: use `"attrs": {"background": "HEX"}` on `tableCell` (same patt
 ```typescript
 // Use MCP instead of acli
 jira_update_issue({
-  issue_key: "{{PROJECT_KEY}}-XXX",
+  issue_key: "ABC-XXX",
   fields: { summary: "New Summary" }
 })
 ```

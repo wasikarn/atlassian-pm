@@ -188,7 +188,7 @@ acli jira workitem create --from-json tasks/bep-xxx-task.json
 **Set estimation fields (after create):**
 
 ```text
-MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
+MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
   "customfield_10016": <SP>,                  # Story Points (XS=1,S=2,M=3,L=5,XL=8)
   "customfield_10107": {"value": "<SIZE>"},   # Size
   "timetracking": {"originalEstimate": "<N>h"} # Original Estimate
@@ -202,15 +202,15 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
 ### 6. Summary
 
 ```text
-## ✅ Task Created: [Title] ({{PROJECT_KEY}}-XXX)
+## ✅ Task Created: [Title] (ABC-XXX)
 
 **Type:** [type]
 **Priority:** [High/Medium/Low]
 
-🔗 [View in Jira](https://{{JIRA_SITE}}/browse/BEP-XXX)
+🔗 [View in Jira](https://{{JIRA_SITE}}/browse/ABC-XXX)
 
-→ Use /verify-issue {{PROJECT_KEY}}-XXX to check quality
-→ Use /update-task {{PROJECT_KEY}}-XXX to add details later
+→ Use /verify-issue ABC-XXX to check quality
+→ Use /update-task ABC-XXX to add details later
 ```
 
 ---
@@ -232,7 +232,7 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
 
 **Output:**
 
-- Task `BEP-2950`: [BE] - Refactor Coupon Service to Repository Pattern (Tech Debt)
+- Task `ABC-2950`: [BE] - Refactor Coupon Service to Repository Pattern (Tech Debt)
   - Context: coupon service มี direct DB query กระจายใน controller — ยากต่อ testing
   - Scope: `src/modules/coupon/coupon.service.ts`, `coupon.repository.ts` (new)
   - AC1: Extract — ย้าย DB queries จาก service ไป repository
@@ -244,4 +244,4 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
 
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
 - [Task Template](../shared-references/templates-task.md) - Task ADF templates (tech-debt, bug, chore, spike)
-- After: `/verify-issue {{PROJECT_KEY}}-XXX` to check quality
+- After: `/verify-issue ABC-XXX` to check quality

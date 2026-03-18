@@ -6,7 +6,7 @@ description: |
   Quick assign a Jira issue to a team member using acli (bypasses MCP silent failure)
 
   Triggers: "assign", "assign issue", "assign to"
-argument-hint: "{{PROJECT_KEY}}-XXX [name]"
+argument-hint: "ABC-XXX [name]"
 ---
 
 # /assign
@@ -16,9 +16,9 @@ argument-hint: "{{PROJECT_KEY}}-XXX [name]"
 ## Usage
 
 ```text
-/assign {{PROJECT_KEY}}-XXX Kobi        → assign to Kobi
-/assign {{PROJECT_KEY}}-XXX {{SLOT_5}}  → assign to {{SLOT_5}}
-/assign {{PROJECT_KEY}}-XXX unassign    → remove assignee
+/assign ABC-XXX Kobi        → assign to Kobi
+/assign ABC-XXX {{SLOT_5}}  → assign to {{SLOT_5}}
+/assign ABC-XXX unassign    → remove assignee
 ```
 
 ## Team Lookup
@@ -31,7 +31,7 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 2. Lookup email from `project-config.json` → `team.members[].email` (match by `name` field, case-insensitive first name)
 3. Run: `acli jira workitem assign -k "KEY" -a "email" -y`
 4. If "unassign" → Run: `acli jira workitem assign -k "KEY" -a "" -y`
-5. Confirm: `Assigned {{PROJECT_KEY}}-XXX to [name] ([email])`
+5. Confirm: `Assigned ABC-XXX to [name] ([email])`
 
 ## Special Cases
 

@@ -136,24 +136,24 @@ Load the plugin (`claude --plugin-dir .`) then type `/atlassian-pm:<command>`.
 | `/atlassian-pm:story-full` | Create Story + Sub-tasks in one go (preferred) |
 | `/atlassian-pm:create-epic` | Create Epic + Confluence Epic Doc with RICE scoring |
 | `/atlassian-pm:create-task` | Create Task: `tech-debt`, `bug`, `chore`, or `spike` |
-| `/atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX` | Read Story → explore codebase → create Sub-tasks |
-| `/atlassian-pm:create-testplan {{PROJECT_KEY}}-XXX` | Create Test Plan + [QA] Sub-tasks from Story |
+| `/atlassian-pm:analyze-story ABC-XXX` | Read Story → explore codebase → create Sub-tasks |
+| `/atlassian-pm:create-testplan ABC-XXX` | Create Test Plan + [QA] Sub-tasks from Story |
 
 ### Jira — Issue Updates
 
 | Command | Description |
 | ------- | ----------- |
-| `/atlassian-pm:update-story {{PROJECT_KEY}}-XXX` | Edit Story — add/edit ACs, scope |
-| `/atlassian-pm:update-epic {{PROJECT_KEY}}-XXX` | Edit Epic — adjust scope, RICE, metrics |
-| `/atlassian-pm:update-task {{PROJECT_KEY}}-XXX` | Edit Task — migrate format, add details |
-| `/atlassian-pm:update-subtask {{PROJECT_KEY}}-XXX` | Edit Sub-task — format, content |
-| `/atlassian-pm:sync-alignment {{PROJECT_KEY}}-XXX` | Sync Story + Sub-tasks bidirectional (+ Confluence if exists) |
+| `/atlassian-pm:update-story ABC-XXX` | Edit Story — add/edit ACs, scope |
+| `/atlassian-pm:update-epic ABC-XXX` | Edit Epic — adjust scope, RICE, metrics |
+| `/atlassian-pm:update-task ABC-XXX` | Edit Task — migrate format, add details |
+| `/atlassian-pm:update-subtask ABC-XXX` | Edit Sub-task — format, content |
+| `/atlassian-pm:sync-alignment ABC-XXX` | Sync Story + Sub-tasks bidirectional (+ Confluence if exists) |
 
 ### Jira — Sync & Quality
 
 | Command | Description |
 | ------- | ----------- |
-| `/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX` | Check ADF format, INVEST criteria, language |
+| `/atlassian-pm:verify-issue ABC-XXX` | Check ADF format, INVEST criteria, language |
 | `/atlassian-pm:search-issues` | Search before creating (prevent duplicates) |
 
 `/atlassian-pm:verify-issue` flags: `--with-subtasks` (batch check), `--fix` (auto-fix), `--dry-run` (report only)
@@ -187,7 +187,7 @@ Load the plugin (`claude --plugin-dir .`) then type `/atlassian-pm:<command>`.
 /atlassian-pm:create-epic          → Create Epic + Confluence doc
 /atlassian-pm:story-full           → Create Story + Sub-tasks in one go
 /atlassian-pm:create-testplan      → Create [QA] Sub-tasks (optional)
-/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX → Verify quality
+/atlassian-pm:verify-issue ABC-XXX → Verify quality
 ```
 
 **Example:** `/atlassian-pm:story-full` → "Build a coupon system for admin" → Claude generates Story + Sub-tasks `[BE]`, `[FE-Admin]`
@@ -202,8 +202,8 @@ Load the plugin (`claude --plugin-dir .`) then type `/atlassian-pm:<command>`.
 ### Update + Cascade Changes
 
 ```text
-/atlassian-pm:update-story {{PROJECT_KEY}}-XXX     → Edit Story only
-/atlassian-pm:sync-alignment {{PROJECT_KEY}}-XXX   → + cascade to Sub-tasks + sync Confluence docs
+/atlassian-pm:update-story ABC-XXX     → Edit Story only
+/atlassian-pm:sync-alignment ABC-XXX   → + cascade to Sub-tasks + sync Confluence docs
 ```
 
 ---
@@ -270,15 +270,15 @@ All project-specific values (Jira site, team, services, domains) live in `.claud
 ### How It Works
 
 ```text
-Git repo (committed):  {{PROJECT_KEY}}-XXX    ← always placeholders
+Git repo (committed):  ABC-XXX    ← always placeholders
                           │
                     [smudge filter]            ← on checkout/pull
                           ↓
-Working tree:          {{PROJECT_KEY}}-XXX                ← real values (local dev)
+Working tree:          ABC-XXX                ← real values (local dev)
                           │
                     [clean filter]             ← on add/commit
                           ↓
-Git staging:           {{PROJECT_KEY}}-XXX    ← always placeholders
+Git staging:           ABC-XXX    ← always placeholders
 ```
 
 ```text
@@ -322,7 +322,7 @@ vi .claude/project-config.json
 ## Tips
 
 - **Always search first:** `/atlassian-pm:search-issues` before creating to prevent duplicates
-- **Always verify after:** `/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX` after creating/updating
+- **Always verify after:** `/atlassian-pm:verify-issue ABC-XXX` after creating/updating
 - **Language:** Thai + English transliteration for technical terms (endpoint, API, component)
 - **Format:** Jira descriptions use ADF format — Claude handles this via `acli --from-json`
 - **Codebase first:** `/atlassian-pm:analyze-story` always explores codebase before creating Sub-tasks

@@ -178,7 +178,7 @@
         "attrs": {"panelType": "info"},
         "content": [
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "{{PROJECT_KEY}}-XXX", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "ABC-XXX", "marks": [{"type": "strong"}]},
             {"type": "text", "text": " - [Story title]"}
           ]}
         ]

@@ -29,5 +29,5 @@ paths:
 **`jira_get_issue`** — always use `fields` param · **`jira_search`** — always use `fields` + `limit` params → see `skills/shared-references/tools.md` for preset tables
 
 **ADF CREATE vs EDIT differ** — CREATE: `projectKey`+`type`+`summary`+`description` (no `issues`) · EDIT: `issues`+`description` (no `projectKey`/`type`/`summary`/`parent`) → details in `skills/shared-references/templates-core.md`
-**Subtask Two-Step:** MCP create (with `parent:{key:"{{PROJECT_KEY}}-XXX"}`) → acli `workitem edit --from-json`
+**Subtask Two-Step:** MCP create (with `parent:{key:"ABC-XXX"}`) → acli `workitem edit --from-json`
 **Smart Link:** see `skills/shared-references/templates-core.md` for inlineCard format

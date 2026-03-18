@@ -50,7 +50,7 @@ Additional: Workflow Steps | CRUD | User Roles | Complexity (manual vs automated
 
 > **Size → Story Points mapping:** Use Size Guide above. Set both fields — Size for visual, Story Points for velocity tracking.
 >
-> **Example:** `jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={"customfield_10016": 3, "customfield_10107": {"value": "M"}, "{{START_DATE_FIELD}}": "2026-02-10", "duedate": "2026-02-14"})`
+> **Example:** `jira_update_issue(issue_key="ABC-XXX", additional_fields={"customfield_10016": 3, "customfield_10107": {"value": "M"}, "{{START_DATE_FIELD}}": "2026-02-10", "duedate": "2026-02-14"})`
 
 ## User Story Template (ADF) - CREATE
 
@@ -145,7 +145,7 @@ Additional: Workflow Steps | CRUD | User Roles | Complexity (manual vs automated
           {"type": "tableRow", "content": [
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Epic"}]}]},
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "{{PROJECT_KEY}}-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/BEP-XXX"}}]}
+              {"type": "text", "text": "ABC-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/ABC-XXX"}}]}
             ]}]}
           ]},
           {"type": "tableRow", "content": [

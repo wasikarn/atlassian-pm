@@ -15,23 +15,23 @@ project = BEP AND type = Story AND sprint IN openSprints()
 ### Find Sub-tasks of Story
 
 ```text
-parent = {{PROJECT_KEY}}-XXX
+parent = ABC-XXX
 ```
 
 > 🚨 **CRITICAL — JQL queries that ALWAYS cause parse errors:**
 >
 > ```text
-> ❌ parent = {{PROJECT_KEY}}-XXX ORDER BY created DESC       → Error: Expecting ')' but got 'ORDER'
-> ❌ parent = {{PROJECT_KEY}}-XXX AND issuetype = Story ORDER BY  → same error
-> ❌ key in (BEP-1, BEP-2) ORDER BY created       → Error: parse error
+> ❌ parent = ABC-XXX ORDER BY created DESC       → Error: Expecting ')' but got 'ORDER'
+> ❌ parent = ABC-XXX AND issuetype = Story ORDER BY  → same error
+> ❌ key in (ABC-1, ABC-2) ORDER BY created       → Error: parse error
 > ```
 >
 > **Safe alternatives:**
 >
 > ```text
-> ✅ parent = {{PROJECT_KEY}}-XXX                              → no ORDER BY needed
-> ✅ "Parent Link" = {{PROJECT_KEY}}-XXX ORDER BY created DESC → use "Parent Link" if sorting needed
-> ✅ key in (BEP-1, BEP-2)                         → remove ORDER BY
+> ✅ parent = ABC-XXX                              → no ORDER BY needed
+> ✅ "Parent Link" = ABC-XXX ORDER BY created DESC → use "Parent Link" if sorting needed
+> ✅ key in (ABC-1, ABC-2)                         → remove ORDER BY
 > ```
 >
 > **Rule: NEVER add ORDER BY to `parent =` or `key in (...)` queries**
@@ -76,7 +76,7 @@ project = BEP AND type = Epic AND status != Done
 ### Find Stories in Epic
 
 ```text
-"Epic Link" = {{PROJECT_KEY}}-XXX AND type = Story
+"Epic Link" = ABC-XXX AND type = Story
 ```
 
 ---
@@ -142,7 +142,7 @@ ORDER BY priority DESC, created ASC # Combined
 | --- | --- |
 | Find story before creating | `project = BEP AND type = Story AND summary ~ "keyword"` |
 | Check my sprint work | `project = BEP AND assignee = currentUser() AND sprint IN openSprints()` |
-| Review sub-tasks | `"Parent Link" = {{PROJECT_KEY}}-XXX ORDER BY created` |
+| Review sub-tasks | `"Parent Link" = ABC-XXX ORDER BY created` |
 | Find blockers | `project = BEP AND priority = Highest AND status != Done` |
 | Overdue items | `project = BEP AND duedate < now() AND status != Done` |
 

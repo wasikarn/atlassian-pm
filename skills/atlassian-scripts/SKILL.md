@@ -122,16 +122,16 @@ What do you need to do?
     │     └─ validate_adf.py tasks/story.json --type story [--fix]
     │
     ├─ Verify writes took effect (HR3/HR5/HR6)
-    │     └─ verify_write.py BEP-1234 --check parent,assignee
+    │     └─ verify_write.py ABC-1234 --check parent,assignee
     │
     ├─ Create subtask (full pipeline)
-    │     └─ jira_write.py create-subtask --parent BEP-1200 --adf tasks/sub.json
+    │     └─ jira_write.py create-subtask --parent ABC-1200 --adf tasks/sub.json
     │
     ├─ Set parent (Epic) on existing issues
-    │     └─ jira_set_parent.py --issues BEP-3331,BEP-3332 --parent BEP-3197
+    │     └─ jira_set_parent.py --issues ABC-3331,ABC-3332 --parent ABC-3197
     │
     └─ Track workflow state
-          └─ workflow_checkpoint.py start story-full BEP-1200
+          └─ workflow_checkpoint.py start story-full ABC-1200
 ```
 
 ---

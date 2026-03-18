@@ -86,7 +86,7 @@ cat ~/.config/atlassian/.env
 
 ```text
 1. cache_sprint_issues(sprint_id=123)  → fetches + caches all issues
-2. cache_get_issue("BEP-456")          → instant cache hit
+2. cache_get_issue("ABC-456")          → instant cache hit
 3. cache_text_search("coupon")         → FTS5 search, no API call
 4. cache_similar_issues("payment flow") → semantic search
 ```
@@ -94,7 +94,7 @@ cat ~/.config/atlassian/.env
 ### After Jira Updates
 
 ```text
-cache_refresh(issue_keys=["BEP-456"])     → single issue
+cache_refresh(issue_keys=["ABC-456"])     → single issue
 cache_refresh(sprint_id=123)              → entire sprint
 cache_invalidate(sprint_id=123)           → clear stale data
 ```

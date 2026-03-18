@@ -91,7 +91,7 @@ acli jira workitem edit --from-json tasks/bep-xxx-epic-update.json --yes
 ## Epic Updated: [Title] ({{PROJECT_KEY}}-XXX)
 Changes: [list]
 → Update Epic Doc if needed
-→ Review stories: BEP-YYY, BEP-ZZZ
+→ Review stories: ABC-YYY, ABC-ZZZ
 ```
 
 ---

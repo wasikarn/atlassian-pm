@@ -159,7 +159,7 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 **Set subtask estimation (after verify parent, before acli edit):**
 
 ```text
-MCP: jira_update_issue(issue_key="BEP-YYY", additional_fields={
+MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
   "timetracking": {"originalEstimate": "<N>h"},  # Original Estimate (from ⏱️ panel)
   "{{START_DATE_FIELD}}": "YYYY-MM-DD",             # Start Date (within parent range — HR8)
   "duedate": "YYYY-MM-DD"                        # Due Date (within parent range — HR8)
@@ -175,7 +175,7 @@ MCP: jira_update_issue(issue_key="BEP-YYY", additional_fields={
 
 ```text
 ## TA Complete: [Title] ({{PROJECT_KEY}}-XXX)
-Sub-tasks: BEP-YYY, BEP-ZZZ
+Sub-tasks: ABC-YYY, ABC-ZZZ
 → Use /create-testplan {{PROJECT_KEY}}-XXX to continue
 ```
 
@@ -193,13 +193,13 @@ Sub-tasks: BEP-YYY, BEP-ZZZ
 
 ## Example
 
-**Input:** `/analyze-story BEP-2468` (story: admin filter coupon by status)
+**Input:** `/analyze-story ABC-2468` (story: admin filter coupon by status)
 
 **Output:**
 
-- `BEP-2469` [BE] - API: เพิ่ม query param `status` ใน `GET /api/coupons` endpoint
-- `BEP-2470` [FE-Admin] - UI: สร้าง `StatusFilter` component + integrate กับ coupon list page
-- `BEP-2471` [QA] - Test: Coupon Status Filter (4 test cases)
+- `ABC-2469` [BE] - API: เพิ่ม query param `status` ใน `GET /api/coupons` endpoint
+- `ABC-2470` [FE-Admin] - UI: สร้าง `StatusFilter` component + integrate กับ coupon list page
+- `ABC-2471` [QA] - Test: Coupon Status Filter (4 test cases)
 - Technical Note updated on parent story
 
 ---

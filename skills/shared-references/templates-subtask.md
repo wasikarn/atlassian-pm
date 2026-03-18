@@ -50,7 +50,7 @@
 >
 > **Estimation:** Set BOTH the ADF `⏱️ Estimation` panel (human-readable) AND `timetracking` field (machine-queryable).
 >
-> **Example Step 1:** `jira_create_issue(project_key="{{PROJECT_KEY}}", summary="[BE] ...", issue_type="Subtask", additional_fields={"parent":{"key":"{{PROJECT_KEY}}-XXX"}, "timetracking":{"originalEstimate":"4h"}, "{{START_DATE_FIELD}}":"2026-02-10", "duedate":"2026-02-11"})`
+> **Example Step 1:** `jira_create_issue(project_key="{{PROJECT_KEY}}", summary="[BE] ...", issue_type="Subtask", additional_fields={"parent":{"key":"ABC-XXX"}, "timetracking":{"originalEstimate":"4h"}, "{{START_DATE_FIELD}}":"2026-02-10", "duedate":"2026-02-11"})`
 
 ## Sub-task Template (ADF) - TWO-STEP WORKFLOW
 
@@ -77,7 +77,7 @@ jira_create_issue({
   project_key: "{{PROJECT_KEY}}",
   summary: "[TAG] - Description",
   issue_type: "Subtask",
-  additional_fields: { parent: { key: "{{PROJECT_KEY}}-XXX" } }  // Parent Story key
+  additional_fields: { parent: { key: "ABC-XXX" } }  // Parent Story key
 })
 ```
 
@@ -93,7 +93,7 @@ jira_create_issue({
 
 ```json
 {
-  "issues": ["BEP-YYY"],
+  "issues": ["ABC-YYY"],
   "description": {
     "type": "doc",
     "version": 1,
@@ -175,7 +175,7 @@ jira_create_issue({
 
 ```json
 {
-  "issues": ["BEP-YYY"],
+  "issues": ["ABC-YYY"],
   "description": {
     "type": "doc",
     "version": 1,
@@ -269,7 +269,7 @@ jira_create_issue({
           {"type": "tableRow", "content": [
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "User Story"}]}]},
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "{{PROJECT_KEY}}-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/BEP-XXX"}}]}
+              {"type": "text", "text": "ABC-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/ABC-XXX"}}]}
             ]}]}
           ]}
         ]

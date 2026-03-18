@@ -85,8 +85,8 @@ For inferred dependencies, mark confidence: HIGH (obvious from context) / MEDIUM
 **Output:** Edge list with type and confidence:
 
 ```text
-BEP-3165 ──[Blocks, HIGH]──> BEP-3157
-BEP-3156 ──[Inferred:FE→BE, MEDIUM]──> BEP-2743
+ABC-3165 ──[Blocks, HIGH]──> ABC-3157
+ABC-3156 ──[Inferred:FE→BE, MEDIUM]──> ABC-2743
 ```
 
 ### Phase 3: Analyze Critical Path
@@ -140,8 +140,8 @@ For each team member, schedule items respecting dependencies:
 ```text
 | Day | Alice       | Bob    | Charlie    | Dave       | Eve        |
 |-----|-------------|--------|------------|------------|------------|
-| 1-2 | {{PROJECT_KEY}}-XXX     | BEP-XX | BEP-XX     | BEP-XX     | BEP-XX     |
-| 3-4 | {{PROJECT_KEY}}-XXX     | ...    | ...        | ...        | ...        |
+| 1-2 | ABC-XXX     | ABC-XX | ABC-XX     | ABC-XX     | ABC-XX     |
+| 3-4 | ABC-XXX     | ...    | ...        | ...        | ...        |
 ```
 
 ### Phase 5: Output
@@ -152,8 +152,8 @@ Generate final deliverable with 4 sections:
 
 ```mermaid
 graph LR
-  A[BEP-3165: Fix maxPerUser] -->|Blocks| B[BEP-3157: API Integration]
-  C[BEP-3156: Collection API] -->|Inferred| D[BEP-2743: Collection Page]
+  A[ABC-3165: Fix maxPerUser] -->|Blocks| B[ABC-3157: API Integration]
+  C[ABC-3156: Collection API] -->|Inferred| D[ABC-2743: Collection Page]
   style A fill:#ff6b6b
   style C fill:#ff6b6b
 ```
@@ -186,7 +186,7 @@ Priority 2: [Action] — reduces delay impact by [N] days
 | Flag | Description |
 | --- | --- |
 | `--sprint <id>` | Analyze specific sprint (default: current active sprint) |
-| `--keys BEP-XX,BEP-YY` | Analyze specific issues instead of full sprint |
+| `--keys ABC-XX,ABC-YY` | Analyze specific issues instead of full sprint |
 | `--team-only` | Show only swim lane plan (skip dependency graph) |
 | `--mermaid-only` | Show only mermaid dependency graph |
 | `--output jira-comment` | Post result as Jira comment on sprint's first item |

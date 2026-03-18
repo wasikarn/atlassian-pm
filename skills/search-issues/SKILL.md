@@ -30,8 +30,8 @@ argument-hint: "[keyword] [--filters]"
 | Input | Generated JQL |
 | --- | --- |
 | `"credit"` | `project = BEP AND summary ~ "credit"` |
-| `BEP-123` | `key = BEP-123` |
-| `BEP-123 --children` | `parent = BEP-123` |
+| `ABC-123` | `key = ABC-123` |
+| `ABC-123 --children` | `parent = ABC-123` |
 | `--sprint current` | `sprint IN openSprints()` |
 | `--assignee me` | `assignee = currentUser()` |
 | `--status "In Progress"` | `status = "In Progress"` |
@@ -45,7 +45,7 @@ MCP: jira_search(jql: "[generated JQL]", fields: "summary,status,assignee,issuet
 
 ### 2.5 Semantic Similarity Check (keyword search only)
 
-**Skip if:** input is issue key (`BEP-123`), uses `--jql`, or uses `--children` flag.
+**Skip if:** input is issue key (`ABC-123`), uses `--jql`, or uses `--children` flag.
 
 ```text
 cache_similar_issues(query: "<keyword>", limit: 5, exclude_keys: [<keys from Phase 2>])
@@ -72,14 +72,14 @@ Found: 5 issues
 
 | Key | Type | Summary | Status |
 |-----|------|---------|--------|
-| BEP-123 | Story | Credit feature | In Progress |
-| BEP-124 | Sub-task | [BE] Credit API | To Do |
+| ABC-123 | Story | Credit feature | In Progress |
+| ABC-124 | Sub-task | [BE] Credit API | To Do |
 
 ## 🔍 Semantic Matches (BERT similarity)
 | Key | Summary | Similarity |
 |-----|---------|------------|
-| BEP-120 | [BE] เติมเครดิต wallet | ⚠️ 94% (likely duplicate) |
-| BEP-118 | Credit payment flow | 🔍 72% (possibly related) |
+| ABC-120 | [BE] เติมเครดิต wallet | ⚠️ 94% (likely duplicate) |
+| ABC-118 | Credit payment flow | 🔍 72% (possibly related) |
 
 💡 พบ likely duplicate → ยืนยันก่อนสร้าง issue ใหม่
 ```
@@ -97,7 +97,7 @@ If no semantic matches above threshold → omit the section entirely.
 | `--status` | `--status "In Progress"` |
 | `--type` | `--type Story` |
 | `--label` | `--label BE` |
-| `--children` | `{{PROJECT_KEY}}-XXX --children` |
+| `--children` | `ABC-XXX --children` |
 | `--jql` | `--jql "custom query"` |
 
 ---
@@ -107,7 +107,7 @@ If no semantic matches above threshold → omit the section entirely.
 | Purpose | Command |
 | --- | --- |
 | Before creating | `/search-issues "credit top-up"` |
-| View sub-tasks | `/search-issues BEP-123 --children` |
+| View sub-tasks | `/search-issues ABC-123 --children` |
 | My sprint work | `/search-issues --sprint current --assignee me` |
 
 ---

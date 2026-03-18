@@ -10,7 +10,7 @@ description: |
   Use when: new feature needing architecture review, multi-service changes, greenfield features before Jira.
   Triggers: "feature blueprint", "architecture doc", "design doc", "blueprint", "feature spec",
   "multi-perspective design", "research feature", "ทำ blueprint"
-argument-hint: "[feature-description or {{PROJECT_KEY}}-XXX or Confluence-page-ID]"
+argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 ---
 
 # /feature-blueprint
@@ -83,7 +83,7 @@ argument-hint: "[feature-description or {{PROJECT_KEY}}-XXX or Confluence-page-I
 | Input | Action |
 |-------|--------|
 | Feature text | Capture as-is into `feature_brief` |
-| Jira key ({{PROJECT_KEY}}-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
+| Jira key (ABC-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
 | Confluence page ID | `confluence_get_page` → read existing doc structure |
 | Epic key | Read overview + existing children via `cache_search` |
 

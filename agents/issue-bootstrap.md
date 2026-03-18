@@ -11,7 +11,7 @@ Pre-gather Jira issue context in a single coordinated pass. Returns structured c
 
 ## Input
 
-Issue key ({{PROJECT_KEY}}-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`
+Issue key (ABC-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`
 
 Defaults:
 
@@ -21,41 +21,41 @@ Defaults:
 
 ## Steps
 
-1. **Main issue** — try `cache_get_issue({{PROJECT_KEY}}-XXX)` first, fallback `jira_get_issue(fields="summary,status,description,issuetype,parent,assignee,labels,issuelinks,customfield_10016,customfield_10107,{{START_DATE_FIELD}},duedate,timetracking")`
+1. **Main issue** — try `cache_get_issue(ABC-XXX)` first, fallback `jira_get_issue(fields="summary,status,description,issuetype,parent,assignee,labels,issuelinks,customfield_10016,customfield_10107,{{START_DATE_FIELD}},duedate,timetracking")`
 
 2. **Parent** — if issue has parent → `cache_get_issue(parent_key, fields="summary,status,issuetype,description")` (truncate description to first 300 chars if long)
 
-3. **Children** — if Story/Epic or `--with-children` → `jira_search(jql="parent = {{PROJECT_KEY}}-XXX", fields="summary,status,assignee,issuetype,timetracking,{{START_DATE_FIELD}},duedate")` ⚠️ NEVER add ORDER BY to parent queries
+3. **Children** — if Story/Epic or `--with-children` → `jira_search(jql="parent = ABC-XXX", fields="summary,status,assignee,issuetype,timetracking,{{START_DATE_FIELD}},duedate")` ⚠️ NEVER add ORDER BY to parent queries
 
 4. **Linked issues** — if issue has issuelinks or `--with-linked` → batch `cache_get_issue` for each linked key (fields `"summary,status,issuetype"`)
 
 ## Output Format
 
 ```text
-## Issue Context: {{PROJECT_KEY}}-XXX
+## Issue Context: ABC-XXX
 
 ### Main Issue
-- Key: {{PROJECT_KEY}}-XXX | Type: Story | Status: In Progress
+- Key: ABC-XXX | Type: Story | Status: In Progress
 - Summary: [summary]
 - Assignee: [name] | Labels: [labels]
 - SP: [story_points] | Size: [size] | Start: [date] | Due: [date]
 - Description: [ADF content — full text, not truncated]
 
 ### Parent
-- Key: BEP-YYY | Type: Epic | Status: In Progress
+- Key: ABC-YYY | Type: Epic | Status: In Progress
 - Summary: [epic title]
 - Description: [first 300 chars of parent description]
 
 ### Children (N subtasks)
 | Key | Summary | Type | Status | Assignee | OE | Start | Due |
 |-----|---------|------|--------|----------|-----|-------|-----|
-| BEP-ZZZ | [summary] | Subtask | To Do | [name] | 4h | date | date |
+| ABC-ZZZ | [summary] | Subtask | To Do | [name] | 4h | date | date |
 
 ### Linked Issues
 | Key | Summary | Link Type | Status |
 |-----|---------|-----------|--------|
-| BEP-AAA | [summary] | Blocks → | Done |
-| BEP-BBB | [summary] | ← Blocked by | In Progress |
+| ABC-AAA | [summary] | Blocks → | Done |
+| ABC-BBB | [summary] | ← Blocked by | In Progress |
 ```
 
 ## Rules

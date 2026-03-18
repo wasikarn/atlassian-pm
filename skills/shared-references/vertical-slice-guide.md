@@ -271,26 +271,26 @@ Story: Coupon UI (❌ No VS label, horizontal)
 
 ```text
 Sprint 32:
-├─ BEP-100: [BE] Build all coupon APIs (5 SP)
-├─ BEP-101: [FE] Build all coupon UI (5 SP)
-└─ BEP-102: [QA] Test coupon system (3 SP)
-    └─ Blocked until BEP-100 + BEP-101 done
+├─ ABC-100: [BE] Build all coupon APIs (5 SP)
+├─ ABC-101: [FE] Build all coupon UI (5 SP)
+└─ ABC-102: [QA] Test coupon system (3 SP)
+    └─ Blocked until ABC-100 + ABC-101 done
 ```
 
 **After (Vertical):**
 
 ```text
 Sprint 32:
-├─ BEP-200: vs1-skeleton (2 SP)
+├─ ABC-200: vs1-skeleton (2 SP)
 │   └─ Nav + empty state, deployable Day 1
-├─ BEP-201: vs2-collect-credit-e2e (3 SP)
+├─ ABC-201: vs2-collect-credit-e2e (3 SP)
 │   └─ BE + FE + QA for collect credit
-└─ BEP-202: vs3-collect-discount-e2e (3 SP)
+└─ ABC-202: vs3-collect-discount-e2e (3 SP)
     └─ BE + FE + QA for collect discount
 
 Sprint 33:
-├─ BEP-203: vs4-use-credit-e2e (3 SP)
-└─ BEP-204: vs5-use-discount-e2e (3 SP)
+├─ ABC-203: vs4-use-credit-e2e (3 SP)
+└─ ABC-204: vs5-use-discount-e2e (3 SP)
 ```
 
 ---

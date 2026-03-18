@@ -8,7 +8,7 @@ description: |
   PO (scope/value) × Tech Lead (feasibility/risk) × Engineer (implementation/effort) × QA (edge cases/testability)
   Use when: planning new feature, unclear requirements, high-risk stories, or multi-service changes
   Triggers: "refine feature", "team debate", "4 roles review", "PO+TL+Eng+QA", "clarify scope", "high-risk story"
-argument-hint: "[feature-description or {{PROJECT_KEY}}-XXX]"
+argument-hint: "[feature-description or ABC-XXX]"
 ---
 
 # /refine-feature
@@ -45,7 +45,7 @@ argument-hint: "[feature-description or {{PROJECT_KEY}}-XXX]"
 
 | Input | Action |
 |-------|--------|
-| Jira key ({{PROJECT_KEY}}-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
+| Jira key (ABC-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
 | Feature text | Capture as-is |
 | Epic key | Read overview + existing children via `cache_search` |
 
