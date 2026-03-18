@@ -278,16 +278,6 @@
 						"timeout": 5
 					}
 				]
-			},
-			{
-				"matcher": "mcp__qmd__search|mcp__qmd__vector_search|mcp__qmd__deep_search|mcp__qmd__get|mcp__qmd__multi_get",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_qmd_usage_track.py",
-						"timeout": 5
-					}
-				]
 			}
 		],
 		"Stop": [

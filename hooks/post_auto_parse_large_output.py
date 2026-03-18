@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hooks_lib import inject_context, log_event
 
 _HOOK = "auto-parse-large-output"
-PARSER_SCRIPT = Path(__file__).resolve().parent.parent.parent / "scripts" / "parse-mcp-output.py"
+PARSER_SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "parse_mcp_output.py"
 
 # Max lines to inject back into context (avoid flooding)
 MAX_OUTPUT_LINES = 60

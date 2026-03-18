@@ -230,16 +230,6 @@ QMD_COLLECTIONS = {
 }
 
 
-def qmd_mark_used(session_id: str) -> None:
-    state = _load(session_id)
-    state["qmd_used"] = True
-    _save(session_id, state)
-
-
-def qmd_is_used(session_id: str) -> bool:
-    return _load(session_id).get("qmd_used", False)
-
-
 def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
     """Mark a collection as auto-searched (per-collection tracking)."""
     state = _load(session_id)

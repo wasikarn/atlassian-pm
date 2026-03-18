@@ -10,7 +10,10 @@ import re
 import sys
 
 raw = sys.stdin.read()
-data = json.loads(raw)
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
 tool_output = data.get("tool_output", "")

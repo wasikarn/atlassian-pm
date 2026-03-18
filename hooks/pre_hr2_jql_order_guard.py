@@ -49,7 +49,6 @@ def main() -> None:
         print(reason, file=sys.stderr)
         sys.exit(2)
 
-    log_event(_HOOK, "ALLOWED", {"session_id": data.get("session_id", "")})
     print("{}")
 
 
