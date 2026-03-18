@@ -17,46 +17,7 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
 
-## Skill Commands
-
-| Command | Description |
-| --- | --- |
-| `/atlassian-pm:feature-blueprint` | Multi-perspective blueprint (PO×Domain×TL×Eng×QA) → Confluence doc + backlog map |
-| `/atlassian-pm:refine-feature` | Multi-role debate (PO×TL×Eng×QA) → refined stories |
-| `/atlassian-pm:create-epic` | Create Epic from product vision + Epic Doc |
-| `/atlassian-pm:create-task` | Create Task (tech-debt, bug, chore, spike) |
-| `/atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX` | Analyze Story → Sub-tasks + Technical Note |
-| `/atlassian-pm:create-testplan {{PROJECT_KEY}}-XXX` | Create Test Plan → [QA] Sub-task |
-| `/atlassian-pm:create-doc` | Create Confluence page (tech-spec, adr, parent) |
-| `/atlassian-pm:update-{epic,story,task,subtask}` | Edit single issue — scope, AC, format |
-| `/atlassian-pm:update-doc PAGE-ID` | Update/Move Confluence page |
-| `/atlassian-pm:story-full` | Create Story + Sub-tasks in one go (preferred) |
-| `/atlassian-pm:sync-alignment {{PROJECT_KEY}}-XXX` | Sync all artifacts bidirectional (Story+Sub-tasks, or +Confluence) |
-| `/atlassian-pm:assign {{PROJECT_KEY}}-XXX name` | Quick assign issue (HR3-safe, uses acli) |
-| `/atlassian-pm:plan-sprint` | Sprint planning: carry-over + capacity + assign |
-| `/atlassian-pm:dependency-chain` | Dependency analysis, critical path, swim lanes |
-| `/atlassian-pm:search-issues` | Search before creating (dedup) |
-| `/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX` | Verify quality (ADF, INVEST, language) |
-| `/atlassian-pm:activity-report` | Generate activity report from claude-mem |
-| `/optimize-context` | Audit + compress CLAUDE.md |
-
-`/atlassian-pm:verify-issue` flags: `--with-subtasks` (batch) | `--fix` (auto-fix) | `--dry-run` (report only)
-
-## Workflow Chain
-
-| Phase | Flow | Notes |
-| --- | --- | --- |
-| **Search first** | `/atlassian-pm:search-issues` | Always run before creating (dedup) |
-| **Blueprint** | `/atlassian-pm:feature-blueprint` → `/atlassian-pm:create-epic` → `/atlassian-pm:story-full` | Greenfield / architecture review |
-| **Refine** | `/atlassian-pm:refine-feature` → `/atlassian-pm:story-full` | Unclear/complex/multi-service |
-| **Create** | PM `/atlassian-pm:create-epic` → `/atlassian-pm:story-full` → QA `/atlassian-pm:create-testplan` | QA optional |
-| **Update single** | `/atlassian-pm:update-{epic,story,task,subtask}` | One issue |
-| **Update cascade** | `/atlassian-pm:sync-alignment` = Story + Sub-tasks (+ Confluence if exists) | |
-| **Standalone** | `/atlassian-pm:create-task`, `/atlassian-pm:create-doc`, `/atlassian-pm:update-doc` | |
-| **Planning** | `/atlassian-pm:plan-sprint` | |
-| **Verify** | `/atlassian-pm:verify-issue` | Always run after creating/updating |
-
-**Full orchestration:** `skills/shared-references/skill-orchestration.md`
+**Workflows:** `skills/shared-references/skill-orchestration.md` · `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
 
 ## Tool Selection
 
@@ -87,17 +48,13 @@ Full config (team, fields, services, environments): @.claude/project-config.json
 
 ## Common Mistakes
 
-> Hook-enforced mistakes (HR2-HR7, HR10) are blocked automatically — see `hooks/`. Full troubleshooting: `skills/shared-references/troubleshooting.md`
+> Hook-enforced mistakes (HR2-HR7, HR10) are blocked automatically. Full troubleshooting: `skills/shared-references/troubleshooting.md`
 
 | Category | Quick Fix |
 | --- | --- |
-| Subtask parent → error | `additional_fields={"parent": {"key": "{{PROJECT_KEY}}-XXX"}}` |
 | Set parent on existing issue | MCP/acli silently fail → use `jira_set_parent.py --issues KEY --parent EPIC` |
-| `fields` param → error | Use `additional_fields` not `fields` |
-| `project_key_or_id` → error | Use `project_key` |
-| `limit > 50` → error | Max 50, use pagination `start_at` |
 | Sibling tool call errored | One parallel MCP call failed → all cancelled. Fix failing call first |
-| Mermaid / Confluence issues | See `mermaid-guide.md` + `.claude/rules/mermaid.md` + `troubleshooting.md` for rendering, animation, panels, font-size |
+| Mermaid / Confluence issues | See `mermaid-guide.md` + `.claude/rules/mermaid.md` + `troubleshooting.md` |
 
 ## References
 
