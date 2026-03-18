@@ -10,13 +10,18 @@ Usage:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / ".claude/skills/atlassian-scripts"))
+_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_ROOT / "skills" / "atlassian-scripts"))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
+
+_config = json.loads((_ROOT / ".claude" / "project-config.json").read_text())
+DEFAULT_PROJECT_KEY: str = _config["jira"]["project_key"]
 
 DEFAULT_FIELDS = ["customfield_10015", "duedate"]
 FIELD_LABELS = {
@@ -51,7 +56,7 @@ def has_dates(issue: dict, fields: list[str]) -> bool:
 def main():
     parser = argparse.ArgumentParser(description="Clear date fields from sprint tickets")
     parser.add_argument("--sprint", required=True, type=int, help="Sprint ID (e.g., 673)")
-    parser.add_argument("--project", default="BEP", help="Project key (default: BEP)")
+    parser.add_argument("--project", default=DEFAULT_PROJECT_KEY, help=f"Project key (default: {DEFAULT_PROJECT_KEY})")
     parser.add_argument(
         "--fields",
         default=",".join(DEFAULT_FIELDS),

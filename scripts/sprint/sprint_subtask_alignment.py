@@ -18,18 +18,22 @@ Usage:
     python3 scripts/sprint-subtask-alignment.py --report-only      # report without fix suggestions
 """
 
-import os
+import argparse
+import json
 import re
 import sys
 from datetime import datetime, timedelta
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".claude", "skills", "atlassian-scripts"))
+_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_ROOT / "skills" / "atlassian-scripts"))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
 # --- Configuration ---
-BOARD_ID = 2  # BEP board
+_config = json.loads((_ROOT / ".claude" / "project-config.json").read_text())
+BOARD_ID: int = _config["jira"]["board_id"]
 SKIP_STATUSES = {"Done", "CANCELED"}
 PARENT_TYPES = {"Story", "Task", "Bug"}
 
@@ -101,14 +105,15 @@ def distribute_dates(count: int, parent_start: str, parent_due: str) -> list[tup
 
 
 def main():
-    dry_run = "--apply" not in sys.argv
-    report_only = "--report-only" in sys.argv
+    parser = argparse.ArgumentParser(description="Sprint subtask alignment checker and fixer")
+    parser.add_argument("--sprint", type=int, help="Sprint ID (default: active sprint)")
+    parser.add_argument("--apply", action="store_true", help="Actually update Jira (default: dry-run)")
+    parser.add_argument("--report-only", action="store_true", help="Report violations without fix suggestions")
+    args = parser.parse_args()
 
-    # Parse sprint ID
-    sprint_id = None
-    for i, arg in enumerate(sys.argv):
-        if arg == "--sprint" and i + 1 < len(sys.argv):
-            sprint_id = int(sys.argv[i + 1])
+    dry_run = not args.apply
+    report_only = args.report_only
+    sprint_id = args.sprint
 
     if dry_run and not report_only:
         print("🔍 DRY RUN — use --apply to actually update Jira\n")

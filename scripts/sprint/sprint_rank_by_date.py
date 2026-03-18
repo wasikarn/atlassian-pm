@@ -13,16 +13,20 @@ Usage:
     python3 scripts/sprint-rank-by-date.py --apply            # actually re-rank in Jira
 """
 
-import os
+import argparse
+import json
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".claude", "skills", "atlassian-scripts"))
+_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_ROOT / "skills" / "atlassian-scripts"))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
 # --- Configuration ---
-BOARD_ID = 2  # BEP board
+_config = json.loads((_ROOT / ".claude" / "project-config.json").read_text())
+BOARD_ID: int = _config["jira"]["board_id"]
 SKIP_STATUSES = {"Done", "CANCELED"}
 PARENT_TYPES = {"Story", "Task", "Bug"}
 
@@ -31,13 +35,13 @@ PRIORITY_ORDER = {"Highest": 1, "High": 2, "Medium": 3, "Low": 4, "Lowest": 5}
 
 
 def main():
-    dry_run = "--apply" not in sys.argv
+    parser = argparse.ArgumentParser(description="Re-rank sprint issues by due date + priority")
+    parser.add_argument("--sprint", type=int, help="Sprint ID (default: active sprint)")
+    parser.add_argument("--apply", action="store_true", help="Actually re-rank in Jira (default: dry-run)")
+    args = parser.parse_args()
 
-    # Parse sprint ID
-    sprint_id = None
-    for i, arg in enumerate(sys.argv):
-        if arg == "--sprint" and i + 1 < len(sys.argv):
-            sprint_id = int(sys.argv[i + 1])
+    dry_run = not args.apply
+    sprint_id = args.sprint
 
     if dry_run:
         print("🔍 DRY RUN — use --apply to actually re-rank in Jira\n")
