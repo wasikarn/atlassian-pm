@@ -16,10 +16,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from hooks_lib import parse_stdin
 from hooks_state import vs_add_subtask, vs_get_coverage, vs_set_story_acs
 
-raw = sys.stdin.read()
-data = json.loads(raw)
+data = parse_stdin()
+if not data:
+    sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
 tool_output = str(data.get("tool_output", ""))

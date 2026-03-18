@@ -90,8 +90,8 @@ def main() -> None:
 
         hr5_add_pending(session_id, issue_key, parent_key)
         hr5_add_known_subtask(session_id, issue_key)
-    except Exception:
-        pass
+    except Exception as e:
+        log_event(_HOOK, "ERROR", {"phase": "state_save", "issue_key": issue_key, "error": str(e)})
 
     # Enrich cache DB so HR10 can detect subtask cross-session
     try:
@@ -102,8 +102,8 @@ def main() -> None:
         )
         conn.commit()
         conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        log_event(_HOOK, "ERROR", {"phase": "cache_enrich", "issue_key": issue_key, "error": str(e)})
 
     log_event(_HOOK, "REMIND", {"issue_key": issue_key, "parent_key": parent_key, "session_id": session_id})
     inject_context(

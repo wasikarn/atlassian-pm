@@ -5,6 +5,7 @@
 | Template | File | Content |
 |----------|------|---------|
 | **Core Rules** | [templates-core.md](templates-core.md) | CREATE/EDIT, panels, styling, common mistakes |
+| **HR Rules** | [hr-rules.md](hr-rules.md) | Hard Rules canonical reference (HR1-HR10) with examples |
 | **Epic** | [templates-epic.md](templates-epic.md) | Epic template + best practices |
 | **Story** | [templates-story.md](templates-story.md) | Story template + AC naming |
 | **Subtask & QA** | [templates-subtask.md](templates-subtask.md) | Subtask + QA templates |

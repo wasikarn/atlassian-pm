@@ -18,11 +18,15 @@ import sqlite3
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hooks_lib import log_event, parse_stdin
+
 CACHE_DB = Path.home() / ".cache" / "jira-generator" / "jira.db"
 SPRINT_FIELD = "customfield_10020"
 
-raw = sys.stdin.read()
-data = json.loads(raw)
+data = parse_stdin()
+if not data:
+    sys.exit(0)
 tool_input = data.get("tool_input", {})
 
 # Extract issue key
@@ -71,8 +75,8 @@ try:
                     is_subtask = True
             except (json.JSONDecodeError, TypeError):
                 pass
-except Exception:
-    pass
+except Exception as e:
+    log_event("hr10-sprint-guard", "ERROR", {"phase": "cache_db", "issue_key": issue_key, "error": str(e)})
 
 # --- Detection layer 3: Session state (HR5 known subtasks) ---
 if not is_subtask:
@@ -83,8 +87,8 @@ if not is_subtask:
 
         if hr5_is_known_subtask(session_id, issue_key):
             is_subtask = True
-    except Exception:
-        pass
+    except Exception as e:
+        log_event("hr10-sprint-guard", "ERROR", {"phase": "session_state", "issue_key": issue_key, "error": str(e)})
 
 if is_subtask:
     print(

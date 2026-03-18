@@ -9,6 +9,10 @@ Exit 2 = block with message, Exit 0 = allow.
 
 import json
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hooks_lib import parse_stdin
 
 PRESETS_GET = """
 ⚠️ BLOCKED: `fields` param is required for jira_get_issue (saves tokens).
@@ -35,8 +39,9 @@ PRESETS_SEARCH = """
 | Full with links | `summary,status,assignee,issuetype,issuelinks,priority,labels` | 20 |
 """
 
-raw = sys.stdin.read()
-data = json.loads(raw)
+data = parse_stdin()
+if not data:
+    sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
 

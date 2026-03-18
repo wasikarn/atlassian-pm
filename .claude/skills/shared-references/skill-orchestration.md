@@ -28,6 +28,7 @@
 
 > Rules that if violated cause **silent failures**, **data corruption**, or **irreversible damage**.
 > Every skill MUST respect these rules. No exceptions.
+> Canonical definitions + examples: `shared-references/hr-rules.md`
 
 ### HR1. Quality Gate ≥ 90% Before Atlassian Writes
 

@@ -114,6 +114,8 @@ Loaded on demand from `.claude/skills/shared-references/` (19 docs, indexed by `
 
 Rules causing **silent failures**, **data corruption**, or **irreversible damage**. Hooks enforce HR2-HR7, HR10 automatically.
 
+> Full definitions, examples, and enforcement details: `shared-references/hr-rules.md`
+
 | Rule | Constraint |
 | --- | --- |
 | **HR1** QG ≥ 90% | NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit. |

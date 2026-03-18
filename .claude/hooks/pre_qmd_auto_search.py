@@ -17,13 +17,15 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from hooks_lib import log_event
 from hooks_state import (
     qmd_collection_for_path,
     qmd_is_collection_searched,
     qmd_mark_collection_searched,
 )
 
-QMD_BIN = "/Users/kobig/.bun/bin/qmd"
+import shutil
+QMD_BIN = shutil.which("qmd") or "/Users/kobig/.bun/bin/qmd"
 
 # Generic path segments that don't make good search queries
 SKIP_SEGMENTS = {
@@ -122,7 +124,8 @@ try:
         timeout=5,
     )
     qmd_output = result.stdout.strip()
-except Exception:
+except Exception as e:
+    log_event("qmd-auto-search", "ERROR", {"phase": "subprocess", "query": query, "error": str(e)})
     sys.exit(0)  # qmd failed → allow Glob/Grep
 
 if not qmd_output:
