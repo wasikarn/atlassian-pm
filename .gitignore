@@ -22,7 +22,7 @@ output/
 # Tasks
 tasks/
 
-.claude/skills/jira-cache-server/.coverage
+mcp-servers/jira-cache-server/.coverage
 /.idea/
 /tmp/
 
