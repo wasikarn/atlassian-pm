@@ -26,11 +26,12 @@ Claude Code ──stdio──> jira-cache-server ──REST API──> Jira Clou
 - **After MCP writes** → `cache_invalidate(issue_key)` (HR6: stale reads corrupt verify/cascade/planning)
 - **Stale data / user says "ล่าสุด"** → `cache_refresh(issue_key, force_refresh=true)`
 
-## Tools (8)
+## Tools (9)
 
 | Tool | Description | Upstream? |
 | ---- | ----------- | --------- |
 | `cache_get_issue` | Get issue by key (cache-first) | Yes (on miss) |
+| `cache_get_issues` | Batch get multiple issues | Yes (on miss) |
 | `cache_search` | JQL search with caching | Yes (on miss) |
 | `cache_sprint_issues` | All sprint issues with pagination | Yes (on miss) |
 | `cache_text_search` | FTS5 keyword search (cache only) | No |
@@ -51,27 +52,24 @@ Claude Code ──stdio──> jira-cache-server ──REST API──> Jira Clou
 ## Setup
 
 ```bash
-# 1. Create venv in cache directory (not in project tree)
-python3 -m venv ~/.cache/jira-generator/jira-cache-server/.venv
-source ~/.cache/jira-generator/jira-cache-server/.venv/bin/activate
-pip install -r .claude/skills/jira-cache-server/requirements.txt
+# 1. Install dependencies (uv manages the venv)
+cd mcp-servers/jira-cache-server
+uv sync --extra embeddings
 
 # 2. Verify credentials exist
 cat ~/.config/atlassian/.env
 # Should have: CONFLUENCE_URL, CONFLUENCE_USERNAME, CONFLUENCE_API_TOKEN
 
 # 3. Test server starts
-~/.cache/jira-generator/jira-cache-server/.venv/bin/python \
-  .claude/skills/jira-cache-server/server.py
+uv run server.py
 ```
 
 ## Files
 
 ```text
-.claude/skills/jira-cache-server/
-├── server.py           # MCP entry point + 8 tool handlers
-├── requirements.txt    # Dependencies
-├── SKILL.md            # This file
+mcp-servers/jira-cache-server/
+├── server.py           # MCP entry point + 9 tool handlers
+├── pyproject.toml      # Dependencies (core + embeddings + test extras)
 └── jira_cache/
     ├── __init__.py     # Exports JiraCache, EmbeddingStore
     ├── cache.py        # SQLite + FTS5 cache (issues, sprints, searches)

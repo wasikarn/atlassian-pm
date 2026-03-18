@@ -46,8 +46,8 @@ if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
 # Local imports (jira_cache to avoid namespace collision with atlassian-scripts/lib)
-from jira_cache.cache import JiraCache, extract_adf_text, strip_noise
-from jira_cache.embeddings import EmbeddingStore
+from jira_cache.cache import JiraCache, strip_noise
+from jira_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
@@ -92,20 +92,6 @@ def _require_cache() -> JiraCache:
     if cache is None:
         raise RuntimeError("Cache not initialized")
     return cache
-
-
-# M10: Centralized embedding text extraction
-def _embedding_text(issue: dict) -> str:
-    """Extract text suitable for embedding from an issue dict."""
-    f = issue.get("fields", {})
-    summary = f.get("summary", "")
-    desc_raw = f.get("description")
-    desc = ""
-    if isinstance(desc_raw, str):
-        desc = desc_raw[:500]
-    elif isinstance(desc_raw, dict):
-        desc = (extract_adf_text(desc_raw) or "")[:500]
-    return f"{summary} {desc}".strip()[:500]
 
 
 TOOLS = [
@@ -333,21 +319,25 @@ def _init() -> None:
         jira_api = None
 
 
+def _extract_core_fields(issue: dict) -> dict:
+    """Extract core display fields shared by summary formatting and compact mode."""
+    fields = issue.get("fields", {})
+    status = fields.get("status", {})
+    assignee = fields.get("assignee", {})
+    issuetype = fields.get("issuetype", {})
+    return {
+        "key": issue.get("key", "?"),
+        "summary": fields.get("summary", ""),
+        "status": status.get("name", "") if isinstance(status, dict) else str(status),
+        "assignee": assignee.get("displayName", "Unassigned") if isinstance(assignee, dict) else str(assignee or "Unassigned"),
+        "issuetype": issuetype.get("name", "") if isinstance(issuetype, dict) else str(issuetype),
+    }
+
+
 def _format_issue_summary(issue: dict) -> str:
     """Format issue data for compact MCP response."""
-    fields = issue.get("fields", {})
-    key = issue.get("key", "?")
-    summary = fields.get("summary", "")
-    status = fields.get("status", {})
-    status_name = status.get("name", "") if isinstance(status, dict) else str(status)
-    assignee = fields.get("assignee", {})
-    assignee_name = (
-        assignee.get("displayName", "Unassigned") if isinstance(assignee, dict) else str(assignee or "Unassigned")
-    )
-    issue_type = fields.get("issuetype", {})
-    type_name = issue_type.get("name", "") if isinstance(issue_type, dict) else str(issue_type)
-
-    return f"[{key}] ({type_name}) {summary} | {status_name} | {assignee_name}"
+    c = _extract_core_fields(issue)
+    return f"[{c['key']}] ({c['issuetype']}) {c['summary']} | {c['status']} | {c['assignee']}"
 
 
 # --- P2-B: Compact mode extraction ---
@@ -355,20 +345,8 @@ def _format_issue_summary(issue: dict) -> str:
 
 def _compact_issue(issue: dict) -> dict:
     """Extract minimal fields from a full issue dict."""
+    compact = _extract_core_fields(issue)
     fields = issue.get("fields", {})
-    compact = {
-        "key": issue.get("key", "?"),
-        "summary": fields.get("summary", ""),
-        "status": fields.get("status", {}).get("name", "")
-        if isinstance(fields.get("status"), dict)
-        else str(fields.get("status", "")),
-        "assignee": fields.get("assignee", {}).get("displayName", "Unassigned")
-        if isinstance(fields.get("assignee"), dict)
-        else str(fields.get("assignee") or "Unassigned"),
-        "issuetype": fields.get("issuetype", {}).get("name", "")
-        if isinstance(fields.get("issuetype"), dict)
-        else str(fields.get("issuetype", "")),
-    }
     if "priority" in fields:
         p = fields["priority"]
         compact["priority"] = p.get("name", "") if isinstance(p, dict) else str(p)
@@ -1010,6 +988,4 @@ async def main() -> None:  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    import asyncio
-
     asyncio.run(main())

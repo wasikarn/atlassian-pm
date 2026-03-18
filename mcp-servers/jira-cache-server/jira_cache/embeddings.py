@@ -16,6 +16,8 @@ import sqlite3
 import struct
 from typing import Any
 
+from .cache import extract_adf_text
+
 logger = logging.getLogger(__name__)
 
 # Lazy-loaded globals
@@ -81,6 +83,19 @@ CREATE VIRTUAL TABLE IF NOT EXISTS issue_embeddings USING vec0(
     embedding float[384]
 );
 """
+
+
+def embedding_text(issue: dict) -> str:
+    """Extract text suitable for embedding from an issue dict."""
+    f = issue.get("fields", {})
+    summary = f.get("summary", "")
+    desc_raw = f.get("description")
+    desc = ""
+    if isinstance(desc_raw, str):
+        desc = desc_raw[:500]
+    elif isinstance(desc_raw, dict):
+        desc = (extract_adf_text(desc_raw) or "")[:500]
+    return f"{summary} {desc}".strip()[:500]
 
 
 class EmbeddingStore:
@@ -233,18 +248,7 @@ class EmbeddingStore:
         items: list[tuple[str, str]] = []  # (key, text)
         for issue in issues:
             key = issue.get("key", "")
-            fields = issue.get("fields", {})
-            summary = fields.get("summary", "")
-            desc = ""
-            desc_raw = fields.get("description")
-            if isinstance(desc_raw, dict):
-                from .cache import extract_adf_text
-
-                desc = extract_adf_text(desc_raw) or ""
-            elif isinstance(desc_raw, str):
-                desc = desc_raw
-
-            text = f"{summary} {desc[:500]}".strip()
+            text = embedding_text(issue)
             if key and text:
                 items.append((key, text))
 

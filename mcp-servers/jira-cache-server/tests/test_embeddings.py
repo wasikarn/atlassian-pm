@@ -311,7 +311,7 @@ class TestStoreBatch:
     def test_store_error(self):
         store, conn = self._make_store()
         issues = [{"key": "BEP-1", "fields": {"summary": "Test"}}]
-        conn.execute.side_effect = Exception("db error")
+        conn.executemany.side_effect = Exception("db error")
         with patch.object(store, "generate_embeddings_batch", return_value=[[0.1] * 384]):
             result = store.store_batch(issues)
             assert result == 0

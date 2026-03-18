@@ -646,10 +646,10 @@ class JiraCache:
                 if not key:
                     continue
                 issue_data = strip_noise(issue_data)
-                fields = issue_data.get("fields", {})
-                description_text = extract_adf_text(fields.get("description"))
-                sid = self._extract_sprint_id(fields)
-                self._put_issue_row(key, fields, description_text, sid, issue_data, now)
+                issue_fields = issue_data.get("fields", {})
+                description_text = extract_adf_text(issue_fields.get("description"))
+                sid = self._extract_sprint_id(issue_fields)
+                self._put_issue_row(key, issue_fields, description_text, sid, issue_data, now)
             self.conn.commit()
         logger.debug("Cached search + %d issues (single transaction)", len(issues))
 

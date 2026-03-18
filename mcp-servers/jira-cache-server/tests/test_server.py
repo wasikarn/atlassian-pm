@@ -421,11 +421,10 @@ class TestHandleCacheGetIssues:
     async def test_with_embeddings(self, cache, mock_jira_api):
         emb = MagicMock()
         emb.available = True
-        emb.store_embedding.return_value = True
         server.embeddings = emb
         mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
         await handle_cache_get_issues({"issue_keys": ["BEP-1"]})
-        emb.store_embedding.assert_called()
+        emb.store_batch.assert_called()
         server.embeddings = None
 
 
@@ -626,12 +625,12 @@ class TestHandleCacheRefresh:
         server.embeddings = emb
         mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
         await handle_cache_refresh({"issue_keys": ["BEP-1"]})
-        emb.store_embedding.assert_called()
+        emb.store_batch.assert_called()
 
         # Sprint refresh with embeddings
         mock_jira_api.get_sprint_issues.return_value = {"issues": [make_issue()], "total": 1}
         await handle_cache_refresh({"sprint_id": 673})
-        emb.store_batch.assert_called()
+        assert emb.store_batch.call_count >= 2
         server.embeddings = None
 
 

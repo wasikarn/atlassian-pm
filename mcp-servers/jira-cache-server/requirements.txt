@@ -1,6 +1,0 @@
-# Core: MCP server
-mcp>=1.0.0
-
-# Optional: Vector embeddings (semantic search)
-sqlite-vec>=0.1.1
-sentence-transformers>=2.2.0
