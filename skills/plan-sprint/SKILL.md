@@ -351,21 +351,21 @@ Subtask alignment: [X checked, Y fixed]
 
 ## Example
 
-**Input:** `/plan-sprint --sprint 640`
+**Input:** `/plan-sprint`
 
 **Output:**
 
 ```
-Sprint 33 (Mar 10-21) | Capacity: 35 tickets
-Carry-over: 4 tickets (BEP-3050, BEP-3051, BEP-3055, BEP-3060)
-New work: 31 tickets from backlog
+Sprint 42 (Apr 7-18) | Capacity: 35 tickets
+Carry-over: 3 tickets ({{PROJECT_KEY}}-XXX, BEP-YYY, BEP-ZZZ)
+New work: 32 tickets from backlog
 Assignments:
   {{SLOT_1}}: 6 tickets (review + complex BE)
   {{SLOT_2}}: 8 tickets (BE focus)
   {{SLOT_3}}: 10 tickets (FE-Web + FE-Admin)
-  {{SLOT_4}}: 7 tickets (FE-Admin + coupon)
+  {{SLOT_4}}: 7 tickets (FE-Admin)
   {{SLOT_5}}: 4 tickets (Mobile + FE-Web)
-Risk: BEP-3055 blocks 3 downstream tickets
+Risk: {{PROJECT_KEY}}-XXX blocks 2 downstream tickets
 ```
 
 ---
