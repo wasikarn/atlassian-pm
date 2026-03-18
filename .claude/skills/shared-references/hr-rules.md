@@ -22,8 +22,8 @@ HR8 has suggestion-only hook. HR9 has no hook — manual via `/verify-issue --wi
 Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 90% → Atlassian
 ```
 
-- OK: Generate ADF → score 92% → proceed to MCP create + acli edit
-- BAD: Draft ADF → immediately `acli workitem create --from-json` → "will fix later"
+- ✅ Generate ADF → score 92% → proceed to MCP create + acli edit
+- ❌ Draft ADF → immediately `acli workitem create --from-json` → "will fix later"
 
 ---
 
@@ -35,9 +35,9 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr2_jql_order_guard.py` (blocks the tool call)
 
-- OK: `parent = BEP-123`
-- BAD: `parent = BEP-123 ORDER BY created DESC`
-- OK: `project = BEP AND issuetype = Story ORDER BY created DESC` (no parent filter)
+- ✅ `parent = BEP-123`
+- ❌ `parent = BEP-123 ORDER BY created DESC`
+- ✅ `project = BEP AND issuetype = Story ORDER BY created DESC` (no parent filter)
 
 ---
 
@@ -49,8 +49,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr3_block_mcp_assignee.py` (blocks MCP assignee updates)
 
-- OK: `acli jira workitem assign -k "BEP-123" -a "email" -y`
-- BAD: `jira_update_issue(issue_key="BEP-123", additional_fields={"assignee": {"accountId": "..."}})`
+- ✅ `acli jira workitem assign -k "BEP-123" -a "email" -y`
+- ❌ `jira_update_issue(issue_key="BEP-123", additional_fields={"assignee": {"accountId": "..."}})`
 
 ---
 
@@ -62,8 +62,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr4_confluence_macro_guard.py` (blocks MCP Confluence macro updates)
 
-- OK: `python atlassian-scripts/update_page_storage.py --page-id 123456 --file page.html`
-- BAD: `confluence_update_page(page_id="123456", body="...<ac:structured-macro>...")` via MCP
+- ✅ `python atlassian-scripts/update_page_storage.py --page-id 123456 --file page.html`
+- ❌ `confluence_update_page(page_id="123456", body="...<ac:structured-macro>...")` via MCP
 
 ---
 
@@ -75,8 +75,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr5_parent_verify_block.py` (blocks next subtask if prior unverified), `post_hr5_parent_verify_remind.py` (injects reminder after create), `post_hr5_parent_verify_clear.py` (auto-clears after confirmed)
 
-- OK: `jira_create_issue(parent={"key":"BEP-123"})` → `jira_get_issue(fields="parent")` → confirm → `acli edit --from-json`
-- BAD: Create 5 subtasks back-to-back without verifying parent links
+- ✅ `jira_create_issue(parent={"key":"BEP-123"})` → `jira_get_issue(fields="parent")` → confirm → `acli edit --from-json`
+- ❌ Create 5 subtasks back-to-back without verifying parent links
 
 ---
 
@@ -88,8 +88,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `post_hr6_queue_invalidation.py` (queues keys after MCP writes), `pre_hr6_stale_read_guard.py` (blocks cache reads for pending keys), `stop_hr6_unflushed_check.py` (blocks session exit if pending)
 
-- OK: `jira_update_issue(...)` → `cache_invalidate(issue_key="BEP-123", force_refresh=true)`
-- BAD: Update issue → immediately read from `cache_get_issue` without invalidating
+- ✅ `jira_update_issue(...)` → `cache_invalidate(issue_key="BEP-123", force_refresh=true)`
+- ❌ Update issue → immediately read from `cache_get_issue` without invalidating
 
 ---
 
@@ -101,8 +101,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr7_sprint_id_guard.py` (blocks sprint field if no lookup in session), `post_hr7_sprint_lookup_track.py` (tracks that lookup was done)
 
-- OK: `jira_get_sprints_from_board(board_id=2, state="active")` → use returned id
-- BAD: `jira_update_issue(additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})`
+- ✅ `jira_get_sprints_from_board(board_id=2, state="active")` → use returned id
+- ❌ `jira_update_issue(additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})`
 
 ---
 
@@ -116,8 +116,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 > **Enforcement gap:** This rule has no blocking hook. Requires manual check or `/verify-issue --with-subtasks` (A3-A4 checks).
 
-- OK: Parent due 2026-03-31 → subtasks due ≤ 2026-03-31
-- BAD: Parent 3 SP, subtasks total 15 SP
+- ✅ Parent due 2026-03-31 → subtasks due ≤ 2026-03-31
+- ❌ Parent 3 SP, subtasks total 15 SP
 
 ---
 
@@ -131,8 +131,8 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 > **Enforcement gap:** This rule has no hook enforcement. Run `/verify-issue --with-subtasks` (A1-A6 alignment checks) manually after creating subtasks.
 
-- OK: Story has AC1: Login with email → subtask "[BE] Implement email auth endpoint"
-- BAD: Story has 5 ACs → only 2 subtasks with vague objectives
+- ✅ Story has AC1: Login with email → subtask "[BE] Implement email auth endpoint"
+- ❌ Story has 5 ACs → only 2 subtasks with vague objectives
 
 ---
 
@@ -144,5 +144,5 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr10_subtask_sprint_guard.py` (blocks update if issue is detected as subtask)
 
-- OK: Set sprint on the parent Story → subtasks inherit automatically
-- BAD: `jira_update_issue(issue_key="BEP-456", additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})` where BEP-456 is a subtask
+- ✅ Set sprint on the parent Story → subtasks inherit automatically
+- ❌ `jira_update_issue(issue_key="BEP-456", additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})` where BEP-456 is a subtask
