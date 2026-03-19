@@ -18,23 +18,7 @@ project = BEP AND type = Story AND sprint IN openSprints()
 parent = ABC-XXX
 ```
 
-> 🚨 **CRITICAL — JQL queries that ALWAYS cause parse errors:**
->
-> ```text
-> ❌ parent = ABC-XXX ORDER BY created DESC       → Error: Expecting ')' but got 'ORDER'
-> ❌ parent = ABC-XXX AND issuetype = Story ORDER BY  → same error
-> ❌ key in (ABC-1, ABC-2) ORDER BY created       → Error: parse error
-> ```
->
-> **Safe alternatives:**
->
-> ```text
-> ✅ parent = ABC-XXX                              → no ORDER BY needed
-> ✅ "Parent Link" = ABC-XXX ORDER BY created DESC → use "Parent Link" if sorting needed
-> ✅ key in (ABC-1, ABC-2)                         → remove ORDER BY
-> ```
->
-> **Rule: NEVER add ORDER BY to `parent =` or `key in (...)` queries**
+> **HR2 (hook-enforced):** Never use `ORDER BY` with `parent =` or `key in (...)` — causes JQL parser error.
 
 ### Find My Assigned Issues
 
