@@ -214,6 +214,14 @@ Install without cloning the repo — Claude handles everything.
 
 Claude will ask for your Jira site, project key, and board ID, then write the config and configure git filters automatically.
 
+`/atlassian-pm:setup` configures:
+
+- ✓ acli (Jira CLI) — installed + authenticated
+- ✓ mcp-atlassian — registered as user-scoped MCP server
+- ✓ `~/.config/atlassian/.env` — Jira/Confluence credentials
+- ✓ `~/.claude/CLAUDE.md` — Atlassian settings block
+- ✓ git smudge/clean filters — placeholder conversion
+
 > **Note:** The marketplace install commands above are based on Claude Code's plugin system. If these commands are not yet available in your version, use the manual installation below.
 
 ---
@@ -224,7 +232,7 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 | --- | --- | --- |
 | [Claude Code](https://claude.ai/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` |
 | [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF publishing | `brew tap atlassian/homebrew-acli && brew install acli` |
-| [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | auto-installed by setup |
+| [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | configured by setup (Phase 4) |
 | Python 3.x | REST API scripts | pre-installed on macOS |
 
 > **uv** (Python package manager) is required for the cache server: `curl -LsSf https://astral.sh/uv/install.sh | sh`
@@ -275,40 +283,34 @@ Get your token at **Atlassian Account → Security → API tokens**.
 
 ### 4. Configure MCP
 
-Add to `~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "mcp-atlassian": {
-      "command": "uvx",
-      "args": ["mcp-atlassian"],
-      "env": {
-        "JIRA_URL": "https://your-site.atlassian.net",
-        "JIRA_USERNAME": "your@email.com",
-        "JIRA_API_TOKEN": "<api-token>",
-        "CONFLUENCE_URL": "https://your-site.atlassian.net/wiki",
-        "CONFLUENCE_USERNAME": "your@email.com",
-        "CONFLUENCE_API_TOKEN": "<api-token>"
-      }
-    }
-  }
-}
+```bash
+claude mcp add --scope user mcp-atlassian -- \
+  uvx --no-cache mcp-atlassian==0.21.0 \
+  --env-file ~/.config/atlassian/.env \
+  --jira-projects-filter=YOUR_PROJECT_KEY \
+  --confluence-spaces-filter=YOUR_SPACE_KEY
 ```
 
-### 5. Configure Python script credentials
+> **Note:** `~/.config/atlassian/.env` must exist first (Step 5). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `BEP`).
+
+### 5. Create credentials file
 
 ```bash
 mkdir -p ~/.config/atlassian
+chmod 700 ~/.config/atlassian
 cat > ~/.config/atlassian/.env << 'EOF'
 JIRA_URL=https://your-site.atlassian.net
 JIRA_USERNAME=your@email.com
-JIRA_API_TOKEN=<api-token>
+JIRA_API_TOKEN=<your-api-token>
 CONFLUENCE_URL=https://your-site.atlassian.net/wiki
 CONFLUENCE_USERNAME=your@email.com
-CONFLUENCE_API_TOKEN=<api-token>
+CONFLUENCE_API_TOKEN=<your-api-token>
 EOF
+chmod 600 ~/.config/atlassian/.env
 ```
+
+Get your API token at: **Atlassian Account → Security → API tokens**
+One token works for both Jira and Confluence. Tokens expire in ≤365 days.
 
 ### 6. Run setup
 
@@ -340,9 +342,9 @@ claude --plugin-dir /path/to/atlassian-pm
 ### Verify
 
 ```bash
-acli jira project list --server https://your-site.atlassian.net
+acli jira auth status
 # Inside Claude Code:
-/atlassian-pm:search-issues
+/atlassian-pm:doctor
 ```
 
 ---
