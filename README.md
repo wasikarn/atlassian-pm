@@ -379,6 +379,7 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 
 ```text
 .claude-plugin/plugin.json              ← Plugin manifest
+.claude-plugin/marketplace.json         ← Plugin catalog (version must match plugin.json)
 .mcp.json                               ← MCP server config
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
@@ -429,3 +430,5 @@ scripts/
 **Let Claude explore** — `/atlassian-pm:analyze-story` always explores the codebase before creating Sub-tasks. Never skip — generic sub-tasks miss real implementation paths.
 
 **Dev hot-reload** — after editing skill or agent files, use `/reload-plugins` in Claude Code.
+
+**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error). `marketplace.json` version must match `plugin.json` exactly and must be in `.claude-plugin/` (not repo root).
