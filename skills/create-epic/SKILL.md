@@ -38,7 +38,7 @@ Extract from blueprint output:
 
 - `epic.title` → ใช้เป็น epic title (ข้ามการถามจาก user)
 - `stories[]` → เก็บเป็น `vs_stories[]` สำหรับ Phase 3
-- `non_goals[]` → เก็บเป็น out-of-scope items
+- `non_goals[]` → เก็บเป็น out-of-scope items สำหรับ Phase 3 scope definition
 - `blueprint_page_id` → link ใน Epic Doc section "References"
 
 Skip interview questions in Phase 1 for information already documented.
@@ -75,6 +75,9 @@ Skip interview questions in Phase 1 for information already documented.
 - **🟡 REVIEW** — Present RICE scoring to stakeholder. Proceed unless stakeholder objects.
 
 ### 3. Define Scope + VS Planning
+
+> **If `vs_stories[]` pre-populated from blueprint:** ข้าม VS derivation — ใช้ `vs_stories[]` จาก blueprint โดยตรง แสดงให้ user confirm แทน
+> **If `non_goals[]` present from blueprint:** ใช้เป็น out-of-scope items ใน scope definition (ไม่ต้องถามใหม่)
 
 - Identify high-level requirements
 - **VS Pattern Selection:** (see [vertical-slice-guide.md](../shared-references/vertical-slice-guide.md))
