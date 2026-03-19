@@ -7,8 +7,8 @@
 
   "jira": {
     "site": "acme-corp.atlassian.net",
-    "project_key": "BEP",
-    "board_id": 2,
+    "project_key": "PROJ",
+    "board_id": 0,
     "_board_id_note": "Get via: jira_get_agile_boards(project_key='PROJECT_KEY')",
 
     "custom_fields": {
@@ -23,7 +23,7 @@
 
   "confluence": {
     "site": "acme-corp.atlassian.net",
-    "space_key": "BEP"
+    "space_key": "PROJ"
   },
 
   "team": {
