@@ -51,43 +51,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   fi
 fi
 
-# --- 1. Install sync-skills CLI ---
-echo "[1/4] Installing sync-skills CLI..."
-mkdir -p "$HOME/.local/bin"
-
-SYNC_SRC="$SCRIPT_DIR/sync-skills"
-SYNC_DST="$HOME/.local/bin/sync-skills"
-
-if [ -L "$SYNC_DST" ]; then
-  existing=$(readlink "$SYNC_DST")
-  if [ "$existing" = "$SYNC_SRC" ]; then
-    echo "  already installed"
-  else
-    rm "$SYNC_DST"
-    ln -s "$SYNC_SRC" "$SYNC_DST"
-    echo "  updated (was: $existing)"
-  fi
-elif [ -f "$SYNC_DST" ]; then
-  rm "$SYNC_DST"
-  ln -s "$SYNC_SRC" "$SYNC_DST"
-  echo "  replaced file with symlink"
-else
-  ln -s "$SYNC_SRC" "$SYNC_DST"
-  echo "  installed"
-fi
-
-# --- 2. Sync skills to ~/.claude/skills/ (dev mode only, skip if running from plugin cache) ---
+# --- 1. Add Atlassian config to ~/.claude/CLAUDE.md ---
 echo ""
-if echo "$PROJECT_DIR" | grep -q "\.claude/plugins/cache"; then
-  echo "[2/4] Skipping sync-skills (running from plugin cache — plugin handles skill loading)"
-else
-  echo "[2/4] Syncing skills to ~/.claude/skills/..."
-  "$SYNC_SRC"
-fi
-
-# --- 3. Add Atlassian config to ~/.claude/CLAUDE.md ---
-echo ""
-echo "[3/4] Configuring ~/.claude/CLAUDE.md..."
+echo "[1/2] Configuring ~/.claude/CLAUDE.md..."
 mkdir -p "$HOME/.claude"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 
@@ -143,9 +109,9 @@ ATLASSIAN_CONFIG
   echo "  added Atlassian settings (site: ${JIRA_SITE}, project: ${PROJECT_KEY})"
 fi
 
-# --- 4. Configure git smudge/clean filter ---
+# --- 2. Configure git smudge/clean filter ---
 echo ""
-echo "[4/4] Configuring git filters..."
+echo "[2/2] Configuring git filters..."
 CURRENT_SMUDGE=$(cd "$PROJECT_DIR" && git config --get filter.project-config.smudge 2>/dev/null || true)
 EXPECTED_SMUDGE="python3 scripts/git_filter.py --smudge"
 
