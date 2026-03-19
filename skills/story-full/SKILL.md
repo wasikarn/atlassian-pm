@@ -27,6 +27,7 @@ argument-hint: "[story-description]"
 
 | Phase | Adds to Context |
 |-------|----------------|
+| 0. Blueprint (optional) | `blueprint_page_id`, `selected_story_index`, `blueprint_acs_hints[]` |
 | 1. Discovery | `epic_data`, `vs_assignment`, `user_requirements`, `user_context` |
 | 2. Write Story | `story_narrative`, `acs[]`, `scope`, `dod` |
 | 3. INVEST | `invest_score`, `vs_validated` |
@@ -40,6 +41,31 @@ argument-hint: "[story-description]"
 | 10. Create | `subtask_keys[]` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+
+## Blueprint Handoff Check
+
+> **Check first:** ดู conversation history ว่ามี `/feature-blueprint` output หรือไม่
+
+**If `blueprint_backlog_map` is present in history:**
+
+Ask user: "ต้องการสร้าง story ไหนจาก blueprint?"
+→ User เลือก story index (e.g., "story 1", "first MVP story")
+
+Extract selected story from blueprint:
+
+- `stories[N].title` → ใช้เป็น story summary draft
+- `stories[N].narrative_hint` → เริ่ม narrative จาก hint นี้ (ไม่ถาม Who/What/Why ซ้ำ)
+- `stories[N].acs_hint[]` → ใช้เป็น starting points สำหรับ ACs
+- `stories[N].vs_label` → pre-assign VS label (ข้าม VS assignment)
+- `stories[N].sp_estimate` → suggest SP (S/M/L)
+- `blueprint_page_id` → link ใน story description section "References"
+
+ข้าม "Ask: Who? What? Why?" ใน Phase 1 สำหรับข้อมูลที่มีอยู่แล้ว
+เริ่มที่ Phase 2 Write User Story โดยใช้ blueprint context เป็น draft
+
+**If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ (ถาม Who/What/Why/Constraints)
+
+---
 
 ## Part A: Create Story (Phases 1-4)
 
