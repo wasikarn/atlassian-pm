@@ -87,7 +87,8 @@ Ask questions in order. Each is a plain chat message (free-form text answer). Va
    - Replace template placeholder values (e.g. `acme-corp.atlassian.net` → real site)
    - Keep all template structure, comments, and non-answered fields as-is
    - Set `jira.board_id` as integer (not string)
-   - If team/services were skipped → keep template placeholder values
+   - If team was skipped → keep template placeholder members
+   - If services were skipped → write `"tags": []` (empty array, not template placeholders)
 3. Write to `$CLAUDE_PLUGIN_ROOT/.claude/project-config.json` using Write tool
 
 ---

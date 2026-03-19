@@ -42,14 +42,10 @@
   },
 
   "services": {
-    "_note": "Service tags used in issue summaries and codebase paths",
+    "_note": "Service tags used in issue summaries and codebase paths. Run /atlassian-pm:setup to configure.",
     "tags": [
-      { "tag": "[BE]", "name": "Backend", "path": "~/Projects/my-project/api" },
-      { "tag": "[FE-Admin]", "name": "Admin", "path": "~/Projects/my-project/admin" },
-      { "tag": "[FE-Web]", "name": "Website", "path": "~/Projects/my-project/website" },
-      { "tag": "[Video]", "name": "Video", "path": "~/Projects/my-project/video" },
-      { "tag": "[Player]", "name": "Player", "path": "~/Projects/my-project/player" },
-      { "tag": "[Jira-Gen]", "name": "Jira Generator", "path": "~/Projects/my-project/jira-generator" }
+      { "tag": "[API]", "name": "Backend", "path": "~/Projects/my-project/api" },
+      { "tag": "[WEB]", "name": "Frontend", "path": "~/Projects/my-project/web" }
     ]
   },
 
