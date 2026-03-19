@@ -66,30 +66,40 @@ Full checklist: [verification-checklist.md](verification-checklist.md)
 
 ### Create or Update?
 
-```text
-New requirement?
-├─ Yes → /search-issues (dedup)
-│        ├─ Duplicate found → /update-* or /sync-alignment
-│        └─ No duplicate
-│             ├─ Greenfield / architecture needed / new domain → /feature-blueprint → /create-epic → /story-full
-│             ├─ Unclear scope / multi-service / high-risk → /refine-feature → /story-full
-│             └─ Clear scope / single-service → /story-full (preferred)
-└─ No → Edit existing
-         ├─ Single issue → /update-{type}
-         └─ Story + subtasks (± Confluence) → /sync-alignment
+```mermaid
+flowchart TD
+    A{New Requirement?} -->|Yes| B["/search-issues\ndedup check"]
+    A -->|"No — Edit existing"| C{Single or Cascade?}
+
+    B --> D{Duplicate found?}
+    D -->|Yes| E["/update-* or /sync-alignment"]
+    D -->|No| F{Scope?}
+
+    F -->|"Greenfield / Architecture\nNew domain"| G["/feature-blueprint\n→ /create-epic → /story-full"]
+    F -->|"Unclear scope\nMulti-service / High-risk"| H["/refine-feature\n→ /story-full"]
+    F -->|"Clear scope\nSingle service"| I["/story-full ⭐ preferred"]
+    F -->|"Bug / Tech-debt\nChore / Spike"| J["/create-task"]
+
+    C -->|Single issue| K["/update-{type}"]
+    C -->|"Story needs new Sub-tasks"| L["/analyze-story"]
+    C -->|"Story + Sub-tasks sync"| M["/sync-alignment"]
+
+    classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    class E,G,H,I,J,K,L,M skill
 ```
 
 ### story-full vs analyze-story?
 
-```text
-/story-full (default)
-├─ Combined PO+TA = less context switching
-├─ Use when: new story from scratch
-└─ Output: Story + Sub-tasks in one go
+```mermaid
+flowchart LR
+    A{Story exists in Jira?} -->|"No\nCreate from scratch"| B
+    A -->|"Yes\nNeed subtasks only"| C
 
-/analyze-story (existing story only)
-├─ Use when: story already exists in Jira, only need subtasks
-└─ Skips story creation, starts from impact analysis
+    B["/story-full ⭐ default\nPhases 1–10\nPO + TA combined\nOutput: Story + Sub-tasks"]
+    C["/analyze-story\nPhases 5–10\nSkips story creation\nStarts from impact analysis"]
+
+    classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    class B,C skill
 ```
 
 ## Pre/Post Conditions
