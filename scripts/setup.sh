@@ -1,5 +1,5 @@
 #!/bin/bash
-# Setup jira-generator: skills, CLI tools, and global Claude config
+# Setup atlassian-pm: skills, CLI tools, and global Claude config
 # Safe to run multiple times (idempotent)
 
 set -e
@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-echo "=== jira-generator setup ==="
+echo "=== atlassian-pm setup ==="
 echo "Project: $PROJECT_DIR"
 echo ""
 
@@ -68,7 +68,7 @@ else
 
 ## Atlassian Settings
 
-> **Full config:** \`jira-generator/.claude/project-config.json\` — team, services, environments, custom fields
+> **Full config:** \`atlassian-pm/.claude/project-config.json\` — team, services, environments, custom fields
 
 | Setting | Value |
 | --- | --- |

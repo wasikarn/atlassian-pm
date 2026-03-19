@@ -29,7 +29,7 @@ Run as a **single Bash tool call**:
 
 ```bash
 # Resolve plugin root (CLAUDE_PLUGIN_ROOT may not be set outside plugin runtime)
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0}"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.0}"
 echo "CLAUDE_PLUGIN_ROOT = $PLUGIN_ROOT"
 
 # 1a. acli
@@ -86,7 +86,7 @@ Ask questions in order. Each is a plain chat message (free-form text answer). Va
 
 ## Phase 3 — Write Config
 
-Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0`).
+Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.0`).
 
 1. Read `$PLUGIN_ROOT/config/project-config.json.template` using Read tool
 2. Build the config object by substituting collected values into the template structure:
@@ -102,7 +102,7 @@ Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugin
 ## Phase 4 — Finalize
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0}"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.0}"
 cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 ```
 

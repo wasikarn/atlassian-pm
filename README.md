@@ -116,7 +116,7 @@ Install without cloning the repo — Claude handles everything.
 ### Step 1 — Install plugin
 
 ```text
-/plugin install atlassian-pm@wasikarn/jira-generator
+/plugin install atlassian-pm@wasikarn/atlassian-pm
 ```
 
 ### Step 2 — Run setup
@@ -151,8 +151,8 @@ Install all four tools before running setup:
 ### Step 1 — Clone and enter the project
 
 ```bash
-git clone <repo-url> jira-generator
-cd jira-generator
+git clone https://github.com/wasikarn/atlassian-pm atlassian-pm
+cd atlassian-pm
 ```
 
 ---
@@ -276,11 +276,11 @@ The `.mcp.json` at the project root auto-registers the cache server when the plu
 
 ```bash
 # Load for this session only
-claude --plugin-dir /path/to/jira-generator
+claude --plugin-dir /path/to/atlassian-pm
 
 # Or add permanently to ~/.claude/settings.json:
 {
-  "pluginDirs": ["/path/to/jira-generator"]
+  "pluginDirs": ["/path/to/atlassian-pm"]
 }
 ```
 

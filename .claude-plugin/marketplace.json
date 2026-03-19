@@ -1,5 +1,5 @@
 {
-  "name": "jira-generator",
+  "name": "atlassian-pm",
   "owner": {
     "name": "Tathep"
   },
@@ -14,8 +14,8 @@
       },
       "keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
       "category": "productivity",
-      "homepage": "https://github.com/wasikarn/jira-generator",
-      "repository": "https://github.com/wasikarn/jira-generator",
+      "homepage": "https://github.com/wasikarn/atlassian-pm",
+      "repository": "https://github.com/wasikarn/atlassian-pm",
       "license": "MIT"
     }
   ]
