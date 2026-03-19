@@ -218,18 +218,8 @@ If any check fails → flag to user with the disagreement.
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: Writing to Confluence before QG ≥ 90% risks publishing incomplete/inconsistent documents. Auto-fix first, escalate if still failing.
 
-Score against `shared-references/verification-checklist.md` — Blueprint Quality (B1-B8):
-
-| # | Check | Criteria |
-|---|-------|----------|
-| B1 | Executive Summary | 1 paragraph, mentions problem + solution + who benefits |
-| B2 | Business Case | Problem narrative, ≥2 user scenarios, non-goals listed, appetite defined |
-| B3 | Domain Analysis | ≥1 bounded context, ≥1 domain event, entities with attributes |
-| B4 | Architecture | **Alternatives ≥2 options** with pros/cons, chosen approach with rationale |
-| B5 | Technical Spec | Real file paths (Glob-validated), endpoints with HTTP methods + status codes |
-| B6 | Risks | ≥3 risks with severity + mitigation, ≥2 edge cases, open questions listed |
-| B7 | Test Strategy | Test approach per affected layer, ≥3 critical test scenarios |
-| B8 | Delivery Plan | VS plan exists, stories mapped to VS labels, sprint estimate, dependency order |
+Score against `shared-references/verification-checklist.md` — Blueprint Quality (B1-B8).
+Load the file to see full criteria before scoring. Target: ≥ 90%.
 
 **Scoring:**
 
