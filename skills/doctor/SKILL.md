@@ -87,6 +87,7 @@ fi
 # Check 5: mcp-atlassian configured
 if claude mcp get mcp-atlassian &>/dev/null; then
   echo "  ✓  mcp-atlassian configured (user scope)"
+  echo "     (if Jira tools show 'not found', restart Claude Code to activate)"
   PASS=$((PASS+1))
 else
   echo "  ✗  mcp-atlassian not registered"

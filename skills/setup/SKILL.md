@@ -482,12 +482,19 @@ If **Skip for now**:
 
 ```text
 =================================================
-  ACTION REQUIRED: Restart Claude Code
+  ⚠️  ACTION REQUIRED: Restart Claude Code NOW
 =================================================
-  mcp-atlassian was just registered.
-  Claude Code must be restarted to activate it.
+  The following MCP servers were registered this session:
+  - mcp-atlassian (Jira + Confluence tools)
+  [Print this line only if FIGMA_NEWLY_ADDED=true: - figma (design references)]
 
-  After restart, verify: /atlassian-pm:doctor
+  These tools are INACTIVE until Claude Code restarts.
+  Running Jira skills before restarting will produce
+  "tool not found" errors.
+
+  After restarting:
+    1. Run /atlassian-pm:doctor    ← verify all systems
+    2. Run /atlassian-pm:search-issues  ← test Jira connection
 =================================================
 ```
 
