@@ -10,7 +10,11 @@ subagents access the same state file concurrently.
 
 import fcntl
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
 
@@ -221,13 +225,22 @@ def cache_is_checked(session_id: str, issue_key: str) -> bool:
 
 # ── QMD: Usage tracking ─────────────────────────────
 
-# Known indexed project roots → collection name
-QMD_COLLECTIONS = {
-    "/Users/kobig/Codes/Works/tathep/tathep-platform-api": "tathep-platform-api",
-    "/Users/kobig/Codes/Works/tathep/tathep-video-processing": "tathep-video-processing",
-    "/Users/kobig/Codes/Works/tathep/tathep-website": "tathep-website",
-    "/Users/kobig/Codes/Works/tathep/tathep-admin": "tathep-admin",
-}
+def _build_qmd_collections() -> dict[str, str]:
+    """Build QMD_COLLECTIONS from project-config.json services.tags[].
+
+    Returns empty dict if config missing — qmd hooks degrade gracefully.
+    expanduser() converts ~/Codes/... to absolute path.
+    """
+    config = load_project_config()
+    return {
+        str(Path(svc["path"]).expanduser()): Path(svc["path"]).expanduser().name
+        for svc in config.get("services", {}).get("tags", [])
+        if svc.get("path")
+    }
+
+
+# Known indexed project roots → collection name (built from project-config.json)
+QMD_COLLECTIONS = _build_qmd_collections()
 
 
 def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
