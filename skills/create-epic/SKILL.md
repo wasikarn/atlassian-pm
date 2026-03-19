@@ -19,6 +19,7 @@ argument-hint: "[epic-title]"
 
 | Phase | Adds to Context |
 |-------|----------------|
+| 0. Blueprint (optional) | `blueprint_page_id`, `blueprint_url`, `blueprint_stories[]` |
 | 1. Discovery | `stakeholder_input`, `problem_narrative`, `vs_plan`, `user_requirements` |
 | 2. RICE | `rice_score`, `priority` |
 | 3. Scope | `scope_items[]`, `vs_stories[]`, `mvp_definition` |
@@ -26,6 +27,29 @@ argument-hint: "[epic-title]"
 | 5. Create | `epic_key`, `epic_doc_id` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+
+## Blueprint Handoff Check
+
+> **Check first:** ดู conversation history ว่ามี `/feature-blueprint` output หรือไม่
+
+**If `blueprint_backlog_map` is present in history:**
+
+Extract from blueprint output:
+
+- `epic.title` → ใช้เป็น epic title (ข้ามการถามจาก user)
+- `stories[]` → เก็บเป็น `vs_stories[]` สำหรับ Phase 3
+- `non_goals[]` → เก็บเป็น out-of-scope items สำหรับ Phase 3 scope definition
+- `blueprint_page_id` → link ใน Epic Doc section "References"
+
+Skip interview questions in Phase 1 for information already documented.
+แสดง summary ให้ user confirm:
+> "พบ blueprint: [Feature Name] — ใช้ข้อมูลจาก blueprint สำหรับ epic นี้ confirm?"
+
+**⛔ GATE** — รอ user confirm ก่อนดำเนินต่อ
+
+**If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ
+
+---
 
 ## Phases
 
@@ -51,6 +75,9 @@ argument-hint: "[epic-title]"
 - **🟡 REVIEW** — Present RICE scoring to stakeholder. Proceed unless stakeholder objects.
 
 ### 3. Define Scope + VS Planning
+
+> **If `vs_stories[]` pre-populated from blueprint:** ข้าม VS derivation — ใช้ `vs_stories[]` จาก blueprint โดยตรง แสดงให้ user confirm แทน
+> **If `non_goals[]` present from blueprint:** ใช้เป็น out-of-scope items ใน scope definition (ไม่ต้องถามใหม่)
 
 - Identify high-level requirements
 - **VS Pattern Selection:** (see [vertical-slice-guide.md](../shared-references/vertical-slice-guide.md))

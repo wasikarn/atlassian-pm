@@ -27,6 +27,7 @@ argument-hint: "[story-description]"
 
 | Phase | Adds to Context |
 |-------|----------------|
+| 0. Blueprint (optional) | `blueprint_page_id`, `selected_story_index`, `blueprint_acs_hints[]` |
 | 1. Discovery | `epic_data`, `vs_assignment`, `user_requirements`, `user_context` |
 | 2. Write Story | `story_narrative`, `acs[]`, `scope`, `dod` |
 | 3. INVEST | `invest_score`, `vs_validated` |
@@ -40,6 +41,54 @@ argument-hint: "[story-description]"
 | 10. Create | `subtask_keys[]` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+
+## Blueprint Handoff Check
+
+> **Check first:** ดู conversation history ว่ามี `/feature-blueprint` output หรือไม่
+
+**If `blueprint_backlog_map` is present in history:**
+
+**Step 1 — แสดง story list:**
+แสดง stories จาก blueprint เป็น numbered list (1-based) ให้ user เลือก:
+
+```text
+Blueprint stories:
+1. [stories[0].title] — [stories[0].vs_label] ([stories[0].sp_estimate])
+2. [stories[1].title] — [stories[1].vs_label] ([stories[1].sp_estimate])
+...
+```
+
+Ask: "ต้องการสร้าง story ข้อไหน? (ระบุหมายเลข)"
+
+- ถ้า index ไม่มีใน list → แสดง list ใหม่ให้ user เลือกอีกครั้ง
+
+**Step 2 — Extract selected story (stories[N-1] where N = user's 1-based choice):**
+
+- `stories[N-1].title` → ใช้เป็น story summary draft
+- `stories[N-1].narrative_hint` → เริ่ม narrative จาก hint นี้
+- `stories[N-1].acs_hint[]` → ใช้เป็น starting points สำหรับ ACs
+- `stories[N-1].vs_label` → pre-assign VS label
+- `stories[N-1].sp_estimate` → suggest SP (S/M/L)
+- `blueprint_page_id` (ถ้ามี) → link ใน story description "References"
+- ถ้า field ใด missing → ข้ามการ populate field นั้น
+
+**Step 3 — Confirm before proceeding:**
+แสดง summary:
+> "Story: [title] | VS: [vs_label] | SP: [sp_estimate]\nใช้ข้อมูลจาก blueprint สำหรับ story นี้ confirm?"
+
+**⛔ GATE** — รอ user confirm ก่อนดำเนินต่อ
+
+**In Phase 1 (Discovery):**
+
+- ✅ ยังคง fetch epic via `jira_get_issue` ถ้า epic key ใน blueprint → ได้ `epic_data`
+- ❌ ข้าม interview questions (Who/What/Why/Constraints) — มีข้อมูลจาก blueprint แล้ว
+- ❌ ข้าม VS assignment question — ใช้ `vs_label` จาก blueprint แทน
+
+ดำเนินต่อ Phase 2 Write User Story โดยใช้ blueprint context เป็น draft
+
+**If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ (ถาม Who/What/Why/Constraints)
+
+---
 
 ## Part A: Create Story (Phases 1-4)
 
