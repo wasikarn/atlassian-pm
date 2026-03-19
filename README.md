@@ -11,7 +11,7 @@ Create Epics, User Stories, Sub-tasks, and plan Sprints using natural language. 
 - [How It Works](#how-it-works)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [Manual Installation](#manual-installation)
 - [Plugin Commands](#plugin-commands)
 - [Usage Examples](#usage-examples)
 - [Project Structure](#project-structure)
@@ -113,19 +113,13 @@ Claude Code ──skills──► acli (ADF JSON) ──────────
 
 Install without cloning the repo — Claude handles everything.
 
-### Step 1 — Add marketplace
+### Step 1 — Install plugin
 
 ```text
-/plugin marketplace add wasikarn/jira-generator
+/plugin install atlassian-pm@wasikarn/jira-generator
 ```
 
-### Step 2 — Install plugin
-
-```text
-/plugin install atlassian-pm@atlassian-pm
-```
-
-### Step 3 — Run setup
+### Step 2 — Run setup
 
 ```text
 /atlassian-pm:setup
@@ -133,7 +127,7 @@ Install without cloning the repo — Claude handles everything.
 
 Claude will ask for your Jira site, project key, and board ID, then write the config and configure git filters automatically.
 
-> **Note:** The marketplace install commands above are based on Claude Code's plugin system. If these commands are not yet available in your version, use the manual installation below.
+> **Note:** Plugin installation requires Claude Code's plugin system. If the `/plugin install` command is not yet available in your version, use the manual installation below.
 
 ---
 
@@ -152,7 +146,7 @@ Install all four tools before running setup:
 
 ---
 
-## Installation
+## Manual Installation
 
 ### Step 1 — Clone and enter the project
 
@@ -476,7 +470,7 @@ agents/                             ← 8 subagent definitions
 ├── alignment-checker.md (sonnet)   ← Epic→Story→Subtask alignment
 └── sprint-planner.md (opus)        ← Sprint capacity planning
 
-hooks/                              ← 39 Python hook scripts
+hooks/                              ← 40 Python hook scripts
 ├── hooks.json                      ← Plugin hook manifest
 ├── pre_hr*.py                      ← Block rule violations before tool execution
 └── post_hr*.py                     ← Track and confirm post-execution state
