@@ -28,6 +28,10 @@ Guided first-time setup for the `atlassian-pm` plugin.
 Run as a **single Bash tool call**:
 
 ```bash
+# Resolve plugin root (CLAUDE_PLUGIN_ROOT may not be set outside plugin runtime)
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0}"
+echo "CLAUDE_PLUGIN_ROOT = $PLUGIN_ROOT"
+
 # 1a. acli
 command -v acli || brew install atlassian-cli
 
@@ -37,7 +41,7 @@ UV_BIN="${HOME}/.local/bin/uv"
 command -v uv &>/dev/null && UV_BIN="uv"
 
 # 1c. jira-cache-server venv
-"$UV_BIN" sync --project "$CLAUDE_PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
+"$UV_BIN" sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
 ```
 
 If any step fails → report error to user and stop. Do not proceed to Phase 2.
@@ -82,21 +86,24 @@ Ask questions in order. Each is a plain chat message (free-form text answer). Va
 
 ## Phase 3 — Write Config
 
-1. Read `$CLAUDE_PLUGIN_ROOT/config/project-config.json.template` using Read tool
+Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0`).
+
+1. Read `$PLUGIN_ROOT/config/project-config.json.template` using Read tool
 2. Build the config object by substituting collected values into the template structure:
    - Replace template placeholder values (e.g. `acme-corp.atlassian.net` → real site)
    - Keep all template structure, comments, and non-answered fields as-is
    - Set `jira.board_id` as integer (not string)
    - If team was skipped → keep template placeholder members
    - If services were skipped → write `"tags": []` (empty array, not template placeholders)
-3. Write to `$CLAUDE_PLUGIN_ROOT/.claude/project-config.json` using Write tool
+3. Write to `$PLUGIN_ROOT/.claude/project-config.json` using Write tool
 
 ---
 
 ## Phase 4 — Finalize
 
 ```bash
-cd "$CLAUDE_PLUGIN_ROOT" && ./scripts/setup.sh
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/jira-generator/atlassian-pm/1.0.0}"
+cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 ```
 
 `setup.sh` handles: git smudge/clean filter configuration, sync-skills to `~/.claude/skills/`, and global `CLAUDE.md` Atlassian settings block. Dependency steps will re-run but are idempotent (safe).
