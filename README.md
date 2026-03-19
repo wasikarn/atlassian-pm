@@ -235,7 +235,7 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | configured by setup (Phase 4) |
 | Python 3.x | REST API scripts | pre-installed on macOS |
 
-> **uv** (Python package manager) is required for the cache server: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+> **uv** (Python package manager) is required for the cache server: `brew install uv`
 
 ---
 
@@ -281,19 +281,7 @@ acli jira login \
 
 Get your token at **Atlassian Account → Security → API tokens**.
 
-### 4. Configure MCP
-
-```bash
-claude mcp add --scope user mcp-atlassian -- \
-  uvx --no-cache mcp-atlassian==0.21.0 \
-  --env-file ~/.config/atlassian/.env \
-  --jira-projects-filter=YOUR_PROJECT_KEY \
-  --confluence-spaces-filter=YOUR_SPACE_KEY
-```
-
-> **Note:** `~/.config/atlassian/.env` must exist first (Step 5). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `BEP`).
-
-### 5. Create credentials file
+### 4. Create credentials file
 
 ```bash
 mkdir -p ~/.config/atlassian
@@ -311,6 +299,18 @@ chmod 600 ~/.config/atlassian/.env
 
 Get your API token at: **Atlassian Account → Security → API tokens**
 One token works for both Jira and Confluence. Tokens expire in ≤365 days.
+
+### 5. Configure MCP
+
+```bash
+claude mcp add --scope user mcp-atlassian -- \
+  uvx --no-cache mcp-atlassian==0.21.0 \
+  --env-file ~/.config/atlassian/.env \
+  --jira-projects-filter=YOUR_PROJECT_KEY \
+  --confluence-spaces-filter=YOUR_SPACE_KEY
+```
+
+> **Note:** `~/.config/atlassian/.env` must exist first (Step 4). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `BEP`).
 
 ### 6. Run setup
 
