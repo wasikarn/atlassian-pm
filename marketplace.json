@@ -1,0 +1,15 @@
+{
+  "name": "atlassian-pm",
+  "description": "Agile Jira/Confluence automation for Claude Code",
+  "plugins": [
+    {
+      "name": "atlassian-pm",
+      "description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
+      "version": "1.0.1",
+      "source": {
+        "type": "github",
+        "repo": "wasikarn/atlassian-pm"
+      }
+    }
+  ]
+}

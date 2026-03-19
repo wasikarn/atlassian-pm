@@ -3,7 +3,8 @@
 # Symlinks are created with platform prefixes: jira-, confluence-
 # Usage: sync-skills [--dry-run] [--verbose] [--remove]
 
-SRC_BASE="$HOME/Codes/Works/tathep/atlassian-pm"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SRC_BASE="$(dirname "$SCRIPT_DIR")"
 DST_BASE="$HOME/.claude"
 
 DRY_RUN=false

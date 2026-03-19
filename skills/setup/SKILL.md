@@ -19,7 +19,7 @@ Guided first-time setup for the `atlassian-pm` plugin.
 | 1. Dependencies | Check + install `acli`, `uv`, jira-cache-server venv |
 | 2. Configuration | Ask Jira URL, project key, board ID (+ optional team + services) |
 | 3. Write Config | Write `.claude/project-config.json` from template |
-| 4. Finalize | Run `scripts/setup.sh` (git filters + sync-skills) |
+| 4. Finalize | Run `scripts/setup.sh` (git filters + global CLAUDE.md) |
 
 ---
 
@@ -29,8 +29,13 @@ Run as a **single Bash tool call**:
 
 ```bash
 # Resolve plugin root (CLAUDE_PLUGIN_ROOT may not be set outside plugin runtime)
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1}"
-echo "CLAUDE_PLUGIN_ROOT = $PLUGIN_ROOT"
+if [ -n "$CLAUDE_PLUGIN_ROOT" ]; then
+  PLUGIN_ROOT="$CLAUDE_PLUGIN_ROOT"
+else
+  PLUGIN_ROOT=$(find "$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | sort -V | tail -1)
+  [ -z "$PLUGIN_ROOT" ] && { echo "Error: plugin not found in cache and CLAUDE_PLUGIN_ROOT not set"; exit 1; }
+fi
+echo "PLUGIN_ROOT = $PLUGIN_ROOT"
 
 # 1a. acli
 if ! command -v acli &>/dev/null; then
@@ -89,7 +94,7 @@ Ask questions in order. Each is a plain chat message (free-form text answer). Va
 
 ## Phase 3 — Write Config
 
-Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1`).
+Use the same `$PLUGIN_ROOT` resolved in Phase 1 (auto-detected from plugin cache or `$CLAUDE_PLUGIN_ROOT`).
 
 1. Read `$PLUGIN_ROOT/config/project-config.json.template` using Read tool
 2. Build the config object by substituting collected values into the template structure:
@@ -105,11 +110,11 @@ Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugin
 ## Phase 4 — Finalize
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1}"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(find "$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | sort -V | tail -1)}"
 cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 ```
 
-`setup.sh` handles: git smudge/clean filter configuration, sync-skills to `~/.claude/skills/`, and global `CLAUDE.md` Atlassian settings block. Dependency steps will re-run but are idempotent (safe).
+`setup.sh` handles: git smudge/clean filter configuration and global `CLAUDE.md` Atlassian settings block. Dependency steps will re-run but are idempotent (safe).
 
 ---
 

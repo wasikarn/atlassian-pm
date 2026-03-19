@@ -190,6 +190,34 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ---
 
+## Online Installation (Recommended)
+
+Install without cloning the repo — Claude handles everything.
+
+**Step 1** — Add marketplace
+
+```text
+/plugin marketplace add wasikarn/atlassian-pm
+```
+
+**Step 2** — Install plugin
+
+```text
+/plugin install atlassian-pm@atlassian-pm
+```
+
+**Step 3** — Run setup
+
+```text
+/atlassian-pm:setup
+```
+
+Claude will ask for your Jira site, project key, and board ID, then write the config and configure git filters automatically.
+
+> **Note:** The marketplace install commands above are based on Claude Code's plugin system. If these commands are not yet available in your version, use the manual installation below.
+
+---
+
 ## Prerequisites
 
 | Tool | Purpose | Install |
