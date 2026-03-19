@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "jira-generator",
+  "description": "Agile Jira/Confluence automation for Claude Code — Tathep Platform",
+  "owner": {
+    "name": "Tathep"
+  },
+  "plugins": [
+    {
+      "name": "atlassian-pm",
+      "description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
+      "category": "productivity",
+      "source": ".",
+      "homepage": "https://github.com/wasikarn/jira-generator"
+    }
+  ]
+}
