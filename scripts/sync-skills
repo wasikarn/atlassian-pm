@@ -1,9 +1,9 @@
 #!/bin/bash
-# Sync jira-generator skills + agents to ~/.claude/
+# Sync atlassian-pm skills + agents to ~/.claude/
 # Symlinks are created with platform prefixes: jira-, confluence-
 # Usage: sync-skills [--dry-run] [--verbose] [--remove]
 
-SRC_BASE="$HOME/Codes/Works/tathep/jira-generator"
+SRC_BASE="$HOME/Codes/Works/tathep/atlassian-pm"
 DST_BASE="$HOME/.claude"
 
 DRY_RUN=false
@@ -19,7 +19,7 @@ for arg in "$@"; do
       echo "Usage: sync-skills [--dry-run] [--verbose] [--remove]"
       echo "  --dry-run   Show what would change without making changes"
       echo "  --verbose   Show unchanged entries too"
-      echo "  --remove    Remove all jira-generator symlinks (undo sync)"
+      echo "  --remove    Remove all atlassian-pm symlinks (undo sync)"
       exit 0
       ;;
   esac
@@ -63,7 +63,7 @@ get_agent_prefix() {
   esac
 }
 
-# ─── remove_all: remove all jira-generator symlinks from a directory ──────
+# ─── remove_all: remove all atlassian-pm symlinks from a directory ──────
 remove_all() {
   local dst="$1"
 
@@ -73,7 +73,7 @@ remove_all() {
     link="${link%/}"
     [ -L "$link" ] || continue
     target=$(readlink "$link")
-    [[ "$target" == *"jira-generator"* ]] || continue
+    [[ "$target" == *"atlassian-pm"* ]] || continue
     echo "  - $(basename "$link")"
     $DRY_RUN || rm "$link"
     removed=$((removed + 1))
@@ -90,12 +90,12 @@ sync_dirs() {
 
   local added=0 unchanged=0 removed=0
 
-  # Remove broken symlinks pointing to jira-generator
+  # Remove broken symlinks pointing to atlassian-pm
   for link in "$dst"/*/; do
     link="${link%/}"
     [ -L "$link" ] || continue
     target=$(readlink "$link")
-    [[ "$target" == *"jira-generator"* ]] || continue
+    [[ "$target" == *"atlassian-pm"* ]] || continue
     if [ ! -e "$link" ]; then
       echo "  - $(basename "$link") (broken, removed)"
       $DRY_RUN || rm "$link"
@@ -115,7 +115,7 @@ sync_dirs() {
 
     if [ -L "$dest" ]; then
       existing=$(readlink "$dest")
-      if [[ "$existing" == *"jira-generator"* ]]; then
+      if [[ "$existing" == *"atlassian-pm"* ]]; then
         $VERBOSE && echo "  ✓ $symname"
         unchanged=$((unchanged + 1))
       else
@@ -146,11 +146,11 @@ sync_files() {
 
   local added=0 unchanged=0 removed=0
 
-  # Remove broken file symlinks pointing to jira-generator
+  # Remove broken file symlinks pointing to atlassian-pm
   for link in "$dst"/*."$ext"; do
     [ -L "$link" ] 2>/dev/null || continue
     target=$(readlink "$link")
-    [[ "$target" == *"jira-generator"* ]] || continue
+    [[ "$target" == *"atlassian-pm"* ]] || continue
     if [ ! -e "$link" ]; then
       echo "  - $(basename "$link") (broken, removed)"
       $DRY_RUN || rm "$link"
@@ -170,7 +170,7 @@ sync_files() {
 
     if [ -L "$dest" ]; then
       existing=$(readlink "$dest")
-      if [[ "$existing" == *"jira-generator"* ]]; then
+      if [[ "$existing" == *"atlassian-pm"* ]]; then
         $VERBOSE && echo "  ✓ $symname"
         unchanged=$((unchanged + 1))
       else
@@ -214,8 +214,8 @@ sync_files "$SRC_BASE/agents" "$DST_BASE/agents" "md"
 echo ""
 skill_count=$(find "$DST_BASE/skills" -maxdepth 1 -type l 2>/dev/null \
   | while read -r l; do readlink "$l"; done \
-  | grep -c "jira-generator" || true)
+  | grep -c "atlassian-pm" || true)
 agent_count=$(find "$DST_BASE/agents" -maxdepth 1 -type l 2>/dev/null \
   | while read -r l; do readlink "$l"; done \
-  | grep -c "jira-generator" || true)
-echo "Total from jira-generator: $skill_count skills, $agent_count agents"
+  | grep -c "atlassian-pm" || true)
+echo "Total from atlassian-pm: $skill_count skills, $agent_count agents"
