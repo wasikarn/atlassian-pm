@@ -122,16 +122,19 @@ fi
 # --- 2. Configure git smudge/clean filter ---
 echo ""
 echo "[2/2] Configuring git filters..."
-CURRENT_SMUDGE=$(cd "$PROJECT_DIR" && git config --get filter.project-config.smudge 2>/dev/null || true)
-EXPECTED_SMUDGE="python3 scripts/git_filter.py --smudge"
-
-if [ "$CURRENT_SMUDGE" = "$EXPECTED_SMUDGE" ]; then
-  echo "  already configured"
+if ! git -C "$PROJECT_DIR" rev-parse --git-dir &>/dev/null; then
+  echo "  skipped (not a git repository — plugin installed from cache)"
 else
-  cd "$PROJECT_DIR"
-  git config filter.project-config.smudge "python3 scripts/git_filter.py --smudge"
-  git config filter.project-config.clean "python3 scripts/git_filter.py --clean"
-  echo "  configured (auto placeholder conversion)"
+  CURRENT_SMUDGE=$(git -C "$PROJECT_DIR" config --get filter.project-config.smudge 2>/dev/null || true)
+  EXPECTED_SMUDGE="python3 scripts/git_filter.py --smudge"
+
+  if [ "$CURRENT_SMUDGE" = "$EXPECTED_SMUDGE" ]; then
+    echo "  already configured"
+  else
+    git -C "$PROJECT_DIR" config filter.project-config.smudge "python3 scripts/git_filter.py --smudge"
+    git -C "$PROJECT_DIR" config filter.project-config.clean "python3 scripts/git_filter.py --clean"
+    echo "  configured (auto placeholder conversion)"
+  fi
 fi
 
 # --- Check PATH ---
