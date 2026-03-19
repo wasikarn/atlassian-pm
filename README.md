@@ -200,7 +200,7 @@ cd mcp-servers/jira-cache-server
 uv sync --extra embeddings
 ```
 
-The `.mcp.json` at the project root auto-registers the cache server when the plugin is loaded. No additional config needed.
+The `.mcp.json` at the project root auto-registers the cache server when the plugin is loaded via `uv run`, which automatically uses the local venv. The `--extra embeddings` flag installs `sqlite-vec` and `sentence-transformers` for semantic similarity search — skip this if you only need keyword search (FTS5).
 
 ---
 
@@ -393,7 +393,7 @@ tasks/                              ← Generated ADF JSON outputs (gitignored)
 CLAUDE.md                           ← Agent instructions (passive context)
 ```
 
-> The jira-cache-server venv is stored outside the project at `~/.cache/jira-generator/jira-cache-server/.venv/` (~640MB ML deps).
+> The jira-cache-server venv is at `mcp-servers/jira-cache-server/.venv/` (~640MB with embeddings). The SQLite database is stored separately at `~/.cache/jira-generator/jira.db`.
 
 ---
 
