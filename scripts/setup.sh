@@ -36,6 +36,15 @@ fi
 
 echo ""
 
+# --- migrate. Remove legacy cache (pre-CLAUDE_PLUGIN_DATA) ---
+LEGACY_CACHE="$HOME/.cache/jira-generator"
+if [ -d "$LEGACY_CACHE" ]; then
+  echo "[migrate] Removing legacy cache at $LEGACY_CACHE ..."
+  rm -rf "$LEGACY_CACHE"
+  echo "  Done. DB now stored in CLAUDE_PLUGIN_DATA (plugin data dir)."
+  echo ""
+fi
+
 # --- 0. Check project config ---
 CONFIG_FILE="$PROJECT_DIR/.claude/project-config.json"
 CONFIG_TEMPLATE="$PROJECT_DIR/config/project-config.json.template"
