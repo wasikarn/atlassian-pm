@@ -25,7 +25,8 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_DB_PATH = Path.home() / ".cache" / "jira-generator" / "jira.db"
+_plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
+DEFAULT_DB_PATH = (Path(_plugin_data) if _plugin_data else Path.home() / ".cache" / "jira-generator") / "jira.db"
 
 # Current schema version — increment when adding migrations
 SCHEMA_VERSION = 3
