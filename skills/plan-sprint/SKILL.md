@@ -59,8 +59,6 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 
 > **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
----
-
 ## Part A: Data Collection (Phases 1-2) — Execution Layer
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
@@ -89,7 +87,8 @@ MCP: jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assigne
 
 ```text
 Read: .claude/skills/shared-references/team-capacity.md
-Read: .claude/project-config.json → team.members[], team.velocity
+Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sprint
+Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
 **Step 2a: Team Velocity (SP-based)**
@@ -114,11 +113,11 @@ Per person:
 ```
 
 > **Review Cost:** Tech Lead reviews 4 people (~15h/sprint), Senior reviews 2 (~4h/sprint).
-> Read `team.review_cost` from project-config.json.
+> Read `review_cost` from `.claude/project-config-team-detail.json`.
 
 **Step 2c: Skill Profile + Complexity**
 
-Read each member's `skill_profile` + `growth_tracks` + `bus_factor` from config.
+Read each member's `skill_profile` from `project-config.json`; `growth_tracks` + `bus_factor` from `project-config-team-detail.json`.
 Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw throughput for item count limits.
 
 **Output:** Capacity table
@@ -128,8 +127,6 @@ Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw th
 | ...    | ...  | ...            | ...         | ...           | ...                      |
 
 **🟡 REVIEW** — Present capacity table to user. Proceed unless user objects.
-
----
 
 ## Part B: Strategy Analysis (Phases 3-6)
 
@@ -142,6 +139,7 @@ You are a sprint planning strategist. Read and apply the frameworks from:
 - .claude/skills/shared-references/sprint-frameworks.md (RICE, Impact/Effort, carry-over model)
 - .claude/skills/shared-references/team-capacity.md (capacity model, skill matrix, focus factor, throughput)
 - .claude/project-config.json → team.members[] (skill_profile, focus_factor, avg_throughput)
+- .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor
 
 ## Sprint Data
 [Insert Phase 1 data: source sprint items, target sprint items, statuses, assignees]
@@ -232,8 +230,6 @@ You are a sprint planning strategist. Read and apply the frameworks from:
 - [ ] Cross-training opportunity flagged (if sprint items touch bus-factor=1 areas → suggest pairing)
 
 **Output:** Risk flags with severity + mitigation
-
----
 
 ## Part C: Approval & Execution (Phases 7-8) — Execution Layer
 
@@ -338,16 +334,12 @@ Subtask alignment: [X checked, Y fixed]
 → To update a story: /update-story {{PROJECT_KEY}}-XXX
 ```
 
----
-
 ## Options
 
 | Flag | Description |
 | ------ | ------------- |
 | `--sprint <id>` | Specify target sprint ID (if not specified → find the next future sprint) |
 | `--carry-over-only` | Carry-over analysis only (no assign/move) — Phase 1-3 only |
-
----
 
 ## Example
 
@@ -367,8 +359,6 @@ Assignments:
   {{SLOT_5}}: 4 tickets (Mobile + FE-Web)
 Risk: ABC-XXX blocks 2 downstream tickets
 ```
-
----
 
 ## References
 

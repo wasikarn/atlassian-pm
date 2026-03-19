@@ -48,7 +48,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = Path(__file__).parent.parent.parent.parent / "project-config.json"
+_CLAUDE_DIR = Path(__file__).parent.parent.parent.parent / ".claude"
+LEAN_CONFIG_PATH = _CLAUDE_DIR / "project-config.json"
+DETAIL_CONFIG_PATH = _CLAUDE_DIR / "project-config-team-detail.json"
 
 
 def create_api() -> JiraAPI:
@@ -62,16 +64,19 @@ def create_api() -> JiraAPI:
     )
 
 
-def load_config() -> dict:
-    """Load project-config.json."""
-    with open(CONFIG_PATH) as f:
-        return json.load(f)
+def load_config() -> tuple[dict, dict]:
+    """Load both config files. Returns (lean_config, detail_config)."""
+    with open(LEAN_CONFIG_PATH) as f:
+        lean = json.load(f)
+    with open(DETAIL_CONFIG_PATH) as f:
+        detail = json.load(f)
+    return lean, detail
 
 
-def save_config(config: dict) -> None:
-    """Save project-config.json with pretty formatting."""
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f, indent=2, ensure_ascii=False)
+def save_detail_config(detail: dict) -> None:
+    """Save team-detail config with pretty formatting."""
+    with open(DETAIL_CONFIG_PATH, "w") as f:
+        json.dump(detail, f, indent=2, ensure_ascii=False)
         f.write("\n")
 
 
@@ -156,10 +161,9 @@ def calculate_velocity(issues: list[dict], sp_field: str) -> dict:
     }
 
 
-def update_config_velocity(config: dict, sprint: dict, velocity: dict) -> None:
-    """Update velocity history in project-config.json."""
-    team = config.setdefault("team", {})
-    vel = team.setdefault("velocity", {})
+def update_config_velocity(detail: dict, sprint: dict, velocity: dict) -> None:
+    """Update velocity history in project-config-team-detail.json."""
+    vel = detail.setdefault("velocity", {})
     sp_data = vel.setdefault("story_points", {"avg_velocity": None, "sprints_tracked": 0, "history": []})
     throughput = vel.setdefault("throughput_history", [])
 
@@ -212,9 +216,9 @@ def update_config_velocity(config: dict, sprint: dict, velocity: dict) -> None:
         vel["avg_throughput_per_sprint"] = round(avg_tp, 1)
 
 
-def print_summary(config: dict) -> None:
+def print_summary(lean: dict, detail: dict) -> None:
     """Print current velocity summary."""
-    vel = config.get("team", {}).get("velocity", {})
+    vel = detail.get("velocity", {})
 
     print("=" * 60)
     print("Velocity Summary")
@@ -231,7 +235,7 @@ def print_summary(config: dict) -> None:
         print("  Need ≥50% SP coverage in sprints to start tracking")
 
     # Throughput
-    print(f"\nAvg Throughput: {vel.get('avg_throughput_per_sprint', '?')} tickets/sprint")
+    print(f"\nAvg Throughput: {lean['team'].get('avg_throughput_per_sprint', '?')} tickets/sprint")
 
     # History
     history = vel.get("throughput_history", [])
@@ -244,7 +248,7 @@ def print_summary(config: dict) -> None:
             print(f"  {entry['sprint']:<20} {entry['completed_tickets']:>8} {sp_str:>6} {entry.get('dates', '')}")
 
     # Team throughput
-    members = config.get("team", {}).get("members", [])
+    members = lean.get("team", {}).get("members", [])
     print("\nTeam Members:")
     print(f"  {'Name':<20} {'Role':<12} {'Focus':>6} {'Throughput':>12}")
     print(f"  {'-' * 20} {'-' * 12} {'-' * 6} {'-' * 12}")
@@ -274,10 +278,10 @@ def main() -> int:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    config = load_config()
+    lean, detail = load_config()
 
     if args.summary:
-        print_summary(config)
+        print_summary(lean, detail)
         return 0
 
     if not args.sprint_id and not args.sprint_name:
@@ -290,7 +294,7 @@ def main() -> int:
         logger.error("Credentials error: %s", e)
         return 2
 
-    board_id = config["jira"]["board_id"]
+    board_id = lean["jira"]["board_id"]
 
     # Find sprint
     if args.sprint_id:
@@ -317,7 +321,7 @@ def main() -> int:
         return 0
 
     # Calculate velocity
-    sp_field = config["jira"]["custom_fields"]["story_points"]
+    sp_field = lean["jira"]["custom_fields"]["story_points"]
     velocity = calculate_velocity(issues, sp_field)
 
     # Display results
@@ -342,9 +346,9 @@ def main() -> int:
         return 0
 
     # Update config
-    update_config_velocity(config, sprint, velocity)
-    save_config(config)
-    print(f"\nUpdated: {CONFIG_PATH}")
+    update_config_velocity(detail, sprint, velocity)
+    save_detail_config(detail)
+    print(f"\nUpdated: {DETAIL_CONFIG_PATH}")
     print("HR6 Action: cache_invalidate may be needed if sprint items were modified")
 
     return 0

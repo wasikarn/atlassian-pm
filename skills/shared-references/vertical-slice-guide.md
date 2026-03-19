@@ -12,8 +12,6 @@
 | User can actually use it | Must wait for other layers |
 | Independently testable | Must wait for integration |
 
----
-
 ## Pattern Selection Decision Tree
 
 ```text
@@ -34,8 +32,6 @@ Epic received
         └─ Coupon → Ad integration ─────────────────────→ Cross-feature
                                                           coordinate with other epics
 ```
-
----
 
 ## VS Patterns
 
@@ -61,8 +57,6 @@ vs1-skeleton
 
 **DoD:** User can navigate to feature, sees placeholder, no errors
 
----
-
 ### 2. Business Rule Split (vs2, vs3, vs4...)
 
 **When:** Different business rules/types that can be delivered separately
@@ -87,8 +81,6 @@ vs3-discount-e2e (Discount Coupon)
 ```
 
 **DoD:** User can complete full flow for that coupon type
-
----
 
 ### 3. Enabler Story (vs-enabler)
 
@@ -116,8 +108,6 @@ vs-enabler-toast
 
 **DoD:** Component works in isolation, documented, other VS can use
 
----
-
 ### 4. Cross-feature (feature-scope)
 
 **When:** Flow spans multiple feature areas or epics
@@ -138,8 +128,6 @@ coupon-ad-integration
 ```
 
 **DoD:** Integration works end-to-end, both features updated
-
----
 
 ## VS Decomposition Process
 
@@ -210,8 +198,6 @@ Story: Coupon UI (❌ No VS label, horizontal)
 └─ [FE-Web] - Integrate with API
 ```
 
----
-
 ## VS Definition of Done
 
 ### Story Level
@@ -235,8 +221,6 @@ Story: Coupon UI (❌ No VS label, horizontal)
 | Event-split | Domain event lifecycle split across 2 VS | ⚡ One VS handles full command→event flow |
 | Consumer-no-emitter | Story consumes event but emitter not in scope | ⚡ Link to producer VS or add dependency |
 | Orphaned event | Event emitted but no consumer VS exists | ⚡ Validate downstream VS or defer event |
-
----
 
 ## Horizontal Split Recovery
 
@@ -293,8 +277,6 @@ Sprint 33:
 └─ ABC-204: vs5-use-discount-e2e (3 SP)
 ```
 
----
-
 ## VS Labels Convention
 
 > Full rules: [writing-style.md](writing-style.md) line 171+
@@ -309,8 +291,6 @@ Sprint 33:
 
 - Feature label (e.g., `coupon-web`)
 - VS label (e.g., `vs2-collect-e2e`)
-
----
 
 ## Sprint Assignment Strategy
 
@@ -327,11 +307,8 @@ Sprint 33:
 3. Lower-value VS (vs4, vs5)
 4. Polish/edge cases
 
----
-
 ## Related References
 
 - [sprint-frameworks.md](sprint-frameworks.md) — Sprint planning + VS overview
 - [writing-style.md](writing-style.md) — VS Labels convention
-- [story-best-practices.md](story-best-practices.md) — INVEST + splitting
 - [verification-checklist.md](verification-checklist.md) — VS quality checks

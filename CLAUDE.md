@@ -10,7 +10,8 @@ Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Co
 
 ## Project Settings
 
-Full config (team, fields, services, environments): @.claude/project-config.json
+Core config (jira fields, team roster, services, environments): @.claude/project-config.json
+Team detail (git evidence, capacity model, bus factor — load on-demand for sprint planning): `.claude/project-config-team-detail.json`
 
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key="{{PROJECT_KEY}}")` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
@@ -37,17 +38,16 @@ Loaded on demand from `skills/shared-references/` (23 docs, indexed by `template
 
 ## Core Principles
 
-1. **Quality Gate before Atlassian** — NEVER create/edit issues on Jira/Confluence before QG ≥ 90%
-2. **Phase-based workflows** — follow phases in order, never skip steps
-3. **Clear handoffs** — each role passes structured context to next
-4. **Traceability** — everything links back to parent (Story→Epic, Sub-task→Story)
-5. **Explore first** — prefer `Task(Explore)` before creating Sub-tasks (no explore = generic paths)
+| Principle | Rule |
+| --- | --- |
+| QG first | NEVER create/edit Atlassian issues before QG ≥ 90% |
+| Phase order | Follow phases in order, never skip steps |
+| Traceability | Everything links to parent: Sub-task→Story→Epic |
+| Explore first | Prefer `Task(Explore)` before creating Sub-tasks (no explore = generic paths) |
 
 ### HARD RULES
 
-Rules causing **silent failures**, **data corruption**, or **irreversible damage**. Hooks enforce HR2-HR7, HR10 automatically.
-
-> Full definitions, examples, and enforcement details: `skills/shared-references/hr-rules.md`
+> Hooks enforce HR2-HR7, HR10 automatically. Full definitions: `skills/shared-references/hr-rules.md`
 
 | Rule | Constraint |
 | --- | --- |
@@ -64,7 +64,7 @@ Rules causing **silent failures**, **data corruption**, or **irreversible damage
 
 ## Context Management
 
-**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post-compact-reinject.py`.
+**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post_compact_reinject.py`.
 
 **Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
 

@@ -286,7 +286,7 @@
 					},
 					{
 						"type": "prompt",
-						"prompt": "You are a task completion verifier for a Jira automation system. Check the conversation for incomplete work. NOTE: Do NOT check HR6 cache_invalidate — this is handled deterministically by the command hook (stop_hr6_unflushed_check.py) which reads session state directly. Specifically check: (1) If a subtask was created, was the parent verified with jira_get_issue? (2) If the user invoked a skill (/story-full, /analyze-story, /plan-sprint, etc.), did all phases complete? (3) If there are pending operations mentioned in the conversation (other than cache_invalidate), are they resolved? If everything looks complete OR if this is just a simple Q&A response (not a Jira workflow), respond {\"ok\": true}. If critical steps were skipped, respond {\"ok\": false, \"reason\": \"specific step that was missed\"}. Be conservative — only block if you are confident a critical step was skipped.",
+						"prompt": "First: scan tool calls in this conversation. If none of these Jira write tools appear — jira_create_issue, jira_batch_create_issues, jira_update_issue, jira_transition_issue, jira_delete_issue, jira_add_comment, jira_add_worklog, jira_link_to_epic — respond {\"ok\": true} immediately. Otherwise verify: (1) subtask created → parent verified via jira_get_issue? (2) skill invoked (/story-full, /analyze-story, /plan-sprint) → all phases complete? (3) pending ops (not cache_invalidate) unresolved? Note: HR6 cache_invalidate is handled by command hook — skip it. Complete or Q&A only: {\"ok\": true}. Critical step skipped: {\"ok\": false, \"reason\": \"step missed\"}. Be conservative — only block if confident.",
 						"timeout": 30
 					}
 				]

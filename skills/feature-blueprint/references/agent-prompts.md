@@ -75,7 +75,7 @@ Brief: {feature_brief}
 Codebase hints: {codebase_context from Phase 3}
 Stack: AdonisJS 5.9 + Effect-TS + Clean Architecture, Next.js 14
 Team roster: {team.members from project-config.json}
-Bus factor areas: {bus_factor from project-config.json}
+Bus factor areas: {bus_factor from project-config-team-detail.json}
 
 Tasks:
 1. Feasibility: can current stack handle this? New patterns needed?

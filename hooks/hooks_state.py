@@ -251,6 +251,22 @@ def qmd_collection_for_path(path: str) -> str | None:
             return name
     return None
 
+# ── Jira write activity tracking ────────────────────────────────────────────
+
+
+def jira_write_mark_occurred(session_id: str) -> None:
+    """Mark that at least one Jira write occurred this session (never cleared)."""
+    state = _load(session_id)
+    if not state.get("jira_write_occurred"):
+        state["jira_write_occurred"] = True
+        _save(session_id, state)
+
+
+def jira_write_is_occurred(session_id: str) -> bool:
+    """Return True if any Jira write operation occurred this session."""
+    return bool(_load(session_id).get("jira_write_occurred", False))
+
+
 # ── Subtask alignment tracking ──────────────────────────────────────────────
 
 def alignment_mark_sprint_suggested(session_id: str, sprint_id: str) -> None:

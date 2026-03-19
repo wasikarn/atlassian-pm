@@ -49,7 +49,7 @@ Tasks:
    - DB migration complexity? Breaking API changes?
    - Cross-service coordination needed?
 3. Risk flags: performance, security, data migration, bus factor
-   (reference bus_factor from project-config.json)
+   (reference bus_factor from project-config-team-detail.json)
 4. Effort estimate: SP per story (XS=1,S=2,M=3,L=5,XL=8)
 5. Dependency ordering: what blocks what?
 6. Reference similar implementations in codebase

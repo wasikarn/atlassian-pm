@@ -2,8 +2,6 @@
 
 > Universal error recovery for jira-workflow commands
 
----
-
 ## acli Errors
 
 ### JSON Format Errors
@@ -97,8 +95,6 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 }
 ```
 
----
-
 ## MCP Tool Errors
 
 ### Search Errors
@@ -165,15 +161,11 @@ acli jira workitem edit --from-json tasks/subtask.json --yes
 | `Expecting ')' but got 'ORDER'` | ORDER BY with `parent =` query | Use `parent = ABC-XXX` without ORDER BY, or `"Parent Link" = ABC-XXX ORDER BY...` |
 | `key in (...) ORDER BY` → parse error | ORDER BY not allowed with key in | Remove `ORDER BY` when using `key in (...)` syntax |
 
-> 🚨 **NEVER add ORDER BY to `parent =` or `key in (...)` queries — they always cause parse errors**
-
 ### Parallel MCP Call Errors
 
 | Error | Cause | Solution |
 | --- | --- | --- |
-| `Sibling tool call errored` | One parallel MCP call failed → all others cancelled | Fix the failing call first; consider making dependent calls sequential instead of parallel |
-
-> **Tip:** When making multiple `jira_search` / `jira_get_issue` calls in parallel, if one has bad JQL syntax, ALL sibling calls get cancelled. Validate JQL syntax before parallel execution.
+| `Sibling tool call errored` | One parallel MCP call failed → all others cancelled | Fix the failing call first; validate JQL before parallel execution |
 
 ### Large Output Error
 
@@ -207,8 +199,6 @@ jira_get_issue(
 | Check parent/links | `summary,status,issuetype,parent` |
 | Full analysis | `summary,status,description,issuetype,parent,labels` |
 
----
-
 ## Common Workflow Errors
 
 ### Phase 1: Discovery
@@ -240,33 +230,13 @@ jira_get_issue(
 | Edit overwrites content | Always fetch current first, then merge |
 | Lost original intent | Compare before/after, preserve core meaning |
 
----
-
 ## Recovery Procedures
 
-### If Create Fails
-
-1. Check error message
-2. Validate JSON structure
-3. Verify ADF format
-4. Retry with fixed JSON
-5. If still fails, try simpler description
-
-### If Update Fails
-
-1. Re-fetch current issue state
-2. Compare with your changes
-3. Check for concurrent edits
-4. Retry update
-
-### If Workflow Interrupted
-
-1. Note which phase completed
-2. Check if issue was created (search Jira)
-3. Resume from last completed phase
-4. If duplicate created, delete and restart
-
----
+| Scenario | Steps |
+| --- | --- |
+| Create fails | Check error → validate JSON/ADF → retry → try simpler description |
+| Update fails | Re-fetch current state → compare → check concurrent edits → retry |
+| Workflow interrupted | Note last completed phase → search Jira for created issue → resume or delete duplicate |
 
 ## Validation Commands
 

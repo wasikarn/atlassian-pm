@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hooks_lib import inject_context, log_event
-from hooks_state import hr6_add_pending
+from hooks_state import hr6_add_pending, jira_write_mark_occurred
 
 _HOOK = "hr6-cache-invalidate"
 
@@ -91,6 +91,7 @@ def main() -> None:
 
     for key in issue_keys:
         hr6_add_pending(session_id, key)
+    jira_write_mark_occurred(session_id)
 
     log_event(_HOOK, "REMIND", {"issue_keys": issue_keys, "tool": tool_name, "session_id": session_id})
 

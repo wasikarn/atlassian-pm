@@ -126,8 +126,6 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after field update.
 
----
-
 ## Part B: Create Sub-tasks (Phases 5-10)
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
@@ -262,16 +260,12 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 → /verify-issue ABC-XXX --with-subtasks
 ```
 
----
-
 ## Benefits vs Separate Workflow
 
 | Approach | When | Context |
 | --- | --- | --- |
 | `/story-full` | New story from scratch (default) | Preserved across all phases |
 | `/analyze-story` | Story already exists, need subtasks only | Starts from Phase 5 |
-
----
 
 ## Example
 
@@ -287,8 +281,6 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
   - `ABC-3101` [BE] - API endpoint `GET /api/reports/monthly` with date range filter
   - `ABC-3102` [FE-Admin] - Monthly report page + table component
   - `ABC-3103` [FE-Admin] - CSV export from report data
-
----
 
 ## References
 

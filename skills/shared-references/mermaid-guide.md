@@ -2,8 +2,6 @@
 
 > Layout control, best practices, and Confluence-specific patterns
 
----
-
 ## Layout Engines
 
 | Engine | Syntax | Best For | Notes |
@@ -27,8 +25,6 @@ flowchart TD
 | `nodePlacementStrategy` | `LINEAR_SEGMENTS` / `BRANDES_KOEPF` | Algorithm for node positioning |
 | `cycleBreakingStrategy` | various | How to handle cycles in the graph |
 | `forceNodeModelOrder` | `true` / `false` | Respect declaration order for positioning |
-
----
 
 ## Direction Control
 
@@ -67,8 +63,6 @@ flowchart LR
     end
     GROUP1 --> GROUP2
 ```
-
----
 
 ## Edge Overlap Solutions
 
@@ -153,8 +147,6 @@ OFFLINE -->|"Reconnect and synchronize data"| ONLINE
 OFFLINE -->|"Reconnect"| ONLINE
 ```
 
----
-
 ## Line Break in Node Labels
 
 | Syntax | Renders As | Support |
@@ -172,8 +164,6 @@ A["Line 1<br/>Line 2"]
 A["Line 1\nLine 2"]
 ```
 
----
-
 ## Node Shapes
 
 | Shape | Syntax | Use For |
@@ -188,8 +178,6 @@ A["Line 1\nLine 2"]
 | Database | `A[(text)]` | Data store |
 | Asymmetric | `A>text]` | Signal/event |
 
----
-
 ## Link Types
 
 | Type | Syntax | Use For |
@@ -200,8 +188,6 @@ A["Line 1\nLine 2"]
 | Thick arrow | `A ==> B` | Emphasis/critical path |
 | Invisible | `A ~~~ B` | Layout control only |
 | With label | `A -->\|"text"\| B` | Labeled transition |
-
----
 
 ## Edge Animation
 
@@ -253,8 +239,6 @@ e2@{ animation: fast }
 
 **Test script:** `scripts/confluence/test_mermaid_animation.py` — creates test page on Confluence with 4 animation variants.
 
----
-
 ## Styling
 
 ### Node Styles
@@ -272,8 +256,6 @@ style NODE_ID fill:#color,stroke:#color,stroke-width:2px
 | Error / Critical | Light red | Red | `fill:#f8d7da,stroke:#dc3545` |
 | Highlight / New | Gold | Dark | `fill:#ffd700,stroke:#333` |
 | Info / Neutral | Light blue | Blue | `fill:#cce5ff,stroke:#004085` |
-
----
 
 ## Confluence-Specific Patterns
 
@@ -337,8 +319,6 @@ Reference: `scripts/confluence/create_player_architecture_page.py`
 | Architecture diagrams | Untested | `architecture-beta` (v11.1.0+) — test before using |
 | Packet diagrams | Untested | `packet` (v11.0.0+) — test before using |
 
----
-
 ## Common Diagram Patterns
 
 ### State Machine (recommended structure)
@@ -380,8 +360,6 @@ flowchart TD
 
 Use `sequenceDiagram` instead of flowchart for request/response patterns.
 
----
-
 ## Anti-Patterns
 
 | Anti-Pattern | Problem | Fix |
@@ -393,8 +371,6 @@ Use `sequenceDiagram` instead of flowchart for request/response patterns.
 | `\n` for line breaks | May render as literal text | Always use `<br/>` |
 | Hardcoded layout with `~~~` everywhere | Fragile, breaks on content change | Use subgraphs for structural grouping first |
 | `&` syntax with edge ID (`D & E e1@--> F`) | Only one edge gets the ID — other stays static | Split into separate edges: `D e1@--> F` + `E e2@--> F` |
-
----
 
 ## Related
 

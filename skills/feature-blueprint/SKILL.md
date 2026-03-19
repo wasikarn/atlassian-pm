@@ -70,8 +70,6 @@ argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 | **M** (Standard) | Multi-service, 3-5 stories | All S1-S8 | Yes (2 rounds) | Single page + ToC |
 | **L** (Full) | System-level, 6+ stories, new domain | All S1-S8 | Yes (2 rounds) | Parent + 8 child pages |
 
----
-
 ## Phases
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed`.
@@ -346,8 +344,6 @@ Next steps (pick creation order):
 
 Present each story as a numbered card for user to pick creation order.
 
----
-
 ## When to Use vs Skip
 
 | Situation | Use `/feature-blueprint`? | Alternative |
@@ -373,8 +369,6 @@ Present each story as a numbered card for user to pick creation order.
 
 **Token budget:** S ~40K, M ~80K, L ~120K. Justified by reduced rework + cross-role alignment before implementation.
 
----
-
 ## S-tier Shortcut
 
 For small features (S-tier), skip Phases 4-5 entirely. Main session generates sections in a **single pass**:
@@ -386,8 +380,6 @@ For small features (S-tier), skip Phases 4-5 entirely. Main session generates se
 5. Write S8 (Delivery Plan) — stories + sprint mapping
 
 No subagents launched. ~40K tokens total.
-
----
 
 ## Example
 
@@ -415,8 +407,6 @@ No subagents launched. ~40K tokens total.
 | Domain Expert flagged missing `NotificationBatch` aggregate | **Added** — TL confirmed batch send needed for class reminders |
 
 **Output:** Confluence page with 8 sections + backlog map with 4 stories + 1 spike
-
----
 
 ## References
 

@@ -85,46 +85,9 @@ Expected carry-over = Σ (items × probability per status)
 
 ## Vertical Slicing
 
-> Source: Scrum Guide, StoriesOnBoard, SAFe — applied in Sprint 32 coupon system
+Full guide: [vertical-slice-guide.md](vertical-slice-guide.md) — patterns, decomposition, anti-patterns, before/after examples
 
-### Principle
-
-Stories must deliver **end-to-end user value** across all layers (UI → API → DB) — each story = independently deployable + testable
-
-### Vertical vs Horizontal
-
-| | Vertical (✅) | Horizontal (❌) |
-| --- | --- | --- |
-| Scope | Full stack for one flow | One layer across many flows |
-| Value | User can actually use it | Must wait for other layers to work |
-| Testing | QA can test real flows | Must wait for integration |
-| Example | "User collects credit coupon e2e" | "Build UI shell for all pages" |
-
-### Patterns
-
-| Pattern | When to Use | Example |
-| --- | --- | --- |
-| **Walking Skeleton** | Need navigation + empty states first | `vs1-skeleton`: nav + empty states |
-| **Business Rule Split** | Split by different rules/types | `vs2-credit-e2e`, `vs3-discount-e2e` |
-| **Enabler Story** (SAFe) | Shared component used by multiple slices | `vs-enabler`: Side Panel, Toast |
-| **Cross-feature** | Spans multiple feature areas | `ad-integration`: coupon → ad flow |
-
-### Anti-patterns
-
-> Full anti-pattern catalog: [vertical-slice-guide.md](vertical-slice-guide.md)
-
-| Anti-pattern | Fix |
-| --- | --- |
-| Shell-only story | Add happy path or reframe as Walking Skeleton |
-| Layer split (BE / FE separated) | Combine BE+FE in single story |
-| Tab-split | Split by business rule instead |
-
-### Sprint Assignment Strategy
-
-| Sprint | Focus | Stories |
-| --- | --- | --- |
-| Sprint N | Skeleton + Enablers + first E2E slice | `vs1-skeleton` + `vs-enabler` + `vs2-*` |
-| Sprint N+1 | Remaining E2E slices + cross-feature | `vs3-*` + `vs4-*` + `ad-integration` |
+**Quick ref:** Each story = full stack (UI→API→DB), independently deployable. Patterns: `vs1-skeleton` → `vs-enabler` → `vs2-*` E2E slices.
 
 ## Sprint Meeting Best Practices
 
@@ -138,29 +101,6 @@ Stories must deliver **end-to-end user value** across all layers (UI → API →
 | 4 weeks | 3h |
 
 **Formula:** `45 min × weeks in sprint`
-
-### Meeting Preparation Checklist
-
-**Product Owner:**
-
-- [ ] Review past sprint retrospective + stakeholder feedback
-- [ ] Backlog refined + prioritized (top items ready)
-- [ ] Acceptance criteria defined for top items
-- [ ] Dependencies identified
-
-**Development Team:**
-
-- [ ] Capacity conflicts identified (leave, meetings)
-- [ ] Technical concerns surfaced
-- [ ] Carry-over items status updated
-
-**Scrum Master:**
-
-- [ ] Meeting scheduled consistently (same day/time)
-- [ ] Sprint goal draft prepared
-- [ ] Previous sprint metrics available
-
----
 
 ## Sprint Goal Best Practices
 
@@ -241,10 +181,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 
 ## Sustainable Pace
 
-### Core Principle
-
-> "Agile processes promote sustainable development. The sponsors, developers, and users should be able to maintain a constant pace indefinitely."
-
 ### Capacity Buffer
 
 | Scenario | Buffer | Reason |
@@ -263,27 +199,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 - [ ] Overtime becoming normal
 
 **Fix:** Reduce scope, not quality
-
----
-
-## Backlog Grooming Integration
-
-### 10% Rule
-
-> Development teams should spend **no more than 10%** of their capacity on backlog grooming
-
-| Sprint Length | Grooming Budget |
-| --- | --- |
-| 2 weeks | ~1 day |
-| 4 weeks | ~2 days |
-
-### Pre-Sprint Refinement Checklist
-
-- [ ] Top 2 sprints worth of items refined
-- [ ] Acceptance criteria written
-- [ ] Dependencies identified
-- [ ] Estimates assigned (if using points)
-- [ ] Items small enough (≤3 days)
 
 ---
 

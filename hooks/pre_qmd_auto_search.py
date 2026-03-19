@@ -11,6 +11,7 @@ Exit 0 = allow, Exit 2 = block with qmd results
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -50,6 +51,27 @@ SKIP_SEGMENTS = {
     "features",
     "index",
     "config",
+    # Framework/infra directories — structural, not semantic
+    "routes",
+    "validators",
+    "middlewares",
+    "middleware",
+    "scripts",
+    "helpers",
+    "handlers",
+    "contracts",
+    "database",
+    "migrations",
+    "seeders",
+}
+
+# File extensions QMD does NOT index — Glob/Grep targeting these is pure navigation
+_UNINDEXED_EXTENSIONS = {
+    ".py", ".sh", ".bash", ".zsh",
+    ".json", ".jsonc", ".lock",
+    ".yaml", ".yml", ".toml", ".env",
+    ".sql", ".csv", ".txt", ".log",
+    ".go", ".rb", ".php", ".java", ".c", ".cpp", ".h",
 }
 
 
@@ -90,8 +112,19 @@ if qmd_is_collection_searched(session_id, collection):
 # Extract search query based on tool type
 query = ""
 if tool_name == "Grep":
+    # Skip if file glob filter targets non-indexed extension
+    file_glob = tool_input.get("glob", "") or tool_input.get("type", "")
+    if file_glob:
+        _, ext = os.path.splitext(file_glob)
+        if ext in _UNINDEXED_EXTENSIONS:
+            sys.exit(0)
+
     # Grep pattern is the search string — use directly
     query = tool_input.get("pattern", "")
+    # Skip structural patterns with no real word content (<3 alpha chars)
+    alpha_count = sum(1 for c in query if c.isalpha())
+    if alpha_count < 3:
+        sys.exit(0)
     # Clean regex-specific syntax for qmd search
     query = re.sub(r"[\\(){}[\]|^$.*+?]", " ", query)
     # Split camelCase/PascalCase/snake_case identifiers
@@ -100,6 +133,14 @@ if tool_name == "Grep":
 elif tool_name == "Glob":
     # Extract meaningful directory names from glob pattern
     pattern = tool_input.get("pattern", "")
+
+    # Skip if pattern targets non-indexed file extension
+    ext_match = re.search(r"\.(\w+)$", pattern.rstrip("/"))
+    if ext_match:
+        ext = "." + ext_match.group(1)
+        if ext in _UNINDEXED_EXTENSIONS:
+            sys.exit(0)
+
     parts = pattern.replace("\\", "/").split("/")
     meaningful = []
     for p in parts:

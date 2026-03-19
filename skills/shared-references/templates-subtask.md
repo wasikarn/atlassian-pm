@@ -63,13 +63,6 @@
 - AC: **max 3 panels** — all `panelType: "success"`, Given/When/Then with specific method names + HTTP codes
 - Reference section: ⚡ **skip** if parent story has all links
 
-> ⚠️ **CRITICAL:** `acli jira workitem create` does not support the `parent` field!
->
-> **Must use Two-Step Workflow:**
->
-> 1. **Step 1:** Create Sub-task shell with MCP (supports parent)
-> 2. **Step 2:** Update description with acli + ADF
-
 ### Step 1: Create Sub-task Shell (MCP)
 
 ```typescript
@@ -159,11 +152,9 @@ jira_create_issue({
 }
 ```
 
-## QA Test Case Template (ADF) - TWO-STEP WORKFLOW
+## QA Test Case Template (ADF)
 
-> ⚡ **Optional** — create only when requested by QA team or story has complex business logic requiring a clear test plan
->
-> Same Two-Step as Sub-task above: MCP create (`summary: "[QA] - Test: [Feature Name]"`) → acli edit
+> ⚡ Optional — create when QA requests or story has complex business logic. Same Two-Step: MCP create (`summary: "[QA] - Test: [Feature Name]"`) → acli edit
 
 **Density rules:**
 

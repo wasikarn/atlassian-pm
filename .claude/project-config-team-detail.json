@@ -1,0 +1,76 @@
+{
+  "_comment": "Team detail — load on-demand for sprint planning (/plan-sprint). NOT auto-loaded at session start.",
+
+  "git_evidence": {
+    "BIG-TATHEP":  "1,286 commits: API 627, Video 376 (sole dev), Admin 176, Website 107. fix 49%, test 25%, refactor 20%. 190 review commits. Video+DevOps bus factor=1. Nov=Video focus, Dec=API focus, Jan-Feb=distributed",
+    "K.Thanainun": "162 commits: API 134, Player 19, Website 5, Admin 4. Coupon, Referral, PhoneAuth, RateLimit. Player: playback bugs+logging+retry queue. Writes tests + refactors per review",
+    "joakim":      "472 commits: Website 273 (58%), Admin 148 (31%), API 51 (11%). coupon, billboard, referral, verify-phone, ad-report. Dec+ API increasing. fix 66%, feat 31%. Junior — needs review for complex tasks",
+    "wanchalerm":  "463 commits: Admin 205 (44%), Website 202 (44%), API 56 (12%). coupon, invoice, accounting, locale/translation. fix 52%, feat 30%. Junior — needs review, fix-heavy pattern",
+    "Natthakarn":  "billboard-owner-app: 55 commits sole dev (Flutter, Aug 2025-Jan 2026) — login, FCM, Sentry, CI/CD, playlist drag&drop, media upload. Website: 9 commits (S31, phone auth). Mobile=expert, DevOps evidence from CI/CD+Sentry setup"
+  },
+
+  "focus_factor_guide": {
+    "tech_lead": "0.4-0.5 (code review, mentoring, architecture, meetings)",
+    "senior":    "0.7-0.8 (complex tasks, some review, mentoring)",
+    "mid":       "0.75-0.85 (feature work, some review)",
+    "junior":    "0.6-0.7 (learning curve, needs code review, pair programming)"
+  },
+
+  "skill_levels": {
+    "expert":       "1.0x — complex tasks independently",
+    "intermediate": "0.8x — standard tasks, review for complex",
+    "basic":        "0.6x — simple tasks, needs guidance"
+  },
+
+  "velocity": {
+    "throughput_history": [
+      {"sprint": "Sprint-28", "id": 508, "completed_tickets": 50, "dates": "Nov 27 - Dec 9, 2025"},
+      {"sprint": "Sprint-29", "id": 541, "completed_tickets": 52, "dates": "Dec 16-30, 2025"},
+      {"sprint": "Sprint-30", "id": 574, "completed_tickets": 48, "dates": "Jan 5-19, 2026"},
+      {"sprint": "Sprint-31", "id": 607, "completed_tickets": 25, "dates": "Jan 22 - Feb 4, 2026"}
+    ],
+    "story_points": {"avg_velocity": null, "sprints_tracked": 0, "history": []}
+  },
+
+  "review_cost": {
+    "hours_per_junior_per_sprint": 5,
+    "reviewers": {
+      "BIG-TATHEP": ["joakim", "wanchalerm", "K.Thanainun", "Natthakarn"],
+      "K.Thanainun": ["joakim", "wanchalerm"]
+    },
+    "_note": "~30 min/PR × ~10 PRs/sprint per junior = ~5h. TL: 4 reviewees × 5h = 20h (in focus_factor 0.5). Sr: 2 reviewees × 5h = 10h (partial in focus_factor 0.75)."
+  },
+
+  "bus_factor": {
+    "critical": [
+      {"area": "Video Processing", "sole_owner": "BIG-TATHEP",  "mitigation": "Document architecture, pair with K.Thanainun"},
+      {"area": "DevOps/Infra",     "sole_owner": "BIG-TATHEP",  "mitigation": "Runbooks, share access with K.Thanainun"},
+      {"area": "Mobile (Flutter)", "sole_owner": "Natthakarn",   "mitigation": "Cross-train joakim or wanchalerm on Flutter basics"}
+    ],
+    "low_coverage": [
+      {"area": "Database/Complex", "owners": ["BIG-TATHEP", "K.Thanainun"], "gap": "No junior has DB skills beyond basic"},
+      {"area": "Frontend (Web)",   "owners": ["Natthakarn", "joakim", "wanchalerm"], "gap": "No senior expert — Tech Lead is intermediate"}
+    ]
+  },
+
+  "growth_tracks": {
+    "joakim":     {"current_strength": "FE intermediate", "growing_toward": "BE API expert", "recommended_next": "Database basics (migrations, query optimization)"},
+    "wanchalerm": {"current_strength": "FE intermediate", "growing_toward": "FE domain expert (coupon/invoice)", "recommended_next": "API complexity (reduce fix ratio from 52% to <40%)"},
+    "Natthakarn": {"current_strength": "Mobile expert, FE Web intermediate", "growing_toward": "Full stack mobile + web", "recommended_next": "Admin panel basics, more website features"}
+  },
+
+  "cross_training": {
+    "priority_1": [
+      {"trainee": "K.Thanainun", "skill": "DevOps basics",               "trainer": "BIG-TATHEP",  "reason": "Bus factor=1 on DevOps"},
+      {"trainee": "K.Thanainun", "skill": "Video Processing overview",   "trainer": "BIG-TATHEP",  "reason": "Bus factor=1 on Video"}
+    ],
+    "priority_2": [
+      {"trainee": "joakim",      "skill": "Database (migrations, indexing)", "trainer": "K.Thanainun", "reason": "Growing into BE"},
+      {"trainee": "wanchalerm",  "skill": "Database (migrations, indexing)", "trainer": "K.Thanainun", "reason": "High FE, needs BE depth"}
+    ],
+    "priority_3": [
+      {"trainee": "joakim",     "skill": "Flutter/Mobile basics",  "trainer": "Natthakarn",  "reason": "Mobile bus factor=1, backup needed"},
+      {"trainee": "Natthakarn", "skill": "Backend API basics",     "trainer": "K.Thanainun", "reason": "Needed for full-stack mobile"}
+    ]
+  }
+}
