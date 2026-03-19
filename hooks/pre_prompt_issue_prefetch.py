@@ -23,12 +23,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hooks_lib import inject_context, log_event
+from config_loader import load_project_config
 
 _HOOK       = "prompt-issue-prefetch"
 CACHE_DB    = Path.home() / ".cache" / "jira-generator" / "jira.db"
-KEY_RE      = re.compile(r"\bBEP-(\d+)\b", re.I)
 MAX_KEYS    = 5
 MAX_DESC_LEN = 200  # chars of description to include
+
+_cfg        = load_project_config()
+PROJECT_KEY = _cfg.get("jira", {}).get("project_key", "")
+KEY_RE      = re.compile(rf"\b{re.escape(PROJECT_KEY)}-(\d+)\b", re.I) if PROJECT_KEY else None
 
 
 def _shorten(text: str | None, n: int = MAX_DESC_LEN) -> str:
@@ -47,7 +51,7 @@ def main() -> None:
     prompt     = data.get("prompt", "")
     session_id = data.get("session_id", "")
 
-    raw_keys = KEY_RE.findall(prompt)
+    raw_keys = KEY_RE.findall(prompt) if KEY_RE is not None else []
     if not raw_keys:
         sys.exit(0)
 
@@ -55,8 +59,7 @@ def main() -> None:
     seen: set[str] = set()
     keys: list[str] = []
     for n in raw_keys:
-        k = f"BEP-{n.lstrip('0') or '0'}"
-        k = f"BEP-{int(n)}"
+        k = f"{PROJECT_KEY}-{int(n)}"
         if k not in seen:
             seen.add(k)
             keys.append(k)
