@@ -88,6 +88,10 @@ def load_project_config() -> dict:
 Replace hardcoded `QMD_COLLECTIONS` dict with config-derived version:
 
 ```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # ensure hooks/ is on sys.path
+
 from config_loader import load_project_config
 
 def _build_qmd_collections() -> dict[str, str]:
@@ -110,12 +114,18 @@ QMD_COLLECTIONS = _build_qmd_collections()
 Replace hardcoded `BEP-` regex with config-derived project key:
 
 ```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # already present for hooks_lib; kept for clarity
+
 from config_loader import load_project_config
 
 _cfg        = load_project_config()
 PROJECT_KEY = _cfg.get("jira", {}).get("project_key", "")
 KEY_RE      = re.compile(rf"\b{re.escape(PROJECT_KEY)}-(\d+)\b", re.I) if PROJECT_KEY else None
 ```
+
+> **Note:** `pre_prompt_issue_prefetch.py` already contains a `sys.path.insert` line (for `hooks_lib`). Add `from config_loader import load_project_config` after that existing line — no new `sys.path.insert` needed. `hooks_state.py` has no existing `sys.path.insert` and requires one to be added.
 
 If `PROJECT_KEY` is empty (fresh install before setup) → `KEY_RE = None` → hook exits immediately without error.
 
@@ -149,16 +159,19 @@ Slash command `/atlassian-pm:setup` — Claude orchestrates the full setup flow.
 
 ```bash
 # Check and install acli
-command -v acli || brew install atlassian-cli && \
-# Check and install uv; export PATH so uv is available in the same Bash invocation
-{ command -v uv || { curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH="$HOME/.local/bin:$PATH"; }; } && \
-# Install jira-cache-server venv
-uv sync --project "$CLAUDE_PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
+command -v acli || brew install atlassian-cli
+
+# Check and install uv
+command -v uv || curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install jira-cache-server venv — use explicit path in case uv was just installed
+# (uv installs to ~/.local/bin on macOS; some setups may use ~/.cargo/bin)
+UV="${HOME}/.local/bin/uv"
+command -v uv &>/dev/null && UV="uv"  # prefer $PATH version if already available
+"$UV" sync --project "$CLAUDE_PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
 ```
 
-> **Important:** All three commands above must run as a **single Bash tool call** (chained with `&&`). The `export PATH` from a previous Bash tool call does not persist into subsequent calls — if `uv` is freshly installed but the commands are split, `uv sync` will fail with "command not found". As a fallback, Phase 1 can use `~/.local/bin/uv sync ...` explicitly.
->
-> **Note:** Phase 1 runs dependency checks inline so Claude can report any failures to the user immediately. Phase 4 (`setup.sh`) also contains the same dependency checks — running them twice is harmless because all checks are idempotent (`command -v` / `brew install` skips if already installed).
+> **Note:** uv is invoked via explicit path (`~/.local/bin/uv`) so the venv install works even if uv was just installed in the same session and the shell's `$PATH` hasn't been updated. Phase 4 (`setup.sh`) also contains the same dependency checks — running them twice is harmless because all checks are idempotent.
 
 #### Phase 2 — Configuration (Claude chat + AskUserQuestion)
 
@@ -179,7 +192,7 @@ Optional fields (AskUserQuestion with buttons):
 
 Claude writes `.claude/project-config.json` by:
 
-1. Reading `config/project-config.json.template` (authoritative template — `setup.sh` also reads from `config/`, not `.claude/`)
+1. Reading `config/project-config.json.template` (authoritative template — the actual file lives at `config/`; note that `setup.sh` currently has a pre-existing bug where `CONFIG_TEMPLATE` points to `.claude/project-config.json.template` which doesn't exist — fix this in `scripts/setup.sh` as part of implementation)
 2. Substituting answered values
 3. Writing to `.claude/project-config.json`
 
@@ -232,6 +245,8 @@ Existing steps 0-4 remain unchanged. `setup.sh` is still usable standalone for d
 
 ### 6. `marketplace.json` (new file at repo root)
 
+> **⚠️ Schema is speculative** — Anthropic has not published an official Claude Code marketplace schema. The format below is a reasonable guess modeled after similar plugin systems. The install flow commands (`/plugin marketplace add`, `/plugin install`) are also unverified. Create this file as a placeholder; update when official documentation is available.
+
 ```json
 {
   "name": "atlassian-pm",
@@ -281,7 +296,7 @@ Existing manual installation steps remain for dev/local use.
 | Modify | `hooks/hooks_state.py` |
 | Modify | `hooks/pre_prompt_issue_prefetch.py` |
 | Create | `skills/setup/SKILL.md` |
-| Modify | `scripts/setup.sh` |
+| Modify | `scripts/setup.sh` (add deps + fix `CONFIG_TEMPLATE` path bug: `.claude/` → `config/`) |
 | Create | `marketplace.json` |
 | Modify | `README.md` |
 
