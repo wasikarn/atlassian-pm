@@ -195,7 +195,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | Tool | Purpose | Install |
 | --- | --- | --- |
 | [Claude Code](https://claude.ai/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` |
-| [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF publishing | `brew install atlassian-cli` |
+| [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF publishing | `brew tap atlassian/homebrew-acli && brew install acli` |
 | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | auto-installed by setup |
 | Python 3.x | REST API scripts | pre-installed on macOS |
 

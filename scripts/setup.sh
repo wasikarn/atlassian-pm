@@ -18,7 +18,8 @@ check_dep() { command -v "$1" &>/dev/null; }
 
 if ! check_dep acli; then
   echo "  Installing acli via Homebrew..."
-  brew install atlassian-cli
+  brew tap atlassian/homebrew-acli
+  brew install acli
 fi
 
 if ! check_dep uv; then
