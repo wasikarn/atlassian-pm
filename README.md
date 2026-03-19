@@ -91,7 +91,7 @@ Claude Code ──skills──► acli (ADF JSON) ──────────
     ├── MCP ──► mcp-atlassian ────────────────────────────────────┤
     │                                                              │
     ├── MCP ──► jira-cache-server ──SQLite + FTS5 ──► Jira REST API v3
-    │                └─ (~/.cache/jira-generator/jira.db)
+    │                └─ (~/.claude/plugins/data/atlassian-pm-jira-generator/jira.db)
     │
     ├── MCP ──► Confluence, Figma, GitHub
     │
@@ -252,14 +252,10 @@ EOF
 ./scripts/setup.sh
 ```
 
-This single command does four things:
+This single command does two things:
 
-1. Creates `.claude/project-config.json` from template (if missing)
-2. Installs the `sync-skills` CLI to `~/.local/bin/`
-3. Syncs skills to `~/.claude/skills/`
-4. Configures git smudge/clean filters (auto placeholder↔real value conversion)
-
-> If `~/.local/bin` is not in your `PATH`, add `export PATH="$HOME/.local/bin:$PATH"` to your shell profile.
+1. Appends Atlassian settings block to `~/.claude/CLAUDE.md` (with real Jira site + project key from config)
+2. Configures git smudge/clean filters (auto placeholder↔real value conversion)
 
 ---
 
@@ -491,7 +487,7 @@ tasks/                              ← Generated ADF JSON outputs (gitignored)
 CLAUDE.md                           ← Agent instructions (passive context)
 ```
 
-> The jira-cache-server venv is at `mcp-servers/jira-cache-server/.venv/` (~640MB with embeddings). The SQLite database is stored separately at `~/.cache/jira-generator/jira.db`.
+> The jira-cache-server venv is at `mcp-servers/jira-cache-server/.venv/` (~640MB with embeddings). The SQLite database is stored separately at `~/.claude/plugins/data/atlassian-pm-jira-generator/jira.db`.
 
 ---
 

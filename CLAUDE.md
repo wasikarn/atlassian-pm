@@ -4,7 +4,7 @@
 
 **Prefer retrieval-led reasoning:** search project docs (`shared-references/`, qmd, `cache_get_issue`) and explore codebase before generating answers from training knowledge. When uncertain, retrieve first — don't guess.
 
-Agile Documentation System for **{{COMPANY}} Platform** — skills-based Jira/Confluence automation
+Agile Documentation System — skills-based Jira/Confluence automation
 
 **Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (40) | `agents/` (8) | `tasks/` (ADF JSON) | `scripts/` (setup/sprint/confluence)
 
