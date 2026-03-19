@@ -31,6 +31,52 @@ You (natural language) → Claude Code + atlassian-pm plugin → Jira / Confluen
 3. Hooks automatically enforce hard rules (HR1–HR10) and block silent failures before they happen
 4. A local cache (SQLite + FTS5) stores Jira data so repeated reads don't consume API tokens
 
+### Workflow Overview
+
+```mermaid
+flowchart TD
+    A([💬 User Intent]) --> B{New or Existing Issue?}
+
+    B -->|New| C["/search-issues\ndedup check"]
+    B -->|Existing| D{Single or Cascade?}
+
+    D -->|Single issue| E["/update-{epic,story,\ntask,subtask}"]
+    D -->|Story + Subtasks| F["/sync-alignment"]
+
+    E --> V["/verify-issue"]
+    F --> V
+
+    C --> G{Scope?}
+
+    G -->|"Greenfield / Architecture\nNew domain"| H["/feature-blueprint\nConfluence + backlog map"]
+    G -->|"Unclear scope / High-risk"| I["/refine-feature\n4-role debate"]
+    G -->|"Clear scope / Single service"| K["/story-full"]
+
+    H --> J["/create-epic"] --> K
+    I --> K
+
+    K --> L["/create-testplan\noptional"]
+    L --> V
+    K --> V
+
+    V --> M([✅ Jira + Confluence])
+
+    subgraph sprint["Sprint Planning"]
+        direction LR
+        N["/plan-sprint"] --> O["/dependency-chain"]
+    end
+
+    M -.->|"After backlog ready"| sprint
+
+    classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
+
+    class C,E,F,H,I,J,K,L,N,O skill
+    class V gate
+    class A,M endpoint
+```
+
 ---
 
 ## Architecture
