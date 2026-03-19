@@ -170,8 +170,8 @@ Ask questions in order. Each is a plain chat message.
    - Store as: `PROJECT_KEY` → `jira.project_key`, `SPACE_KEY` → `confluence.space_key`
 
 3. **Board ID**
-   - Ask: "What is your Jira board ID? (say 'look it up' and I'll call `jira_get_agile_boards`)"
-   - If "look it up" → call `MCP: jira_get_agile_boards(project_key="<key>")` and show results
+   - Ask: "What is your Jira board ID? (enter `0` if you don't know it yet — I'll help look it up after setup)"
+   - Accept: positive integer (known) or `0` (unknown — defer to Phase 5b)
    - Store as: `jira.board_id` (integer)
 
 **Optional** (via AskUserQuestion with buttons):
@@ -347,6 +347,25 @@ else
   echo "  ✗  project-config: file missing — run: /atlassian-pm:setup"
 fi
 ```
+
+**Board ID lookup (if board_id = 0):**
+
+After the Phase 5b Bash block completes, read `project-config.json`. If `jira.board_id = 0`:
+
+1. Print: `"Board ID is 0 (not set). MCP is now connected."`
+2. Ask via AskUserQuestion: `"Look up your board ID now?"` with buttons `[Yes, look it up]` `[Skip for now]`
+
+If **Yes, look it up**:
+
+- Call `jira_get_agile_boards(project_key="<KEY from config>")`
+- Show list of boards to user
+- Ask user to pick one
+- Read `project-config.json` via Read tool, replace `jira.board_id` value with chosen integer, write back via Write tool
+- Print: `"  board_id updated ✓"`
+
+If **Skip for now**:
+
+- Print: `"  Board ID left as 0 — doctor will warn about this"`
 
 ### 5c. Summary Output
 

@@ -115,7 +115,7 @@ if [ -f "$CONFIG_FILE" ]; then
     PASS=$((PASS+1))
   else
     echo "  !  board_id = 0 (placeholder)"
-    echo "     → Run: /atlassian-pm:setup to set correct board ID"
+    echo "     → Run: /atlassian-pm:setup (will offer MCP lookup in Phase 5)"
     WARN=$((WARN+1))
   fi
 else
