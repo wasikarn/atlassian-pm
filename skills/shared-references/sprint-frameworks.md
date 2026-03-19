@@ -128,8 +128,6 @@ Stories must deliver **end-to-end user value** across all layers (UI → API →
 
 ## Sprint Meeting Best Practices
 
-> Source: [Easy Agile](https://www.easyagile.com/blog/2026-sprint-planning-team-alignment-challenges-best-practices), [Mountain Goat Software](https://www.mountaingoatsoftware.com/agile/scrum/meetings/sprint-planning-meeting)
-
 ### Timebox Formula
 
 | Sprint Length | Meeting Timebox |
@@ -166,8 +164,6 @@ Stories must deliver **end-to-end user value** across all layers (UI → API →
 
 ## Sprint Goal Best Practices
 
-> Source: [Atlassian](https://www.atlassian.com/agile/scrum/sprint-planning), [DevDynamics](https://devdynamics.ai/blog/the-ultimate-guide-to-agile-sprint-planning/)
-
 ### SMART Sprint Goal
 
 | Criteria | Question | Example |
@@ -198,8 +194,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 ---
 
 ## "Just Enough" Planning
-
-> Source: [DevDynamics](https://devdynamics.ai/blog/the-ultimate-guide-to-agile-sprint-planning/), [Premier Agile](https://premieragile.com/sprint-planning-best-practices)
 
 ### Principle
 
@@ -232,7 +226,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 
 ## Task Decomposition
 
-> Source: [monday.com](https://monday.com/blog/rnd/sprint-backlog/)
 > Subtask size guide: [templates-subtask.md](templates-subtask.md#subtask-best-practices)
 
 ### Rule: Subtask ≤ 1 day (M = 4-8h max)
@@ -247,8 +240,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 ---
 
 ## Sustainable Pace
-
-> Source: [Wrike](https://www.wrike.com/scrum-guide/faq/what-is-a-sprint-backlog/), Agile Manifesto
 
 ### Core Principle
 
@@ -276,8 +267,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 ---
 
 ## Backlog Grooming Integration
-
-> Source: [Premier Agile](https://premieragile.com/prioritize-work-and-manage-sprint-backlog/), [Scrum Study](https://www.scrumstudy.com/article/agile-scrum-sprint-backlog)
 
 ### 10% Rule
 
@@ -311,14 +300,3 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 - [ ] Stories are vertical slices (not horizontal layers)
 - [ ] **Buffer:** 10-15% capacity reserved
 - [ ] User approved plan before execution
-
----
-
-## Sources
-
-- Meeting Timebox: [Mountain Goat Software](https://www.mountaingoatsoftware.com/agile/scrum/meetings/sprint-planning-meeting)
-- Sprint Planning Best Practices: [Easy Agile](https://www.easyagile.com/blog/2026-sprint-planning-team-alignment-challenges-best-practices)
-- Sprint Goal: [Atlassian Sprint Planning](https://www.atlassian.com/agile/scrum/sprint-planning)
-- Just Enough Planning: [DevDynamics](https://devdynamics.ai/blog/the-ultimate-guide-to-agile-sprint-planning/)
-- Sprint Backlog: [monday.com](https://monday.com/blog/rnd/sprint-backlog/), [Wrike](https://www.wrike.com/scrum-guide/faq/what-is-a-sprint-backlog/)
-- Backlog Grooming: [Premier Agile](https://premieragile.com/prioritize-work-and-manage-sprint-backlog/)
