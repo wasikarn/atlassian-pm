@@ -12,7 +12,7 @@ MCP server providing local SQLite cache for Jira data. Reduces token consumption
 Claude Code ──stdio──> jira-cache-server ──REST API──> Jira Cloud
                               │
                         SQLite + FTS5 + sqlite-vec
-                        (~/.cache/jira-generator/jira.db)
+                        (~/.cache/atlassian-pm/jira.db)
 ```
 
 **Key constraint:** MCP servers cannot call other MCP servers. This server uses JiraAPI (REST API v3) directly for upstream fetches, reusing `atlassian-scripts/lib/` for auth + API client.

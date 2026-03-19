@@ -6,7 +6,7 @@ issue summaries/descriptions, and ADF text extraction for indexing.
 Usage:
     from lib.cache import JiraCache
 
-    cache = JiraCache()  # Uses ~/.cache/jira-generator/jira.db
+    cache = JiraCache()  # Uses ~/.cache/atlassian-pm/jira.db
     cache.put_issue("BEP-123", issue_data)
     cached = cache.get_issue("BEP-123", max_age_hours=24)
     results = cache.text_search("coupon payment", limit=10)
@@ -26,7 +26,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
-DEFAULT_DB_PATH = (Path(_plugin_data) if _plugin_data else Path.home() / ".cache" / "jira-generator") / "jira.db"
+DEFAULT_DB_PATH = (Path(_plugin_data) if _plugin_data else Path.home() / ".cache" / "atlassian-pm") / "jira.db"
 
 # Current schema version — increment when adding migrations
 SCHEMA_VERSION = 3
