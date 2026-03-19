@@ -26,7 +26,9 @@ from hooks_state import (
 )
 
 import shutil
-QMD_BIN = shutil.which("qmd") or "/Users/kobig/.bun/bin/qmd"
+QMD_BIN = shutil.which("qmd")
+if not QMD_BIN:
+    sys.exit(0)  # qmd not installed → allow Glob/Grep through
 
 # Generic path segments that don't make good search queries
 SKIP_SEGMENTS = {
