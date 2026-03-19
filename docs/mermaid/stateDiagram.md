@@ -7,7 +7,7 @@
 Mermaid can render state diagrams. The syntax tries to be compliant with the syntax used in plantUml as this will make
 it easier for users to share diagrams between mermaid and plantUml.
 
-```mermaid-example
+```mermaid
 ---
 title: Simple sample
 ---
@@ -23,7 +23,7 @@ stateDiagram-v2
 
 Older renderer:
 
-```mermaid-example
+```mermaid
 stateDiagram
     [*] --> Still
     Still --> [*]
@@ -43,21 +43,21 @@ the **Crash** state. There is no transition from **Still** to **Crash**. (You ca
 
 A state can be declared in multiple ways. The simplest way is to define a state with just an id:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     stateId
 ```
 
 Another way is by using the state keyword with a description as per below:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     state "This is a state description" as s2
 ```
 
 Another way to define a state with a description is to define the state id followed by a colon and the description:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     s2 : This is a state description
 ```
@@ -69,14 +69,14 @@ Transitions are path/edges when one state passes into another. This is represent
 When you define a transition between two states and the states are not already defined, the undefined states are defined
 with the id from the transition. You can later add descriptions to states defined this way.
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     s1 --> s2
 ```
 
 It is possible to add text to a transition to describe what it represents:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     s1 --> s2: A transition
 ```
@@ -86,7 +86,7 @@ stateDiagram-v2
 There are two special states indicating the start and stop of the diagram. These are written with the [\*] syntax and
 the direction of the transition to it defines it either as a start or a stop state.
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     [*] --> s1
     s1 --> [*]
@@ -100,7 +100,7 @@ have several internal states. These are called composite states in this terminol
 In order to define a composite state you need to use the state keyword followed by an id and the body of the composite
 state between \{\}. You can name a composite state on a separate line just like a simple state. See the example below:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     [*] --> First
     state First {
@@ -119,7 +119,7 @@ stateDiagram-v2
 
 You can do this in several layers:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     [*] --> First
 
@@ -140,7 +140,7 @@ stateDiagram-v2
 
 You can also define transitions also between composite states:
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     [*] --> First
     First --> Second
@@ -166,7 +166,7 @@ _You cannot define transitions between internal states belonging to different co
 
 Sometimes you need to model a choice between two or more paths, you can do so using &lt;&lt;choice&gt;&gt;.
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     state if_state <<choice>>
     [*] --> IsPositive
@@ -179,7 +179,7 @@ stateDiagram-v2
 
 It is possible to specify a fork in the diagram using &lt;&lt;fork&gt;&gt; &lt;&lt;join&gt;&gt;.
 
-```mermaid-example
+```mermaid
    stateDiagram-v2
     state fork_state <<fork>>
       [*] --> fork_state
@@ -199,7 +199,7 @@ Sometimes nothing says it better than a Post-it note. That is also the case in s
 
 Here you can choose to put the note to the _right of_ or to the _left of_ a node.
 
-```mermaid-example
+```mermaid
     stateDiagram-v2
         State1: The state with a note
         note right of State1
@@ -214,7 +214,7 @@ Here you can choose to put the note to the _right of_ or to the _left of_ a node
 
 As in plantUml you can specify concurrency using the -- symbol.
 
-```mermaid-example
+```mermaid
 stateDiagram-v2
     [*] --> Active
 
@@ -238,7 +238,7 @@ stateDiagram-v2
 With state diagrams you can use the direction statement to set the direction which the diagram will render like in this
 example.
 
-```mermaid-example
+```mermaid
 stateDiagram
     direction LR
     [*] --> A
@@ -345,7 +345,7 @@ class Moving, Crash movement
 Here is a diagram that shows the examples in use. Note that the `Crash` state has two classDef styles applied: `movement`
 and `badBadEvent`
 
-```mermaid-example
+```mermaid
    stateDiagram
    direction TB
 
@@ -379,7 +379,7 @@ You can apply a classDef style to a state using the `:::` (three colons) operato
 
 You can use this in a diagram within a statement using a class. This includes the start and end states. For example:
 
-```mermaid-example
+```mermaid
 stateDiagram
    direction TB
 
@@ -407,7 +407,7 @@ After it has been defined, **yswsii** is used in the diagram in the first transi
 and also in the transition to **YetAnotherState** (`yswsii --> YetAnotherState`).
 (**yswsii** has been styled so that it is different from the other states.)
 
-```mermaid-example
+```mermaid
 stateDiagram
     classDef yourState font-style:italic,font-weight:bold,fill:white
 
@@ -418,5 +418,3 @@ stateDiagram
     yswsii --> YetAnotherState
     YetAnotherState --> [*]
 ```
-
-<!--- cspell:ignore yswsii --->

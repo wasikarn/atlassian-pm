@@ -4,18 +4,14 @@
 
 Mermaid can render sequence diagrams.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>John: Hello John, how are you?
     John-->>Alice: Great!
     Alice-)John: See you later!
 ```
 
-```note
-A note on nodes, the word "end" could potentially break the diagram, due to the way that the mermaid language is scripted.
-
-If unavoidable, one must use parentheses(), quotation marks "", or brackets {},[], to enclose the word "end". i.e : (end), [end], {end}.
-```
+> A note on nodes, the word "end" could potentially break the diagram, due to the way that the mermaid language is scripted. If unavoidable, one must use parentheses(), quotation marks "", or brackets {},[], to enclose the word "end". i.e : (end), [end], {end}.
 
 ## Syntax
 
@@ -26,7 +22,7 @@ rendered in order of appearance in the diagram source text. Sometimes you might 
 different order than how they appear in the first message. It is possible to specify the actor's order of
 appearance by doing the following:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice
     participant Bob
@@ -38,7 +34,7 @@ sequenceDiagram
 
 If you specifically want to use the actor symbol instead of a rectangle with text you can do so by using actor statements as per below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     actor Alice
     actor Bob
@@ -50,7 +46,7 @@ sequenceDiagram
 
 If you want to use the boundary symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "boundary" }
     participant Bob
@@ -62,7 +58,7 @@ sequenceDiagram
 
 If you want to use the control symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "control" }
     participant Bob
@@ -74,7 +70,7 @@ sequenceDiagram
 
 If you want to use the entity symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "entity" }
     participant Bob
@@ -86,7 +82,7 @@ sequenceDiagram
 
 If you want to use the database symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "database" }
     participant Bob
@@ -98,7 +94,7 @@ sequenceDiagram
 
 If you want to use the collections symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "collections" }
     participant Bob
@@ -110,7 +106,7 @@ sequenceDiagram
 
 If you want to use the queue symbol for a participant, use the JSON configuration syntax as shown below.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice@{ "type" : "queue" }
     participant Bob
@@ -126,7 +122,7 @@ The actor can have a convenient identifier and a descriptive label. Aliases can 
 
 You can define an alias using the `as` keyword after the participant declaration:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant A as Alice
     participant J as John
@@ -136,7 +132,7 @@ sequenceDiagram
 
 The external alias syntax also works with participant stereotype configurations, allowing you to combine type specification with aliases:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant API@{ "type": "boundary" } as Public API
     actor DB@{ "type": "database" } as User Database
@@ -151,7 +147,7 @@ sequenceDiagram
 
 Alternatively, you can define an alias directly inside the configuration object using the `"alias"` field. This works with both `participant` and `actor` keywords:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant API@{ "type": "boundary", "alias": "Public API" }
     participant Auth@{ "type": "control", "alias": "Auth Service" }
@@ -166,7 +162,7 @@ sequenceDiagram
 
 When both inline alias (in the configuration object) and external alias (using `as` keyword) are provided, the **external alias takes precedence**:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant API@{ "type": "boundary", "alias": "Internal Name" } as External Name
     participant DB@{ "type": "database", "alias": "Internal DB" } as External DB
@@ -187,7 +183,7 @@ A --> B: Hello
 
 Create directives support actor/participant distinction and aliases. The sender or the recipient of a message can be destroyed but only the recipient can be created.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>Bob: Hello Bob, how are you ?
     Bob->>Alice: Fine, thank you. And you?
@@ -228,17 +224,9 @@ box rgba(33,66,99,0.5)
 end
 ```
 
-```note
-If your group name is a color you can force the color to be transparent:
-```
+> If your group name is a color you can force the color to be transparent: use `box transparent Aqua`
 
-```
-box transparent Aqua
-... actors ...
-end
-```
-
-```mermaid-example
+```mermaid
     sequenceDiagram
     box Purple Alice & John
     participant A
@@ -281,11 +269,9 @@ Lines can be solid or dotted, and can end with various types of arrowheads, cros
 | `-)`     | Solid line with an open arrow at the end (async)     |
 | `--)`    | Dotted line with a open arrow at the end (async)     |
 
-**Half-Arrows (v<MERMAID_RELEASE_VERSION>+)**
+**Half-Arrows**
 
-The following half-arrow types are supported for more expressive sequence diagrams. Both solid and dotted variants are available by increasing the number of dashes (`-` → `--`).
-
----
+Both solid and dotted variants are available by increasing the number of dashes (`-` → `--`).
 
 | Type    | Description                                          |
 | ------- | ---------------------------------------------------- |
@@ -306,7 +292,7 @@ The following half-arrow types are supported for more expressive sequence diagra
 | `\\-`   | Solid line with reverse bottom stick half arrowhead  |
 | `\\--`  | Dotted line with reverse bottom stick half arrowhead |
 
-## Central Connections (v<MERMAID_RELEASE_VERSION>+)
+## Central Connections
 
 Mermaid sequence diagrams support **central lifeline connections** using a `()`.
 This is useful to represent messages or signals that connect to a central point, rather than from one actor directly to another.
@@ -315,7 +301,7 @@ To indicate a central connection, append `()` to the arrow syntax.
 
 #### Basic Syntax
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice
     participant John
@@ -328,7 +314,7 @@ sequenceDiagram
 
 It is possible to activate and deactivate an actor. (de)activation can be dedicated declarations:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>John: Hello John, how are you?
     activate John
@@ -338,7 +324,7 @@ sequenceDiagram
 
 There is also a shortcut notation by appending `+`/`-` suffix to the message arrow:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>+John: Hello John, how are you?
     John-->>-Alice: Great!
@@ -346,7 +332,7 @@ sequenceDiagram
 
 Activations can be stacked for same actor:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>+John: Hello John, how are you?
     Alice->>+John: John, can you hear me?
@@ -361,7 +347,7 @@ Note [ right of | left of | over ] [Actor]: Text in note content
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant John
     Note right of John: Text in note
@@ -369,7 +355,7 @@ sequenceDiagram
 
 It is also possible to create notes spanning two participants:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->John: Hello John, how are you?
     Note over Alice,John: A typical interaction
@@ -379,7 +365,7 @@ sequenceDiagram
 
 Line break can be added to Note and Message:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->John: Hello John,<br/>how are you?
     Note over Alice,John: A typical interaction<br/>But now in two lines
@@ -387,7 +373,7 @@ sequenceDiagram
 
 Line breaks in Actor names requires aliases:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice as Alice<br/>Johnson
     Alice->John: Hello John,<br/>how are you?
@@ -406,7 +392,7 @@ end
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->John: Hello John, how are you?
     loop Every minute
@@ -436,7 +422,7 @@ end
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>Bob: Hello Bob, how are you?
     alt is sick
@@ -467,7 +453,7 @@ end
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     par Alice to Bob
         Alice->>Bob: Hello guys!
@@ -480,7 +466,7 @@ sequenceDiagram
 
 It is also possible to nest parallel blocks.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     par Alice to Bob
         Alice->>Bob: Go help John
@@ -512,7 +498,7 @@ end
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     critical Establish a connection to the DB
         Service-->DB: connect
@@ -525,7 +511,7 @@ sequenceDiagram
 
 It is also possible to have no options at all
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     critical Establish a connection to the DB
         Service-->DB: connect
@@ -548,7 +534,7 @@ end
 
 See the example below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Consumer-->API: Book something
     API-->BookingService: Start booking process
@@ -584,7 +570,7 @@ end
 
 See the examples below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice
     participant John
@@ -607,7 +593,7 @@ sequenceDiagram
 
 Comments can be entered within a sequence diagram, which will be ignored by the parser. Comments need to be on their own line, and must be prefaced with `%%` (double percent signs). Any text after the start of the comment to the next newline will be treated as a comment, including any diagram syntax
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     Alice->>John: Hello John, how are you?
     %% this is a comment
@@ -618,7 +604,7 @@ sequenceDiagram
 
 It is possible to escape characters using the syntax exemplified here.
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     A->>B: I #9829; you!
     B->>A: I #9829; you #infin; times more!
@@ -640,7 +626,7 @@ It is possible to get a sequence number attached to each arrow in a sequence dia
 
 It can also be turned on via the diagram code as in the diagram:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     autonumber
     Alice->>John: Hello John, how are you?
@@ -688,7 +674,7 @@ links <actor>: <json-formatted link-name link-url pairs>
 
 An example is below:
 
-```mermaid-example
+```mermaid
 sequenceDiagram
     participant Alice
     participant John
@@ -699,119 +685,11 @@ sequenceDiagram
     Alice-)John: See you later!
 ```
 
-## Styling
-
-Styling of a sequence diagram is done by defining a number of css classes. During rendering these classes are extracted from the file located at src/themes/sequence.scss
-
-### Classes used
-
-| Class          | Description                                                    |
-| -------------- | -------------------------------------------------------------- |
-| actor          | Styles for the actor box.                                      |
-| actor-top      | Styles for the actor figure/ box at the top of the diagram.    |
-| actor-bottom   | Styles for the actor figure/ box at the bottom of the diagram. |
-| text.actor     | Styles for text of all of the actors.                          |
-| text.actor-box | Styles for text of the actor box.                              |
-| text.actor-man | Styles for text of the actor figure.                           |
-| actor-line     | The vertical line for an actor.                                |
-| messageLine0   | Styles for the solid message line.                             |
-| messageLine1   | Styles for the dotted message line.                            |
-| messageText    | Defines styles for the text on the message arrows.             |
-| labelBox       | Defines styles label to left in a loop.                        |
-| labelText      | Styles for the text in label for loops.                        |
-| loopText       | Styles for the text in the loop box.                           |
-| loopLine       | Defines styles for the lines in the loop box.                  |
-| note           | Styles for the note box.                                       |
-| noteText       | Styles for the text on in the note boxes.                      |
-
-### Sample stylesheet
-
-```css
-body {
-  background: white;
-}
-
-.actor {
-  stroke: #ccccff;
-  fill: #ececff;
-}
-text.actor {
-  fill: black;
-  stroke: none;
-  font-family: Helvetica;
-}
-
-.actor-line {
-  stroke: grey;
-}
-
-.messageLine0 {
-  stroke-width: 1.5;
-  stroke-dasharray: '2 2';
-  marker-end: 'url(#arrowhead)';
-  stroke: black;
-}
-
-.messageLine1 {
-  stroke-width: 1.5;
-  stroke-dasharray: '2 2';
-  stroke: black;
-}
-
-#arrowhead {
-  fill: black;
-}
-
-.messageText {
-  fill: black;
-  stroke: none;
-  font-family: 'trebuchet ms', verdana, arial;
-  font-size: 14px;
-}
-
-.labelBox {
-  stroke: #ccccff;
-  fill: #ececff;
-}
-
-.labelText {
-  fill: black;
-  stroke: none;
-  font-family: 'trebuchet ms', verdana, arial;
-}
-
-.loopText {
-  fill: black;
-  stroke: none;
-  font-family: 'trebuchet ms', verdana, arial;
-}
-
-.loopLine {
-  stroke-width: 2;
-  stroke-dasharray: '2 2';
-  marker-end: 'url(#arrowhead)';
-  stroke: #ccccff;
-}
-
-.note {
-  stroke: #decc93;
-  fill: #fff5ad;
-}
-
-.noteText {
-  fill: black;
-  stroke: none;
-  font-family: 'trebuchet ms', verdana, arial;
-  font-size: 14px;
-}
-```
-
 ## Configuration
 
 It is possible to adjust the margins for rendering the sequence diagram.
 
 This is done by defining `mermaid.sequenceConfig` or by the CLI to use a json file with the configuration.
-How to use the CLI is described in the [mermaidCLI](../config/mermaidCLI.md) page.
 `mermaid.sequenceConfig` can be set to a JSON string with config parameters or the corresponding object.
 
 ```javascript
@@ -825,19 +703,16 @@ mermaid.sequenceConfig = {
 };
 ```
 
-### Possible configuration parameters
+### Key configuration parameters
 
-| Parameter         | Description                                                                                                                                | Default value                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
-| mirrorActors      | Turns on/off the rendering of actors below the diagram as well as above it                                                                 | false                          |
-| bottomMarginAdj   | Adjusts how far down the graph ended. Wide borders styles with css could generate unwanted clipping which is why this config param exists. | 1                              |
-| actorFontSize     | Sets the font size for the actor's description                                                                                             | 14                             |
-| actorFontFamily   | Sets the font family for the actor's description                                                                                           | "Open Sans", sans-serif        |
-| actorFontWeight   | Sets the font weight for the actor's description                                                                                           | "Open Sans", sans-serif        |
-| noteFontSize      | Sets the font size for actor-attached notes                                                                                                | 14                             |
-| noteFontFamily    | Sets the font family for actor-attached notes                                                                                              | "trebuchet ms", verdana, arial |
-| noteFontWeight    | Sets the font weight for actor-attached notes                                                                                              | "trebuchet ms", verdana, arial |
-| noteAlign         | Sets the text alignment for text in actor-attached notes                                                                                   | center                         |
-| messageFontSize   | Sets the font size for actor<->actor messages                                                                                              | 16                             |
-| messageFontFamily | Sets the font family for actor<->actor messages                                                                                            | "trebuchet ms", verdana, arial |
-| messageFontWeight | Sets the font weight for actor<->actor messages                                                                                            | "trebuchet ms", verdana, arial |
+| Parameter         | Description                                                                 | Default value                  |
+| ----------------- | --------------------------------------------------------------------------- | ------------------------------ |
+| mirrorActors      | Turns on/off the rendering of actors below the diagram as well as above it  | false                          |
+| bottomMarginAdj   | Adjusts how far down the graph ended                                        | 1                              |
+| actorFontSize     | Sets the font size for the actor's description                              | 14                             |
+| actorFontFamily   | Sets the font family for the actor's description                            | "Open Sans", sans-serif        |
+| noteFontSize      | Sets the font size for actor-attached notes                                 | 14                             |
+| noteFontFamily    | Sets the font family for actor-attached notes                               | "trebuchet ms", verdana, arial |
+| noteAlign         | Sets the text alignment for text in actor-attached notes                    | center                         |
+| messageFontSize   | Sets the font size for actor<->actor messages                               | 16                             |
+| messageFontFamily | Sets the font family for actor<->actor messages                             | "trebuchet ms", verdana, arial |
