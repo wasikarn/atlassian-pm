@@ -11,9 +11,34 @@ echo "=== jira-generator setup ==="
 echo "Project: $PROJECT_DIR"
 echo ""
 
+# --- deps. Check + install dependencies (idempotent) ---
+echo "[deps] Checking dependencies..."
+
+check_dep() { command -v "$1" &>/dev/null; }
+
+if ! check_dep acli; then
+  echo "  Installing acli via Homebrew..."
+  brew install atlassian-cli
+fi
+
+if ! check_dep uv; then
+  echo "  Installing uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+fi
+
+if [ -d "$PROJECT_DIR/mcp-servers/jira-cache-server" ]; then
+  echo "  Installing jira-cache-server venv..."
+  UV_BIN="${HOME}/.local/bin/uv"
+  command -v uv &>/dev/null && UV_BIN="uv"
+  "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/jira-cache-server" --extra embeddings --quiet
+fi
+
+echo ""
+
 # --- 0. Check project config ---
 CONFIG_FILE="$PROJECT_DIR/.claude/project-config.json"
-CONFIG_TEMPLATE="$PROJECT_DIR/.claude/project-config.json.template"
+CONFIG_TEMPLATE="$PROJECT_DIR/config/project-config.json.template"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   if [ -f "$CONFIG_TEMPLATE" ]; then
