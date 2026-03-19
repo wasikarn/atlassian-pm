@@ -29,7 +29,7 @@ Run as a **single Bash tool call**:
 
 ```bash
 # Resolve plugin root (CLAUDE_PLUGIN_ROOT may not be set outside plugin runtime)
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/0.1.0}"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1}"
 echo "CLAUDE_PLUGIN_ROOT = $PLUGIN_ROOT"
 
 # 1a. acli
@@ -105,7 +105,7 @@ Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugin
 ## Phase 4 — Finalize
 
 ```bash
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/0.1.0}"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1}"
 cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 ```
 
