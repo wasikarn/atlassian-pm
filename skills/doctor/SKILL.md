@@ -109,7 +109,7 @@ fi
 
 # Check 7: board_id non-zero
 if [ -f "$CONFIG_FILE" ]; then
-  BOARD_ID=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['board_id'])" 2>/dev/null || echo "0")
+  BOARD_ID=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); v=c['jira']['board_id']; print(v if v else 0)" 2>/dev/null || echo "0")
   if [ "$BOARD_ID" != "0" ] && [ -n "$BOARD_ID" ]; then
     echo "  ✓  board_id = $BOARD_ID"
     PASS=$((PASS+1))
@@ -129,7 +129,11 @@ if [ -n "$PLUGIN_ROOT" ] && git -C "$PLUGIN_ROOT" config --get filter.project-co
   PASS=$((PASS+1))
 else
   echo "  !  git filters not configured"
-  echo "     → Run: cd $PLUGIN_ROOT && ./scripts/setup.sh"
+  if [ -n "$PLUGIN_ROOT" ]; then
+    echo "     → Run: cd $PLUGIN_ROOT && ./scripts/setup.sh"
+  else
+    echo "     → Run: /atlassian-pm:setup (plugin root not resolved)"
+  fi
   WARN=$((WARN+1))
 fi
 
