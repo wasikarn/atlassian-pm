@@ -29,6 +29,12 @@ def main() -> None:
     if search_is_done(session_id):
         sys.exit(0)
 
+    # Subtasks are children of an existing story — dedup search not required
+    tool_input = data.get("tool_input", {})
+    issuetype = (tool_input.get("issuetype") or "").lower()
+    if "sub" in issuetype:
+        sys.exit(0)
+
     # Block: no search done yet
     print(
         "DEDUP BLOCK: Cannot create issues without prior search in this session. "
