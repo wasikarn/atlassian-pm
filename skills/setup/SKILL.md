@@ -29,6 +29,16 @@ if [[ "$(uname)" != "Darwin" ]]; then
   exit 1
 fi
 
+# Python 3.11+ required for jira-cache-server
+if ! python3 -c "import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)" 2>/dev/null; then
+  PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "unknown")
+  echo "ERROR: Python 3.11+ required (found: Python $PY_VER)"
+  echo "       Install: brew install python@3.11 && brew link python@3.11"
+  exit 1
+fi
+PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+echo "  Python $PY_VER ✓"
+
 # Resolve PLUGIN_ROOT
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
 if [ -z "$PLUGIN_ROOT" ]; then
@@ -373,6 +383,7 @@ fi
 | Phase | Error | Action |
 | --- | --- | --- |
 | 0 | Not macOS | Hard stop: `ERROR: requires macOS` |
+| 0 | Python < 3.11 | Hard stop: show `brew install python@3.11` command |
 | 0 | Plugin not found | Hard stop: `Error: plugin not found` |
 | 1 | acli install fail | Hard stop: show brew command |
 | 1 | uv install fail | Hard stop: show brew command |
