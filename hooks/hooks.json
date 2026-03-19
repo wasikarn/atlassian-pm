@@ -113,16 +113,6 @@
 				]
 			},
 			{
-				"matcher": "mcp__mcp-atlassian__jira_transition_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_transition_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
 				"matcher": "Glob|Grep",
 				"hooks": [
 					{
@@ -140,11 +130,6 @@
 					{
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr5_parent_verify_remind.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_workflow_chain_suggest.py",
 						"timeout": 5
 					},
 					{

@@ -250,3 +250,17 @@ def qmd_collection_for_path(path: str) -> str | None:
         if path.startswith(root):
             return name
     return None
+
+# ── Subtask alignment tracking ──────────────────────────────────────────────
+
+def alignment_mark_sprint_suggested(session_id: str, sprint_id: str) -> None:
+    """Mark that alignment check was suggested for this sprint."""
+    state = _load(session_id)
+    suggested = set(state.get("alignment_suggested_sprints", []))
+    suggested.add(str(sprint_id))
+    state["alignment_suggested_sprints"] = sorted(suggested)
+    _save(session_id, state)
+
+def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
+    """Check if alignment check was already suggested for this sprint."""
+    return str(sprint_id) in set(_load(session_id).get("alignment_suggested_sprints", []))
