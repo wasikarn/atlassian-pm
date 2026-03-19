@@ -127,7 +127,7 @@ else
 fi
 
 echo "[3/3] Syncing jira-cache-server venv..."
-UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
+UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm}/venv" \
   uv sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" \
   --extra embeddings --quiet \
   && echo "      venv: ready ✓" \
@@ -324,14 +324,18 @@ claude mcp get mcp-atlassian &>/dev/null \
   && echo "  ✓  mcp-atlassian: configured" \
   || echo "  ✗  mcp-atlassian: not found — run: /atlassian-pm:setup"
 
-[ -f "${CLAUDE_PLUGIN_DATA}/venv/bin/python" ] \
+[ -f "${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm}/venv/bin/python" ] \
   && echo "  ✓  jira-cache-server: venv ready" \
   || echo "  !  jira-cache-server: venv missing (cache features degraded)"
 
-[ -f "${PLUGIN_ROOT}/.claude/project-config.json" ] && \
-  ! grep -q "acme-corp.atlassian.net" "${PLUGIN_ROOT}/.claude/project-config.json" \
-  && echo "  ✓  project-config: valid" \
-  || echo "  ✗  project-config: placeholder values — run: /atlassian-pm:setup"
+if [ -f "${PLUGIN_ROOT}/.claude/project-config.json" ] && \
+   ! grep -q "acme-corp.atlassian.net" "${PLUGIN_ROOT}/.claude/project-config.json"; then
+  echo "  ✓  project-config: valid"
+elif [ -f "${PLUGIN_ROOT}/.claude/project-config.json" ]; then
+  echo "  ✗  project-config: placeholder values — run: /atlassian-pm:setup"
+else
+  echo "  ✗  project-config: file missing — run: /atlassian-pm:setup"
+fi
 ```
 
 ### 5c. Summary Output
