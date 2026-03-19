@@ -52,6 +52,8 @@ ENV_OK=false
 ACLI_OK=false
 MCP_OK=false
 MCP_NEWLY_ADDED=false
+FIGMA_OK=false
+FIGMA_NEWLY_ADDED=false
 JIRA_SITE=""
 PROJECT_KEY=""
 SPACE_KEY=""
@@ -81,11 +83,17 @@ if claude mcp get mcp-atlassian &>/dev/null; then
   MCP_OK=true
 fi
 
+# figma MCP: already registered?
+if claude mcp get figma &>/dev/null; then
+  FIGMA_OK=true
+fi
+
 echo "Detection complete:"
 echo "  config:      $([ "$SKIP_CONFIG" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  credentials: $([ "$ENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  acli auth:   $([ "$ACLI_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  mcp:         $([ "$MCP_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
+echo "  figma MCP:   $([ "$FIGMA_OK" = "true" ] && echo "✓ found" || echo "- not configured (optional)")"
 ```
 
 **Second-run fast path:** If all four flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The board ID lookup check in Phase 5b still applies.
