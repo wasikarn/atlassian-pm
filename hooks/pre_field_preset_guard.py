@@ -1,63 +1,73 @@
-#!/usr/bin/env python3
-"""PreToolUse guard: blocks jira_get_issue without `fields` and jira_search without `fields`+`limit`.
+"""PreToolUse guard: auto-inject default fields/limit for jira_get_issue and jira_search.
 
-Prevents wasteful full-field fetches that consume unnecessary tokens.
-Suggests presets from CLAUDE.md field tables.
+Previously blocked missing params — now silently injects safe defaults via updatedInput,
+preventing wasteful full-field fetches without interrupting Claude's workflow.
 
-Exit 2 = block with message, Exit 0 = allow.
+Behaviour:
+  jira_get_issue without fields  → inject DEFAULT_GET_FIELDS
+  jira_search without fields     → inject DEFAULT_SEARCH_FIELDS
+  jira_search without limit      → inject DEFAULT_SEARCH_LIMIT
+
+Exit 0 = allow (always — auto-fix replaces blocking).
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from hooks_lib import parse_stdin
+from hooks_lib import log_event, parse_stdin, update_tool_input
 
-PRESETS_GET = """
-⚠️ BLOCKED: `fields` param is required for jira_get_issue (saves tokens).
+_HOOK = "field-preset-guard"
 
-**Presets (pick one):**
-| Use Case | fields |
-|----------|--------|
-| Quick check | `summary,status,assignee` |
-| Read description | `summary,status,description` |
-| Full analysis | `summary,status,description,issuetype,parent,labels` |
-| Parent check | `parent` |
-| Sprint planning | `summary,status,assignee,issuetype,priority` |
-"""
-
-PRESETS_SEARCH = """
-⚠️ BLOCKED: `fields` and `limit` params are required for jira_search (saves tokens).
-
-**Presets (pick one):**
-| Use Case | fields | limit |
-|----------|--------|-------|
-| Sprint overview | `summary,status,assignee,issuetype,priority` | 30 |
-| Sub-task list | `summary,status,assignee` | 20 |
-| Search duplicates | `summary,status,issuetype` | 10 |
-| Full with links | `summary,status,assignee,issuetype,issuelinks,priority,labels` | 20 |
-"""
+DEFAULT_GET_FIELDS    = "summary,status,description,issuetype,parent,labels,assignee,priority"
+DEFAULT_SEARCH_FIELDS = "summary,status,assignee,issuetype,priority"
+DEFAULT_SEARCH_LIMIT  = 30
 
 data = parse_stdin()
 if not data:
     sys.exit(0)
-tool_name = data.get("tool_name", "")
+
+tool_name  = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
+session_id = data.get("session_id", "")
 
 if tool_name.endswith("jira_get_issue"):
     if not tool_input.get("fields"):
-        print(PRESETS_GET.strip())
-        sys.exit(2)
+        new_input = {**tool_input, "fields": DEFAULT_GET_FIELDS}
+        log_event(_HOOK, "AUTO_FIXED", {
+            "tool": "jira_get_issue",
+            "injected": "fields",
+            "value": DEFAULT_GET_FIELDS,
+            "session_id": session_id,
+        })
+        update_tool_input(
+            new_input,
+            context=f"Auto-injected fields='{DEFAULT_GET_FIELDS}' (no fields param → token-safe default).",
+        )
+        sys.exit(0)
 
 elif tool_name.endswith("jira_search"):
-    missing = []
-    if not tool_input.get("fields"):
-        missing.append("fields")
-    if not tool_input.get("limit") and tool_input.get("limit") != 0:
-        missing.append("limit")
-    if missing:
-        print(PRESETS_SEARCH.strip())
-        sys.exit(2)
+    injected = []
+    new_input = dict(tool_input)
+
+    if not new_input.get("fields"):
+        new_input["fields"] = DEFAULT_SEARCH_FIELDS
+        injected.append(f"fields='{DEFAULT_SEARCH_FIELDS}'")
+
+    if not new_input.get("limit") and new_input.get("limit") != 0:
+        new_input["limit"] = DEFAULT_SEARCH_LIMIT
+        injected.append(f"limit={DEFAULT_SEARCH_LIMIT}")
+
+    if injected:
+        log_event(_HOOK, "AUTO_FIXED", {
+            "tool": "jira_search",
+            "injected": injected,
+            "session_id": session_id,
+        })
+        update_tool_input(
+            new_input,
+            context=f"Auto-injected {', '.join(injected)} (token-safe defaults).",
+        )
+        sys.exit(0)
 
 sys.exit(0)

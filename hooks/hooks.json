@@ -125,6 +125,16 @@
 		],
 		"PostToolUse": [
 			{
+				"matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_filter_mcp_response.py",
+						"timeout": 5
+					}
+				]
+			},
+			{
 				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
 				"hooks": [
 					{
@@ -220,7 +230,8 @@
 					{
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_event_model_track.py",
-						"timeout": 5
+						"timeout": 5,
+						"async": true
 					},
 					{
 						"type": "command",
@@ -320,6 +331,39 @@
 					{
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_confirm_invalidation.py",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_prompt_issue_prefetch.py",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"PostCompact": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_compact_reinject.py",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"SubagentStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_subagent_context.py",
 						"timeout": 5
 					}
 				]

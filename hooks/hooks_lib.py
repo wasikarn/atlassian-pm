@@ -3,7 +3,7 @@
 
 Separate from hooks_state.py (session state) — this module provides:
   - Centralized logging    → log_event(hook_name, level, data)
-  - I/O helpers            → parse_stdin, allow, block, inject_context
+  - I/O helpers            → parse_stdin, allow, block, inject_context, update_tool_input
   - Data extraction        → get_issue_key, get_additional_fields, get_parent_key
   - Constants              → ACLI_FROM_JSON_RE, LOG_DIR
   - Type detection         → detect_issue_type(data, file_path)
@@ -92,17 +92,64 @@ def block(reason: str) -> None:
     sys.exit(2)
 
 
-def inject_context(text: str) -> None:
-    """Inject additionalContext into Claude's context (PostToolUse hooks only).
+def inject_context(text: str, event_name: str = "PostToolUse") -> None:
+    """Inject additionalContext into Claude's context.
 
+    Works for: PostToolUse, PreToolUse, UserPromptSubmit, SubagentStart, SessionStart.
     Outputs the hookSpecificOutput wrapper required by the hooks runtime.
+
+    Args:
+        text:       The context string to inject.
+        event_name: Hook event name (default: "PostToolUse").
     """
     print(json.dumps({
         "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
+            "hookEventName": event_name,
             "additionalContext": text,
         }
     }))
+
+
+def update_tool_input(new_input: dict, context: str | None = None) -> None:
+    """Modify tool input before execution (PreToolUse only).
+
+    Outputs hookSpecificOutput with updatedInput so the tool receives
+    modified params. Optionally also injects additionalContext.
+
+    Args:
+        new_input: Complete replacement tool_input dict.
+        context:   Optional additionalContext message (logged in Claude context).
+    """
+    output: dict = {
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "updatedInput": new_input,
+        }
+    }
+    if context:
+        output["hookSpecificOutput"]["additionalContext"] = context
+    print(json.dumps(output))
+
+
+def update_mcp_output(new_output: object, context: str | None = None) -> None:
+    """Override what Claude sees from an MCP tool response (PostToolUse only).
+
+    Replaces the tool_response before Claude processes it.
+    Only works for MCP tools (not built-in tools like Bash, Read, etc.).
+
+    Args:
+        new_output: Replacement MCP tool output (any JSON-serialisable value).
+        context:    Optional additionalContext message.
+    """
+    output: dict = {
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "updatedMCPToolOutput": new_output,
+        }
+    }
+    if context:
+        output["hookSpecificOutput"]["additionalContext"] = context
+    print(json.dumps(output))
 
 
 # ── Data extraction ────────────────────────────────────────────────────────
