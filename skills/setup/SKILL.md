@@ -393,6 +393,24 @@ fi
 ### 5a. Run setup.sh
 
 ```bash
+# Copy team-detail config from template if missing
+TEAM_DETAIL="$PLUGIN_ROOT/.claude/project-config-team-detail.json"
+TEAM_DETAIL_TEMPLATE="$PLUGIN_ROOT/.claude/project-config-team-detail.json.template"
+
+if [ ! -f "$TEAM_DETAIL" ]; then
+  if [ -f "$TEAM_DETAIL_TEMPLATE" ]; then
+    cp "$TEAM_DETAIL_TEMPLATE" "$TEAM_DETAIL"
+    echo "  ✓  project-config-team-detail.json created from template"
+    echo "     Edit this file to add real team velocity and capacity data"
+    echo "     Required for: /atlassian-pm:plan-sprint"
+  else
+    echo "  !  project-config-team-detail.json template not found"
+    echo "     Create manually from: .claude/project-config-team-detail.json.template"
+  fi
+else
+  echo "  ✓  project-config-team-detail.json already exists"
+fi
+
 cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 ```
 
