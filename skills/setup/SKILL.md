@@ -88,7 +88,7 @@ echo "  acli auth:   $([ "$ACLI_OK" = "true" ] && echo "✓ found" || echo "✗ 
 echo "  mcp:         $([ "$MCP_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 ```
 
-**Second-run fast path:** If all four flags are true after Phase 0:
+**Second-run fast path:** If all four flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The board ID lookup check in Phase 5b still applies.
 
 ```bash
 if [ "$SKIP_CONFIG" = "true" ] && [ "$ENV_OK" = "true" ] && \
@@ -359,7 +359,7 @@ If **Yes, look it up**:
 
 - Call `jira_get_agile_boards(project_key="<KEY from config>")`
 - Show list of boards to user
-- Ask user to pick one
+- Ask user to pick one via AskUserQuestion
 - Read `project-config.json` via Read tool, replace `jira.board_id` value with chosen integer, write back via Write tool
 - Print: `"  board_id updated ✓"`
 
