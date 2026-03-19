@@ -166,17 +166,7 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ### 7. Design Sub-tasks
 
-**Tech Lead Decomposition — dependency ordering:**
-
-```
-1. Data layer (migration + model)   ← foundation, blocks everything
-2. Auth/OAuth (if new auth flow)    ← must exist before API validates identity
-3. Backend API (endpoints + routes) ← FE service contract depends on this
-4. Backend service/channel          ← business logic, depends on model
-5. FE service layer                 ← depends on BE API contract
-6. FE component/page                ← depends on FE service
-7. FE interactions/events           ← depends on FE component + FE service
-```
+**Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
 
 **Scope table format per subtask** (single Action | File table):
 
