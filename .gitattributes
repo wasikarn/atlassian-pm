@@ -2,6 +2,7 @@
 # Setup: ./scripts/setup.sh (configures git filter.project-config)
 *.md filter=project-config
 scripts/*.py filter=project-config
+scripts/sprint/*.py filter=project-config
 scripts/*.html filter=project-config
 scripts/setup.sh filter=project-config
 scripts/sync-skills filter=project-config

@@ -58,7 +58,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__jira-cache-server__cache_get_issue",
+				"matcher": "mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue",
 				"hooks": [
 					{
 						"type": "command",
@@ -180,7 +180,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__jira-cache-server__cache_invalidate",
+				"matcher": "mcp__plugin_atlassian-pm_jira-cache-server__cache_invalidate",
 				"hooks": [
 					{
 						"type": "command",
@@ -190,7 +190,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__jira-cache-server__cache_search|mcp__jira-cache-server__cache_sprint_issues",
+				"matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__plugin_atlassian-pm_jira-cache-server__cache_search|mcp__plugin_atlassian-pm_jira-cache-server__cache_sprint_issues",
 				"hooks": [
 					{
 						"type": "command",
@@ -200,7 +200,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__jira-cache-server__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
+				"matcher": "mcp__plugin_atlassian-pm_jira-cache-server__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
 				"hooks": [
 					{
 						"type": "command",
@@ -241,7 +241,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__jira-cache-server__cache_get_issue",
+				"matcher": "mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue",
 				"hooks": [
 					{
 						"type": "command",
@@ -326,7 +326,7 @@
 		],
 		"PostToolUseFailure": [
 			{
-				"matcher": "mcp__jira-cache-server__cache_invalidate",
+				"matcher": "mcp__plugin_atlassian-pm_jira-cache-server__cache_invalidate",
 				"hooks": [
 					{
 						"type": "command",
