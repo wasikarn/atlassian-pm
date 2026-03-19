@@ -48,8 +48,14 @@ command -v uv || curl -LsSf https://astral.sh/uv/install.sh | sh
 UV_BIN="${HOME}/.local/bin/uv"
 command -v uv &>/dev/null && UV_BIN="uv"
 
-# 1c. jira-cache-server venv
-"$UV_BIN" sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
+# 1c. jira-cache-server venv (stored in CLAUDE_PLUGIN_DATA for persistence across updates)
+if [ -n "$CLAUDE_PLUGIN_DATA" ]; then
+  mkdir -p "$CLAUDE_PLUGIN_DATA"
+  UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
+  cp "$PLUGIN_ROOT/mcp-servers/jira-cache-server/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
+else
+  "$UV_BIN" sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
+fi
 ```
 
 If any step fails → report error to user and stop. Do not proceed to Phase 2.

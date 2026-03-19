@@ -297,6 +297,15 @@
 				"hooks": [
 					{
 						"type": "command",
+						"command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
+						"timeout": 60
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_prerequisite_check.py",
 						"timeout": 5
 					}
