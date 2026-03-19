@@ -1,6 +1,6 @@
 # atlassian-pm
 
-> Agile Documentation System for the {{COMPANY}} Platform — AI-powered Jira and Confluence automation via Claude Code plugin.
+> AI-powered Jira and Confluence automation via Claude Code plugin — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
 
 Create Epics, User Stories, Sub-tasks, and plan Sprints using natural language. The plugin enforces quality gates, prevents silent failures through hook-based guardrails, and reduces Jira API token consumption by 80–90% via a local SQLite cache.
 
@@ -239,6 +239,13 @@ acli jira project list --server https://your-site.atlassian.net
 
 Load the plugin (`claude --plugin-dir .`), then use `/atlassian-pm:<command>`.
 
+### Feature Design
+
+| Command | Description |
+| --- | --- |
+| `/atlassian-pm:feature-blueprint` | Multi-perspective blueprint on Confluence — 5 roles debate (PO, Domain Expert, TL, Engineer, QA). S/M/L tiers. |
+| `/atlassian-pm:refine-feature` | 4-role debate to refine unclear requirements or high-risk stories before creating Jira artifacts |
+
 ### Issue Creation
 
 | Command | Description |
@@ -265,6 +272,7 @@ Load the plugin (`claude --plugin-dir .`), then use `/atlassian-pm:<command>`.
 | --- | --- | --- |
 | `/atlassian-pm:search-issues` | | Search before creating (prevent duplicates) |
 | `/atlassian-pm:verify-issue ABC-XXX` | `--with-subtasks` · `--fix` · `--dry-run` | Check ADF format, INVEST criteria, language |
+| `/atlassian-pm:assign ABC-XXX [name]` | | Assign issue to team member (bypasses MCP silent failure) |
 
 ### Sprint Planning
 
@@ -285,26 +293,43 @@ Load the plugin (`claude --plugin-dir .`), then use `/atlassian-pm:<command>`.
 
 ## Usage Examples
 
-### End-to-End Feature Creation
+### Full Feature Workflow (Blueprint → Jira)
 
 ```text
-# 1. Check no duplicates exist
+# 1. Design the feature with multi-role debate (output: Confluence page + backlog map)
+/atlassian-pm:feature-blueprint
+→ "Build a real-time notification system for the platform"
+
+# 2. Check no duplicates exist
 /atlassian-pm:search-issues
 
-# 2. Create Epic with Confluence doc and RICE score
+# 3. Create Epic with Confluence doc and RICE score
 /atlassian-pm:create-epic
 
-# 3. Create Story + Sub-tasks in one workflow
+# 4. Create Story + Sub-tasks in one workflow
 /atlassian-pm:story-full
 
-# 4. Optionally create QA sub-tasks
+# 5. Optionally create QA sub-tasks
 /atlassian-pm:create-testplan ABC-123
 
-# 5. Verify quality (ADF, INVEST, language)
+# 6. Verify quality (ADF, INVEST, language)
 /atlassian-pm:verify-issue ABC-123 --with-subtasks
 ```
 
 **Example:** `/atlassian-pm:story-full` → "Build a coupon system for admin" → Claude generates Story with `[BE]` and `[FE-Admin]` Sub-tasks, each with implementation paths from codebase exploration.
+
+---
+
+### Clarify Before Writing (Unclear Requirements)
+
+```text
+# Run 4-role debate when requirements are unclear or high-risk
+/atlassian-pm:refine-feature ABC-123
+
+# Roles: PO (scope/value) × Tech Lead (feasibility/risk)
+#      × Engineer (effort/implementation) × QA (edge cases/testability)
+# Output: revised story narrative + refined ACs ready for /story-full
+```
 
 ---
 
@@ -335,10 +360,11 @@ Load the plugin (`claude --plugin-dir .`), then use `/atlassian-pm:<command>`.
 ## Project Structure
 
 ```text
-.claude-plugin/plugin.json          ← Plugin manifest (name: atlassian-pm)
-.mcp.json                           ← MCP server config (jira-cache-server)
-.claude/project-config.json         ← Your real config (gitignored)
-config/project-config.json.template ← Template with safe placeholders (tracked)
+.claude-plugin/plugin.json                ← Plugin manifest (name: atlassian-pm)
+.mcp.json                                 ← MCP server config (jira-cache-server)
+.claude/project-config.json               ← Your real config — loaded every session (gitignored)
+.claude/project-config-team-detail.json   ← Sprint planning detail — loaded on-demand (gitignored)
+config/project-config.json.template       ← Template with safe placeholders (tracked)
 
 skills/                             ← Skill definitions (1 dir = 1 slash command)
 ├── story-full/                     ← Composite: PO + TA in one workflow
@@ -401,6 +427,15 @@ CLAUDE.md                           ← Agent instructions (passive context)
 
 All project-specific values (Jira site, team, services, domains) live in `.claude/project-config.json` — the **single source of truth**. The repo tracks only the `.template` version with placeholder values; real config is gitignored.
 
+### Config Files
+
+| File | Loaded | Contains |
+| --- | --- | --- |
+| `.claude/project-config.json` | Every session (passive context) | Jira fields, team roster (name/role/skill_profile/throughput), services, environments |
+| `.claude/project-config-team-detail.json` | On-demand (sprint planning only) | git_evidence, bus_factor, growth_tracks, review_cost, velocity history |
+
+This split keeps session-start token cost low — the detail file is only read when `/atlassian-pm:plan-sprint` runs.
+
 ### Git Filter: Automatic Placeholder Conversion
 
 ```text
@@ -408,7 +443,7 @@ Git repo (committed):  {{PROJECT_KEY}}-XXX   ← always placeholders
                               │
                         [smudge filter]       ← on checkout / pull
                               ↓
-Working tree:          {{PROJECT_KEY}}-XXX                ← real values (local dev)
+Working tree:          ABC-XXX                ← real values (local dev)
                               │
                         [clean filter]        ← on add / commit
                               ↓
@@ -421,10 +456,10 @@ After `./scripts/setup.sh`, the git filters run automatically. No manual steps n
 
 | Placeholder | Example real value |
 | --- | --- |
-| `{{PROJECT_KEY}}` | `BEP` |
+| `{{PROJECT_KEY}}` | `ABC` |
 | `{{JIRA_SITE}}` | `acme-corp.atlassian.net` |
 | `{{CONFLUENCE_SITE}}` | `acme-corp.atlassian.net` |
-| `{{SPACE_KEY}}` | `BEP` |
+| `{{SPACE_KEY}}` | `ABC` |
 | `{{COMPANY}}` | `Acme Corp` |
 | `{{COMPANY_LOWER}}` | `acme` |
 | `{{START_DATE_FIELD}}` | `{{START_DATE_FIELD}}` |
