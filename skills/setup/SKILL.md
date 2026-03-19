@@ -316,6 +316,8 @@ MCP_NEWLY_ADDED=true
 echo "  mcp-atlassian: registered (user scope) ✓"
 ```
 
+---
+
 ### 4d. Configure Figma MCP (optional)
 
 **Always runs — skip logic handled internally by `FIGMA_OK` flag.**
