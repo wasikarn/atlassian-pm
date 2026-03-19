@@ -13,7 +13,7 @@ Enable internal team members (~5-7 people) to install the `atlassian-pm` plugin 
 ## Problems to Solve
 
 | Problem | Location | Impact |
-|---------|----------|--------|
+| ------- | -------- | ------ |
 | Hardcoded absolute paths | `hooks/hooks_state.py:225-229` | QMD collection lookup fails on other machines |
 | Hardcoded project key regex | `hooks/pre_prompt_issue_prefetch.py:29,58-59` | Issue prefetch broken for any project key ≠ BEP |
 | No marketplace catalog | — | Cannot install via `/plugin marketplace add` |
@@ -77,7 +77,7 @@ def load_project_config() -> dict:
         return {}
 ```
 
-**Path resolution:** `hooks/config_loader.py` → `../.claude/project-config.json` — works from any working directory because path is relative to `__file__`, not `cwd`.
+**Path resolution:** `hooks/config_loader.py` → `../.claude/project-config.json` — works from any working directory because path is relative to `__file__`, not `cwd`. `__file__` is resolved at module load time (fixed path), so the config is always found regardless of the process's current directory. If hooks ever move to a subdirectory, update the `parent.parent` depth accordingly.
 
 **Failure mode:** Returns `{}` on any error (missing file, malformed JSON) — hooks degrade gracefully.
 
@@ -126,28 +126,41 @@ if KEY_RE is None or not KEY_RE.findall(prompt):
     sys.exit(0)
 ```
 
+Also replace the hardcoded normalisation on lines 57-59 where issue keys are reconstructed:
+
+```python
+# Before (hardcoded):
+k = f"BEP-{n.lstrip('0') or '0'}"  # line 58 — dead code (immediately overwritten)
+k = f"BEP-{int(n)}"                 # line 59
+
+# After (config-derived); remove line 58 (dead code), update line 59:
+k = f"{PROJECT_KEY}-{int(n)}"
+```
+
+Remove line 58 entirely — its value is immediately overwritten by line 59, making it dead code. Keeping it would leave a stale hardcoded `BEP-` in the file.
+
 ---
 
 ### 4. `skills/setup/SKILL.md` (new skill)
 
 Slash command `/atlassian-pm:setup` — Claude orchestrates the full setup flow.
 
-**Phases:**
-
-**Phase 1 — Dependency Check (Bash tool)**
+#### Phase 1 — Dependency Check (Bash tool)
 
 ```bash
 # Check and install acli
-command -v acli || brew install atlassian-cli
-
-# Check and install uv
-command -v uv || curl -LsSf https://astral.sh/uv/install.sh | sh
-
+command -v acli || brew install atlassian-cli && \
+# Check and install uv; export PATH so uv is available in the same Bash invocation
+{ command -v uv || { curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH="$HOME/.local/bin:$PATH"; }; } && \
 # Install jira-cache-server venv
 uv sync --project "$CLAUDE_PLUGIN_ROOT/mcp-servers/jira-cache-server" --extra embeddings
 ```
 
-**Phase 2 — Configuration (Claude chat + AskUserQuestion)**
+> **Important:** All three commands above must run as a **single Bash tool call** (chained with `&&`). The `export PATH` from a previous Bash tool call does not persist into subsequent calls — if `uv` is freshly installed but the commands are split, `uv sync` will fail with "command not found". As a fallback, Phase 1 can use `~/.local/bin/uv sync ...` explicitly.
+>
+> **Note:** Phase 1 runs dependency checks inline so Claude can report any failures to the user immediately. Phase 4 (`setup.sh`) also contains the same dependency checks — running them twice is harmless because all checks are idempotent (`command -v` / `brew install` skips if already installed).
+
+#### Phase 2 — Configuration (Claude chat + AskUserQuestion)
 
 Required fields (regular chat messages, free-form answers):
 
@@ -156,21 +169,21 @@ Required fields (regular chat messages, free-form answers):
 3. Board ID (hint: run `jira_get_agile_boards(project_key=...)` if unsure)
 
 Optional fields (AskUserQuestion with buttons):
-4. Add team members now? → `เพิ่มตอนนี้` / `ข้ามก่อน`
 
-- If yes: ask name, email, role per member (loop until blank name)
-1. Add service paths now? → `เพิ่มตอนนี้` / `ข้ามก่อน`
+1. Add team members now? → `เพิ่มตอนนี้` / `ข้ามก่อน`
+   - If yes: ask name, email, role per member (loop until blank name)
+2. Add service paths now? → `เพิ่มตอนนี้` / `ข้ามก่อน`
    - If yes: ask path per service (BE, Admin, Website, etc.)
 
-**Phase 3 — Write Config (Write tool)**
+#### Phase 3 — Write Config (Write tool)
 
 Claude writes `.claude/project-config.json` by:
 
-1. Reading `config/project-config.json.template`
+1. Reading `config/project-config.json.template` (authoritative template — `setup.sh` also reads from `config/`, not `.claude/`)
 2. Substituting answered values
 3. Writing to `.claude/project-config.json`
 
-**Phase 4 — Finalize (Bash tool)**
+#### Phase 4 — Finalize (Bash tool)
 
 ```bash
 cd "$CLAUDE_PLUGIN_ROOT" && ./scripts/setup.sh
@@ -178,7 +191,7 @@ cd "$CLAUDE_PLUGIN_ROOT" && ./scripts/setup.sh
 
 `setup.sh` handles git filter + sync-skills (dependency steps already done in Phase 1).
 
-**Summary output:**
+#### Summary output
 
 ```text
 ✅ atlassian-pm setup complete
@@ -206,7 +219,7 @@ fi
 if ! check_dep uv; then
   echo "  Installing uv..."
   curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="$HOME/.cargo/bin:$PATH"
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
 echo "  Installing jira-cache-server venv..."
@@ -229,7 +242,7 @@ Existing steps 0-4 remain unchanged. `setup.sh` is still usable standalone for d
       "description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
       "version": "1.0.0",
       "source": {
-        "source": "github",
+        "type": "github",
         "repo": "wasikarn/jira-generator"
       }
     }
@@ -263,7 +276,7 @@ Existing manual installation steps remain for dev/local use.
 ## Files Changed
 
 | Action | File |
-|--------|------|
+| ------ | ---- |
 | Create | `hooks/config_loader.py` |
 | Modify | `hooks/hooks_state.py` |
 | Modify | `hooks/pre_prompt_issue_prefetch.py` |
