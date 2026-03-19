@@ -6,383 +6,78 @@
 
 ## Technical Checks (All Issue Types)
 
-### T1: ADF Format
-
-```text
-□ Description has type: "doc"
-□ Version is 1
-□ Content array exists
-□ No malformed nodes
-```
-
-### T2: Panel Structure
-
-```text
-□ Panels have valid panelType (info, success, warning, error, note)
-□ Panel content is array
-□ No nested tables in panels
-```
-
-### T3: Inline Code Marks
-
-```text
-□ File paths have code marks (e.g., `app/Models/User.ts`)
-□ API routes have code marks (e.g., `/api/v1/credits`)
-□ Component names have code marks (e.g., `CreditHistoryPage`)
-□ Technical terms marked appropriately
-```
-
-### T4: Links
-
-```text
-□ Parent link exists (for sub-tasks)
-□ Epic link exists (for stories)
-□ Child count matches (for parents)
-□ External links valid (Confluence, docs)
-```
-
-### T5: Required Fields
-
-```text
-□ Summary filled
-□ Description not empty
-□ Issue type correct
-□ Project key correct (BEP)
-□ Assignee/Reporter set (if required)
-```
+| Check | Criteria |
+| --- | --- |
+| **T1: ADF Format** | type: "doc"; version: 1; content array exists; no malformed nodes |
+| **T2: Panel Structure** | valid panelType (info, success, warning, error, note); panel content is array; no nested tables in panels |
+| **T3: Inline Code Marks** | file paths marked (e.g., `app/Models/User.ts`); API routes marked (e.g., `/api/v1/credits`); component names marked; technical terms marked appropriately |
+| **T4: Links** | parent link exists (sub-tasks); epic link exists (stories); child count matches (parents); external links valid |
+| **T5: Required Fields** | summary filled; description not empty; issue type correct; project key correct (BEP); assignee/reporter set (if required) |
 
 ---
 
 ## Story Quality Checks
 
-### S1: INVEST Criteria
-
-```text
-□ Independent - Does not depend on other stories to deliver value
-□ Negotiable - Has room for discussion
-□ Valuable - Has clear business value
-□ Estimable - Effort can be estimated
-□ Small - Can be completed in 1 sprint
-□ Testable - All ACs can be verified
-```
-
-### S2: Narrative Format
-
-```text
-□ Has "As a [persona]"
-□ Has "I want to [action]"
-□ Has "So that [benefit]"
-□ Persona is specific (not generic "user")
-□ Benefit is business value (not technical)
-```
-
-### S3: Narrative Anti-Patterns
-
-```text
-□ No Generic Persona ("As a user" → must specify role + situation)
-□ No Solution Masking ("I want a modal" → write goal, solution goes in AC)
-□ No Missing Why ("So that" states real value, not restatement of goal)
-□ No Kitchen Sink (1 story ≠ 3 goals — split with SPIDR)
-□ No Tech Story ("As a developer, I want to refactor" → use Task)
-□ No Copy-Paste (each story has unique context)
-□ Persona has role + context + level (not just "admin")
-□ Goal has verb + object + context (not just "see list")
-□ Benefit is business value: measurable > behavioral > qualitative
-```
-
-### S4: Acceptance Criteria
-
-```text
-□ All ACs have Given clause
-□ All ACs have When clause
-□ All ACs have Then clause
-□ ACs are specific (not vague)
-□ ACs are measurable
-□ ACs cover happy path
-□ ACs cover error cases
-□ ACs are independent
-```
-
-### S5: Scope Definition
-
-```text
-□ Services impacted listed
-□ In-scope clearly defined
-□ Out-of-scope mentioned
-□ Dependencies noted
-```
-
-### S6: Language
-
-```text
-□ Thai language for content
-□ English for technical terms (transliteration)
-□ Consistent throughout
-□ No machine translation artifacts
-```
+| Check | Criteria |
+| --- | --- |
+| **S1: INVEST** | Independent (no story deps to deliver value); Negotiable (room for discussion); Valuable (clear business value); Estimable (effort can be estimated); Small (1 sprint); Testable (all ACs verifiable) |
+| **S2: Narrative Format** | Has "As a [persona]"; "I want to [action]"; "So that [benefit]"; persona is specific (not generic "user"); benefit is business value (not technical) |
+| **S3: Narrative Anti-Patterns** | No generic persona ("user" → specify role+situation); no solution masking ("I want a modal" → write goal); "So that" states real value (not restatement); no kitchen sink (1 story ≠ 3 goals — split with SPIDR); no tech story ("As a developer, I want to refactor" → use Task); no copy-paste; persona has role+context+level; goal has verb+object+context; benefit is measurable > behavioral > qualitative |
+| **S4: Acceptance Criteria** | All ACs have Given/When/Then clauses; ACs are specific and measurable; cover happy path; cover error cases; ACs are independent |
+| **S5: Scope Definition** | Services impacted listed; in-scope clearly defined; out-of-scope mentioned; dependencies noted |
+| **S6: Language** | Thai language for content; English for technical terms (transliteration); consistent throughout; no machine translation artifacts |
 
 ---
 
 ## Vertical Slice Quality Checks
 
-### VS1: Slice Integrity
-
-```text
-□ Story delivers end-to-end user value
-□ All required layers touched (UI → API → DB or subset)
-□ Story is independently deployable
-□ Story is testable without other slices
-```
-
-### VS2: Labeling (MANDATORY)
-
-```text
-□ Has feature label (e.g., coupon-web, credit-topup)
-□ Has VS label (e.g., vs1-skeleton, vs2-credit-e2e, vs-enabler)
-□ Label matches VS pattern:
-  - vs{N}-{name} for numbered slices
-  - vs-enabler for shared components
-  - {feature}-{scope} for cross-cutting
-```
-
-### VS3: Anti-patterns Check
-
-```text
-□ Not shell-only (UI exists but no logic)
-□ Not layer-split (BE separate from FE)
-□ Not tab-split (single tab without context)
-□ Not horizontal split (one layer across flows)
-```
-
-### VS4: Subtask VS Alignment (`--with-subtasks` only)
-
-```text
-□ All subtasks contribute to VS completion
-□ Subtasks together deliver the vertical slice
-□ No horizontal-only subtasks (unless enabler)
-□ Subtask scope stays within VS boundaries
-```
+| Check | Criteria |
+| --- | --- |
+| **VS1: Slice Integrity** | Story delivers end-to-end user value; all required layers touched (UI → API → DB or subset); story is independently deployable; story is testable without other slices |
+| **VS2: Labeling (MANDATORY)** | Has feature label (e.g., coupon-web, credit-topup); has VS label (e.g., vs1-skeleton, vs2-credit-e2e, vs-enabler); label matches pattern: `vs{N}-{name}` for numbered, `vs-enabler` for shared, `{feature}-{scope}` for cross-cutting |
+| **VS3: Anti-patterns** | Not shell-only (UI exists but no logic); not layer-split (BE separate from FE); not tab-split (single tab without context); not horizontal split (one layer across flows) |
+| **VS4: Subtask VS Alignment** (`--with-subtasks` only) | All subtasks contribute to VS completion; subtasks together deliver the vertical slice; no horizontal-only subtasks (unless enabler); subtask scope stays within VS boundaries |
 
 ---
 
 ## Sub-task Quality Checks
 
-### ST1: Objective
-
-```text
-□ Clear 1-2 sentence objective
-□ Answers "what" and "why"
-□ Specific to this sub-task
-```
-
-### ST2: Scope & Files
-
-```text
-□ File paths are real (not generic — Glob-validated)
-□ Scope table uses Action|File format (CREATE / MODIFY / REF)
-□ At least 1 REF row exists (pattern reference for developer)
-□ Config/enum MODIFY included if new value is added
-□ No orphan scope item (every file must appear in at least 1 AC)
-```
-
-### ST3: Acceptance Criteria
-
-```text
-□ Given/When/Then format
-□ References real method names or endpoints (not generic "call API")
-□ HTTP status codes specified where applicable (201, 409, 403, 204...)
-□ Error UI specified (toast color + exact message text)
-□ Auth middleware documented if new route added
-□ Data contract specified for API subtasks
-```
-
-### ST4: Tag & Summary
-
-```text
-□ Tag matches service: [BE], [FE-Admin], [FE-Web]
-□ Summary is descriptive
-□ Summary starts with tag
-```
-
-### ST5: Language
-
-```text
-□ Thai + transliteration consistent
-□ Technical terms in English
-□ Code/paths in English
-```
+| Check | Criteria |
+| --- | --- |
+| **ST1: Objective** | Clear 1-2 sentence objective; answers "what" and "why"; specific to this sub-task |
+| **ST2: Scope & Files** | File paths are real (not generic — Glob-validated); scope table uses Action\|File format (CREATE/MODIFY/REF); ≥1 REF row exists (pattern reference); config/enum MODIFY included if new value added; no orphan scope item (every file appears in ≥1 AC) |
+| **ST3: Acceptance Criteria** | Given/When/Then format; references real method names or endpoints (not generic "call API"); HTTP status codes specified where applicable (201, 409, 403, 204…); error UI specified (toast color + exact message); auth middleware documented if new route added; data contract specified for API subtasks |
+| **ST4: Tag & Summary** | Tag matches service: [BE], [FE-Admin], [FE-Web]; summary is descriptive; summary starts with tag |
+| **ST5: Language** | Thai + transliteration consistent; technical terms in English; code/paths in English |
 
 ---
 
 ## QA Sub-task Quality Checks
 
-### QA1: Coverage
-
-```text
-□ All Story ACs have test coverage
-□ Happy path covered
-□ Edge cases covered
-□ Error handling covered
-```
-
-### QA2: Test Format
-
-```text
-□ Test objective clear
-□ Preconditions stated
-□ Steps are specific
-□ Expected results defined
-□ Actual result field (for execution)
-```
-
-### QA3: Test Scenarios
-
-```text
-□ Scenarios grouped by type (happy, edge, error)
-□ Priority assigned to each test
-□ Panel colors match type:
-  - 🟢 success = Happy path
-  - 🟡 warning = Edge cases
-  - 🔴 error = Error handling
-```
-
-### QA4: Test Data
-
-```text
-□ Test data requirements listed
-□ Preconditions for tests defined
-□ Environment requirements noted
-```
-
-### QA5: Language
-
-```text
-□ Thai + transliteration consistent
-□ Technical terms in English
-□ Clear, actionable language
-```
+| Check | Criteria |
+| --- | --- |
+| **QA1: Coverage** | All story ACs have test coverage; happy path covered; edge cases covered; error handling covered |
+| **QA2: Test Format** | Test objective clear; preconditions stated; steps are specific; expected results defined; actual result field (for execution) |
+| **QA3: Test Scenarios** | Grouped by type (happy, edge, error); priority assigned; panel colors match: success=happy path, warning=edge cases, error=error handling |
+| **QA4: Test Data** | Test data requirements listed; preconditions for tests defined; environment requirements noted |
+| **QA5: Language** | Thai + transliteration consistent; technical terms in English; clear, actionable language |
 
 ---
 
 ## Epic Quality Checks
 
-### E1: Vision
-
-```text
-□ Problem statement clear
-□ Target users defined
-□ Business value articulated
-□ Success metrics defined
-```
-
-### E2: RICE Score
-
-```text
-□ Reach estimated
-□ Impact scored (0.25-3)
-□ Confidence percentage
-□ Effort in weeks
-□ Final score calculated
-```
-
-### E3: Scope
-
-```text
-□ Must-have features listed
-□ Should-have features listed
-□ Nice-to-have features listed
-□ Out-of-scope defined
-```
-
-### E4: User Stories
-
-```text
-□ Stories identified (draft)
-□ Stories cover must-have scope
-□ Stories are independent
-```
+| Check | Criteria |
+| --- | --- |
+| **E1: Vision** | Problem statement clear; target users defined; business value articulated; success metrics defined |
+| **E2: RICE Score** | Reach estimated; impact scored (0.25–3); confidence percentage; effort in weeks; final score calculated |
+| **E3: Scope** | Must-have features listed; should-have features listed; nice-to-have features listed; out-of-scope defined |
+| **E4: User Stories** | Stories identified (draft); stories cover must-have scope; stories are independent |
 
 ---
 
-## Blueprint Quality Checks
+## Blueprint Quality (B1-B8)
 
-### B1: Executive Summary
-
-```text
-□ 1 paragraph (not bullet list)
-□ Mentions problem being solved
-□ Mentions proposed solution
-□ Mentions who benefits
-```
-
-### B2: Business Case
-
-```text
-□ Problem narrative present
-□ ≥2 user scenarios with persona + goal + outcome
-□ Non-goals / no-gos listed
-□ Appetite defined (sprints or effort range)
-□ Success metrics defined
-```
-
-### B3: Domain Analysis
-
-```text
-□ ≥1 bounded context identified
-□ ≥1 domain event mapped (Command → Event)
-□ Entities have key attributes listed
-□ Aggregates have invariants defined
-□ Context map shows integration patterns
-```
-
-### B4: Architecture & Design
-
-```text
-□ Alternatives Considered has ≥2 options
-□ Each option has pros and cons
-□ Chosen approach has explicit rationale
-□ New services/patterns documented
-□ Migration complexity assessed
-```
-
-### B5: Technical Specification
-
-```text
-□ File paths are real (Glob-validated, not generic)
-□ Endpoints have HTTP methods + status codes
-□ Data contracts specified (request/response)
-□ DB changes documented (tables, columns, constraints)
-□ Code reuse opportunities identified
-```
-
-### B6: Risks & Edge Cases
-
-```text
-□ ≥3 risks with severity + mitigation
-□ ≥2 edge cases documented
-□ Rabbit holes identified
-□ Open questions listed with owners
-□ No unresolved "blocker" questions
-```
-
-### B7: Test Strategy
-
-```text
-□ Test approach per affected layer
-□ ≥3 critical test scenarios
-□ Happy path + unhappy path covered
-□ Performance/security test needs assessed
-```
-
-### B8: Delivery Plan
-
-```text
-□ VS plan exists with slice labels
-□ Stories mapped to VS labels
-□ Sprint estimate present
-□ Dependency ordering documented
-□ Team assignment suggestions (if applicable)
-```
+Canonical criteria in `feature-blueprint/SKILL.md` — "Blueprint Quality Gate" section.
 
 ---
 
@@ -391,53 +86,14 @@
 > **Principle:** Use only actual fetched data — never guess under any circumstances.
 > If unsure which AC maps to which subtask → flag as "unclear mapping"
 
-### A1: AC ↔ Subtask Coverage
-
-```text
-□ Each Story AC has ≥1 subtask backing it
-□ No AC without a subtask to implement it
-□ Mapping is clear (if unclear → flag)
-```
-
-### A2: Service Tag Match
-
-```text
-□ Story "Services Impacted" → all subtask tags covered
-□ No subtask tag outside Story scope
-□ Tags: [BE], [FE-Admin], [FE-Web] match the listed services
-```
-
-### A3: Scope Consistency
-
-```text
-□ Story in-scope items → subtask objectives fully covered
-□ No scope gap (items in Story but no subtask implements them)
-□ No scope creep (subtask doing more than Story specifies)
-```
-
-### A4: Epic ↔ Story Fit
-
-```text
-□ Story scope falls within Epic must-have/should-have
-□ Story does not exceed Epic scope
-□ Skip if Story is standalone (no parent Epic)
-```
-
-### A5: Parent-Child Links
-
-```text
-□ Every subtask.parent = Story key
-□ Story.parent = Epic key (if applicable)
-□ No orphan subtask
-```
-
-### A6: Confluence Alignment
-
-```text
-□ Tech Note content is consistent with Story ACs (if available)
-□ Tech Note does not conflict with subtask details
-□ Skip if no Confluence page exists, flag as info
-```
+| Check | Criteria |
+| --- | --- |
+| **A1: AC ↔ Subtask Coverage** | Each story AC has ≥1 subtask backing it; no AC without a subtask to implement it; mapping is clear (if unclear → flag) |
+| **A2: Service Tag Match** | Story "Services Impacted" → all subtask tags covered; no subtask tag outside story scope; tags [BE], [FE-Admin], [FE-Web] match listed services |
+| **A3: Scope Consistency** | Story in-scope items → subtask objectives fully covered; no scope gap (items in story but no subtask implements them); no scope creep (subtask doing more than story specifies) |
+| **A4: Epic ↔ Story Fit** | Story scope falls within epic must-have/should-have; story does not exceed epic scope; skip if story is standalone (no parent epic) |
+| **A5: Parent-Child Links** | Every subtask.parent = story key; story.parent = epic key (if applicable); no orphan subtask |
+| **A6: Confluence Alignment** | Tech note content consistent with story ACs (if available); tech note does not conflict with subtask details; skip if no Confluence page exists (flag as info) |
 
 ---
 
@@ -476,20 +132,8 @@
 
 ## Quick Reference
 
-### Verify Story + Sub-tasks
+**Verify Story + Sub-tasks:** `/verify-issue ABC-XXX --with-subtasks`
 
-```text
-/verify-issue ABC-XXX --with-subtasks
-```
+**Verify and Auto-Fix:** `/verify-issue ABC-XXX --fix`
 
-### Verify and Auto-Fix
-
-```text
-/verify-issue ABC-XXX --fix
-```
-
-### After Full Workflow
-
-```text
-/story-full → /verify-issue ABC-XXX --with-subtasks
-```
+**After Full Workflow:** `/story-full → /verify-issue ABC-XXX --with-subtasks`
