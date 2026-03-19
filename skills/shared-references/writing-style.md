@@ -16,21 +16,21 @@
 
 ### Commonly Used Transliterations
 
-| Thai | English (keep as-is) |
-| --- | --- |
-| - | endpoint |
-| - | payload |
-| - | validate |
-| - | component |
-| - | service |
-| - | API |
-| - | route |
-| - | model |
-| - | schema |
-| - | query |
-| - | filter |
-| - | response |
-| - | request |
+| English (keep as-is) |
+| --- |
+| endpoint |
+| payload |
+| validate |
+| component |
+| service |
+| API |
+| route |
+| model |
+| schema |
+| query |
+| filter |
+| response |
+| request |
 
 ### Correct Examples
 
