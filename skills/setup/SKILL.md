@@ -316,6 +316,74 @@ MCP_NEWLY_ADDED=true
 echo "  mcp-atlassian: registered (user scope) ✓"
 ```
 
+### 4d. Configure Figma MCP (optional)
+
+**Always runs — skip logic handled internally by `FIGMA_OK` flag.**
+
+If `FIGMA_OK=true`, print `"  figma MCP: already configured — skipping ✓"` and skip this step.
+
+Otherwise, ask via AskUserQuestion:
+
+```
+Would you like to configure Figma MCP for design references in skills?
+(optional — skip if your team does not use Figma)
+```
+
+Buttons: `[Yes, configure]` `[Skip for now]`
+
+If **Skip for now**: print `"  figma MCP: skipped"` and continue to Phase 5.
+
+If **Yes, configure**:
+
+**Step 1.** Print token visibility warning (same as Phase 4a):
+
+```
+⚠️  Your token will be visible in this chat session.
+    Clear the conversation after setup if this is a shared machine.
+    Claude will never echo your token back in any output or summary.
+```
+
+**Step 2.** Ask: `"What is your Figma Personal Access Token?"`
+
+- Hint: Figma → Settings → Security → Personal Access Tokens
+- **IMPORTANT:** After collecting token, NEVER echo it back. Reference as `[token collected]` if needed.
+
+**Step 3.** Write token to env file using **Write tool** (not shell echo — avoids token in shell history):
+
+File: `~/.config/atlassian/.figma.env`
+
+```
+FIGMA_API_KEY=<FIGMA_TOKEN>
+```
+
+**Step 4.** Set permissions and register:
+
+```bash
+chmod 600 "${HOME}/.config/atlassian/.figma.env"
+
+claude mcp add --scope user figma -- npx -y figma-developer-mcp \
+  --env-file "${HOME}/.config/atlassian/.figma.env"
+```
+
+> **Note:** `figma-developer-mcp` reads `FIGMA_API_KEY` from the env file. Token is never passed as an argv argument — consistent with Phase 4c security pattern.
+
+**Step 5.** Verify registration:
+
+```bash
+if claude mcp get figma &>/dev/null; then
+  echo "  figma MCP: registered (user scope) ✓"
+  FIGMA_NEWLY_ADDED=true
+else
+  echo "  !  figma MCP: registration may have failed — check: claude mcp list"
+fi
+```
+
+**Security properties:**
+
+- Token written to `~/.config/atlassian/.figma.env` (chmod 600) — same directory as Jira `.env`
+- Passed via `--env-file` (file path in argv, not the secret itself)
+- NEVER echo token in any output, summary, or tool call
+
 ---
 
 ## Phase 5 — Finalize + Validate
