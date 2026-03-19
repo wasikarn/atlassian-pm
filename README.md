@@ -38,12 +38,14 @@ flowchart TD
     A([💬 User Intent]) --> B{New or Existing Issue?}
 
     B -->|New| C["/search-issues\ndedup check"]
-    B -->|Existing| D{Single or Cascade?}
+    B -->|Existing| D{Edit scope?}
 
     D -->|Single issue| E["/update-{epic,story,\ntask,subtask}"]
-    D -->|Story + Subtasks| F["/sync-alignment"]
+    D -->|Need new Sub-tasks| AS["/analyze-story"]
+    D -->|Story + Sub-tasks sync| F["/sync-alignment"]
 
     E --> V["/verify-issue"]
+    AS --> V
     F --> V
 
     C --> G{Scope?}
@@ -51,6 +53,7 @@ flowchart TD
     G -->|"Greenfield / Architecture\nNew domain"| H["/feature-blueprint\nConfluence + backlog map"]
     G -->|"Unclear scope / High-risk"| I["/refine-feature\n4-role debate"]
     G -->|"Clear scope / Single service"| K["/story-full"]
+    G -->|"Bug / Tech-debt\nChore / Spike"| T["/create-task"]
 
     H --> J["/create-epic"] --> K
     I --> K
@@ -58,6 +61,7 @@ flowchart TD
     K --> L["/create-testplan\noptional"]
     L --> V
     K --> V
+    T --> V
 
     V --> M([✅ Jira + Confluence])
 
@@ -72,7 +76,7 @@ flowchart TD
     classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
 
-    class C,E,F,H,I,J,K,L,N,O skill
+    class C,E,F,AS,H,I,J,K,L,N,O,T skill
     class V gate
     class A,M endpoint
 ```
