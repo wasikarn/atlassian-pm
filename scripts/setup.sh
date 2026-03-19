@@ -76,10 +76,14 @@ else
   echo "  installed"
 fi
 
-# --- 2. Sync skills to ~/.claude/skills/ ---
+# --- 2. Sync skills to ~/.claude/skills/ (dev mode only, skip if running from plugin cache) ---
 echo ""
-echo "[2/4] Syncing skills to ~/.claude/skills/..."
-"$SYNC_SRC"
+if echo "$PROJECT_DIR" | grep -q "\.claude/plugins/cache"; then
+  echo "[2/4] Skipping sync-skills (running from plugin cache — plugin handles skill loading)"
+else
+  echo "[2/4] Syncing skills to ~/.claude/skills/..."
+  "$SYNC_SRC"
+fi
 
 # --- 3. Add Atlassian config to ~/.claude/CLAUDE.md ---
 echo ""
@@ -87,35 +91,38 @@ echo "[3/4] Configuring ~/.claude/CLAUDE.md..."
 mkdir -p "$HOME/.claude"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 
+# Read real values from project-config.json
+JIRA_SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('site','your-site.atlassian.net'))" 2>/dev/null || echo "your-site.atlassian.net")
+PROJECT_KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('project_key','YOUR_KEY'))" 2>/dev/null || echo "YOUR_KEY")
+
 if [ -f "$CLAUDE_MD" ] && grep -q "Atlassian Settings" "$CLAUDE_MD"; then
   echo "  Atlassian settings already present"
 else
-  # Append config block (update values from .claude/project-config.json)
-  cat >> "$CLAUDE_MD" << 'ATLASSIAN_CONFIG'
+  cat >> "$CLAUDE_MD" << ATLASSIAN_CONFIG
 
 ## Atlassian Settings
 
-> **Full config:** `jira-generator/.claude/project-config.json` — team, services, environments, custom fields
+> **Full config:** \`jira-generator/.claude/project-config.json\` — team, services, environments, custom fields
 
 | Setting | Value |
 | --- | --- |
-| Jira | `your-site.atlassian.net` / Project: `BEP` |
-| Date Fields | `{{START_DATE_FIELD}}` (Start), `{{SPRINT_FIELD}}` (Sprint) |
+| Jira | \`${JIRA_SITE}\` / Project: \`${PROJECT_KEY}\` |
+| Date Fields | \`{{START_DATE_FIELD}}\` (Start), \`{{SPRINT_FIELD}}\` (Sprint) |
 
-**Dynamic lookup:** Board → `jira_get_agile_boards(project_key="{{PROJECT_KEY}}")` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
+**Dynamic lookup:** Board → \`jira_get_agile_boards(project_key="${PROJECT_KEY}")\` · Sprint → \`jira_get_sprints_from_board(board_id, state="future")\`
 
-**Assign:** `acli jira workitem assign -k "KEY" -a "email" -y` (MCP assignee broken)
+**Assign:** \`acli jira workitem assign -k "KEY" -a "email" -y\` (MCP assignee broken)
 
 ## Development Workflow
 
-### When referencing Jira issues ({{PROJECT_KEY}}-XXX)
+### When referencing Jira issues (${PROJECT_KEY}-XXX)
 
 **Before implement:**
-1. Read issue via MCP `jira_get_issue` — understand AC, scope, technical notes
+1. Read issue via MCP \`jira_get_issue\` — understand AC, scope, technical notes
 2. Read sub-tasks for implementation details
 
 **After implement:**
-1. Add Jira comment via MCP `jira_add_comment`:
+1. Add Jira comment via MCP \`jira_add_comment\`:
    - What was implemented/changed
    - Files modified
    - Deviations from AC (if any)
@@ -124,16 +131,16 @@ else
 
 | Operation | Tool |
 | --- | --- |
-| Read issue | MCP `jira_get_issue` |
-| Search issues | MCP `jira_search` |
-| Add comment | MCP `jira_add_comment` |
-| Update issue fields | MCP `jira_update_issue` |
-| Read Confluence | MCP `confluence_get_page` |
-| Update Confluence | MCP `confluence_update_page` |
-| Complex formatting | `/atlassian-scripts` |
-| Create/manage issues | Skill commands (`/create-story`, `/verify-issue`, etc.) |
+| Read issue | MCP \`jira_get_issue\` |
+| Search issues | MCP \`jira_search\` |
+| Add comment | MCP \`jira_add_comment\` |
+| Update issue fields | MCP \`jira_update_issue\` |
+| Read Confluence | MCP \`confluence_get_page\` |
+| Update Confluence | MCP \`confluence_update_page\` |
+| Complex formatting | \`/atlassian-scripts\` |
+| Create/manage issues | Skill commands (\`/story-full\`, \`/verify-issue\`, etc.) |
 ATLASSIAN_CONFIG
-  echo "  added Atlassian settings and workflow"
+  echo "  added Atlassian settings (site: ${JIRA_SITE}, project: ${PROJECT_KEY})"
 fi
 
 # --- 4. Configure git smudge/clean filter ---
