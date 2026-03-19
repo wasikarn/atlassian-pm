@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -378,7 +378,7 @@ All project-specific values live in `.claude/project-config.json` — the single
 | File | Loaded | Contains |
 | --- | --- | --- |
 | `.claude/project-config.json` | Every session | Jira fields, team roster, services, environments |
-| `.claude/project-config-team-detail.json` | Sprint planning only | Git evidence, bus factor, velocity history |
+| `.claude/project-config-team-detail.json` | Sprint planning only | Git evidence, bus factor, velocity history *(gitignored — create from template)* |
 
 ### Git Filter — Automatic Placeholder Conversion
 
@@ -407,7 +407,7 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 
 ```text
 .claude-plugin/plugin.json              ← Plugin manifest
-.claude-plugin/marketplace.json         ← Plugin catalog (version must match plugin.json)
+.claude-plugin/marketplace.json         ← Plugin catalog (version lives here — not in plugin.json)
 .mcp.json                               ← MCP server config
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
@@ -459,4 +459,4 @@ scripts/
 
 **Dev hot-reload** — after editing skill or agent files, use `/reload-plugins` in Claude Code.
 
-**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error). `marketplace.json` version must match `plugin.json` exactly and must be in `.claude-plugin/` (not repo root).
+**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error) or a `version` field (version lives in `.claude-plugin/marketplace.json` only). `marketplace.json` must be in `.claude-plugin/` (not repo root).

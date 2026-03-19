@@ -11,9 +11,9 @@ Agile Documentation System — skills-based Jira/Confluence automation
 ## Project Settings
 
 Core config (jira fields, team roster, services, environments): @.claude/project-config.json
-Team detail (git evidence, capacity model, bus factor — load on-demand for sprint planning): `.claude/project-config-team-detail.json`
+Team detail (git evidence, capacity model, bus factor — load on-demand for sprint planning): `.claude/project-config-team-detail.json` *(gitignored — create from `.claude/project-config-team-detail.json.template`)*
 
-**Dynamic lookup:** Board → `jira_get_agile_boards(project_key="{{PROJECT_KEY}}")` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
+**Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
