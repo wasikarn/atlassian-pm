@@ -230,13 +230,15 @@ def _build_qmd_collections() -> dict[str, str]:
 
     Returns empty dict if config missing — qmd hooks degrade gracefully.
     expanduser() converts ~/Codes/... to absolute path.
+    Note: if two services share the same directory basename, the last one wins silently.
     """
     config = load_project_config()
-    return {
-        str(Path(svc["path"]).expanduser()): Path(svc["path"]).expanduser().name
-        for svc in config.get("services", {}).get("tags", [])
-        if svc.get("path")
-    }
+    result = {}
+    for svc in config.get("services", {}).get("tags", []):
+        if svc.get("path"):
+            resolved = Path(svc["path"]).expanduser()
+            result[str(resolved)] = resolved.name
+    return result
 
 
 # Known indexed project roots → collection name (built from project-config.json)
