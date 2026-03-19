@@ -478,7 +478,9 @@ If **Skip for now**:
 → /atlassian-pm:plan-sprint   sprint planning
 ```
 
-### 5d. Restart Notice (conditional on `MCP_NEWLY_ADDED=true`)
+### 5d. Restart Notice (conditional on `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`)
+
+Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 
 ```text
 =================================================
