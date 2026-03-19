@@ -1,55 +1,137 @@
-# atlassian-pm (jira-generator)
+# atlassian-pm
 
-Agile Documentation System for **{{COMPANY}} Platform** — Create Epics, User Stories, Sub-tasks, and plan Sprints via Claude Code plugin (`atlassian-pm`).
+> Agile Documentation System for the {{COMPANY}} Platform — AI-powered Jira and Confluence automation via Claude Code plugin.
+
+Create Epics, User Stories, Sub-tasks, and plan Sprints using natural language. The plugin enforces quality gates, prevents silent failures through hook-based guardrails, and reduces Jira API token consumption by 80–90% via a local SQLite cache.
+
+---
+
+## Contents
+
+- [How It Works](#how-it-works)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Plugin Commands](#plugin-commands)
+- [Usage Examples](#usage-examples)
+- [Project Structure](#project-structure)
+- [Configuration System](#configuration-system)
+- [Tips](#tips)
+
+---
+
+## How It Works
+
+```text
+You (natural language) → Claude Code + atlassian-pm plugin → Jira / Confluence
+```
+
+1. You describe what you need in plain language (e.g. "Create a coupon system story for admin")
+2. Claude uses the skill workflow: **Explore codebase → Write ADF → Quality Gate ≥ 90% → Publish**
+3. Hooks automatically enforce hard rules (HR1–HR10) and block silent failures before they happen
+4. A local cache (SQLite + FTS5) stores Jira data so repeated reads don't consume API tokens
+
+---
 
 ## Architecture
 
 ```text
-Claude Code ──skills──> acli (ADF JSON) ──> Jira Cloud
-    │                                         ↑
-    ├──MCP──> mcp-atlassian ─────────────────┘
-    │                                   ↑
-    ├──MCP──> jira-cache-server ───SQLite+FTS5 (local cache)
-    │                              └─> Jira REST API v3
-    ├──MCP──> Confluence, Figma, GitHub
+Claude Code ──skills──► acli (ADF JSON) ──────────────────► Jira Cloud
+    │                                                              ▲
+    ├── MCP ──► mcp-atlassian ────────────────────────────────────┤
+    │                                                              │
+    ├── MCP ──► jira-cache-server ──SQLite + FTS5 ──► Jira REST API v3
+    │                └─ (~/.cache/jira-generator/jira.db)
     │
-    └──Python──> atlassian-scripts/lib/ (REST API)
+    ├── MCP ──► Confluence, Figma, GitHub
+    │
+    └── Python ──► atlassian-scripts/lib/ (REST API helpers)
 ```
 
 **Key design decisions:**
 
-- **Descriptions** always via `acli --from-json` (ADF format) — MCP produces ugly output
-- **Fields** (assignee, sprint, labels) via MCP `jira_update_issue`
-- **Sub-tasks** use two-step: MCP create (with parent) → acli edit (description)
-- **Heavy ML deps** (PyTorch, sentence-transformers) isolated in venv outside project tree
+| Layer | Tool | Why |
+| --- | --- | --- |
+| Descriptions | `acli --from-json` (ADF format) | MCP produces unformatted output |
+| Fields (assignee, sprint, labels) | MCP `jira_update_issue` | Simpler and more reliable for field updates |
+| Sub-task creation | MCP create → acli edit (two-step) | MCP may silently drop parent; acli handles description |
+| ML dependencies | venv outside project tree | PyTorch + sentence-transformers are ~640MB |
+
+---
 
 ## Prerequisites
 
+Install all four tools before running setup:
+
 | Tool | Purpose | Install |
-| ---- | ------- | ------- |
-| [Claude Code](https://claude.com/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` or VSCode extension |
+| --- | --- | --- |
+| [Claude Code](https://claude.com/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` |
 | [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF descriptions | `brew install atlassian-cli` |
-| [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | `uvx mcp-atlassian` (auto-installed) |
+| [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP server | `uvx mcp-atlassian` (auto-installed) |
 | Python 3.x | REST API scripts | Pre-installed on macOS |
 
-## Setup
+> `uv` is required for the Jira Cache Server (Python package manager). Install: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-### 0. Create Project Config (First Time Only)
+---
+
+## Installation
+
+### Step 1 — Clone and enter the project
+
+```bash
+git clone <repo-url> jira-generator
+cd jira-generator
+```
+
+---
+
+### Step 2 — Create project config
+
+Copy the template and fill in your real values (Jira site, team members, service paths):
 
 ```bash
 cp config/project-config.json.template .claude/project-config.json
-# Edit with your real values: team, Jira site, domains, service paths
 ```
 
-### 1. Configure acli
+Then edit `.claude/project-config.json`:
+
+```jsonc
+{
+  "jira": {
+    "site": "your-company.atlassian.net",   // ← your Jira domain
+    "project_key": "ABC",                    // ← your project key
+    "board_id": 1                            // ← from jira_get_agile_boards()
+  },
+  "confluence": {
+    "site": "your-company.atlassian.net",
+    "space_key": "ABC"
+  },
+  "team": {
+    "members": [...]                         // ← your team roster
+  }
+}
+```
+
+> The template ships with safe placeholder values. Real config is gitignored — never committed.
+
+---
+
+### Step 3 — Configure acli
 
 ```bash
-acli jira login --server https://your-site.atlassian.net --user <email> --token <api-token>
+acli jira login \
+  --server https://your-site.atlassian.net \
+  --user your@email.com \
+  --token <api-token>
 ```
 
-### 2. Configure MCP Servers
+Generate your API token at: **Atlassian Account → Security → API tokens**
 
-Add to Claude Code settings (`~/.claude/settings.json` or VSCode settings):
+---
+
+### Step 4 — Configure MCP servers
+
+Add to your Claude Code settings (`~/.claude/settings.json`):
 
 ```json
 {
@@ -59,10 +141,10 @@ Add to Claude Code settings (`~/.claude/settings.json` or VSCode settings):
       "args": ["mcp-atlassian"],
       "env": {
         "JIRA_URL": "https://your-site.atlassian.net",
-        "JIRA_USERNAME": "<email>",
+        "JIRA_USERNAME": "your@email.com",
         "JIRA_API_TOKEN": "<api-token>",
         "CONFLUENCE_URL": "https://your-site.atlassian.net/wiki",
-        "CONFLUENCE_USERNAME": "<email>",
+        "CONFLUENCE_USERNAME": "your@email.com",
         "CONFLUENCE_API_TOKEN": "<api-token>"
       }
     }
@@ -70,140 +152,182 @@ Add to Claude Code settings (`~/.claude/settings.json` or VSCode settings):
 }
 ```
 
-### 3. Configure Atlassian Credentials (Python scripts)
+> For VSCode, add to your workspace or user `settings.json` under the Claude Code extension settings.
 
-Python scripts (`atlassian-scripts/`) load credentials from `~/.config/atlassian/.env`:
+---
+
+### Step 5 — Configure credentials for Python scripts
+
+Python scripts in `atlassian-scripts/` load credentials from `~/.config/atlassian/.env`:
 
 ```bash
 mkdir -p ~/.config/atlassian
 cat > ~/.config/atlassian/.env << 'EOF'
-CONFLUENCE_URL=https://your-site.atlassian.net/wiki
-CONFLUENCE_USERNAME=<email>
-CONFLUENCE_API_TOKEN=<api-token>
 JIRA_URL=https://your-site.atlassian.net
-JIRA_USERNAME=<email>
+JIRA_USERNAME=your@email.com
 JIRA_API_TOKEN=<api-token>
+CONFLUENCE_URL=https://your-site.atlassian.net/wiki
+CONFLUENCE_USERNAME=your@email.com
+CONFLUENCE_API_TOKEN=<api-token>
 EOF
-```
-
-### 4. Load Plugin (Development Mode)
-
-```bash
-# Load plugin for this session
-claude --plugin-dir /path/to/jira-generator
-
-# Or add to your Claude Code config for permanent use:
-# ~/.claude/settings.json → "pluginDirs": ["/path/to/jira-generator"]
-```
-
-Skills are available as `/atlassian-pm:<name>` (e.g. `/atlassian-pm:story-full`).
-
-### 5. Setup Jira Cache Server (Optional)
-
-Local SQLite cache for Jira data — reduces token consumption by 80-90% for repeated queries.
-
-```bash
-# Create venv in cache directory
-python3 -m venv ~/.cache/jira-generator/jira-cache-server/.venv
-source ~/.cache/jira-generator/jira-cache-server/.venv/bin/activate
-pip install -r mcp-servers/jira-cache-server/requirements.txt
-```
-
-The `.mcp.json` at plugin root auto-registers `jira-cache-server` when loaded via `--plugin-dir`.
-
-### Verify Setup
-
-```bash
-# Validate plugin structure
-claude plugin validate .
-
-# Check acli
-acli jira project list --server https://your-site.atlassian.net
-
-# In Claude Code: /atlassian-pm:search-issues → should list issues
 ```
 
 ---
 
-## Commands
+### Step 6 — Run setup
 
-Load the plugin (`claude --plugin-dir .`) then type `/atlassian-pm:<command>`.
+```bash
+./scripts/setup.sh
+```
 
-### Jira — Issue Creation
+This single command does four things:
+
+1. Creates `.claude/project-config.json` from template (if missing)
+2. Installs the `sync-skills` CLI to `~/.local/bin/`
+3. Syncs skills to `~/.claude/skills/`
+4. Configures git smudge/clean filters (auto placeholder↔real value conversion)
+
+> If `~/.local/bin` is not in your `PATH`, add `export PATH="$HOME/.local/bin:$PATH"` to your shell profile.
+
+---
+
+### Step 7 — Install Jira Cache Server (recommended)
+
+The cache server reduces token consumption by 80–90% for repeated Jira queries.
+
+```bash
+cd mcp-servers/jira-cache-server
+uv sync --extra embeddings
+```
+
+The `.mcp.json` at the project root auto-registers the cache server when the plugin is loaded. No additional config needed.
+
+---
+
+### Step 8 — Load the plugin
+
+```bash
+# Load for this session only
+claude --plugin-dir /path/to/jira-generator
+
+# Or add permanently to ~/.claude/settings.json:
+{
+  "pluginDirs": ["/path/to/jira-generator"]
+}
+```
+
+Skills are available as `/atlassian-pm:<name>` (e.g. `/atlassian-pm:story-full`).
+
+---
+
+### Verify Setup
+
+```bash
+# Check plugin structure is valid
+claude plugin validate .
+
+# Check acli is authenticated
+acli jira project list --server https://your-site.atlassian.net
+
+# Inside Claude Code — should list your recent issues
+/atlassian-pm:search-issues
+```
+
+---
+
+## Plugin Commands
+
+Load the plugin (`claude --plugin-dir .`), then use `/atlassian-pm:<command>`.
+
+### Issue Creation
 
 | Command | Description |
-| ------- | ----------- |
-| `/atlassian-pm:story-full` | Create Story + Sub-tasks in one go (preferred) |
+| --- | --- |
+| `/atlassian-pm:story-full` | Create Story + Sub-tasks in one go **(preferred)** |
 | `/atlassian-pm:create-epic` | Create Epic + Confluence Epic Doc with RICE scoring |
 | `/atlassian-pm:create-task` | Create Task: `tech-debt`, `bug`, `chore`, or `spike` |
 | `/atlassian-pm:analyze-story ABC-XXX` | Read Story → explore codebase → create Sub-tasks |
-| `/atlassian-pm:create-testplan ABC-XXX` | Create Test Plan + [QA] Sub-tasks from Story |
+| `/atlassian-pm:create-testplan ABC-XXX` | Create Test Plan + `[QA]` Sub-tasks from Story |
 
-### Jira — Issue Updates
+### Issue Updates
 
 | Command | Description |
-| ------- | ----------- |
+| --- | --- |
 | `/atlassian-pm:update-story ABC-XXX` | Edit Story — add/edit ACs, scope |
 | `/atlassian-pm:update-epic ABC-XXX` | Edit Epic — adjust scope, RICE, metrics |
 | `/atlassian-pm:update-task ABC-XXX` | Edit Task — migrate format, add details |
 | `/atlassian-pm:update-subtask ABC-XXX` | Edit Sub-task — format, content |
-| `/atlassian-pm:sync-alignment ABC-XXX` | Sync Story + Sub-tasks bidirectional (+ Confluence if exists) |
+| `/atlassian-pm:sync-alignment ABC-XXX` | Sync Story + Sub-tasks bidirectionally (+ Confluence if exists) |
 
-### Jira — Sync & Quality
+### Search and Quality
 
-| Command | Description |
-| ------- | ----------- |
-| `/atlassian-pm:verify-issue ABC-XXX` | Check ADF format, INVEST criteria, language |
-| `/atlassian-pm:search-issues` | Search before creating (prevent duplicates) |
+| Command | Flags | Description |
+| --- | --- | --- |
+| `/atlassian-pm:search-issues` | | Search before creating (prevent duplicates) |
+| `/atlassian-pm:verify-issue ABC-XXX` | `--with-subtasks` · `--fix` · `--dry-run` | Check ADF format, INVEST criteria, language |
 
-`/atlassian-pm:verify-issue` flags: `--with-subtasks` (batch check), `--fix` (auto-fix), `--dry-run` (report only)
+### Sprint Planning
 
-### Jira — Planning & Analysis
+| Command | Flags | Description |
+| --- | --- | --- |
+| `/atlassian-pm:plan-sprint` | `--sprint 123` · `--carry-over-only` | Sprint planning: carry-over + capacity + assign |
+| `/atlassian-pm:dependency-chain` | | Dependency graph, critical path, swim lanes |
+| `/atlassian-pm:activity-report` | | Work activity report from session history |
 
-| Command | Description |
-| ------- | ----------- |
-| `/atlassian-pm:plan-sprint` | Sprint planning: carry-over + capacity + assign |
-| `/atlassian-pm:dependency-chain` | Dependency graph, critical path, swim lanes |
-| `/atlassian-pm:activity-report` | Generate work activity report from claude-mem |
-
-`/atlassian-pm:plan-sprint` options: `--sprint 123` (target sprint), `--carry-over-only` (analysis only)
-
-### Confluence — Documentation
+### Confluence Documentation
 
 | Command | Description |
-| ------- | ----------- |
-| `/atlassian-pm:create-doc` | Create Confluence page: `tech-spec`, `adr`, `parent` |
+| --- | --- |
+| `/atlassian-pm:create-doc` | Create page: `tech-spec`, `adr`, `parent` |
 | `/atlassian-pm:update-doc` | Update or move a Confluence page |
-| `/optimize-context` | Audit + compress CLAUDE.md passive context |
 
 ---
 
 ## Usage Examples
 
-### Create a Full Feature (End-to-End)
+### End-to-End Feature Creation
 
 ```text
-/atlassian-pm:search-issues        → Check no duplicates exist
-/atlassian-pm:create-epic          → Create Epic + Confluence doc
-/atlassian-pm:story-full           → Create Story + Sub-tasks in one go
-/atlassian-pm:create-testplan      → Create [QA] Sub-tasks (optional)
-/atlassian-pm:verify-issue ABC-XXX → Verify quality
+# 1. Check no duplicates exist
+/atlassian-pm:search-issues
+
+# 2. Create Epic with Confluence doc and RICE score
+/atlassian-pm:create-epic
+
+# 3. Create Story + Sub-tasks in one workflow
+/atlassian-pm:story-full
+
+# 4. Optionally create QA sub-tasks
+/atlassian-pm:create-testplan ABC-123
+
+# 5. Verify quality (ADF, INVEST, language)
+/atlassian-pm:verify-issue ABC-123 --with-subtasks
 ```
 
-**Example:** `/atlassian-pm:story-full` → "Build a coupon system for admin" → Claude generates Story + Sub-tasks `[BE]`, `[FE-Admin]`
+**Example:** `/atlassian-pm:story-full` → "Build a coupon system for admin" → Claude generates Story with `[BE]` and `[FE-Admin]` Sub-tasks, each with implementation paths from codebase exploration.
+
+---
 
 ### Plan a Sprint
 
 ```text
-/atlassian-pm:plan-sprint   → 8 phases: Discovery → Capacity → Carry-over →
-                              Prioritize → Distribute → Risk → Review → Execute
+/atlassian-pm:plan-sprint
+
+# 8-phase workflow:
+# Discovery → Capacity → Carry-over → Prioritize
+# → Distribute → Risk → Review → Execute
 ```
 
-### Update + Cascade Changes
+---
+
+### Update with Cascade
 
 ```text
-/atlassian-pm:update-story ABC-XXX     → Edit Story only
-/atlassian-pm:sync-alignment ABC-XXX   → + cascade to Sub-tasks + sync Confluence docs
+# Edit Story only
+/atlassian-pm:update-story ABC-123
+
+# Edit Story AND cascade to Sub-tasks + sync Confluence
+/atlassian-pm:sync-alignment ABC-123
 ```
 
 ---
@@ -211,120 +335,151 @@ Load the plugin (`claude --plugin-dir .`) then type `/atlassian-pm:<command>`.
 ## Project Structure
 
 ```text
-.claude-plugin/plugin.json          <- Plugin manifest (name: atlassian-pm)
-.mcp.json                           <- MCP server config (jira-cache-server)
+.claude-plugin/plugin.json          ← Plugin manifest (name: atlassian-pm)
+.mcp.json                           ← MCP server config (jira-cache-server)
+.claude/project-config.json         ← Your real config (gitignored)
+config/project-config.json.template ← Template with safe placeholders (tracked)
 
-skills/                             <- Skill definitions (1 dir = 1 slash command)
+skills/                             ← Skill definitions (1 dir = 1 slash command)
+├── story-full/                     ← Composite: PO + TA in one workflow
 ├── create-{epic,task,doc,testplan}/
 ├── update-{epic,story,task,subtask,doc}/
 ├── analyze-story/
-├── story-full/                     <- Composite: PO + TA in one workflow
-├── sync-alignment/                 <- Bidirectional sync (Jira + Confluence)
-├── plan-sprint/                    <- Sprint planning: carry-over + capacity + assign
-├── dependency-chain/               <- Critical path + swim lane analysis
+├── sync-alignment/                 ← Bidirectional sync (Jira + Confluence)
+├── plan-sprint/                    ← Sprint planning: carry-over + capacity + assign
+├── dependency-chain/               ← Critical path + swim lane analysis
 ├── search-issues/, verify-issue/, activity-report/, assign/
-├── atlassian-scripts/              <- Python REST API scripts (non-user-invocable)
-│   ├── lib/                        <- auth, jira_api, converters, exceptions
-│   └── scripts/                    <- 16 utility scripts
-└── shared-references/              <- Reusable docs loaded by skills (23 files)
-    ├── templates.md                <- All ADF templates (Epic, Story, Sub-task, Task)
-    ├── tools.md, writing-style.md, verification-checklist.md
-    ├── troubleshooting.md, hr-rules.md
-    └── ...
+│
+├── atlassian-scripts/              ← Python REST API scripts (non-user-invocable)
+│   ├── lib/                        ← auth, jira_api, converters, exceptions
+│   └── *.py                        ← 16 utility scripts
+│
+└── shared-references/              ← Reusable docs loaded by skills (23 files)
+    ├── templates.md                ← All ADF templates (Epic, Story, Sub-task, Task)
+    ├── tools.md                    ← Field presets and tool selection rules
+    ├── writing-style.md            ← Thai + English style guide
+    ├── verification-checklist.md   ← Quality gate criteria
+    ├── hr-rules.md                 ← Hard rule definitions (HR1–HR10)
+    └── troubleshooting.md          ← Common failure patterns + fixes
 
-agents/                             <- 8 subagent definitions
-├── code-explorer.md (haiku)        <- Codebase exploration
-├── issue-reader.md (haiku)         <- Fast Jira issue fetch
-├── jira-search.md (haiku)          <- JQL search + dedup
-├── issue-bootstrap.md (haiku)      <- Pre-gather full issue context
-├── quality-gate.md (haiku)         <- ADF quality scoring
-├── story-writer.md (sonnet)        <- ADF JSON generation
-├── alignment-checker.md (sonnet)   <- Epic→Story→Subtask alignment
-└── sprint-planner.md (opus)        <- Sprint planning
+agents/                             ← 8 subagent definitions
+├── code-explorer.md (haiku)        ← Codebase exploration
+├── issue-reader.md (haiku)         ← Fast Jira issue fetch
+├── jira-search.md (haiku)          ← JQL search + dedup
+├── issue-bootstrap.md (haiku)      ← Pre-gather full issue context
+├── quality-gate.md (haiku)         ← ADF quality scoring
+├── story-writer.md (sonnet)        ← ADF JSON generation
+├── alignment-checker.md (sonnet)   ← Epic→Story→Subtask alignment
+└── sprint-planner.md (opus)        ← Sprint capacity planning
 
-hooks/                              <- 39 Python hook scripts
-├── hooks.json                      <- Plugin hook manifest (${CLAUDE_PLUGIN_ROOT})
-├── hooks_lib.py, hooks_state.py    <- Shared libraries
-└── pre_hr*.py, post_hr*.py, ...    <- HR enforcement hooks
+hooks/                              ← 39 Python hook scripts
+├── hooks.json                      ← Plugin hook manifest
+├── pre_hr*.py                      ← Block rule violations before tool execution
+└── post_hr*.py                     ← Track and confirm post-execution state
 
-mcp-servers/jira-cache-server/      <- MCP server: local Jira cache (SQLite+FTS5)
-├── server.py                       <- MCP entry point + 10 tool handlers
-└── jira_cache/                     <- cache.py + embeddings.py
+mcp-servers/jira-cache-server/      ← MCP server: local Jira cache
+├── server.py                       ← MCP entry point + 9 tool handlers
+└── jira_cache/
+    ├── cache.py                    ← SQLite + FTS5 (issues, sprints, searches)
+    └── embeddings.py               ← sqlite-vec + sentence-transformers
 
 scripts/
-├── setup.sh, git_filter.py         <- Setup + git smudge/clean filter
-├── sprint/                         <- Sprint batch utilities (5 scripts)
-└── confluence/                     <- Confluence page scripts
+├── setup.sh                        ← One-command setup (idempotent)
+├── git_filter.py                   ← Placeholder↔value smudge/clean filter
+├── sprint/                         ← Sprint batch utilities (5 scripts)
+└── confluence/                     ← Confluence page scripts
 
-config/project-config.json.template <- Template for instance-specific config
-tasks/                              <- Generated ADF JSON outputs (gitignored)
-CLAUDE.md                           <- Agent instructions (passive context)
+tasks/                              ← Generated ADF JSON outputs (gitignored)
+CLAUDE.md                           ← Agent instructions (passive context)
 ```
 
-> **Note:** jira-cache-server venv stored at `~/.cache/jira-generator/jira-cache-server/.venv/` (~643MB ML deps, outside project tree).
+> The jira-cache-server venv is stored outside the project at `~/.cache/jira-generator/jira-cache-server/.venv/` (~640MB ML deps).
+
+---
 
 ## Configuration System
 
-All project-specific values (Jira site, team, services, domains) live in `.claude/project-config.json` — the **single source of truth**. The repo tracks only the `.template` version with safe placeholder values; real config is gitignored.
+All project-specific values (Jira site, team, services, domains) live in `.claude/project-config.json` — the **single source of truth**. The repo tracks only the `.template` version with placeholder values; real config is gitignored.
 
-### How It Works
-
-```text
-Git repo (committed):  ABC-XXX    ← always placeholders
-                          │
-                    [smudge filter]            ← on checkout/pull
-                          ↓
-Working tree:          ABC-XXX                ← real values (local dev)
-                          │
-                    [clean filter]             ← on add/commit
-                          ↓
-Git staging:           ABC-XXX    ← always placeholders
-```
+### Git Filter: Automatic Placeholder Conversion
 
 ```text
-.claude/project-config.json.template   ← tracked in git (safe placeholders)
-.claude/project-config.json            ← gitignored (your real values)
-scripts/git_filter.py                  ← git smudge/clean filter (auto conversion)
-.git/hooks/pre-commit                  ← blocks commits with sensitive data
+Git repo (committed):  {{PROJECT_KEY}}-XXX   ← always placeholders
+                              │
+                        [smudge filter]       ← on checkout / pull
+                              ↓
+Working tree:          {{PROJECT_KEY}}-XXX                ← real values (local dev)
+                              │
+                        [clean filter]        ← on add / commit
+                              ↓
+Git staging:           {{PROJECT_KEY}}-XXX   ← always placeholders
 ```
 
-After `./scripts/setup.sh`, git filters handle placeholder↔value conversion **automatically**. No manual steps needed — working tree shows real values, commits contain only placeholders.
+After `./scripts/setup.sh`, the git filters run automatically. No manual steps needed — working tree shows real values, commits contain only placeholders.
 
-### Placeholders
+### Placeholder Reference
 
-| Placeholder | Example Real Value |
-| ----------- | ------------------ |
+| Placeholder | Example real value |
+| --- | --- |
 | `{{PROJECT_KEY}}` | `BEP` |
 | `{{JIRA_SITE}}` | `acme-corp.atlassian.net` |
 | `{{CONFLUENCE_SITE}}` | `acme-corp.atlassian.net` |
 | `{{SPACE_KEY}}` | `BEP` |
-| `{{START_DATE_FIELD}}` | `customfield_XXXXX` (Start Date) |
-| `{{SPRINT_FIELD}}` | `customfield_YYYYY` (Sprint) |
 | `{{COMPANY}}` | `Acme Corp` |
 | `{{COMPANY_LOWER}}` | `acme` |
-| `{{SLOT_1}}` .. `{{SLOT_N}}` | Team member names (from `project-config.json` → `team.members[]`) |
+| `{{START_DATE_FIELD}}` | `{{START_DATE_FIELD}}` |
+| `{{SPRINT_FIELD}}` | `{{SPRINT_FIELD}}` |
+| `{{SLOT_1}}` .. `{{SLOT_N}}` | Team member names from `project-config.json → team.members[]` |
 
 ### Cloning to Another Project
 
 ```bash
-# 1. Copy template to create your config
+# 1. Copy template
 cp config/project-config.json.template .claude/project-config.json
 
-# 2. Edit with your values: team, Jira site, domains, service paths
+# 2. Edit with your project's values
 vi .claude/project-config.json
 
-# 3. Run setup (configures git filters)
+# 3. Run setup — configures git filters, installs CLI tools
 ./scripts/setup.sh
 ```
 
-> **Manual override:** `python scripts/configure_project.py --apply` / `--revert --apply` for debugging or bulk conversion without git filters.
+**Manual override (debugging):**
+
+```bash
+python scripts/configure_project.py --apply          # apply placeholders → real values
+python scripts/configure_project.py --revert --apply # revert real values → placeholders
+```
+
+---
 
 ## Tips
 
-- **Always search first:** `/atlassian-pm:search-issues` before creating to prevent duplicates
-- **Always verify after:** `/atlassian-pm:verify-issue ABC-XXX` after creating/updating
-- **Language:** Thai + English transliteration for technical terms (endpoint, API, component)
-- **Format:** Jira descriptions use ADF format — Claude handles this via `acli --from-json`
-- **Codebase first:** `/atlassian-pm:analyze-story` always explores codebase before creating Sub-tasks
-- **Cache server:** Use `cache_sprint_issues` before sprint planning for 80%+ token savings
-- **Hot-reload:** After editing skill/agent files, use `/reload-plugins` in Claude Code
+**Before creating anything:**
+
+- Always run `/atlassian-pm:search-issues` first — prevents duplicate issues
+
+**After creating or updating:**
+
+- Always run `/atlassian-pm:verify-issue ABC-XXX` — catches format and alignment issues
+- Add `--with-subtasks` to check the entire tree at once
+
+**Token savings:**
+
+- Before sprint planning, run `cache_sprint_issues(sprint_id=...)` to pre-cache all issues
+- Repeated lookups cost 0 tokens after first fetch (local SQLite, no API call)
+
+**Codebase exploration:**
+
+- `/atlassian-pm:analyze-story` always explores the codebase before creating Sub-tasks
+- Never skip this step — generic sub-tasks miss real implementation paths
+
+**Development workflow:**
+
+- After editing skill or agent files, use `/reload-plugins` in Claude Code to hot-reload
+- Use `claude plugin validate .` to check for manifest errors before testing
+
+**Language:**
+
+- Jira descriptions use Thai + English transliteration for technical terms (endpoint, API, component, etc.)
+- ADF format is handled automatically via `acli --from-json` — no manual formatting needed
