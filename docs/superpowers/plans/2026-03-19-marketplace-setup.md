@@ -574,7 +574,7 @@ Config:  [CLAUDE_PLUGIN_ROOT]/.claude/project-config.json
 head -10 skills/setup/SKILL.md
 ```
 
-Expected: starts with `---`, has `name: setup`, `disable-model-invocation: true`, `description:`, `argument-hint:`, closing `---`.
+Expected: starts with `---`, has `name: setup`, `description:`, `argument-hint:`, closing `---`. There should be NO `disable-model-invocation` field (skill requires LLM reasoning for interactive phases).
 
 - [ ] **Step 3: Commit**
 
