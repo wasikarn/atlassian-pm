@@ -44,7 +44,8 @@ For each item, extract:
 Load team info:
 
 ```text
-Read: .claude/skills/shared-references/team-capacity.md
+Read: .claude/skills/shared-references/team-capacity.md (capacity formulas, skill matrix, thresholds)
+Read: .claude/project-config.json (team roster: members[], skill_profile, avg_throughput)
 ```
 
 **Size defaults** (if no estimate available):
@@ -194,5 +195,5 @@ Priority 2: [Action] — reduces delay impact by [N] days
 ## References
 
 - [Dependency Frameworks](../shared-references/dependency-frameworks.md) — Dependency types, CPM algorithm, decoupling patterns, swim lane rules, risk scoring
-- [Team Capacity](../shared-references/team-capacity.md) — Team roster + capacity model
+- [Team Capacity](../shared-references/team-capacity.md) — Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
 - [Sprint Frameworks](../shared-references/sprint-frameworks.md) — Vertical slicing, carry-over model

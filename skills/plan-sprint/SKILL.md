@@ -372,6 +372,6 @@ Risk: ABC-XXX blocks 2 downstream tickets
 
 ## References
 
-- [Team Capacity](../shared-references/team-capacity.md) - Team roster, capacity model, skill mapping
+- [Team Capacity](../shared-references/team-capacity.md) - Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
 - [Sprint Frameworks](../shared-references/sprint-frameworks.md) - RICE, Impact/Effort, carry-over model
 - [Tool Selection](../shared-references/tools.md) - MCP vs acli decision rules
