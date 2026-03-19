@@ -48,20 +48,43 @@ argument-hint: "[story-description]"
 
 **If `blueprint_backlog_map` is present in history:**
 
-Ask user: "ต้องการสร้าง story ไหนจาก blueprint?"
-→ User เลือก story index (e.g., "story 1", "first MVP story")
+**Step 1 — แสดง story list:**
+แสดง stories จาก blueprint เป็น numbered list (1-based) ให้ user เลือก:
 
-Extract selected story from blueprint:
+```text
+Blueprint stories:
+1. [stories[0].title] — [stories[0].vs_label] ([stories[0].sp_estimate])
+2. [stories[1].title] — [stories[1].vs_label] ([stories[1].sp_estimate])
+...
+```
 
-- `stories[N].title` → ใช้เป็น story summary draft
-- `stories[N].narrative_hint` → เริ่ม narrative จาก hint นี้ (ไม่ถาม Who/What/Why ซ้ำ)
-- `stories[N].acs_hint[]` → ใช้เป็น starting points สำหรับ ACs
-- `stories[N].vs_label` → pre-assign VS label (ข้าม VS assignment)
-- `stories[N].sp_estimate` → suggest SP (S/M/L)
-- `blueprint_page_id` → link ใน story description section "References"
+Ask: "ต้องการสร้าง story ข้อไหน? (ระบุหมายเลข)"
 
-ข้าม "Ask: Who? What? Why?" ใน Phase 1 สำหรับข้อมูลที่มีอยู่แล้ว
-เริ่มที่ Phase 2 Write User Story โดยใช้ blueprint context เป็น draft
+- ถ้า index ไม่มีใน list → แสดง list ใหม่ให้ user เลือกอีกครั้ง
+
+**Step 2 — Extract selected story (stories[N-1] where N = user's 1-based choice):**
+
+- `stories[N-1].title` → ใช้เป็น story summary draft
+- `stories[N-1].narrative_hint` → เริ่ม narrative จาก hint นี้
+- `stories[N-1].acs_hint[]` → ใช้เป็น starting points สำหรับ ACs
+- `stories[N-1].vs_label` → pre-assign VS label
+- `stories[N-1].sp_estimate` → suggest SP (S/M/L)
+- `blueprint_page_id` (ถ้ามี) → link ใน story description "References"
+- ถ้า field ใด missing → ข้ามการ populate field นั้น
+
+**Step 3 — Confirm before proceeding:**
+แสดง summary:
+> "Story: [title] | VS: [vs_label] | SP: [sp_estimate]\nใช้ข้อมูลจาก blueprint สำหรับ story นี้ confirm?"
+
+**⛔ GATE** — รอ user confirm ก่อนดำเนินต่อ
+
+**In Phase 1 (Discovery):**
+
+- ✅ ยังคง fetch epic via `jira_get_issue` ถ้า epic key ใน blueprint → ได้ `epic_data`
+- ❌ ข้าม interview questions (Who/What/Why/Constraints) — มีข้อมูลจาก blueprint แล้ว
+- ❌ ข้าม VS assignment question — ใช้ `vs_label` จาก blueprint แทน
+
+ดำเนินต่อ Phase 2 Write User Story โดยใช้ blueprint context เป็น draft
 
 **If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ (ถาม Who/What/Why/Constraints)
 
