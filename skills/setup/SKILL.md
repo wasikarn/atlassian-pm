@@ -89,7 +89,7 @@ Ask questions in order. Each is a plain chat message (free-form text answer). Va
 
 ## Phase 3 — Write Config
 
-Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/0.1.0`).
+Use the same `$PLUGIN_ROOT` resolved in Phase 1 (fallback: `$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/1.0.1`).
 
 1. Read `$PLUGIN_ROOT/config/project-config.json.template` using Read tool
 2. Build the config object by substituting collected values into the template structure:
