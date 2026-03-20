@@ -23,6 +23,7 @@
 | Bulk reschedule | `/bulk-reschedule` | N/A |
 | Import spec | `/spec-to-stories` → `/story-full` (per story) | ≥ 90% |
 | Tech debt audit | `/tech-debt-radar` → `/create-task` (prioritized) | N/A |
+| Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
 
 **Rules:**
 
