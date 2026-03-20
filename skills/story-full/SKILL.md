@@ -80,7 +80,7 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 **In Phase 1 (Discovery):**
 
-- ✅ ยังคง fetch epic via `jira_get_issue` ถ้า epic key ใน blueprint → ได้ `epic_data`
+- ✅ ยังคง fetch epic via `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` ถ้า epic key ใน blueprint → ได้ `epic_data`
 - ❌ ข้าม interview questions (Who/What/Why/Constraints) — มีข้อมูลจาก blueprint แล้ว
 - ❌ ข้าม VS assignment question — ใช้ `vs_label` จาก blueprint แทน
 
@@ -98,7 +98,7 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 - Ask: Who? What? Why? Constraints?
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
-- If Epic exists → `MCP: jira_get_issue(issue_key: "ABC-XXX")` + read VS plan + Problem narrative
+- If Epic exists → `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` → receives epic context (narrative, scope, children stories). Avoids redundant MCP calls.
 - **VS Assignment:** Which vertical slice? (`vs1-skeleton`, `vs2-*`, `vs-enabler`)
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of requirements + VS assignment.
 
@@ -143,10 +143,10 @@ So that [benefit].
 > HR1: DO NOT send Story to Atlassian without QG ≥ 90%.
 
 1. Generate ADF JSON → `tasks/story.json`
-2. Score against `shared-references/verification-checklist.md` (Technical + Story Quality)
-3. If < 90% → auto-fix → re-score (max 2 attempts)
-4. If ≥ 90% → proceed to Phase 4 automatically
-5. If still < 90% after 2 fixes → escalate to user
+2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `tasks/story.json` + issue type `story`. Receives: `{score, status, checks_failed[], auto_fixable}`.
+3. If `status = PASS` (≥ 90%) → proceed to Phase 4 automatically
+4. If `status = FAIL` and `auto_fixable = yes` → apply fixes → re-invoke quality-gate (max 1 re-invoke)
+5. If still FAIL after re-invoke → escalate to user with the failed check list
 
 ### 4. Create Story in Jira
 
@@ -263,7 +263,15 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 
-> [QG Scoring Rules](../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Subtask Quality X/5 | Overall X%`
+For each subtask ADF JSON in `tasks/`:
+
+1. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass subtask JSON path + issue type `subtask`. Receives: `{score, status, checks_failed[], auto_fixable}`.
+2. If `status = PASS` → proceed
+3. If `status = FAIL` and `auto_fixable = yes` → apply fixes inline → re-invoke quality-gate (max 1 re-invoke)
+4. If still FAIL → escalate to user with specific check failures
+5. Only proceed to Phase 10 when ALL subtasks pass QG
+
+> Report: `Technical X/5 | Subtask Quality X/5 | Overall X%`
 
 ### 10. Create Sub-tasks
 

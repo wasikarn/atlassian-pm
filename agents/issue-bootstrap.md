@@ -11,7 +11,13 @@ Pre-gather Jira issue context in a single coordinated pass. Returns structured c
 
 ## Input
 
-Issue key (ABC-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`
+Issue key (ABC-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`, `--depth=minimal`
+
+Depth aliases:
+
+- `--shallow` / `--depth=minimal`: main issue + parent summary only (no children, no linked)
+- `--depth=full` (default for Story/Epic): main + parent + children + linked
+- `--depth=context` (default for Subtask): main + parent only
 
 Defaults:
 

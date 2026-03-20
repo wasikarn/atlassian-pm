@@ -141,13 +141,15 @@ Launch 5 agents **IN PARALLEL** (single message, 5 Task calls). Each proposes in
 
 **Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **Round 1** section. Substitute all `{...}` placeholders with full text before launching.
 
-| Agent | Model | Sections | Word Limit |
-|-------|-------|----------|------------|
-| PO | sonnet | S2 + S8 partial | 800 |
-| Domain Expert | sonnet | S3 | 500 |
-| Tech Lead | opus | S4 + S8 partial | 1000 |
-| Engineer | sonnet | S5 | 800 |
-| QA | sonnet | S6 + S7 | 600 |
+| Agent | Model | Sections | Word Limit | maxTurns |
+| ------- | ------- | ---------- | ---------- | -------- |
+| PO | sonnet | S2 + S8 partial | 800 | 8 |
+| Domain Expert | sonnet | S3 | 500 | 8 |
+| Tech Lead | opus | S4 + S8 partial | 1000 | 10 |
+| Engineer | sonnet | S5 | 800 | 8 |
+| QA | sonnet | S6 + S7 | 600 | 8 |
+
+> **maxTurns enforcement:** Set `maxTurns` per table when launching Task agents. Uncapped agents on complex features can consume 30+ turns; these caps prevent runaway costs.
 
 **🟢 AUTO** — Collect all 5 results. Proceed to Round 2.
 
@@ -157,15 +159,17 @@ Launch 5 agents **IN PARALLEL** (single message, 5 Task calls). Each proposes in
 
 Share **ALL Round 1 outputs** to each agent. Launch 5 agents **IN PARALLEL**.
 
+> **maxTurns enforcement:** Set `maxTurns` per table when launching Task agents.
+
 **Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **Round 2** section. Each agent challenges the others based on their expertise.
 
-| Agent | Focus | Word Limit |
-|-------|-------|------------|
-| PO | Accept/reject architecture per user value, revise appetite | 600 |
-| Domain Expert | Validate bounded contexts vs scenarios + data model | 400 |
-| Tech Lead | Challenge estimates, validate patterns, security/deployment verdict | 800 |
-| Engineer | Flag deceptive complexity, revise effort with evidence | 600 |
-| QA | New edge cases from all inputs, security tests, accessibility verdict | 500 |
+| Agent | Focus | Word Limit | maxTurns |
+| ------- | ------- | ---------- | -------- |
+| PO | Accept/reject architecture per user value, revise appetite | 600 | 8 |
+| Domain Expert | Validate bounded contexts vs scenarios + data model | 400 | 8 |
+| Tech Lead | Challenge estimates, validate patterns, security/deployment verdict | 800 | 10 |
+| Engineer | Flag deceptive complexity, revise effort with evidence | 600 | 8 |
+| QA | New edge cases from all inputs, security tests, accessibility verdict | 500 | 8 |
 
 **🟢 AUTO** — Collect all 5 results. Proceed to convergence.
 

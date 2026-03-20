@@ -33,6 +33,27 @@ Score each check against `shared-references/verification-checklist.md`. Key sub-
 - Return: score, pass/fail, list of issues to fix with specific fix instructions
 - HR1: Block if score < 90%
 
+## Output Format
+
+Return a structured result:
+
+```
+QG Score: XX/100 (XX%)
+Status: PASS / FAIL
+Threshold: 90%
+
+Checks failed:
+- [check-id]: [what is wrong] → Fix: [specific fix instruction]
+
+Checks warned:
+- [check-id]: [what to improve]
+
+Auto-fixable: [yes/no — yes if all failures are structural (missing panel, wrong panelType, etc.)]
+```
+
+If FAIL and auto-fixable → apply fixes inline and re-score (max 1 auto-fix cycle internally).
+Return final score after fix attempt.
+
 ## Memory
 
 Update your agent memory when you discover recurring QG patterns, common failures, or team conventions. Consult memory before scoring to apply learned patterns.

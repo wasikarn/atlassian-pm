@@ -121,6 +121,16 @@
 						"timeout": 10
 					}
 				]
+			},
+			{
+				"matcher": "mcp__mcp-atlassian__jira_transition_issue",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_dod_check.py",
+						"timeout": 5
+					}
+				]
 			}
 		],
 		"PostToolUse": [

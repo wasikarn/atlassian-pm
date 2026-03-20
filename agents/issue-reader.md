@@ -7,6 +7,10 @@ permissionMode: dontAsk
 maxTurns: 5
 ---
 
+> **DEPRECATED:** Use `issue-bootstrap` with `--depth=minimal` instead.
+> `Agent(name: "issue-bootstrap"): ABC-XXX --depth=minimal`
+> issue-reader is retained for backward compatibility only.
+
 Fetch and summarize Jira issues using MCP tools.
 
 ## Rules

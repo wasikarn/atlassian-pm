@@ -131,36 +131,22 @@ Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw th
 ## Part B: Strategy Analysis (Phases 3-6)
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-> **🟢 AUTO** — Phases 3-6 run via Task agent. All automated. Escalate only on incomplete data.
+> **🟢 AUTO** — Phases 3-6 delegated to `sprint-planner` agent. All automated. Escalate only on incomplete data.
 
 ```text
-Task(subagent_type: "general-purpose", prompt: """
-You are a sprint planning strategist. Read and apply the frameworks from:
-- .claude/skills/shared-references/sprint-frameworks.md (RICE, Impact/Effort, carry-over model)
-- .claude/skills/shared-references/team-capacity.md (capacity model, skill matrix, focus factor, throughput)
-- .claude/project-config.json → team.members[] (skill_profile, focus_factor, avg_throughput)
-- .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor
+Agent(name: "sprint-planner"): Pass the following context:
 
 ## Sprint Data
-[Insert Phase 1 data: source sprint items, target sprint items, statuses, assignees]
+[Insert Phase 1 data: source sprint items with statuses/assignees/estimates]
 [Insert Phase 2 data: capacity table with productive hours per person]
 
-## Tasks
-1. **Carry-over Analysis:** Calculate carry-over probability using the status-based model
-2. **Prioritization:** Rank items using the Impact/Effort matrix (skip RICE if insufficient data)
-3. **Workload Distribution:** Match items → team members using skill_profile match scores + hours capacity
-4. **Risk Assessment:** Flag overloads (>95% utilization), skill gaps, dependencies, blockers
+The agent will:
+1. Carry-over analysis (status-based probability model)
+2. Prioritization (Impact/Effort matrix)
+3. Workload distribution (skill match + hours capacity)
+4. Risk assessment (overloads, gaps, dependencies)
 
-## Output Format
-### Carry-over Summary
-| Key | Summary | Status | Probability | Assignee | Est. Hours |
-### Prioritized Items
-| Priority | Key | Summary | Quadrant | Required Skill | Reason |
-### Recommended Assignments
-| Member | Productive Hrs | Carry-over Hrs | New Hrs | Total Hrs | Utilization% | Risk Flag |
-### Risk Flags
-| Risk | Severity | Mitigation |
-""")
+Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk Flags tables.
 ```
 
 ### 3. Carry-over Analysis

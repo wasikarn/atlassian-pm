@@ -38,8 +38,8 @@ argument-hint: "[issue-key]"
 
 ### 1. Discovery
 
-- `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
-- Read: Narrative, ACs, Links, Epic context
+- `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
+- Read: Narrative, ACs, Links, Epic context from bootstrap output
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of story understanding.
 
 ### 2. Impact Analysis
@@ -144,15 +144,21 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 
-> [QG Scoring Rules](../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Subtask Quality X/5 | Overall X%`
+For each subtask ADF JSON in `tasks/`:
+
+1. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass subtask JSON path + issue type `subtask`. Receives: `{score, status, checks_failed[], auto_fixable}`.
+2. If `status = PASS` → proceed
+3. If `status = FAIL` and `auto_fixable = yes` → apply fixes inline → re-invoke quality-gate (max 1 re-invoke)
+4. If still FAIL → escalate to user with specific check failures
+5. Only proceed to Phase 6 when ALL subtasks pass QG
+
+> Report: `Technical X/5 | Subtask Quality X/5 | Overall X%`
 
 ### 6. Create Artifacts
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the `parent` field. MCP may silently ignore parent.
-
 > [Two-Step Subtask](../shared-references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
-
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
 
