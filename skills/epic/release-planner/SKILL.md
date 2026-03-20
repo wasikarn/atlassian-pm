@@ -34,7 +34,7 @@ argument-hint: "[--epics <key1,key2>] [--date <YYYY-MM-DD>] [--name <release-nam
 | 8. Confluence | `page_url` |
 | 9. Version | `fix_version_id` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Input Resolution
 

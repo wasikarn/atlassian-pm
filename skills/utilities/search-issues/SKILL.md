@@ -111,4 +111,4 @@ If no semantic matches above threshold → omit the section entirely.
 ## References
 
 - [references/use-cases.md](references/use-cases.md) — example commands by use case
-- [JQL Quick Reference](../../shared-references/jql-quick-ref.md)
+- [JQL Quick Reference](../../../references/jql-quick-ref.md)

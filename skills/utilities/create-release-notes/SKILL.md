@@ -209,6 +209,6 @@ jira_add_comment(
 ## References
 
 - [references/usage-guide.md](references/usage-guide.md) — common scenario commands
-- [Confluence Templates](../../shared-references/templates-core.md)
-- [Tools Reference](../../shared-references/tools.md)
+- [Confluence Templates](../../../references/templates-core.md)
+- [Tools Reference](../../../references/tools.md)
 - Chain from: `/release-planner` → `/sprint-closer` → `/create-release-notes`

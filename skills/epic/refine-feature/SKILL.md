@@ -33,7 +33,7 @@ argument-hint: "[feature-description or ABC-XXX]"
 | 4d. QG | `qg_passed`, `qg_fixes[]` |
 | 5. Handoff | `next_skill`, `debate_summary` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels, ITERATE cycle.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels, ITERATE cycle.
 
 ## Phases
 
@@ -133,7 +133,7 @@ Per story, verify:
 
 If any check fails → auto-fix from debate context → re-check. Escalate to user only if ambiguous.
 
-> Stories will be formatted per [templates-story.md](../../shared-references/templates-story.md) when passed to `/story-full`.
+> Stories will be formatted per [templates-story.md](../../../references/templates-story.md) when passed to `/story-full`.
 
 ### 5. Handoff
 
@@ -165,12 +165,12 @@ Present each story as a numbered plan card for user to pick creation order.
 
 ## References
 
-- [Story Template](../../shared-references/templates-story.md) — Story ADF template (used by `/story-full` downstream)
-- [Writing Style](../../shared-references/writing-style.md) — Thai + transliteration, concise, scan-first
-- [Workflow Patterns](../../shared-references/workflow-patterns.md) — Gate levels, ITERATE cycle
-- [Vertical Slice Guide](../../shared-references/vertical-slice-guide.md) — VS patterns, labels
-- [Verification Checklist](../../shared-references/verification-checklist.md) — Quality criteria
-- [Tools](../../shared-references/tools.md) — Jira/Confluence tool selection
+- [Story Template](../../../references/templates-story.md) — Story ADF template (used by `/story-full` downstream)
+- [Writing Style](../../../references/writing-style.md) — Thai + transliteration, concise, scan-first
+- [Workflow Patterns](../../../references/workflow-patterns.md) — Gate levels, ITERATE cycle
+- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) — VS patterns, labels
+- [Verification Checklist](../../../references/verification-checklist.md) — Quality criteria
+- [Tools](../../../references/tools.md) — Jira/Confluence tool selection
 - [Decision Guide](references/decision-guide.md)
 - [Examples](references/examples.md)
 - After refinement: `/story-full` to create in Jira

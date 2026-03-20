@@ -253,6 +253,6 @@ Update type?
 - Space: `BEP`
 - MCP Tool: `confluence_update_page`, `confluence_get_page`
 - Scripts: `.claude/skills/atlassian-scripts/scripts/`
-- [Tech Note Template](../../shared-references/templates-technote.md) - Tech Note best practices
+- [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Error Handling](references/error-handling.md)
 - [Examples](references/examples.md)

@@ -41,7 +41,7 @@ argument-hint: "[story-description]"
 | 9. QG Subtasks | `qg_score`, `passed_qg` |
 | 10. Create | `subtask_keys[]` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Blueprint Handoff Check
 
@@ -118,7 +118,7 @@ So that [benefit].
   - Annotate → user specifies items to change → revise ONLY those items → re-present (max 3 rounds)
   - Approve → proceed to INVEST validation
   - Major rework → back to Discovery
-  - See [Annotation Cycle](../../shared-references/workflow-patterns.md#annotation-cycle-iterate-gate)
+  - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 3. INVEST + VS Validation
 
@@ -190,9 +190,9 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ### 6. Codebase Exploration ⚠️ MANDATORY
 
-> [Parallel Explore](../../shared-references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
+> [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 7. Design Sub-tasks
 
@@ -229,24 +229,24 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
   - Annotate → user specifies subtask + notes → revise ONLY annotated subtasks → re-present (max 3 rounds)
   - Approve → proceed to Alignment Check
   - Major rework → back to Codebase Exploration
-  - See [Annotation Cycle](../../shared-references/workflow-patterns.md#annotation-cycle-iterate-gate)
+  - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 8. Alignment Check
 
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 9. Quality Gate — Subtasks (MANDATORY)
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 10. Create Sub-tasks
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the parent field. MCP may silently ignore parent.
-> [Two-Step Subtask](../../shared-references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
+> [Two-Step Subtask](../../../references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
 
 ```text
 # Step 1: Create shells (parallel)
@@ -297,9 +297,9 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Story Template](../../shared-references/templates-story.md) - Story ADF template + best practices
-- [Subtask Template](../../shared-references/templates-subtask.md) - Subtask ADF template + QA
-- [Vertical Slice Guide](../../shared-references/vertical-slice-guide.md) - VS patterns, decomposition, labels
-- [Verification Checklist](../../shared-references/verification-checklist.md) - INVEST, quality checks
-- [Subtask Design Patterns](../../shared-references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Story Template](../../../references/templates-story.md) - Story ADF template + best practices
+- [Subtask Template](../../../references/templates-subtask.md) - Subtask ADF template + QA
+- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS patterns, decomposition, labels
+- [Verification Checklist](../../../references/verification-checklist.md) - INVEST, quality checks
+- [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks

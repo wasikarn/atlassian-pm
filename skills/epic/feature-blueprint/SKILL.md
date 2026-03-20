@@ -39,7 +39,7 @@ argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 | 9. Bridge | `blueprint_backlog_map{}` (stories[], spikes[], dependencies[], non_goals[]) |
 | 10. Handoff | `next_skills[]`, `summary` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels, ITERATE cycle, Parallel Explore.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels, ITERATE cycle, Parallel Explore.
 
 ## Document Structure (8 Sections)
 
@@ -60,7 +60,7 @@ argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 
 - S4 **must have "Alternatives Considered"** with ≥2 options + pros/cons + rationale
 - S1-S2 come before S4-S5 (user/customer first, then technical)
-- All sections follow Thai + transliteration per [writing-style.md](../../shared-references/writing-style.md)
+- All sections follow Thai + transliteration per [writing-style.md](../../../references/writing-style.md)
 
 ## Size Tiers
 
@@ -119,7 +119,7 @@ Based on `feature_brief`, determine:
 
 > Skip for S-tier if user provides sufficient context or feature is purely conceptual.
 
-Launch 2-3 `Task(Explore)` agents **IN PARALLEL** per [Parallel Explore](../../shared-references/workflow-patterns.md):
+Launch 2-3 `Task(Explore)` agents **IN PARALLEL** per [Parallel Explore](../../../references/workflow-patterns.md):
 
 | Agent | Focus |
 |-------|-------|
@@ -247,7 +247,7 @@ Max 2 auto-fix attempts. Escalate if still failing.
 
 **Page title:** `[Blueprint] {Feature Name}`
 
-**Confluence section format** (follows [writing-style.md](../../shared-references/writing-style.md) numbered section pattern):
+**Confluence section format** (follows [writing-style.md](../../../references/writing-style.md) numbered section pattern):
 
 ```text
 {toc:maxLevel=2}
@@ -360,11 +360,11 @@ Present each story as a numbered card for user to pick creation order.
 
 ## References
 
-- [Writing Style](../../shared-references/writing-style.md) — Thai + transliteration, concise, scan-first
-- [Workflow Patterns](../../shared-references/workflow-patterns.md) — Gate levels, ITERATE cycle, Parallel Explore
-- [Vertical Slice Guide](../../shared-references/vertical-slice-guide.md) — VS patterns, labels
-- [Verification Checklist](../../shared-references/verification-checklist.md) — Quality criteria (B1-B8 for blueprints)
-- [Tools](../../shared-references/tools.md) — Confluence tool selection
+- [Writing Style](../../../references/writing-style.md) — Thai + transliteration, concise, scan-first
+- [Workflow Patterns](../../../references/workflow-patterns.md) — Gate levels, ITERATE cycle, Parallel Explore
+- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) — VS patterns, labels
+- [Verification Checklist](../../../references/verification-checklist.md) — Quality criteria (B1-B8 for blueprints)
+- [Tools](../../../references/tools.md) — Confluence tool selection
 - [Decision Guide](references/decision-guide.md)
 - [S-tier Shortcut](references/s-tier-shortcut.md)
 - [Examples](references/examples.md)

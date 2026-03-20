@@ -32,7 +32,7 @@ argument-hint: "[issue-key-or-page-id] [changes]"
 | 7. Execute | `applied_keys[]`, `execution_log` |
 | 8. Verify | `verification_report` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ---
 
@@ -120,7 +120,7 @@ Directions: DOWN (parent→child) / UP (child→parent) / SIDEWAYS (Jira↔Confl
 > **🟢 AUTO** — Run only if scope changed or new file paths needed. Skip if format-only. Validate paths with Glob.
 
 - Run only when: scope changed / need new file paths / new sub-task needed
-- [Parallel Explore](../../shared-references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
+- [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 - **Skip** if format-only / wording-only / technical detail change. Validate paths with Glob. Generic paths REJECTED.
 
 ### 6. Generate Sync Updates
@@ -193,10 +193,10 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Templates Index](../../shared-references/templates.md) - Load by issue type (epic, story, subtask, task)
-- [Tool Selection](../../shared-references/tools.md)
-- [Verification Checklist](../../shared-references/verification-checklist.md)
-- [Atlassian Scripts](../../atlassian-scripts/SKILL.md)
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Templates Index](../../../references/templates.md) - Load by issue type (epic, story, subtask, task)
+- [Tool Selection](../../../references/tools.md)
+- [Verification Checklist](../../../references/verification-checklist.md)
+- [Atlassian Scripts](../../../atlassian-scripts/SKILL.md)
 - [Edge Cases](references/edge-cases.md) - Edge case handling reference
 - [Decision Guide](references/decision-guide.md) - When to use this skill vs alternatives

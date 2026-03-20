@@ -33,7 +33,7 @@ argument-hint: "<confluence-page-id> [--epic <key>] [--dry-run]"
 | 6. QG | `qg_results[]` |
 | 7. Created | `story_keys[]`, `coverage_map{}` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Fetch Spec
 

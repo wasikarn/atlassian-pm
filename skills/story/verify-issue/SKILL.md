@@ -173,8 +173,8 @@ Quality: wiki → ADF, EN → Thai
 
 ## References
 
-- [Verification Checklist](../../shared-references/verification-checklist.md)
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Templates Index](../../shared-references/templates.md) - Load by issue type (epic, story, subtask, task)
-- [Writing Style](../../shared-references/writing-style.md)
+- [Verification Checklist](../../../references/verification-checklist.md)
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Templates Index](../../../references/templates.md) - Load by issue type (epic, story, subtask, task)
+- [Writing Style](../../../references/writing-style.md)
 - [Scenarios](references/scenarios.md) - Command examples, integration workflows, and full example run

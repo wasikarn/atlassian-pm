@@ -172,7 +172,7 @@ Any changes needed before creating?
 
 ### 4. Quality Gate (MANDATORY)
 
-> **🟢 AUTO** — [QG Scoring Rules](../../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Quality X/6 | Overall X%`
+> **🟢 AUTO** — [QG Scoring Rules](../../../references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Quality X/6 | Overall X%`
 > HR1: DO NOT send Task to Atlassian without QG ≥ 90%.
 
 ### 5. Create
@@ -223,7 +223,7 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Task Template](../../shared-references/templates-task.md) - Task ADF templates (tech-debt, bug, chore, spike)
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Task Template](../../../references/templates-task.md) - Task ADF templates (tech-debt, bug, chore, spike)
 - [Scenarios](references/scenarios.md) - Command examples and full example
 - After: `/verify-issue ABC-XXX` to check quality

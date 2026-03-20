@@ -29,7 +29,7 @@ argument-hint: "[issue-key] [changes]"
 | 5. QG | `qg_score`, `passed_qg` |
 | 6. Apply | `applied` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Phases
 
@@ -71,7 +71,7 @@ argument-hint: "[issue-key] [changes]"
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT send updates to Atlassian without QG ≥ 90%.
 
-> [QG Scoring Rules](../../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Quality X/6 | Overall X%`
+> [QG Scoring Rules](../../../references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Quality X/6 | Overall X%`
 
 ### 6. Apply Update
 
@@ -99,7 +99,7 @@ Changes: [list]
 
 ## References
 
-- [Update Workflow Patterns](../../shared-references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Epic Template](../../shared-references/templates-epic.md) - Epic ADF template + best practices
-- [Tool Selection](../../shared-references/tools.md) - Tool selection
+- [Update Workflow Patterns](../../../references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Epic Template](../../../references/templates-epic.md) - Epic ADF template + best practices
+- [Tool Selection](../../../references/tools.md) - Tool selection

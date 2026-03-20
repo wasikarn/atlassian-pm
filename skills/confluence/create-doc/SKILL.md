@@ -152,7 +152,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 - Space: `BEP`
 - MCP Tool: `confluence_create_page`
 - Scripts: `.claude/skills/atlassian-scripts/scripts/`
-- [Tech Note Template](../../shared-references/templates-technote.md) - Tech Note best practices
+- [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Templates](references/templates.md)
 - [Examples](references/examples.md)
 - Related: `/update-doc` for updating existing pages

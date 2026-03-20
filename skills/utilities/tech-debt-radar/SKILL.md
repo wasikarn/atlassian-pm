@@ -20,7 +20,7 @@ argument-hint: "[--update]"
 
 - **Today:** !`date +%Y-%m-%d`
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Fetch Issues
 

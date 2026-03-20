@@ -46,8 +46,8 @@ When generating ACs, apply service-specific defaults based on detected service t
 
 ## Rules
 
-- Read templates from `.claude/skills/shared-references/templates.md`
-- Follow writing style from `.claude/skills/shared-references/writing-style.md`
+- Read templates from `references/templates.md`
+- Follow writing style from `references/writing-style.md`
 - Use panels: Objective (info), Scope (note), AC (success), Technical Notes (warning)
 - AC format: Given/When/Then
 - Smart links for issue references: `{"type":"inlineCard","attrs":{"url":"..."}}`

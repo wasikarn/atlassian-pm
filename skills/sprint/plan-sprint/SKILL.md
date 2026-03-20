@@ -53,7 +53,7 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 | 7. Review | `approved_plan` |
 | 8. Execute | `execution_log[]`, `assigned_keys[]` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Part A: Data Collection (Phases 1-2) — Execution Layer
 
@@ -80,7 +80,7 @@ MCP: jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assigne
 ### 2. Team Capacity
 
 ```text
-Read: .claude/skills/shared-references/team-capacity.md
+Read: ../../../references/team-capacity.md
 Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sprint
 Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
@@ -155,7 +155,7 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 ### 4. Prioritization + Story Structure Validation
 
-**Validate stories are vertical slices** (see [Sprint Frameworks](../../shared-references/sprint-frameworks.md#vertical-slicing)):
+**Validate stories are vertical slices** (see [Sprint Frameworks](../../../references/sprint-frameworks.md#vertical-slicing)):
 
 - [ ] Each story delivers end-to-end user value (not just one layer)
 - [ ] Shell-only stories reframed as Walking Skeleton
@@ -250,7 +250,7 @@ Status: 🟢 ≤80% | ⚠️ 80-95% | 🔴 >95%
 - Annotate → user specifies items to reassign, adjust hours, swap priorities → revise ONLY annotated items → re-present (max 3 rounds)
 - Approve → proceed to Execute Assignments
 - Major rework → back to Prioritization (Phase 4)
-- See [Annotation Cycle](../../shared-references/workflow-patterns.md#annotation-cycle-iterate-gate)
+- See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 8. Execute Assignments
 
@@ -330,9 +330,9 @@ Subtask alignment: [X checked, Y fixed]
 
 ## References
 
-- [Team Capacity](../../shared-references/team-capacity.md) - Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
-- [Sprint Frameworks](../../shared-references/sprint-frameworks.md) - RICE, Impact/Effort, carry-over model
-- [Tool Selection](../../shared-references/tools.md) - MCP vs acli decision rules
+- [Team Capacity](../../../references/team-capacity.md) - Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
+- [Sprint Frameworks](../../../references/sprint-frameworks.md) - RICE, Impact/Effort, carry-over model
+- [Tool Selection](../../../references/tools.md) - MCP vs acli decision rules
 - [Pre-Meeting Checklist](references/pre-meeting-checklist.md)
 - [Assignment Algorithm](references/assignment-algorithm.md)
 - [Examples](references/examples.md)

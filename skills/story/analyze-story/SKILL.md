@@ -30,7 +30,7 @@ argument-hint: "[issue-key]"
 | 5b. QG | `qg_score`, `passed_qg` |
 | 6. Create | `subtask_keys[]` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Phases
 
@@ -62,9 +62,9 @@ argument-hint: "[issue-key]"
 
 ### 3. Codebase Exploration ⚠️ MANDATORY
 
-> [Parallel Explore](../../shared-references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
+> [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 4. Design Sub-tasks
 
@@ -89,24 +89,24 @@ argument-hint: "[issue-key]"
   - Annotate → user specifies subtask + notes → revise ONLY annotated subtasks → re-present (max 3 rounds)
   - Approve → proceed to Alignment Check
   - Major rework → back to Codebase Exploration
-  - See [Annotation Cycle](../../shared-references/workflow-patterns.md#annotation-cycle-iterate-gate)
+  - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 5. Alignment Check
 
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 5b. Quality Gate — Subtasks (MANDATORY)
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
-> See [shared-references/subtask-design-patterns.md](../../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 6. Create Artifacts
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the `parent` field. MCP may silently ignore parent.
-> [Two-Step Subtask](../../shared-references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
+> [Two-Step Subtask](../../../references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
 
@@ -145,9 +145,9 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Subtask Template](../../shared-references/templates-subtask.md) - Subtask ADF template + best practices
-- [Vertical Slice Guide](../../shared-references/vertical-slice-guide.md) - VS decomposition, patterns
-- [Tool Selection](../../shared-references/tools.md) - Tools, service tags, effort sizing
-- [Subtask Design Patterns](../../shared-references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Subtask Template](../../../references/templates-subtask.md) - Subtask ADF template + best practices
+- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS decomposition, patterns
+- [Tool Selection](../../../references/tools.md) - Tools, service tags, effort sizing
+- [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
 - After creation: `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`

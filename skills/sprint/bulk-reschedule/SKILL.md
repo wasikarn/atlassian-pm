@@ -19,7 +19,7 @@ argument-hint: "[--sprint <id>] [--issues <keys>] [--shift <+N|-N>] [--new-start
 
 - **Today:** !`date +%Y-%m-%d`
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Resolve Scope
 

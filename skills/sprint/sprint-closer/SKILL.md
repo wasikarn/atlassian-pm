@@ -31,7 +31,7 @@ argument-hint: "[--sprint <id>]"
 | 5. Close | `sprint_closed: bool` |
 | 6. Review Page | `confluence_page_url` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Fetch Sprint Data
 

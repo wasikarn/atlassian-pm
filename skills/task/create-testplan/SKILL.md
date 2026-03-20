@@ -28,7 +28,7 @@ argument-hint: "[issue-key]"
 | 4. QG | `qg_score`, `passed_qg` |
 | 5. Create | `qa_subtask_key` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 > **Note:** Test Plan is embedded in [QA] Sub-task description instead of creating a separate Confluence page
 
@@ -66,7 +66,7 @@ argument-hint: "[issue-key]"
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create QA subtask in Jira without QG ≥ 90%.
 
-> [QG Scoring Rules](../../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | QA Quality X/5 | Overall X%`
+> [QG Scoring Rules](../../../references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | QA Quality X/5 | Overall X%`
 
 ### 5. Create [QA] Sub-task
 
@@ -75,14 +75,14 @@ argument-hint: "[issue-key]"
 
 > **Principle:** 1 Story = 1 [QA] Sub-task (Test Plan embedded in description)
 >
-> ⚠️ Use **Two-Step Workflow** (see [Subtask Template](../../shared-references/templates-subtask.md)):
+> ⚠️ Use **Two-Step Workflow** (see [Subtask Template](../../../references/templates-subtask.md)):
 >
 > **Step 1:** MCP `jira_create_issue` → summary: `[QA] - Test: [Feature Name]`, parent: `{{PROJECT_KEY}}-XXX`
 > **Step 2:** `acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-qa.json --yes`
 >
 > ⚠️ EDIT JSON uses `"issues": ["ABC-QQQ"]` (not `"parent"` or `"parentKey"`)
 
-Panel colors: see [ADF Core Rules](../../shared-references/templates-core.md) — success=happy, warning=edge, error=error
+Panel colors: see [ADF Core Rules](../../../references/templates-core.md) — success=happy, warning=edge, error=error
 
 > **🟢 AUTO** — HR6: `cache_invalidate(qa_subtask_key)` after create.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
@@ -119,6 +119,6 @@ Coverage: X ACs → Y test scenarios (100%)
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Subtask Template](../../shared-references/templates-subtask.md) - Subtask + QA ADF templates
-- [Verification](../../shared-references/verification-checklist.md) - QA checklist
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Subtask Template](../../../references/templates-subtask.md) - Subtask + QA ADF templates
+- [Verification](../../../references/verification-checklist.md) - QA checklist

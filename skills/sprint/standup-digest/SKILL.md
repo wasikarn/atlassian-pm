@@ -20,7 +20,7 @@ argument-hint: "[--sprint <id>] [--post]"
 - **Today:** !`date +%Y-%m-%d`
 - **Team:** @.claude/project-config.json → `team.members[]`
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md)
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phase 1 — Fetch Sprint Issues
 

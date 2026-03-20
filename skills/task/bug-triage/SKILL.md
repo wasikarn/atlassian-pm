@@ -222,10 +222,10 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md)
-- [Task Template](../../shared-references/templates-task.md) — bug template section
-- [Verification Checklist](../../shared-references/verification-checklist.md)
-- [Tools Reference](../../shared-references/tools.md) — acli vs MCP decision
+- [ADF Core Rules](../../../references/templates-core.md)
+- [Task Template](../../../references/templates-task.md) — bug template section
+- [Verification Checklist](../../../references/verification-checklist.md)
+- [Tools Reference](../../../references/tools.md) — acli vs MCP decision
 - [Scenarios](references/scenarios.md) - Command examples by scenario
 - After: `/verify-issue [KEY]` to check quality
 - After fix: `/create-testplan [KEY]` to create QA verification subtask

@@ -44,7 +44,7 @@ For each item, extract:
 Load team info:
 
 ```text
-Read: .claude/skills/shared-references/team-capacity.md (capacity formulas, skill matrix, thresholds)
+Read: ../../../references/team-capacity.md (capacity formulas, skill matrix, thresholds)
 Read: .claude/project-config.json (team roster: members[], skill_profile, avg_throughput)
 ```
 
@@ -95,7 +95,7 @@ ABC-3156 ──[Inferred:FE→BE, MEDIUM]──> ABC-2743
 Read reference for algorithm details:
 
 ```text
-Read: ../../shared-references/dependency-frameworks.md (section: Critical Path Method)
+Read: ../../../references/dependency-frameworks.md (section: Critical Path Method)
 ```
 
 1. Calculate ES/EF for each item (forward pass)
@@ -121,7 +121,7 @@ Read: ../../shared-references/dependency-frameworks.md (section: Critical Path M
 Read reference for scheduling rules:
 
 ```text
-Read: ../../shared-references/dependency-frameworks.md (section: Swim Lane Rules)
+Read: ../../../references/dependency-frameworks.md (section: Swim Lane Rules)
 ```
 
 For each team member, schedule items respecting dependencies:
@@ -194,6 +194,6 @@ Priority 2: [Action] — reduces delay impact by [N] days
 
 ## References
 
-- [Dependency Frameworks](../../shared-references/dependency-frameworks.md) — Dependency types, CPM algorithm, decoupling patterns, swim lane rules, risk scoring
-- [Team Capacity](../../shared-references/team-capacity.md) — Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
-- [Sprint Frameworks](../../shared-references/sprint-frameworks.md) — Vertical slicing, carry-over model
+- [Dependency Frameworks](../../../references/dependency-frameworks.md) — Dependency types, CPM algorithm, decoupling patterns, swim lane rules, risk scoring
+- [Team Capacity](../../../references/team-capacity.md) — Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
+- [Sprint Frameworks](../../../references/sprint-frameworks.md) — Vertical slicing, carry-over model

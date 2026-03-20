@@ -26,7 +26,7 @@ argument-hint: "[epic-title]"
 | 4. QG | `qg_score`, `passed_qg` |
 | 5. Create | `epic_key`, `epic_doc_id` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Blueprint Handoff Check
 
@@ -78,7 +78,7 @@ Skip interview questions in Phase 1 for information already documented.
 > **If `non_goals[]` present from blueprint:** ใช้เป็น out-of-scope items ใน scope definition (ไม่ต้องถามใหม่)
 
 - Identify high-level requirements
-- **VS Pattern Selection:** (see [vertical-slice-guide.md](../../shared-references/vertical-slice-guide.md))
+- **VS Pattern Selection:** (see [vertical-slice-guide.md](../../../references/vertical-slice-guide.md))
   - Walking Skeleton? → `vs1-skeleton`
   - Enablers needed? → `vs-enabler`
   - Business rule splits? → `vs2-*`, `vs3-*`
@@ -91,14 +91,14 @@ Skip interview questions in Phase 1 for information already documented.
   - Annotate → stakeholder specifies items to change (add/remove stories, adjust VS, change MVP boundary)
   - Approve → proceed to Quality Gate
   - Major rework → back to Discovery
-  - See [Annotation Cycle](../../shared-references/workflow-patterns.md#annotation-cycle-iterate-gate)
+  - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 4. Quality Gate (MANDATORY)
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT send Epic to Atlassian without QG ≥ 90%.
 
-> [QG Scoring Rules](../../shared-references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Epic Quality X/4 | Overall X%`
+> [QG Scoring Rules](../../../references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | Epic Quality X/4 | Overall X%`
 
 ### 5. Create Artifacts
 
@@ -137,10 +137,10 @@ Epic Doc: [link] | Epic: [link]
 
 ## References
 
-- [ADF Core Rules](../../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Epic Template](../../shared-references/templates-epic.md) - Epic ADF template + best practices
-- [Tool Selection](../../shared-references/tools.md) - Tool selection, effort sizing
-- [Vertical Slice Guide](../../shared-references/vertical-slice-guide.md) - VS patterns, decomposition
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Epic Template](../../../references/templates-epic.md) - Epic ADF template + best practices
+- [Tool Selection](../../../references/tools.md) - Tool selection, effort sizing
+- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS patterns, decomposition
 - [Epic ADF Structure](references/epic-adf-structure.md) - Epic ADF section layout and panel type reference
 - [Examples](references/examples.md) - Full input/output example
 - After creation: `/verify-issue {{PROJECT_KEY}}-XXX`

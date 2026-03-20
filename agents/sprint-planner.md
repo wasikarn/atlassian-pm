@@ -13,8 +13,8 @@ Plan sprints with carry-over analysis, risk-adjusted capacity calculation, and w
 
 ## Rules
 
-- Read team capacity from `.claude/skills/shared-references/team-capacity.md`
-- Read sprint frameworks from `.claude/skills/shared-references/sprint-frameworks.md`
+- Read team capacity from `references/team-capacity.md`
+- Read sprint frameworks from `references/sprint-frameworks.md`
 - HR7: ALWAYS lookup sprint ID via `jira_get_sprints_from_board()` — never hardcode
 - HR8: Subtask dates must align with parent date range
 
