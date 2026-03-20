@@ -54,6 +54,7 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 | 4. Prioritize | `prioritized_items[]`, `vs_validated` |
 | 5. Distribute | `assignment_map[]`, `workload_table` |
 | 6. Risk | `risk_flags[]`, `mitigations[]` |
+| 6b. Risk Forecast | `risk_forecast_result`, `mitigations_applied[]` |
 | 7. Review | `approved_plan` |
 | 8. Execute | `execution_log[]`, `assigned_keys[]` |
 
@@ -217,7 +218,7 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 **Output:** Risk flags with severity + mitigation
 
-### Risk Assessment
+### 6b. Risk Forecast (risk-forecaster agent)
 
 > **🟡 REVIEW** — Run risk-forecaster with sprint-planner output. Present findings. Proceed unless user objects.
 
