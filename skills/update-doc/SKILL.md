@@ -238,25 +238,13 @@ Update type?
 
 ## Common Scenarios
 
-| Scenario | Command | Tool |
-| --- | --- | --- |
-| Update status | `/update-doc 123456789 --status Published` | MCP |
-| Replace text | `/update-doc 123456789 --find "v1" --replace "v2"` | Script |
-| Update section | `/update-doc 123456789 --section "API Spec"` | MCP or Script |
-| Full rewrite | `/update-doc 123456789` | Script |
-| Move page | `/update-doc 123456789 --move 987654321` | Script |
-| Batch move | `/update-doc --move 987654321 --pages 123456789,333444555` | Script |
+> See [references/examples.md](references/examples.md) for common command and tool examples.
 
 ---
 
 ## Error Handling
 
-| Error | Cause | Solution |
-| --- | --- | --- |
-| Page not found | Wrong page ID | Search for the page again |
-| Version conflict | Someone else updated | Fetch latest version and retry |
-| Permission denied | No edit access | Contact admin |
-| Code blocks broken | MCP markdown renders `<pre class="highlight">` | Run `fix_confluence_code_blocks.py --page-id` |
+> See [references/error-handling.md](references/error-handling.md) for error causes and solutions.
 
 ---
 
@@ -266,3 +254,5 @@ Update type?
 - MCP Tool: `confluence_update_page`, `confluence_get_page`
 - Scripts: `.claude/skills/atlassian-scripts/scripts/`
 - [Tech Note Template](../shared-references/templates-technote.md) - Tech Note best practices
+- [Error Handling](references/error-handling.md)
+- [Examples](references/examples.md)

@@ -91,83 +91,13 @@ CONFLUENCE_API_TOKEN=your-api-token
 
 ## Script Selection Guide
 
-```text
-What do you need to do?
-    │
-    ├─ Create a new page
-    │     └─ create_confluence_page.py --space --title
-    │
-    ├─ Update entire content
-    │     └─ create_confluence_page.py --page-id --content-file
-    │
-    ├─ Find/Replace text
-    │     └─ update_confluence_page.py --find --replace
-    │
-    ├─ Move page(s) to new parent
-    │     └─ move_confluence_page.py --page-id(s) --parent-id
-    │
-    ├─ Add macros (ToC, Children, Status)
-    │     └─ update_page_storage.py --page-id --content-file
-    │
-    ├─ Fix broken code blocks
-    │     └─ fix_confluence_code_blocks.py --page-id(s)
-    │
-    ├─ Verify content alignment
-    │     └─ audit_confluence_pages.py --config audit.json
-    │
-    ├─ Fix Jira issue descriptions (ADF)
-    │     └─ update_jira_description.py --config fixes.json
-    │
-    ├─ Validate ADF before Jira write (HR1)
-    │     └─ validate_adf.py {{artifacts_dir}}/story.json --type story [--fix]
-    │
-    ├─ Verify writes took effect (HR3/HR5/HR6)
-    │     └─ verify_write.py ABC-1234 --check parent,assignee
-    │
-    ├─ Create subtask (full pipeline)
-    │     └─ jira_write.py create-subtask --parent ABC-1200 --adf {{artifacts_dir}}/sub.json
-    │
-    ├─ Set parent (Epic) on existing issues
-    │     └─ jira_set_parent.py --issues ABC-3331,ABC-3332 --parent ABC-3197
-    │
-    └─ Track workflow state
-          └─ workflow_checkpoint.py start story-full ABC-1200
-```
+> See [references/script-selection-guide.md](references/script-selection-guide.md) for a decision tree on which script to use.
 
 ---
 
 ## When to Use Scripts vs MCP
 
-> **🚨 CRITICAL:** MCP Confluence tools have TWO limitations that cause macros to fail:
->
-> 1. **Storage format** → MCP HTML-escapes `<ac:` tags, macros render as raw text
-> 2. **Code blocks** → MCP renders as `<pre>` instead of Confluence macro
->
-> **Rule:** If your page contains ANY macros (Jira, expand, info panel, ToC, children) → **ALWAYS use Python scripts**
-
-| Scenario | Tool | Why |
-| --- | --- | --- |
-| Simple page read | MCP `confluence_get_page` | Fast, no script needed |
-| Page create/update (no code, no macros) | MCP `confluence_create_page` / `update_page` | Markdown works fine |
-| Page create/update (with code) | MCP + `fix_confluence_code_blocks.py` | MCP renders code as `<pre>`, fix script converts |
-| **Page with Jira macros / panels** | **Script** `update_page_storage.py` | ⚠️ MCP escapes XML → macros render as text |
-| **Page with expand / ToC / children** | **Script** `update_page_storage.py` | ⚠️ MCP escapes XML → macros render as text |
-| Batch text replacement | **Script** `update_confluence_page.py` | More reliable |
-| Fix broken code blocks | **Script** `fix_confluence_code_blocks.py` | Post-step after MCP create/update |
-| Issue linking (Blocks/Relates) | MCP `jira_create_issue_link` | Bidirectional links between issues |
-| Web links (Figma/Confluence) | MCP `jira_create_remote_issue_link` | Add external links to issue Links section |
-| Set parent (Epic) on existing issues | **Script** `jira_set_parent.py` | MCP/acli silently ignore parent field |
-| Move issues to backlog / sprint mgmt | **Script** via `JiraAPI._request()` | MCP not supported — use Agile REST API + **numeric IDs** |
-
-> **⚠️ Known Issue (Code Blocks):** MCP `confluence_create_page` / `confluence_update_page` with `content_format: 'markdown'`
-> renders code blocks as `<pre class="highlight">` instead of Confluence `<ac:structured-macro>`.
-> **You must always run `fix_confluence_code_blocks.py --page-id` after any MCP create/update that contains code blocks.**
->
-> **⚠️ Known Issue (Storage Format/Macros):** MCP with `content_format: 'storage'` HTML-escapes the content.
-> `<ac:structured-macro>` becomes `&lt;ac:structured-macro&gt;` and renders as plain text instead of a macro.
-> **For ANY page with macros (Jira tables, panels, expand, ToC), use `update_page_storage.py` directly.**
-
----
+> See [references/when-to-use.md](references/when-to-use.md) for MCP vs script decision rules and known issues.
 
 ---
 
@@ -185,17 +115,10 @@ What do you need to do?
 
 ## References
 
+- [references/script-selection-guide.md](references/script-selection-guide.md) — decision tree for script selection
+- [references/when-to-use.md](references/when-to-use.md) — MCP vs script decision rules and known issues
 - Confluence REST API: <https://developer.atlassian.com/cloud/confluence/rest/v1/intro/>
 - Jira REST API v3: <https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/>
 - Credentials: `~/.config/atlassian/.env`
 - Storage Format: <https://developer.atlassian.com/cloud/confluence/confluence-storage-format/>
 - ADF (Atlassian Document Format): <https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/>
-
----
-
-## Related Skills
-
-| Skill | Description |
-| --- | --- |
-| `/create-doc` | Create new Confluence page (uses MCP) |
-| `/update-doc` | Update existing Confluence page (uses scripts when needed) |

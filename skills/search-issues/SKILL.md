@@ -104,14 +104,11 @@ If no semantic matches above threshold → omit the section entirely.
 
 ## Use Cases
 
-| Purpose | Command |
-| --- | --- |
-| Before creating | `/search-issues "credit top-up"` |
-| View sub-tasks | `/search-issues ABC-123 --children` |
-| My sprint work | `/search-issues --sprint current --assignee me` |
+> See [references/use-cases.md](references/use-cases.md) for example commands by use case.
 
 ---
 
 ## References
 
+- [references/use-cases.md](references/use-cases.md) — example commands by use case
 - [JQL Quick Reference](../shared-references/jql-quick-ref.md)

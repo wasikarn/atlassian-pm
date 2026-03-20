@@ -202,16 +202,13 @@ jira_add_comment(
 
 ## Common Scenarios
 
-| Scenario | Command |
-| --- | --- |
-| After sprint close | `/create-release-notes --version v2.3.0` |
-| Preview before publishing | `/create-release-notes --version v2.3.0 --dry-run` |
-| Interactive (pick version) | `/create-release-notes` |
+> See [references/usage-guide.md](references/usage-guide.md) for common scenario commands.
 
 ---
 
 ## References
 
+- [references/usage-guide.md](references/usage-guide.md) — common scenario commands
 - [Confluence Templates](../shared-references/templates-core.md)
 - [Tools Reference](../shared-references/tools.md)
 - Chain from: `/release-planner` → `/sprint-closer` → `/create-release-notes`
