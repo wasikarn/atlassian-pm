@@ -63,7 +63,7 @@ Round WSJF to 1 decimal. Higher = pull first.
 
 1. **Value Density** — `value_density = Business Value / Job Size`. Flag stories where value_density < 0.5 as "high effort, low value".
 
-2. **Aging Alert** — check `updated` field. If a story has been in backlog (To Do/Backlog status) for more than 21 days without SP estimate or AC updates → flag as "aging".
+2. **Aging Alert** — check `created` field. If a story has been in backlog (To Do/Backlog status) for more than 21 days AND still missing SP estimate or AC → flag as "aging".
 
 3. **Group results and output grooming report**
 
