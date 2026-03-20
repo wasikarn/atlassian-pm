@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-33 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
+32 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -49,7 +49,6 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | plan-sprint | `/atlassian-pm:plan-sprint` | 8 | jira-cache-server, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
 | dependency-chain | `/atlassian-pm:dependency-chain` | 5 | jira-cache-server, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
 | sprint-closer | `/atlassian-pm:sprint-closer` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
-| retrospective-action-items | `/atlassian-pm:retrospective-action-items` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Convert Confluence retrospective page action items → Jira Tasks with owner + sprint assignment. Supports `--dry-run`. |
 | standup-digest | `/atlassian-pm:standup-digest` | 4 | jira-cache-server, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
 | bulk-reschedule | `/atlassian-pm:bulk-reschedule` | 5 | jira-cache-server, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 
@@ -176,10 +175,6 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 /atlassian-pm:bug-triage                              # interactive full intake
 /atlassian-pm:bug-triage "video upload fails iOS 17"  # summary pre-filled
-
-/atlassian-pm:retrospective-action-items 12345           # page ID
-/atlassian-pm:retrospective-action-items 12345 --dry-run # preview only
-/atlassian-pm:retrospective-action-items                 # search for retro page
 
 /atlassian-pm:create-release-notes --version v2.3.0      # specific version
 /atlassian-pm:create-release-notes --version v2.3.0 --dry-run  # preview
