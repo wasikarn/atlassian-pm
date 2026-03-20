@@ -430,28 +430,28 @@ skills/                        ← 1 directory = 1 slash command
 ├── story-full/                ← Composite: explore + write + publish
 ├── create-{epic,task,doc,testplan}/
 ├── update-{epic,story,task,subtask,doc}/
-├── analyze-story/
+├── analyze-story/, bug-triage/, create-release-notes/
 ├── sync-alignment/            ← Bidirectional Jira + Confluence sync
 ├── plan-sprint/               ← 8-phase sprint planning
 ├── dependency-chain/          ← Critical path + swim lanes
 ├── search-issues/, verify-issue/, activity-report/, assign/
 ├── atlassian-scripts/         ← Python REST API scripts (16 utilities)
-└── shared-references/         ← Docs loaded by skills (23 files)
+└── shared-references/         ← Docs loaded by skills (24 files)
     ├── templates.md           ← ADF templates (Epic, Story, Sub-task, Task)
     ├── hr-rules.md            ← Hard rule definitions (HR1–HR10)
     └── troubleshooting.md     ← Common failures + fixes
 
-agents/                                  ← 17 subagent definitions (3-layer architecture)
+agents/                                  ← 18 subagent definitions (3-layer architecture)
 │
 │  Layer 1 — Foundation (compact output, token-optimized)
 ├── code-explorer.md (haiku)             ← Codebase exploration; Memory-First Protocol; --domain flag
 ├── issue-bootstrap.md (haiku)           ← Pre-fetch issue context; --preset flags; BOOTSTRAP_COMPACT
-├── issue-reader.md (haiku)              ← Fast Jira issue fetch (deprecated → issue-bootstrap)
 ├── jira-search.md (haiku)               ← Duplicate confidence scoring (EXACT/HIGH/MEDIUM/LOW)
 ├── quality-gate.md (haiku)              ← ADF quality scoring; Pattern Memory; Team Convention Check
 ├── pr-description-writer.md (haiku)     ← Generate PR description from branch + issue
 ├── pr-review-jira-sync.md (haiku)       ← Sync merged PR back to Jira (transition + comment)
 ├── velocity-tracker.md (haiku)          ← Velocity history; anomaly detection (1.5σ); per-member stats
+├── sprint-transition-agent.md (haiku)   ← Batch sprint issue moves + sprint state transitions
 │
 │  Layer 2 — Analysis (expert reasoning, domain knowledge)
 ├── story-writer.md (sonnet)             ← ADF JSON; Convention Memory; Service-Aware AC Defaults
@@ -459,6 +459,7 @@ agents/                                  ← 17 subagent definitions (3-layer ar
 ├── backlog-groomer.md (sonnet)          ← WSJF scoring; aging alerts; Top Candidates output
 ├── retrospective-analyst.md (sonnet)    ← Cross-Sprint Comparison; Team Health Score (0-100)
 ├── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
+├── spec-parser-agent.md (haiku)         ← Parse Confluence spec → structured requirements; Read only
 │
 │  Layer 3 — Synthesis (cross-domain specialists, new in v1.1.0)
 ├── estimation-calibrator.md (sonnet)    ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
@@ -466,10 +467,14 @@ agents/                                  ← 17 subagent definitions (3-layer ar
 ├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
 └── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
 
-hooks/                         ← 42 Python hook scripts
+hooks/                         ← 44 Python hook scripts
 ├── hooks.json                 ← Plugin hook manifest
-├── pre_hr*.py                 ← Block violations before tool execution
-└── post_hr*.py                ← Confirm post-execution state
+├── plugin/
+│   ├── guards/                ← HR1–HR10 enforcement (15 hooks)
+│   ├── quality/               ← ADF structure, write quality, story size gates (4 hooks)
+│   ├── cache/                 ← Read optimization, dedup, field presets (6 hooks)
+│   └── session/               ← Session management, compaction, token filtering (12 hooks)
+└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (7 hooks)
 
 mcp-servers/jira-cache-server/ ← Local Jira cache (SQLite + FTS5 + embeddings)
 scripts/
