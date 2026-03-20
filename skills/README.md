@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-31 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
+33 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -49,6 +49,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | plan-sprint | `/atlassian-pm:plan-sprint` | 8 | jira-cache-server, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
 | dependency-chain | `/atlassian-pm:dependency-chain` | 5 | jira-cache-server, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
 | sprint-closer | `/atlassian-pm:sprint-closer` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
+| retrospective-action-items | `/atlassian-pm:retrospective-action-items` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Convert Confluence retrospective page action items → Jira Tasks with owner + sprint assignment. Supports `--dry-run`. |
 | standup-digest | `/atlassian-pm:standup-digest` | 4 | jira-cache-server, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
 | bulk-reschedule | `/atlassian-pm:bulk-reschedule` | 5 | jira-cache-server, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 
@@ -66,6 +67,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | search-issues | `/atlassian-pm:search-issues` | 3 | jira-cache-server, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
 | tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
+| create-release-notes | `/atlassian-pm:create-release-notes` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
 | atlassian-scripts | — | — | — | Python script library for Confluence/Jira REST API operations. Not user-invocable directly; used internally by skills when MCP has limitations (macros, code blocks, parent fields). |
 
 ### Internal Only
@@ -174,6 +176,14 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 /atlassian-pm:bug-triage                              # interactive full intake
 /atlassian-pm:bug-triage "video upload fails iOS 17"  # summary pre-filled
+
+/atlassian-pm:retrospective-action-items 12345           # page ID
+/atlassian-pm:retrospective-action-items 12345 --dry-run # preview only
+/atlassian-pm:retrospective-action-items                 # search for retro page
+
+/atlassian-pm:create-release-notes --version v2.3.0      # specific version
+/atlassian-pm:create-release-notes --version v2.3.0 --dry-run  # preview
+/atlassian-pm:create-release-notes                       # pick version interactively
 ```
 
 ---
