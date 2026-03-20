@@ -10,7 +10,7 @@ Agile Documentation System — skills-based Jira/Confluence automation
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 30 skills with phases, categories, and argument patterns.
-**Hook reference:** [hooks/README.md](hooks/README.md) — all 42 hooks, what they enforce, and how to debug them.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all 44 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 
