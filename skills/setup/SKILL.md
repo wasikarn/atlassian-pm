@@ -58,8 +58,17 @@ JIRA_SITE=""
 PROJECT_KEY=""
 SPACE_KEY=""
 
-# project-config: exists and non-placeholder?
+# Auto-restore config from backup if missing (survives plugin reinstall)
 CONFIG_FILE="$PLUGIN_ROOT/.claude/project-config.json"
+CONFIG_BACKUP="$HOME/.config/atlassian/atlassian-pm-config.json"
+if [ ! -f "$CONFIG_FILE" ] || grep -q "acme-corp.atlassian.net" "$CONFIG_FILE"; then
+  if [ -f "$CONFIG_BACKUP" ] && ! grep -q "acme-corp.atlassian.net" "$CONFIG_BACKUP"; then
+    cp "$CONFIG_BACKUP" "$CONFIG_FILE"
+    echo "  → Restored project-config.json from backup ✓"
+  fi
+fi
+
+# project-config: exists and non-placeholder?
 if [ -f "$CONFIG_FILE" ] && ! grep -q "acme-corp.atlassian.net" "$CONFIG_FILE"; then
   SKIP_CONFIG=true
   JIRA_SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['site'])" 2>/dev/null || echo "")
@@ -205,6 +214,14 @@ Overwrite? [y/N]:
 - `y` → overwrite
 
 Write config using Write tool: read `$PLUGIN_ROOT/config/project-config.json.template`, substitute collected values, write to `$PLUGIN_ROOT/.claude/project-config.json`.
+
+After writing, backup config so it survives future plugin reinstalls:
+
+```bash
+mkdir -p "$HOME/.config/atlassian"
+cp "$PLUGIN_ROOT/.claude/project-config.json" "$HOME/.config/atlassian/atlassian-pm-config.json"
+echo "  → Config backed up to ~/.config/atlassian/ ✓"
+```
 
 ---
 

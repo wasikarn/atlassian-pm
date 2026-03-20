@@ -139,6 +139,10 @@ Skills invoke these automatically. Listed here for reference:
 | `backlog-groomer` | Readiness checks for sprint items | sonnet |
 | `retrospective-analyst` | Sprint retro + Confluence page | sonnet |
 | `velocity-tracker` | Tracks velocity history in config | haiku |
+| `estimation-calibrator` | SP calibration from historical similarity | sonnet |
+| `risk-forecaster` | 4-dimension delivery risk scoring per sprint | sonnet |
+| `adf-surgeon` | Structural ADF repair for Jira quirks | haiku |
+| `team-pattern-advisor` | Multi-sprint strategic pattern analysis | sonnet |
 
 ---
 

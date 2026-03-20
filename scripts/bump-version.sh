@@ -173,6 +173,13 @@ else
   warn "Plugin cache not found at $PLUGIN_CACHE — copy config manually after restart"
 fi
 
+# Backup config for future reinstall recovery (read by setup skill Phase 0)
+if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then
+  mkdir -p "$HOME/.config/atlassian"
+  cp "$REPO_ROOT/.claude/project-config.json" "$HOME/.config/atlassian/atlassian-pm-config.json"
+  ok "Backed up project-config.json to ~/.config/atlassian/"
+fi
+
 # ── done ──────────────────────────────────────────────────────────────────────
 
 echo ""
