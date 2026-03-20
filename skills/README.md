@@ -216,9 +216,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 Skills are plain Markdown files. Follow existing conventions:
 
-1. Create a subdirectory under `skills/` matching the skill name.
+1. Create a subdirectory under the appropriate category folder (`skills/<category>/<name>/`). Categories: `setup/`, `epic/`, `story/`, `task/`, `sprint/`, `confluence/`, `utilities/`.
 2. Write `SKILL.md` with YAML frontmatter + numbered phase instructions.
 3. Use gate levels (`⛔ GATE`, `🟡 REVIEW`, `🔄 ITERATE`, `🟢 AUTO`) consistently.
-4. Reference shared docs from `../shared-references/` rather than duplicating content.
+4. Reference shared docs from `../../shared-references/` (two levels up from `skills/<category>/<name>/`).
 5. Validate frontmatter fields: `name`, `description`, `x-compatibility`, `argument-hint`.
 6. Run `uv run dev-loop:skill-validator` if available to catch formatting issues.

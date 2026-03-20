@@ -7,6 +7,7 @@
 Agile Documentation System — skills-based Jira/Confluence automation
 
 **Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (24 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 hooks in `plugin/` + `dev/`) | `agents/` (18) | `scripts/` (setup/sprint/parse/bump-version)
+**Skills layout:** 32 skills organized by category — `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../shared-references/` from each skill
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 32 skills with phases, categories, and argument patterns.

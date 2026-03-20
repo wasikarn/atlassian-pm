@@ -426,17 +426,16 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 1 directory = 1 slash command
-├── story-full/                ← Composite: explore + write + publish
-├── create-{epic,task,doc,testplan}/
-├── update-{epic,story,task,subtask,doc}/
-├── analyze-story/, bug-triage/, create-release-notes/
-├── sync-alignment/            ← Bidirectional Jira + Confluence sync
-├── plan-sprint/               ← 8-phase sprint planning
-├── dependency-chain/          ← Critical path + swim lanes
-├── search-issues/, verify-issue/, activity-report/, assign/
+skills/                        ← 1 directory = 1 slash command (organized by category)
+├── setup/                     ← setup, doctor
+├── epic/                      ← feature-blueprint, refine-feature, create-epic, update-epic, release-planner
+├── story/                     ← story-full, analyze-story, spec-to-stories, verify-issue, sync-alignment
+├── task/                      ← create-task, create-testplan, bug-triage, assign, update-story, update-subtask, update-task
+├── sprint/                    ← plan-sprint, dependency-chain, sprint-closer, standup-digest, bulk-reschedule
+├── confluence/                ← create-doc, update-doc
+├── utilities/                 ← search-issues, activity-report, tech-debt-radar, create-release-notes
 ├── atlassian-scripts/         ← Python REST API scripts (16 utilities)
-└── shared-references/         ← Docs loaded by skills (24 files)
+└── shared-references/         ← Docs loaded by skills on-demand (24 files)
     ├── templates.md           ← ADF templates (Epic, Story, Sub-task, Task)
     ├── hr-rules.md            ← Hard rule definitions (HR1–HR10)
     └── troubleshooting.md     ← Common failures + fixes
