@@ -67,13 +67,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
 | tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | create-release-notes | `/atlassian-pm:create-release-notes` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
-| atlassian-scripts | — | — | — | Python script library for Confluence/Jira REST API operations. Not user-invocable directly; used internally by skills when MCP has limitations (macros, code blocks, parent fields). |
-
-### Internal Only
-
-| Skill | User-invocable | Description |
-| --- | --- | --- |
-| shared-references | No | 23 reference docs loaded on demand by skills. See section below. |
+| atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper for `atlassian-scripts/` at project root. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
 
 ---
 
@@ -185,7 +179,7 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 ## Shared References
 
-`skills/shared-references/` contains 23 reference docs loaded on demand by skills. They are never loaded eagerly — each skill specifies which docs it needs.
+`references/` (project root) contains 24 reference docs loaded on demand by skills. They are never loaded eagerly — each skill specifies which docs it needs.
 
 | File | Purpose |
 | --- | --- |
@@ -219,6 +213,6 @@ Skills are plain Markdown files. Follow existing conventions:
 1. Create a subdirectory under the appropriate category folder (`skills/<category>/<name>/`). Categories: `setup/`, `epic/`, `story/`, `task/`, `sprint/`, `confluence/`, `utilities/`.
 2. Write `SKILL.md` with YAML frontmatter + numbered phase instructions.
 3. Use gate levels (`⛔ GATE`, `🟡 REVIEW`, `🔄 ITERATE`, `🟢 AUTO`) consistently.
-4. Reference shared docs from `../../shared-references/` (two levels up from `skills/<category>/<name>/`).
+4. Reference shared docs from `../../../references/` (three levels up to project root `references/`).
 5. Validate frontmatter fields: `name`, `description`, `x-compatibility`, `argument-hint`.
 6. Run `uv run dev-loop:skill-validator` if available to catch formatting issues.

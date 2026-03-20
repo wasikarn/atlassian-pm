@@ -6,8 +6,8 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (24 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 hooks in `plugin/` + `dev/`) | `agents/` (18) | `scripts/` (setup/sprint/parse/bump-version)
-**Skills layout:** 32 skills organized by category — `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../shared-references/` from each skill
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 hooks in `plugin/` + `dev/`) | `agents/` (18) | `scripts/` (setup/sprint/parse/bump-version)
+**Skills layout:** 32 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 32 skills with phases, categories, and argument patterns.
@@ -24,14 +24,14 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 **Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge, commits, tags, pushes, creates GitHub release, updates plugin + copies config in one step
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
 
-**Workflows:** [`skill-orchestration.md`](skills/shared-references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](skills/shared-references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
+**Workflows:** [`skill-orchestration.md`](references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
 **Verify:** `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
 
-**Tool selection:** `.claude/rules/tool-selection.md` (auto-loaded for skills/hooks/scripts) · `skills/shared-references/tools.md` (field presets)
+**Tool selection:** `.claude/rules/tool-selection.md` (auto-loaded for skills/hooks/scripts) · `references/tools.md` (field presets)
 
 ## Common Mistakes
 
-> Hook-enforced mistakes (HR2-HR7, HR10) are blocked automatically. Full troubleshooting: `skills/shared-references/troubleshooting.md`
+> Hook-enforced mistakes (HR2-HR7, HR10) are blocked automatically. Full troubleshooting: `references/troubleshooting.md`
 
 | Category | Quick Fix |
 | --- | --- |
@@ -41,7 +41,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 
 ## References
 
-Loaded on demand from `skills/shared-references/` (23 docs, indexed by `templates.md`). **Scripts:** `skills/atlassian-scripts/SKILL.md`
+Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scripts:** `atlassian-scripts/README.md`
 
 ## Core Principles
 
@@ -54,7 +54,7 @@ Loaded on demand from `skills/shared-references/` (23 docs, indexed by `template
 
 ### HARD RULES
 
-> Hooks enforce HR2-HR7, HR10 automatically. Full definitions: `skills/shared-references/hr-rules.md`
+> Hooks enforce HR2-HR7, HR10 automatically. Full definitions: `references/hr-rules.md`
 
 | Rule | Constraint |
 | --- | --- |
@@ -79,7 +79,7 @@ Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
 ## Efficiency
 
-- **No redundant reads:** Summarize `skills/shared-references/` on first read — never re-read same file.
+- **No redundant reads:** Summarize `references/` on first read — never re-read same file.
 - **Deliverable-first:** Every skill must produce its deliverable (ADF JSON, issue, report) within the session — don't stop at research phase.
 - **Simple patterns:** Prefer `*.md` over complex globs. Default to simplest pattern that works.
 - **Validate before commit:** Check frontmatter fields, `allowed-tools`, hook commands. Run markdownlint on `*.md` changes.

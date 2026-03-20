@@ -426,19 +426,23 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 1 directory = 1 slash command (organized by category)
+skills/                        ← slash-command skills only (7 categories)
 ├── setup/                     ← setup, doctor
 ├── epic/                      ← feature-blueprint, refine-feature, create-epic, update-epic, release-planner
 ├── story/                     ← story-full, analyze-story, spec-to-stories, verify-issue, sync-alignment
 ├── task/                      ← create-task, create-testplan, bug-triage, assign, update-story, update-subtask, update-task
 ├── sprint/                    ← plan-sprint, dependency-chain, sprint-closer, standup-digest, bulk-reschedule
 ├── confluence/                ← create-doc, update-doc
-├── utilities/                 ← search-issues, activity-report, tech-debt-radar, create-release-notes
-├── atlassian-scripts/         ← Python REST API scripts (16 utilities)
-└── shared-references/         ← Docs loaded by skills on-demand (24 files)
-    ├── templates.md           ← ADF templates (Epic, Story, Sub-task, Task)
-    ├── hr-rules.md            ← Hard rule definitions (HR1–HR10)
-    └── troubleshooting.md     ← Common failures + fixes
+└── utilities/                 ← search-issues, activity-report, tech-debt-radar, create-release-notes, atlassian-scripts
+
+references/                    ← Docs loaded by skills on-demand (24 files)
+├── templates.md               ← ADF templates (Epic, Story, Sub-task, Task)
+├── hr-rules.md                ← Hard rule definitions (HR1–HR10)
+└── troubleshooting.md         ← Common failures + fixes
+
+atlassian-scripts/             ← Python REST API scripts + lib (16 scripts)
+├── scripts/                   ← CLI scripts (create/update Confluence, Jira ADF, set parent)
+└── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
 
 agents/                                  ← 18 subagent definitions (3-layer architecture)
 │
