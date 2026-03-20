@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-43 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+44 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## How hooks work
 
@@ -23,6 +23,7 @@ Enforce the hard rules defined in CLAUDE.md. Blocking hooks output a human-reada
 | HR7 | `pre_hr7_sprint_id_guard.py` | Hardcoded sprint IDs — enforces dynamic lookup |
 | HR10 | `pre_hr10_subtask_sprint_guard.py` | Setting sprint field on subtasks (API error + cascade failure) |
 | DoR | `pre_dor_check.py` | Blocks moving to In Progress without story subtasks + AC + QG ≥ 90% |
+| WIP | `pre_wip_limit_check.py` | Injects reminder to verify assignee WIP < team limit before moving to In Progress |
 
 ### Enhancement hooks
 
@@ -88,6 +89,7 @@ Manage state, tracking, and cross-hook coordination.
 | `pre_qmd_auto_search.py` | Glob, Grep |
 | `pre_search_before_create.py` | jira_create_issue, jira_batch_create_issues |
 | `pre_dod_check.py` | jira_transition_issue |
+| `pre_wip_limit_check.py` | jira_transition_issue |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit |
 
 ### PostToolUse
