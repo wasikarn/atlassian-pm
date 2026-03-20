@@ -8,7 +8,7 @@
       "name": "atlassian-pm",
       "source": "./",
       "description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "Tathep"
       },

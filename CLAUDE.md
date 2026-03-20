@@ -6,7 +6,11 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (40 scripts) | `agents/` (8) | `scripts/` (setup/sprint/parse)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (42 scripts) | `agents/` (11) | `scripts/` (setup/sprint/parse)
+
+**New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
+**Skill index:** [skills/README.md](skills/README.md) — all 23 skills with phases, categories, and argument patterns.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all 42 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 
@@ -18,7 +22,8 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
 
-**Workflows:** `skills/shared-references/skill-orchestration.md` · `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
+**Workflows:** [`skill-orchestration.md`](skills/shared-references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](skills/shared-references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
+**Verify:** `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
 
 **Tool selection:** `.claude/rules/tool-selection.md` (auto-loaded for skills/hooks/scripts) · `skills/shared-references/tools.md` (field presets)
 
@@ -66,7 +71,7 @@ Loaded on demand from `skills/shared-references/` (23 docs, indexed by `template
 
 **Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post_compact_reinject.py`.
 
-**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `sprint-planner` (opus).
+**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku, deprecated→issue-bootstrap), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet).
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
