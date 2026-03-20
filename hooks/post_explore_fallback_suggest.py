@@ -19,7 +19,7 @@ except json.JSONDecodeError:
     sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
-tool_output = str(data.get("tool_output", ""))
+tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
 
 # Only trigger on Task tool with Explore subagent
 if tool_name != "Task":

@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hooks_lib import inject_context, log_event
 
 _HOOK = "hr5-verify-parent"
-CACHE_DB = Path.home() / ".cache" / "jira-generator" / "jira.db"
+CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "jira.db"
 
 
 def extract_parent(tool_input: dict) -> str | None:

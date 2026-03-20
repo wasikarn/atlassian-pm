@@ -88,7 +88,10 @@ def split_identifier(s: str) -> str:
 
 
 raw = sys.stdin.read()
-data = json.loads(raw)
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
 session_id = data.get("session_id", "")

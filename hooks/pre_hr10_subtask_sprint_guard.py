@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hooks_lib import log_event, parse_stdin
 
-CACHE_DB = Path.home() / ".cache" / "jira-generator" / "jira.db"
+CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "jira.db"
 SPRINT_FIELD = "customfield_10020"
 
 data = parse_stdin()

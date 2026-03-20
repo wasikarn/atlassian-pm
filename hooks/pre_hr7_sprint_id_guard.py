@@ -13,8 +13,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config_loader import load_project_config
 from hooks_lib import log_event
 from hooks_state import hr7_is_lookup_done
+
+_cfg = load_project_config()
+_BOARD_ID = _cfg.get("jira", {}).get("board_id", "<board_id>")
 
 _HOOK = "hr7-sprint-id-guard"
 SPRINT_FIELD = "customfield_10020"
@@ -55,7 +59,7 @@ def main() -> None:
     log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "session_id": session_id})
     reason = (
         f"HR7 BLOCKED: Sprint ID detected for {issue_key} but no sprint lookup in this session.\n"
-        f"Run: jira_get_sprints_from_board(board_id=2, state='active') first.\n"
+        f"Run: jira_get_sprints_from_board(board_id={_BOARD_ID}, state='active') first.\n"
         f"HR7: Never hardcode sprint IDs — they change every sprint."
     )
     print(reason, file=sys.stderr)

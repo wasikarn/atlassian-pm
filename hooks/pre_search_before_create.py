@@ -12,7 +12,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config_loader import load_project_config
 from hooks_state import search_is_done
+
+_cfg = load_project_config()
+_PROJECT_KEY = _cfg.get("jira", {}).get("project_key", "<project_key>")
 
 _HOOK = "pre-search-before-create"
 
@@ -38,7 +42,7 @@ def main() -> None:
     # Block: no search done yet
     print(
         "DEDUP BLOCK: Cannot create issues without prior search in this session. "
-        "Run jira_search(jql='project = BEP AND summary ~ \"keyword\"', "
+        f"Run jira_search(jql='project = {_PROJECT_KEY} AND summary ~ \"keyword\"', "
         "fields='summary,status,issuetype', limit=10) or /jira-search-issues first. "
         "This prevents duplicate issues.",
         file=sys.stderr,

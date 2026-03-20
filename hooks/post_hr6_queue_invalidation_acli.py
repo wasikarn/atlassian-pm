@@ -48,7 +48,7 @@ def main() -> None:
         return
 
     # Extract issue keys from command and output
-    tool_output = str(data.get("tool_output", ""))
+    tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
     all_text = command + " " + tool_output
 
     keys = re.findall(r"[A-Z]+-\d+", all_text)

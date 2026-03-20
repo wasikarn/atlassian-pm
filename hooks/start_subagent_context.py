@@ -20,8 +20,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config_loader import load_project_config
 from hooks_lib import inject_context, log_event
 from hooks_state import _load  # read-only access to session state
+
+_cfg = load_project_config()
+_BOARD_ID = _cfg.get("jira", {}).get("board_id", "<board_id>")
 
 _HOOK = "subagent-context-inject"
 
@@ -29,7 +33,7 @@ _HR_RULES = """\
 HARD RULES (violating = data corruption / silent failure):
 - HR5: After MCP subtask create → verify parent with jira_get_issue(fields='parent')
 - HR6: After ANY Jira write → cache_invalidate(issue_key, auto_refresh=true) immediately
-- HR7: Sprint ID NEVER hardcoded — always jira_get_sprints_from_board(board_id=2, state='active')
+- HR7: Sprint ID NEVER hardcoded — always jira_get_sprints_from_board(board_id={_BOARD_ID}, state='active')
 - HR10: NEVER set sprint field (customfield_10020) on subtasks — inherited from parent
 - Tool: jira_get_issue / jira_search ALWAYS require fields + limit params\
 """

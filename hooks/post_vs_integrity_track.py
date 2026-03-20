@@ -24,7 +24,7 @@ if not data:
     sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
-tool_output = str(data.get("tool_output", ""))
+tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
 session_id = data.get("session_id", "")
 
 # ── Story read: extract ACs ──────────────────────────
