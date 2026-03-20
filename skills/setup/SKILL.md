@@ -97,21 +97,30 @@ if claude mcp get figma &>/dev/null; then
   FIGMA_OK=true
 fi
 
+# venv: exists in data dir?
+VENV_OK=false
+_PLUGIN_DATA=$(ls -d "$HOME/.claude/plugins/data/atlassian-pm-"* 2>/dev/null | sort -V | tail -1)
+[ -z "$_PLUGIN_DATA" ] && _PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm"
+if [ -f "${_PLUGIN_DATA}/venv/bin/python" ]; then
+  VENV_OK=true
+fi
+
 echo "Detection complete:"
 echo "  config:      $([ "$SKIP_CONFIG" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  credentials: $([ "$ENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  acli auth:   $([ "$ACLI_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  mcp:         $([ "$MCP_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
+echo "  venv:        $([ "$VENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed (will sync)")"
 echo "  figma MCP:   $([ "$FIGMA_OK" = "true" ] && echo "✓ found" || echo "- not configured (optional)")"
 ```
 
-**Second-run fast path:** If all four flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The board ID lookup check in Phase 5b still applies.
+**Second-run fast path:** If all five flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The venv check ensures Phase 1 always runs when venv is missing (e.g. after plugin reinstall).
 
 ```bash
 if [ "$SKIP_CONFIG" = "true" ] && [ "$ENV_OK" = "true" ] && \
-   [ "$ACLI_OK" = "true" ] && [ "$MCP_OK" = "true" ]; then
+   [ "$ACLI_OK" = "true" ] && [ "$MCP_OK" = "true" ] && [ "$VENV_OK" = "true" ]; then
   echo ""
-  echo "System already configured (config ✓  credentials ✓  mcp ✓)"
+  echo "System already configured (config ✓  credentials ✓  mcp ✓  venv ✓)"
   echo "Running validation only..."
   # → Jump to Phase 5b (health check)
 fi
@@ -154,7 +163,12 @@ else
 fi
 
 echo "[3/3] Syncing jira-cache-server venv..."
-UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm}/venv" \
+# Resolve data dir: prefer CLAUDE_PLUGIN_DATA env, else discover atlassian-pm-* (new naming), else fallback to atlassian-pm/
+if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
+  CLAUDE_PLUGIN_DATA=$(ls -d "$HOME/.claude/plugins/data/atlassian-pm-"* 2>/dev/null | sort -V | tail -1)
+  [ -z "$CLAUDE_PLUGIN_DATA" ] && CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm"
+fi
+UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
   uv sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache-server" \
   --extra embeddings --quiet \
   && echo "      venv: ready ✓" \

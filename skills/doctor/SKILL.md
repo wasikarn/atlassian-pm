@@ -33,7 +33,7 @@ PASS=0
 WARN=0
 FAIL=0
 SKIP=0
-TOTAL=10
+TOTAL=11
 
 echo "Checking atlassian-pm environment..."
 echo ""
