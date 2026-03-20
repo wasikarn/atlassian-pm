@@ -20,7 +20,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
-**Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge + CHANGELOG, commits, tags, pushes, creates GitHub release, and updates plugin in one step
+**Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge, commits, tags, pushes, creates GitHub release, updates plugin + copies config in one step
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
 
 **Workflows:** [`skill-orchestration.md`](skills/shared-references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](skills/shared-references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
