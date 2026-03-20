@@ -54,9 +54,16 @@ fi
 
 # --- 0. Check project config ---
 CONFIG_FILE="$PROJECT_DIR/.claude/project-config.json"
-CONFIG_TEMPLATE="$PROJECT_DIR/.claude/project-config.json.template"
+# Prefer config/ template (more complete), fall back to .claude/ template
+if [ -f "$PROJECT_DIR/config/project-config.json.template" ]; then
+  CONFIG_TEMPLATE="$PROJECT_DIR/config/project-config.json.template"
+else
+  CONFIG_TEMPLATE="$PROJECT_DIR/.claude/project-config.json.template"
+fi
 TEAM_DETAIL_FILE="$PROJECT_DIR/.claude/project-config-team-detail.json"
 TEAM_DETAIL_TEMPLATE="$PROJECT_DIR/.claude/project-config-team-detail.json.template"
+
+_config_has_placeholder() { grep -qE "acme-corp\.atlassian\.net|YOUR-INSTANCE|YOUR_PROJECT_KEY" "$1" 2>/dev/null; }
 
 if [ ! -f "$CONFIG_FILE" ]; then
   if [ -f "$CONFIG_TEMPLATE" ]; then
@@ -84,11 +91,13 @@ echo "[1/2] Configuring ~/.claude/CLAUDE.md..."
 mkdir -p "$HOME/.claude"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 
-# Read real values from project-config.json
+# Read real values from project-config.json (skip if still placeholder)
 JIRA_SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('site','your-site.atlassian.net'))" 2>/dev/null || echo "your-site.atlassian.net")
 PROJECT_KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('project_key','YOUR_KEY'))" 2>/dev/null || echo "YOUR_KEY")
 
-if [ -f "$CLAUDE_MD" ] && grep -q "Atlassian Settings" "$CLAUDE_MD"; then
+if _config_has_placeholder "$CONFIG_FILE" 2>/dev/null; then
+  echo "  config has placeholder values — CLAUDE.md update skipped (run /atlassian-pm:setup to configure)"
+elif [ -f "$CLAUDE_MD" ] && grep -q "Atlassian Settings" "$CLAUDE_MD"; then
   echo "  Atlassian settings already present"
 else
   cat >> "$CLAUDE_MD" << ATLASSIAN_CONFIG

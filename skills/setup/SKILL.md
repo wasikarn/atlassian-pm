@@ -61,15 +61,16 @@ SPACE_KEY=""
 # Auto-restore config from backup if missing (survives plugin reinstall)
 CONFIG_FILE="$PLUGIN_ROOT/.claude/project-config.json"
 CONFIG_BACKUP="$HOME/.config/atlassian/atlassian-pm-config.json"
-if [ ! -f "$CONFIG_FILE" ] || grep -q "acme-corp.atlassian.net" "$CONFIG_FILE"; then
-  if [ -f "$CONFIG_BACKUP" ] && ! grep -q "acme-corp.atlassian.net" "$CONFIG_BACKUP"; then
+_is_placeholder() { grep -qE "acme-corp\.atlassian\.net|YOUR-INSTANCE|YOUR_PROJECT_KEY" "$1" 2>/dev/null; }
+if [ ! -f "$CONFIG_FILE" ] || _is_placeholder "$CONFIG_FILE"; then
+  if [ -f "$CONFIG_BACKUP" ] && ! _is_placeholder "$CONFIG_BACKUP"; then
     cp "$CONFIG_BACKUP" "$CONFIG_FILE"
     echo "  → Restored project-config.json from backup ✓"
   fi
 fi
 
 # project-config: exists and non-placeholder?
-if [ -f "$CONFIG_FILE" ] && ! grep -q "acme-corp.atlassian.net" "$CONFIG_FILE"; then
+if [ -f "$CONFIG_FILE" ] && ! _is_placeholder "$CONFIG_FILE"; then
   SKIP_CONFIG=true
   JIRA_SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['site'])" 2>/dev/null || echo "")
   PROJECT_KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['project_key'])" 2>/dev/null || echo "")
