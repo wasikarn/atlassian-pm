@@ -5,7 +5,7 @@ Usage:
     python3 scripts/clear-sprint-dates.py --sprint 673
     python3 scripts/clear-sprint-dates.py --sprint 673 --dry-run
     python3 scripts/clear-sprint-dates.py --sprint 673 --fields duedate
-    python3 scripts/clear-sprint-dates.py --sprint 673 --fields customfield_10015,duedate
+    python3 scripts/clear-sprint-dates.py --sprint 673 --fields {{START_DATE_FIELD}},duedate
     python3 scripts/clear-sprint-dates.py --sprint 673 --jql "status != Done"
 """
 
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(_ROOT / "skills" / "atlassian-scripts"))
+sys.path.insert(0, str(_ROOT / "atlassian-scripts"))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
@@ -23,9 +23,9 @@ from lib.jira_api import JiraAPI, derive_jira_url
 _config = json.loads((_ROOT / ".claude" / "project-config.json").read_text())
 DEFAULT_PROJECT_KEY: str = _config["jira"]["project_key"]
 
-DEFAULT_FIELDS = ["customfield_10015", "duedate"]
+DEFAULT_FIELDS = ["{{START_DATE_FIELD}}", "duedate"]
 FIELD_LABELS = {
-    "customfield_10015": "Start Date",
+    "{{START_DATE_FIELD}}": "Start Date",
     "duedate": "Due Date",
 }
 

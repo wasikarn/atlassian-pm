@@ -17,7 +17,7 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "skills" / "atlassian-scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "atlassian-scripts"))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
