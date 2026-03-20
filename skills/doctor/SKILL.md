@@ -113,6 +113,12 @@ fi
 
 # Check 6: project-config valid (non-placeholder)
 CONFIG_FILE="${PLUGIN_ROOT}/.claude/project-config.json"
+BACKUP_CONFIG="$HOME/.config/atlassian/project-config.json"
+# Auto-restore from backup if config is missing (e.g. after clean install)
+if [ ! -f "$CONFIG_FILE" ] && [ -f "$BACKUP_CONFIG" ]; then
+  cp "$BACKUP_CONFIG" "$CONFIG_FILE"
+  echo "  ✓  project-config restored from backup (~/.config/atlassian/project-config.json)"
+fi
 if [ -f "$CONFIG_FILE" ] && ! grep -qE "YOUR-INSTANCE|YOUR_PROJECT_KEY|acme-corp\.atlassian\.net" "$CONFIG_FILE"; then
   SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['site'])" 2>/dev/null || echo "?")
   KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['project_key'])" 2>/dev/null || echo "?")
