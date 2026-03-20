@@ -373,7 +373,7 @@ Claude Code ──skills──► acli (ADF JSON) ──────────
     │
     ├── MCP ──► Confluence, Figma, GitHub
     │
-    └── Python ──► atlassian-scripts/lib/ (REST API helpers)
+    └── Python ──► scripts/lib/ (REST API helpers)
 ```
 
 | Layer | Tool | Why |
@@ -440,9 +440,12 @@ references/                    ← Docs loaded by skills on-demand (24 files)
 ├── hr-rules.md                ← Hard rule definitions (HR1–HR10)
 └── troubleshooting.md         ← Common failures + fixes
 
-atlassian-scripts/             ← Python REST API scripts + lib (16 scripts)
-├── scripts/                   ← CLI scripts (create/update Confluence, Jira ADF, set parent)
-└── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
+scripts/                       ← All Python scripts + lib (merged atlassian-scripts + scripts)
+├── api/                       ← CLI scripts (create/update Confluence, Jira ADF, set parent)
+├── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
+├── sprint/                    ← Sprint management scripts
+├── analysis/                  ← Analysis tools (AC mapper, impact suggester, QA matrix)
+└── docs/                      ← Script documentation (README, references, technical notes)
 
 agents/                                  ← 18 subagent definitions (3-layer architecture)
 │

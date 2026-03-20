@@ -38,14 +38,14 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
-# Add atlassian-scripts to path for JiraAPI + auth reuse
-# Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/skills/atlassian-scripts)
-# Fallback for standalone testing: resolve relative to new location (mcp-servers/jira-cache-server/ -> root -> skills/)
-_scripts_dir = Path(__file__).resolve().parent.parent.parent / "skills" / "atlassian-scripts"
+# Add scripts/lib to path for JiraAPI + auth reuse
+# Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/scripts)
+# Fallback for standalone testing: resolve relative to this file (mcp-servers/jira-cache-server/ -> root -> scripts/)
+_scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
 if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
-# Local imports (jira_cache to avoid namespace collision with atlassian-scripts/lib)
+# Local imports (jira_cache to avoid namespace collision with scripts/lib)
 from jira_cache.cache import JiraCache, strip_noise
 from jira_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials

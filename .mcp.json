@@ -8,7 +8,7 @@
         "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/server.py"
       ],
       "env": {
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/skills/atlassian-scripts",
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts",
         "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv"
       }
     }

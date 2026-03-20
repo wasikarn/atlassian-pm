@@ -12,10 +12,10 @@ user-invocable: false
 # Atlassian Scripts
 
 **Role:** Developer / Tech Lead
-**Scripts location:** `atlassian-scripts/scripts/` (project root)
-**Library:** `atlassian-scripts/lib/`
+**Scripts location:** `scripts/api/` (project root)
+**Library:** `scripts/lib/`
 
-> See [../../../atlassian-scripts/README.md](../../../atlassian-scripts/README.md) for full architecture, available scripts, and module responsibilities.
+> See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full architecture, available scripts, and module responsibilities.
 
 ---
 
@@ -36,8 +36,7 @@ user-invocable: false
 ## Usage Pattern
 
 ```bash
-cd atlassian-scripts
-uv run scripts/<script-name>.py [args]
+uv run scripts/api/<script-name>.py [args]
 ```
 
 ## Prerequisites
@@ -54,10 +53,10 @@ CONFLUENCE_API_TOKEN=your-api-token
 
 ## References
 
-> See [../../../atlassian-scripts/README.md](../../../atlassian-scripts/README.md) for full docs, decision tree, and known issues.
+> See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full docs, decision tree, and known issues.
 
-- [script-reference.md](../../../atlassian-scripts/script-reference.md) — Script 1-12 usage, arguments, examples
-- [library-api.md](../../../atlassian-scripts/library-api.md) — ConfluenceAPI, JiraAPI, Converters, Exceptions
-- [technical-notes.md](../../../atlassian-scripts/technical-notes.md) — SSL, Storage Format, Mermaid, History
+- [script-reference.md](../../../scripts/docs/script-reference.md) — Script 1-12 usage, arguments, examples
+- [library-api.md](../../../scripts/docs/library-api.md) — ConfluenceAPI, JiraAPI, Converters, Exceptions
+- [technical-notes.md](../../../scripts/docs/technical-notes.md) — SSL, Storage Format, Mermaid, History
 - Confluence REST API: <https://developer.atlassian.com/cloud/confluence/rest/v1/intro/>
 - Jira REST API v3: <https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/>

@@ -276,4 +276,4 @@ Quick reference:
 
 ## Related
 
-- ADF format: `templates.md` · Tool selection: `tools.md` · Scripts: `../atlassian-scripts/README.md`
+- ADF format: `templates.md` · Tool selection: `tools.md` · Scripts: `../scripts/docs/README.md`

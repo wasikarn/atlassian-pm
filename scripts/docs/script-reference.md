@@ -1,6 +1,6 @@
 # Script Reference
 
-> Details for all scripts in `atlassian-scripts/scripts/`
+> Details for all scripts in `scripts/api/`
 >
 > For overview and script selection guide, see [SKILL.md](SKILL.md)
 
@@ -10,20 +10,20 @@
 
 Create or update a Confluence page with proper code block formatting.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/create_confluence_page.py`
+**Location:** `.claude/scripts/api/create_confluence_page.py`
 
 ### Usage
 
 ```bash
 # Create new page
-python3 .claude/skills/atlassian-scripts/scripts/create_confluence_page.py \
+python3 .claude/scripts/api/create_confluence_page.py \
   --space BEP --title "Technical Spec: Feature X" --content-file content.md
 
 # Create as child page
 # Add: --parent-id 123456789
 
 # Update existing page
-python3 .claude/skills/atlassian-scripts/scripts/create_confluence_page.py \
+python3 .claude/scripts/api/create_confluence_page.py \
   --page-id 123456789 --content-file updated-content.md
 
 # Options: --content "inline" | --dry-run | --verbose
@@ -65,12 +65,12 @@ python3 .claude/skills/atlassian-scripts/scripts/create_confluence_page.py \
 
 Generic script for find/replace content in Confluence pages.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/update_confluence_page.py`
+**Location:** `.claude/scripts/api/update_confluence_page.py`
 
 ### Usage
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/update_confluence_page.py \
+python3 .claude/scripts/api/update_confluence_page.py \
   --page-id 111222333 --find "old" --replace "new"
 
 # Multiple: repeat --find/--replace pairs | --regex | --dry-run | --verbose
@@ -92,12 +92,12 @@ python3 .claude/skills/atlassian-scripts/scripts/update_confluence_page.py \
 
 Move page(s) under a different parent page without modifying content.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/move_confluence_page.py`
+**Location:** `.claude/scripts/api/move_confluence_page.py`
 
 ### Usage
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/move_confluence_page.py \
+python3 .claude/scripts/api/move_confluence_page.py \
   --page-id 123456789 --parent-id 987654321
 
 # Batch: --page-ids 123,456,789 | --dry-run | --verbose
@@ -116,12 +116,12 @@ python3 .claude/skills/atlassian-scripts/scripts/move_confluence_page.py \
 
 Update a page with raw storage format for macros (ToC, Children, Status).
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/update_page_storage.py`
+**Location:** `.claude/scripts/api/update_page_storage.py`
 
 ### Usage
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/update_page_storage.py \
+python3 .claude/scripts/api/update_page_storage.py \
   --page-id 222333444 --content-file content.html
 
 # Options: --content "inline" | --title "New Title" | --dry-run | --verbose
@@ -148,12 +148,12 @@ This script sends raw storage format directly to the API.
 
 Fix code blocks from `<pre class="highlight"><code>` to `<ac:structured-macro ac:name="code">`.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/fix_confluence_code_blocks.py`
+**Location:** `.claude/scripts/api/fix_confluence_code_blocks.py`
 
 ### Usage
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/fix_confluence_code_blocks.py \
+python3 .claude/scripts/api/fix_confluence_code_blocks.py \
   --page-id 123456789
 # Batch: --page-ids 123,456,789 | --dry-run | --verbose
 ```
@@ -166,17 +166,17 @@ Converts `<pre class="highlight"><code>` → `<ac:structured-macro ac:name="code
 
 Verify content across multiple Confluence pages for presence/absence of specified strings.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/audit_confluence_pages.py`
+**Location:** `.claude/scripts/api/audit_confluence_pages.py`
 
 ### Usage
 
 ```bash
 # Single page
-python3 .claude/skills/atlassian-scripts/scripts/audit_confluence_pages.py \
+python3 .claude/scripts/api/audit_confluence_pages.py \
   --page-id 987654321 --should-have "ABC-2883" --should-not-have "2025-01-21"
 
 # Batch from JSON config
-python3 .claude/skills/atlassian-scripts/scripts/audit_confluence_pages.py --config audit.json
+python3 .claude/scripts/api/audit_confluence_pages.py --config audit.json
 ```
 
 Config: `[{"page_id":"123","label":"Name","should_have":["X"],"should_not_have":["Y"]}]`
@@ -194,13 +194,13 @@ Config: `[{"page_id":"123","label":"Name","should_have":["X"],"should_not_have":
 Fix Jira issue descriptions via REST API v3 (ADF format) directly.
 Preserves all formatting (panels, tables, marks, code blocks).
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/update_jira_description.py`
+**Location:** `.claude/scripts/api/update_jira_description.py`
 
 ### Usage
 
 ```bash
 # Single issue
-python3 .claude/skills/atlassian-scripts/scripts/update_jira_description.py \
+python3 .claude/scripts/api/update_jira_description.py \
   --issue ABC-2819 --find "old" --replace "new"
 
 # Batch: --config fixes.json | --dry-run | --verbose
@@ -225,21 +225,21 @@ Config: `{"ABC-2819": [["old","new"]], "ABC-2755": [["old1","new1"],["old2","new
 
 Validate ADF JSON against quality gate before writing to Jira. Enforces HR1 (QG ≥ 90% before writes).
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/validate_adf.py`
+**Location:** `.claude/scripts/api/validate_adf.py`
 
 ### Usage
 
 ```bash
 # Validate story ADF
-python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
+python3 .claude/scripts/api/validate_adf.py \
   {{artifacts_dir}}/story.json --type story
 
 # Auto-fix + re-validate → writes -fixed.json
-python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
+python3 .claude/scripts/api/validate_adf.py \
   {{artifacts_dir}}/story.json --type story --fix
 
 # JSON output (for piping)
-python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
+python3 .claude/scripts/api/validate_adf.py \
   {{artifacts_dir}}/story.json --type story --json
 
 # Options: --verbose (show all checks) | --summary-only
@@ -276,25 +276,25 @@ python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
 
 Post-write verifier — reads back from Jira API to confirm writes took effect.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/verify_write.py`
+**Location:** `.claude/scripts/api/verify_write.py`
 
 ### Usage
 
 ```bash
 # Verify parent link
-python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
+python3 .claude/scripts/api/verify_write.py \
   ABC-1234 --check parent --expected-parent ABC-1200
 
 # Verify assignee
-python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
+python3 .claude/scripts/api/verify_write.py \
   ABC-1234 --check assignee
 
 # Multiple issues + checks
-python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
+python3 .claude/scripts/api/verify_write.py \
   ABC-1234 ABC-1235 --check parent,assignee,description
 
 # JSON output
-python3 .claude/skills/atlassian-scripts/scripts/verify_write.py \
+python3 .claude/scripts/api/verify_write.py \
   ABC-1234 --check parent --json
 ```
 
@@ -326,21 +326,21 @@ Always reports `cache_invalidate` actions needed (HR6).
 
 Unified write pipeline with all HARD RULES enforced at every step.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/jira_write.py`
+**Location:** `.claude/scripts/api/jira_write.py`
 
 ### Usage
 
 ```bash
 # Create subtask (full 5-step pipeline)
-python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
+python3 .claude/scripts/api/jira_write.py create-subtask \
   --parent ABC-1200 --adf {{artifacts_dir}}/sub.json --assignee user@email.com
 
 # Update description only
-python3 .claude/skills/atlassian-scripts/scripts/jira_write.py update-description \
+python3 .claude/scripts/api/jira_write.py update-description \
   --issue ABC-1234 --adf {{artifacts_dir}}/fixed.json --type story
 
 # Dry run (validate only, no writes)
-python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
+python3 .claude/scripts/api/jira_write.py create-subtask \
   --parent ABC-1200 --adf {{artifacts_dir}}/sub.json --dry-run
 ```
 
@@ -382,35 +382,35 @@ python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
 
 Track workflow phases and enforce prerequisites across multi-step skill workflows.
 
-**Location:** `.claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py`
+**Location:** `.claude/scripts/api/workflow_checkpoint.py`
 
 ### Usage
 
 ```bash
 # Start workflow
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
+python3 .claude/scripts/api/workflow_checkpoint.py \
   start story-full ABC-1200
 
 # Record quality gate pass
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
+python3 .claude/scripts/api/workflow_checkpoint.py \
   pass-gate qg-story 94
 
 # Advance to next phase
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
+python3 .claude/scripts/api/workflow_checkpoint.py \
   advance create-story
 
 # Check prerequisite (exit code 0=met, 1=not met)
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py \
+python3 .claude/scripts/api/workflow_checkpoint.py \
   check qg-story
 
 # Show current status
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py status
+python3 .claude/scripts/api/workflow_checkpoint.py status
 
 # Complete workflow
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py complete
+python3 .claude/scripts/api/workflow_checkpoint.py complete
 
 # Cleanup stale state (>24h)
-python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py cleanup
+python3 .claude/scripts/api/workflow_checkpoint.py cleanup
 ```
 
 ### Commands
@@ -431,4 +431,4 @@ State persists in `{{artifacts_dir}}/.workflow-state.json`. Auto-clears after 24
 
 ---
 
-> Script selection guide: see `atlassian-scripts/SKILL.md`
+> Script selection guide: see `scripts/docs/script-selection-guide.md`

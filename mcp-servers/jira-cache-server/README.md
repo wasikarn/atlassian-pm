@@ -15,7 +15,7 @@ Claude Code ──stdio──> jira-cache-server ──REST API──> Jira Clou
                         (~/.cache/atlassian-pm/jira.db)
 ```
 
-**Key constraint:** MCP servers cannot call other MCP servers. This server uses JiraAPI (REST API v3) directly for upstream fetches, reusing `atlassian-scripts/lib/` for auth + API client.
+**Key constraint:** MCP servers cannot call other MCP servers. This server uses JiraAPI (REST API v3) directly for upstream fetches, reusing `scripts/lib/` for auth + API client.
 
 ## When to Use
 
@@ -76,7 +76,7 @@ mcp-servers/jira-cache-server/
     └── embeddings.py   # sqlite-vec + sentence-transformers
 ```
 
-**Reused from `atlassian-scripts/lib/`:** `auth.py` (credentials), `jira_api.py` (REST API client), `exceptions.py`
+**Reused from `scripts/lib/`:** `auth.py` (credentials), `jira_api.py` (REST API client), `exceptions.py`
 
 ## Usage Patterns
 

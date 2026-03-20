@@ -120,7 +120,7 @@ MCP markdown → Confluence will render code blocks as `<pre class="highlight">`
 **You must run the fix script immediately after every create/update:**
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/fix_confluence_code_blocks.py \
+python3 .claude/skills/scripts/api/fix_confluence_code_blocks.py \
   --page-id [created_page_id]
 ```
 
@@ -151,7 +151,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 
 - Space: `BEP`
 - MCP Tool: `confluence_create_page`
-- Scripts: `.claude/skills/atlassian-scripts/scripts/`
+- Scripts: `.claude/skills/scripts/api/`
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Templates](references/templates.md)
 - [Examples](references/examples.md)

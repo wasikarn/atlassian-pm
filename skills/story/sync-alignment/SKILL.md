@@ -197,6 +197,6 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 - [Templates Index](../../../references/templates.md) - Load by issue type (epic, story, subtask, task)
 - [Tool Selection](../../../references/tools.md)
 - [Verification Checklist](../../../references/verification-checklist.md)
-- [Atlassian Scripts](../../../atlassian-scripts/SKILL.md)
+- [Atlassian Scripts](../../../skills/utilities/atlassian-scripts/SKILL.md)
 - [Edge Cases](references/edge-cases.md) - Edge case handling reference
 - [Decision Guide](references/decision-guide.md) - When to use this skill vs alternatives

@@ -62,7 +62,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr4_confluence_macro_guard.py` (blocks MCP Confluence macro updates)
 
-- ✅ `python atlassian-scripts/update_page_storage.py --page-id 123456 --file page.html`
+- ✅ `python scripts/api/update_page_storage.py --page-id 123456 --file page.html`
 - ❌ `confluence_update_page(page_id="123456", body="...<ac:structured-macro>...")` via MCP
 
 ---

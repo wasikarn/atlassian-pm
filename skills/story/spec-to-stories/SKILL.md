@@ -102,7 +102,7 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 1. `jira_batch_create_issues` — all approved stories with parent epic
 2. HR5 batch pattern: create all → verify all parents → `acli` edit all descriptions
    - Verify: `jira_get_issue(key, fields="parent")` per story → confirm `parent.key = epic_key`
-   - If parent missing: re-add via `python3 skills/atlassian-scripts/jira_set_parent.py --issues KEY --parent EPIC`
+   - If parent missing: re-add via `python3 scripts/api/jira_set_parent.py --issues KEY --parent EPIC`
 3. HR6: `cache_invalidate(key)` for each created story
 
 ## Phase 8 — Summary

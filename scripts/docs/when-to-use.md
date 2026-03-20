@@ -1,4 +1,4 @@
-# When to Use Scripts vs MCP — atlassian-scripts
+# When to Use Scripts vs MCP — scripts/api/
 
 > **CRITICAL:** MCP Confluence tools have TWO limitations that cause macros to fail:
 >

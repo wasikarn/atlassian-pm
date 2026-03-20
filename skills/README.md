@@ -67,7 +67,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
 | tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | create-release-notes | `/atlassian-pm:create-release-notes` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
-| atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper for `atlassian-scripts/` at project root. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
+| atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
 
 ---
 

@@ -123,7 +123,7 @@ MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
 
 - Technical Note (if needed):
   - Simple text → `MCP: confluence_create_page`
-  - With code blocks → Python script (see `.claude/skills/atlassian-scripts/SKILL.md`)
+  - With code blocks → Python script (see `.claude/skills/utilities/atlassian-scripts/SKILL.md`)
 
 ### 7. Handoff
 

@@ -168,7 +168,7 @@ MCP markdown → Confluence will render code blocks as `<pre class="highlight">`
 **You must run the fix script immediately after every create/update:**
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/fix_confluence_code_blocks.py \
+python3 .claude/skills/scripts/api/fix_confluence_code_blocks.py \
   --page-id [page_id]
 ```
 
@@ -177,7 +177,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 **Option B: Find & replace**
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/update_confluence_page.py \
+python3 .claude/skills/scripts/api/update_confluence_page.py \
   --page-id [page_id] \
   --find "[old text]" \
   --replace "[new text]"
@@ -186,7 +186,7 @@ python3 .claude/skills/atlassian-scripts/scripts/update_confluence_page.py \
 **Option C: Move page**
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/move_confluence_page.py \
+python3 .claude/skills/scripts/api/move_confluence_page.py \
   --page-id [page_id] \
   --parent-id [target_parent_id]
 ```
@@ -194,7 +194,7 @@ python3 .claude/skills/atlassian-scripts/scripts/move_confluence_page.py \
 Batch move:
 
 ```bash
-python3 .claude/skills/atlassian-scripts/scripts/move_confluence_page.py \
+python3 .claude/skills/scripts/api/move_confluence_page.py \
   --page-ids [page_id1],[page_id2],[page_id3] \
   --parent-id [target_parent_id]
 ```
@@ -252,7 +252,7 @@ Update type?
 
 - Space: `BEP`
 - MCP Tool: `confluence_update_page`, `confluence_get_page`
-- Scripts: `.claude/skills/atlassian-scripts/scripts/`
+- Scripts: `.claude/skills/scripts/api/`
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Error Handling](references/error-handling.md)
 - [Examples](references/examples.md)

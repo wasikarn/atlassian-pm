@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────
-SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "skills" / "atlassian-scripts"
+SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type, log_event

@@ -1,4 +1,4 @@
-# Script Selection Guide — atlassian-scripts
+# Script Selection Guide — scripts/api/
 
 ```text
 What do you need to do?

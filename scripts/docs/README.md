@@ -18,8 +18,7 @@ user-invocable: false
 ## Architecture
 
 ```text
-atlassian-scripts/
-├── __init__.py              # Package marker
+scripts/
 ├── lib/                     # Shared library modules
 │   ├── __init__.py          # Public exports
 │   ├── exceptions.py        # Custom exceptions (Confluence + Jira + Validation)
@@ -29,19 +28,21 @@ atlassian-scripts/
 │   ├── converters.py        # Content converters
 │   ├── adf_validator.py     # ADF quality gate engine (HR1)
 │   └── workflow_state.py    # Workflow state + prerequisites
-└── scripts/                 # CLI scripts
-    ├── create_confluence_page.py
-    ├── update_confluence_page.py
-    ├── move_confluence_page.py
-    ├── update_page_storage.py
-    ├── fix_confluence_code_blocks.py
-    ├── audit_confluence_pages.py
-    ├── update_jira_description.py
-    ├── validate_adf.py          # Script 8: ADF validator (HR1)
-    ├── verify_write.py          # Script 9: Post-write verifier (HR3/HR5/HR6)
-    ├── jira_write.py            # Script 10: Write wrapper (HR1/HR3/HR5/HR6)
-    ├── workflow_checkpoint.py   # Script 11: Workflow state CLI
-    └── jira_set_parent.py       # Script 12: Set parent (Epic) via REST
+├── api/                     # CLI scripts
+│   ├── create_confluence_page.py
+│   ├── update_confluence_page.py
+│   ├── move_confluence_page.py
+│   ├── update_page_storage.py
+│   ├── fix_confluence_code_blocks.py
+│   ├── audit_confluence_pages.py
+│   ├── update_jira_description.py
+│   ├── validate_adf.py          # Script 8: ADF validator (HR1)
+│   ├── verify_write.py          # Script 9: Post-write verifier (HR3/HR5/HR6)
+│   ├── jira_write.py            # Script 10: Write wrapper (HR1/HR3/HR5/HR6)
+│   ├── workflow_checkpoint.py   # Script 11: Workflow state CLI
+│   └── jira_set_parent.py       # Script 12: Set parent (Epic) via REST
+├── sprint/                  # Sprint management scripts
+└── analysis/                # Analysis tools (AC mapper, impact suggester, QA matrix)
 ```
 
 ### Module Responsibilities (SRP)

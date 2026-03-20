@@ -2,7 +2,6 @@
 paths:
   - "scripts/**/*.py"
   - "hooks/**/*.py"
-  - "skills/atlassian-scripts/**/*.py"
 ---
 
 # Python Script Conventions

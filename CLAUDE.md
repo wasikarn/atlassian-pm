@@ -2,11 +2,11 @@
 
 ## Overview
 
-**Prefer retrieval-led reasoning:** search project docs (`shared-references/`, qmd, `cache_get_issue`) and explore codebase before generating answers from training knowledge. When uncertain, retrieve first — don't guess.
+**Prefer retrieval-led reasoning:** search project docs (`references/`, qmd, `cache_get_issue`) and explore codebase before generating answers from training knowledge. When uncertain, retrieve first — don't guess.
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 hooks in `plugin/` + `dev/`) | `agents/` (18) | `scripts/` (setup/sprint/parse/bump-version)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `scripts/` (api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 hooks in `plugin/` + `dev/`) | `agents/` (18)
 **Skills layout:** 32 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
@@ -41,7 +41,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 
 ## References
 
-Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scripts:** `atlassian-scripts/README.md`
+Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scripts:** `skills/utilities/atlassian-scripts/SKILL.md` → `scripts/api/`
 
 ## Core Principles
 

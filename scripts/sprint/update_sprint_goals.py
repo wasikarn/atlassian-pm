@@ -9,8 +9,8 @@ Uses JiraAPI._request() to call the Agile REST API:
 import sys
 from pathlib import Path
 
-# Add atlassian-scripts to path so we can import the library
-scripts_dir = Path(__file__).resolve().parent.parent.parent / "atlassian-scripts"
+# Add scripts to path so we can import the library
+scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
