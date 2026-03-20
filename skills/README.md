@@ -191,6 +191,7 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 | --- | --- |
 | `skill-orchestration.md` | How skills chain together; handoff patterns |
 | `workflow-patterns.md` | Gate levels, QG scoring, annotation cycle, Parallel Explore, Two-Step subtask |
+| `update-workflow.md` | Common patterns for all update-* skills: Phase 5 QG, Phase 6 apply, gate phrases, preserve intent |
 | `team-capacity.md` | Capacity formulas, complexity-adjusted throughput, skill matrix thresholds |
 | `sprint-frameworks.md` | RICE, Impact/Effort matrix, carry-over probability model, vertical slicing |
 | `dependency-frameworks.md` | CPM algorithm, swim lane rules, decoupling patterns, risk scoring |
