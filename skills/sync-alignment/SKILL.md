@@ -56,8 +56,6 @@ Epic (Jira)
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Identify Origin
 
 - Receive input: `{{PROJECT_KEY}}-XXX` (Jira key) or Confluence page ID
@@ -183,24 +181,13 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 
 ## Edge Cases
 
-| Case | Handling |
-| --- | --- |
-| Confluence page does not exist | Flag + recommend `/create-doc` (no auto-create) |
-| No sub-tasks exist | Sync only Story <-> Epic/Confluence |
-| Multiple Confluence pages match | List all and let user choose |
-| Artifact graph > 20 items | Recommend breaking into multiple runs |
-| Partial failure | Continue remaining + report failures |
-| Issue DONE/CLOSED | Warning but allow sync (doc alignment) |
-| No changes detected | Report "already aligned" + skip |
-| QA sub-task affected | FLAG for QA review (no auto-rewrite of test plan) |
-| Epic Doc affected | Update story status table + summary only |
+> See [references/edge-cases.md](references/edge-cases.md) for edge case handling reference.
 
 ---
 
 ## When to Use
 
-> `/sync-alignment` handles both Jira-only cascades (Story → Sub-tasks) and full artifact sync (+ Confluence).
-> If only Jira sub-tasks need updating, it skips Confluence phases automatically.
+> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives.
 
 ---
 
@@ -211,3 +198,5 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 - [Tool Selection](../shared-references/tools.md)
 - [Verification Checklist](../shared-references/verification-checklist.md)
 - [Atlassian Scripts](../atlassian-scripts/SKILL.md)
+- [Edge Cases](references/edge-cases.md) - Edge case handling reference
+- [Decision Guide](references/decision-guide.md) - When to use this skill vs alternatives

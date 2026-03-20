@@ -216,11 +216,7 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 
 ## Common Scenarios
 
-| Scenario | Command | Notes |
-| --- | --- | --- |
-| Quick bug from QA testing | `/bug-triage "video upload fails on iOS 17"` | Summary pre-filled |
-| Production incident bug | `/bug-triage` | Full intake — likely P1 |
-| UI glitch found | `/bug-triage "button misaligned on mobile"` | Likely P3 |
+> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
 ---
 
@@ -230,5 +226,6 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 - [Task Template](../shared-references/templates-task.md) — bug template section
 - [Verification Checklist](../shared-references/verification-checklist.md)
 - [Tools Reference](../shared-references/tools.md) — acli vs MCP decision
+- [Scenarios](references/scenarios.md) - Command examples by scenario
 - After: `/verify-issue [KEY]` to check quality
 - After fix: `/create-testplan [KEY]` to create QA verification subtask

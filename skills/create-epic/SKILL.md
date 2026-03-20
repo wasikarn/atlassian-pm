@@ -53,8 +53,6 @@ Skip interview questions in Phase 1 for information already documented.
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Discovery
 
 - Interview stakeholder:
@@ -127,34 +125,13 @@ Epic Doc: [link] | Epic: [link]
 
 ## Epic Structure (ADF)
 
-| Section | Panel Type | Content |
-| --- | --- | --- |
-| 🎯 Epic Overview | `info` | Problem statement + summary + scope statement |
-| 💰 Business Value | `success` | Revenue, Retention, Operations |
-| 📦 Scope | `info` + table | Features/modules breakdown |
-| 📊 RICE Score | table | R/I/C/E + final score |
-| 🎯 Success Metrics | table | KPIs + targets |
-| 📋 User Stories | `info` panels | Grouped by feature area |
-| 📈 Progress | `note` | Done/In Progress/To Do counts |
-| 🔗 Links | table | Epic Doc, Technical Notes |
-
-**ADF Restrictions:**
-
-- ❌ Do not nest tables inside panels (will error)
-- ✅ Use paragraphs or bulletList inside panels instead
+> See [references/epic-adf-structure.md](references/epic-adf-structure.md) for the full Epic ADF section layout and panel type reference.
 
 ---
 
 ## Example
 
-**Input:** "สร้าง epic สำหรับระบบ coupon management ทั้งหมด"
-
-**Output:**
-
-- Epic `ABC-2800`: [Platform] - ระบบจัดการ Coupon (Coupon Management System)
-  - RICE: R=8 I=7 C=0.8 E=3 → Score 14.9
-  - Scope: 5 stories (Create, List, Redeem, Report, Settings)
-- Epic Doc: Confluence page with overview, business value, VS plan
+> See [references/examples.md](references/examples.md) for a full input/output example.
 
 ---
 
@@ -164,4 +141,6 @@ Epic Doc: [link] | Epic: [link]
 - [Epic Template](../shared-references/templates-epic.md) - Epic ADF template + best practices
 - [Tool Selection](../shared-references/tools.md) - Tool selection, effort sizing
 - [Vertical Slice Guide](../shared-references/vertical-slice-guide.md) - VS patterns, decomposition
+- [Epic ADF Structure](references/epic-adf-structure.md) - Epic ADF section layout and panel type reference
+- [Examples](references/examples.md) - Full input/output example
 - After creation: `/verify-issue {{PROJECT_KEY}}-XXX`
