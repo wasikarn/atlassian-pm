@@ -4,7 +4,7 @@ description: Generate data-driven sprint retrospective. Fetches completed sprint
 model: sonnet
 tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__jira-cache-server__cache_sprint_issues, mcp__jira-cache-server__cache_get_issue
 permissionMode: dontAsk
-maxTurns: 25
+maxTurns: 20
 skills:
   - shared-references
 ---
@@ -37,6 +37,16 @@ For each Story (not subtask) — batch fetch changelogs via `jira_batch_get_chan
 - Blockers: any status that stayed "Blocked" > 1 day
 - Late starts: items that started in progress after Day 6 of sprint
 
+**Bottleneck Attribution:**
+From changelog data, identify where time was spent for stories that exceeded avg cycle time:
+
+- "In Dev" time (In Progress → Code Review): measures dev speed
+- "In Review" time (Code Review → QA): measures review bottleneck
+- "In QA" time (Waiting to Test → Done or To Fix): measures QA throughput
+- "Blocked" time: measures external dependency delays
+
+Label each slow story with primary bottleneck: DEV / REVIEW / QA / BLOCKED
+
 ### Phase 3: Metrics Summary
 
 Calculate:
@@ -47,6 +57,19 @@ Calculate:
 - **QA rejection rate**: stories that went WAITING TO TEST → TO FIX / total stories with QA
 - **Individual throughput**: completed items per assignee (Stories only)
 
+### Phase 3b: Cross-Sprint Comparison
+
+Load velocity history from `.claude/project-config-team-detail.json` `velocity` block (if available):
+
+Compare current sprint metrics against rolling averages:
+
+- Velocity: current vs avg → "above/at/below average by X%"
+- Carry-over rate: current vs avg → flag if this sprint is >1.5× avg carry-over rate
+- QA rejection rate: current vs team avg → flag recurring pattern if above avg for 2+ consecutive sprints
+- Cycle time: current vs avg → flag if >1.2× average
+
+Add a `cross_sprint_insights[]` to Phase 4 Synthesize Insights.
+
 ### Phase 4: Synthesize Insights
 
 Based on metrics, identify patterns:
@@ -54,6 +77,39 @@ Based on metrics, identify patterns:
 - **What went well**: items completed on time, velocity ≥ 90%, low carry-over
 - **What to improve**: high carry-over (>20%), slow cycle time (>5 days avg), QA rejections (>30%), blocked items
 - **Patterns**: specific people or service areas with recurring blockers
+
+### Phase 4b: Team Health Score
+
+Score 4 dimensions (each 0-25 points):
+
+**Delivery Health (25 pts):**
+
+- velocity ≥ 90% planned: 25 pts
+- 75-89%: 15 pts
+- 60-74%: 8 pts
+- < 60%: 0 pts
+
+**Process Health (25 pts):**
+
+- carry-over ≤ 15%: 25 pts
+- 15-25%: 15 pts
+- > 25%: 5 pts
+
+**Quality Health (25 pts):**
+
+- QA rejection ≤ 20%: 25 pts
+- 20-35%: 15 pts
+- > 35%: 5 pts
+
+**Flow Health (25 pts):**
+
+- avg cycle time ≤ 4 days: 25 pts
+- 4-6 days: 15 pts
+- > 6 days: 5 pts
+
+Total score: 0-100. 90+: Healthy | 70-89: Stable | 50-69: Needs Attention | <50: At Risk
+
+Add Team Health Score to Phase 5 retrospective document.
 
 ### Phase 5: Generate Retrospective Document
 
@@ -70,6 +126,14 @@ Output a Confluence-ready retrospective in this structure:
 | Carry-over rate | [X%] | ≤ 15% | 🟢/⚠️/🔴 |
 | Avg cycle time | [X days] | ≤ 4 days | 🟢/⚠️/🔴 |
 | QA rejection rate | [X%] | ≤ 20% | 🟢/⚠️/🔴 |
+
+## 🏥 Team Health Score: [N]/100 ([Healthy/Stable/Needs Attention/At Risk])
+| Dimension | Score | Signal |
+|-----------|-------|--------|
+| Delivery | [X]/25 | [note] |
+| Process | [X]/25 | [note] |
+| Quality | [X]/25 | [note] |
+| Flow | [X]/25 | [note] |
 
 ## 🟢 What Went Well
 [Data-driven points: e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
@@ -90,6 +154,18 @@ Output a Confluence-ready retrospective in this structure:
 ```
 
 ### Phase 6: Action Items (if --action-items flag)
+
+**Action Item SMART Validation:**
+Before adding an action item to the retrospective, check:
+
+- Specific: names a concrete behavior change, not "improve communication"
+- Measurable: has a metric or observable outcome
+- Assignable: names a specific person (not "the team")
+- Realistic: feasible within next 1-2 sprints
+- Time-bound: has a due date (typically: next sprint end date)
+
+Reject generic action items. Replace with specific alternatives:
+❌ "Improve code review" → ✅ "{{SLOT_2}} reviews BE PRs within 24h of request (due: Sprint 47 end)"
 
 For each action item in the retrospective:
 
