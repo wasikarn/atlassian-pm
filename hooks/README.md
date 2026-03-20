@@ -1,6 +1,22 @@
 # Hooks — atlassian-pm
 
-44 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+43 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+
+## Directory structure
+
+```text
+hooks/
+├── hooks_lib.py      — shared I/O, logging, data extraction utilities
+├── hooks_state.py    — session state manager (file-locked JSON)
+├── config_loader.py  — project-config.json reader (cached per process)
+├── hooks.json        — hook registry (wires hooks to Claude events)
+├── plugin/
+│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (15 hooks)
+│   ├── quality/      — ADF structure, write quality, story size gates (4 hooks)
+│   ├── cache/        — read optimization, dedup, field presets (6 hooks)
+│   └── session/      — session management, compaction, token filtering, tracking (12 hooks)
+└── dev/              — developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
+```
 
 ## How hooks work
 
@@ -136,20 +152,20 @@ Manage state, tracking, and cross-hook coordination.
 If a hook blocks unexpectedly:
 
 1. Check `TOOL_INPUT` — hooks read tool arguments from this env var as JSON.
-2. Run the script directly: `TOOL_INPUT='{"key":"value"}' python3 hooks/NAME.py`
+2. Run the script directly: `TOOL_INPUT='{"key":"value"}' python3 hooks/plugin/guards/NAME.py`
 3. Inspect persisted state: read `hooks_state.py` or look for a state file in the hooks directory.
 4. Check `hooks.json` to confirm the event + matcher is wired correctly.
 
 ## Adding a hook
 
-1. Create `hooks/your_hook.py`. Read `TOOL_INPUT` via `hooks_lib.py`. Exit 1 with stderr message to block; exit 0 to pass through.
+1. Create `hooks/plugin/<subdir>/your_hook.py` (or `hooks/dev/` for dev workflow hooks). Read `TOOL_INPUT` via `hooks_lib.py`. Exit 1 with stderr message to block; exit 0 to pass through. Set `sys.path` to `parents[2]` (plugin subdirs) or `parents[1]` (dev) so shared libs resolve.
 2. Add an entry to `hooks.json`:
 
 ```json
 {
   "event": "PreToolUse",
   "matcher": "tool_name",
-  "command": "python3 hooks/your_hook.py"
+  "command": "python3 hooks/plugin/guards/your_hook.py"
 }
 ```
 

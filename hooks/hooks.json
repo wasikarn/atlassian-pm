@@ -7,17 +7,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_adf_structure_validate.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/quality/pre_adf_structure_validate.py",
 						"timeout": 10
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_event_ac_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/quality/pre_event_ac_check.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr1_quality_gate.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr1_quality_gate.py",
 						"timeout": 10
 					}
 				]
@@ -27,12 +27,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr3_block_mcp_assignee.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr3_block_mcp_assignee.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr10_subtask_sprint_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr10_subtask_sprint_guard.py",
 						"timeout": 5
 					}
 				]
@@ -42,7 +42,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr2_jql_order_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr2_jql_order_guard.py",
 						"timeout": 5
 					}
 				]
@@ -52,7 +52,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr4_confluence_macro_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr4_confluence_macro_guard.py",
 						"timeout": 5
 					}
 				]
@@ -62,7 +62,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr6_stale_read_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr6_stale_read_guard.py",
 						"timeout": 5
 					}
 				]
@@ -72,12 +72,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_search_before_create.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/pre_search_before_create.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr5_parent_verify_block.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr5_parent_verify_block.py",
 						"timeout": 5
 					}
 				]
@@ -87,12 +87,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr7_sprint_id_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/pre_hr7_sprint_id_guard.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_story_size_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/quality/pre_story_size_guard.py",
 						"timeout": 5
 					}
 				]
@@ -102,7 +102,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_field_preset_guard.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/pre_field_preset_guard.py",
 						"timeout": 5
 					}
 				]
@@ -112,7 +112,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_cache_prefer.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/pre_cache_prefer.py",
 						"timeout": 5
 					}
 				]
@@ -122,7 +122,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_qmd_auto_search.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/pre_qmd_auto_search.py",
 						"timeout": 10
 					}
 				]
@@ -132,17 +132,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_dod_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/pre_dod_check.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_dor_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/pre_dor_check.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_wip_limit_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/pre_wip_limit_check.py",
 						"timeout": 5
 					}
 				]
@@ -154,7 +154,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_filter_mcp_response.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_filter_mcp_response.py",
 						"timeout": 5
 					}
 				]
@@ -164,12 +164,12 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr5_parent_verify_remind.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr5_parent_verify_remind.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_vs_integrity_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_vs_integrity_track.py",
 						"timeout": 5
 					}
 				]
@@ -179,7 +179,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_queue_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr6_queue_invalidation.py",
 						"timeout": 5
 					}
 				]
@@ -189,7 +189,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_sprint_capacity_recheck.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/post_sprint_capacity_recheck.py",
 						"timeout": 5
 					}
 				]
@@ -199,7 +199,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_search_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_search_track.py",
 						"timeout": 5
 					}
 				]
@@ -209,7 +209,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr7_sprint_lookup_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr7_sprint_lookup_track.py",
 						"timeout": 5
 					}
 				]
@@ -219,7 +219,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_confirm_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr6_confirm_invalidation.py",
 						"timeout": 5
 					}
 				]
@@ -229,7 +229,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_auto_parse_large_output.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_auto_parse_large_output.py",
 						"timeout": 15
 					}
 				]
@@ -239,7 +239,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_subtask_alignment_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/post_subtask_alignment_suggest.py",
 						"timeout": 5
 					}
 				]
@@ -249,7 +249,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_cache_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/post_cache_suggest.py",
 						"timeout": 5
 					}
 				]
@@ -259,18 +259,18 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr5_parent_verify_clear.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr5_parent_verify_clear.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_event_model_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_event_model_track.py",
 						"timeout": 5,
 						"async": true
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_vs_integrity_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_vs_integrity_track.py",
 						"timeout": 5
 					}
 				]
@@ -280,7 +280,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_cache_checked_track.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/post_cache_checked_track.py",
 						"timeout": 5
 					}
 				]
@@ -290,7 +290,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_explore_fallback_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_explore_fallback_suggest.py",
 						"timeout": 10
 					}
 				]
@@ -300,17 +300,17 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_auto_verify_suggest.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/quality/post_auto_verify_suggest.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_queue_invalidation_acli.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr6_queue_invalidation_acli.py",
 						"timeout": 5
 					},
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_pr_sync.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/dev/post_pr_sync.py",
 						"timeout": 5
 					}
 				]
@@ -321,7 +321,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/stop_hr6_unflushed_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/stop_hr6_unflushed_check.py",
 						"timeout": 10
 					},
 					{
@@ -351,7 +351,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_prerequisite_check.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/start_prerequisite_check.py",
 						"timeout": 5
 					}
 				]
@@ -361,7 +361,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_compact_reinject.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/start_compact_reinject.py",
 						"timeout": 10
 					}
 				]
@@ -372,7 +372,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/compact_pre_save.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/compact_pre_save.py",
 						"timeout": 10
 					}
 				]
@@ -384,7 +384,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_confirm_invalidation.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/guards/post_hr6_confirm_invalidation.py",
 						"timeout": 5
 					}
 				]
@@ -395,7 +395,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_prompt_issue_prefetch.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/cache/pre_prompt_issue_prefetch.py",
 						"timeout": 5
 					}
 				]
@@ -406,7 +406,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_compact_reinject.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/post_compact_reinject.py",
 						"timeout": 5
 					}
 				]
@@ -417,7 +417,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/start_subagent_context.py",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/plugin/session/start_subagent_context.py",
 						"timeout": 5
 					}
 				]
