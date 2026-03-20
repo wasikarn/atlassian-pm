@@ -36,6 +36,7 @@ argument-hint: "[story-description]"
 | 5. Impact | `services_impacted[]`, `vs_verified` |
 | 6. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
 | 7. Design | `subtask_designs[]` |
+| 7b. Estimation Calibration | `subtask_designs[]` (SP values updated) |
 | 8. Alignment | `alignment_checklist` |
 | 9. QG Subtasks | `qg_score`, `passed_qg` |
 | 10. Create | `subtask_keys[]` |
