@@ -5,6 +5,14 @@
   "license": "MIT",
   "repository": "https://github.com/wasikarn/atlassian-pm",
   "keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
-  "skills": "./skills/",
+  "skills": [
+    "./skills/setup/",
+    "./skills/epic/",
+    "./skills/story/",
+    "./skills/task/",
+    "./skills/sprint/",
+    "./skills/confluence/",
+    "./skills/utilities/"
+  ],
   "mcpServers": "./.mcp.json"
 }
