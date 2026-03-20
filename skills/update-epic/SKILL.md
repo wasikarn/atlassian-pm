@@ -33,8 +33,6 @@ argument-hint: "[issue-key] [changes]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Fetch Current State
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
@@ -96,36 +94,8 @@ Changes: [list]
 
 ---
 
-## Common Scenarios
-
-| Scenario | Command | Impact |
-| --- | --- | --- |
-| Adjust scope | `/update-epic {{PROJECT_KEY}}-XXX "reduce scope"` | ⚠️ High |
-| Update RICE | `/update-epic {{PROJECT_KEY}}-XXX "RICE update"` | 🟢 Low |
-| Add metrics | `/update-epic {{PROJECT_KEY}}-XXX "add metric"` | 🟢 Low |
-| Format migrate | `/update-epic {{PROJECT_KEY}}-XXX "migrate ADF"` | 🟢 Low |
-
----
-
-## Epic Structure (ADF)
-
-| Section | Panel Type | Content |
-| --- | --- | --- |
-| 🎯 Epic Overview | `info` | Problem statement + summary + scope statement |
-| 💰 Business Value | `success` | Revenue, Retention, Operations |
-| 📦 Scope | `info` + table | Features/modules breakdown |
-| 📊 RICE Score | table | R/I/C/E + final score |
-| 🎯 Success Metrics | table | KPIs + targets |
-| 📋 User Stories | `info` panels | Grouped by feature area |
-| 📈 Progress | `note` | Done/In Progress/To Do counts |
-| 🔗 Links | table | Epic Doc, Technical Notes |
-
-**ADF restrictions:**
-
-- ❌ Do not nest tables inside panels (will cause an error)
-- ✅ Use paragraphs or bulletList inside panels instead
-
----
+> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
+> See [references/epic-structure.md](references/epic-structure.md) for the Epic ADF section layout and panel type reference.
 
 ## References
 

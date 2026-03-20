@@ -34,8 +34,6 @@ argument-hint: "[issue-key]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Discovery
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
@@ -117,19 +115,7 @@ Coverage: X ACs → Y test scenarios (100%)
 
 ---
 
-## Example
-
-**Input:** `/create-testplan ABC-2468` (story: admin filter coupon by status)
-
-**Output:**
-
-- `ABC-2471` [QA] - Test: Coupon Status Filter
-  - TC1: Filter active — กรอง active แล้วแสดงเฉพาะ active coupons
-  - TC2: Filter expired — กรอง expired แล้วแสดงเฉพาะ expired coupons
-  - TC3: Clear filter — กด clear แล้วกลับมาแสดงทั้งหมด
-  - TC4: Empty state — กรอง status ที่ไม่มี coupon แล้วแสดง empty message
-
----
+> See [references/examples.md](references/examples.md) for input/output examples.
 
 ## References
 

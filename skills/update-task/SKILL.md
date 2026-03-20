@@ -33,8 +33,6 @@ argument-hint: "{{PROJECT_KEY}}-XXX [changes]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Fetch Current State
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
@@ -159,32 +157,8 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 
 ---
 
-## Common Scenarios
-
-| Scenario | Command | Impact |
-| --- | --- | --- |
-| Migrate Wiki → ADF | `/update-task {{PROJECT_KEY}}-XXX "migrate"` | 🟢 Low |
-| Add issues | `/update-task {{PROJECT_KEY}}-XXX "add issues"` | 🟡 Medium |
-| Add ACs | `/update-task {{PROJECT_KEY}}-XXX "add ACs"` | 🟡 Medium |
-| Change type | `/update-task {{PROJECT_KEY}}-XXX "change to bug"` | 🟠 High |
-
----
-
-## Task Type Detection
-
-**Auto-detect from content:**
-
-| Pattern | Detected Type |
-| --- | --- |
-| Priority sections (HIGH/MEDIUM/LOW) | `tech-debt` |
-| Repro steps, Expected/Actual | `bug` |
-| Task checklist, simple objective | `chore` |
-| Research question, Investigation | `spike` |
-| No clear pattern | `generic` |
-
-**Type impacts which template structure is used**
-
----
+> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
+> See [references/task-type-detection.md](references/task-type-detection.md) for auto-detection patterns by content.
 
 ## References
 

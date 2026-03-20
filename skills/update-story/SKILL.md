@@ -33,8 +33,6 @@ argument-hint: "[issue-key] [changes]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Fetch Current State
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
@@ -116,16 +114,7 @@ Subtask alignment: [X subtasks checked, Y adjusted]
 
 ---
 
-## Common Scenarios
-
-| Scenario | Command | Impact |
-| --- | --- | --- |
-| Add AC | `/update-story {{PROJECT_KEY}}-XXX "add mobile AC"` | 🟡 Medium |
-| Format migrate | `/update-story {{PROJECT_KEY}}-XXX "migrate ADF"` | 🟢 Low |
-| Clarify AC | `/update-story {{PROJECT_KEY}}-XXX "AC2 is unclear"` | 🟢 Low |
-| Reduce scope | `/update-story {{PROJECT_KEY}}-XXX "reduce scope"` | 🔴 High |
-
----
+> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
 ## References
 

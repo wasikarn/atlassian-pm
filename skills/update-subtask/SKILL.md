@@ -33,8 +33,6 @@ argument-hint: "[issue-key] [changes]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Fetch Current State
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX", fields: "summary,status,description,parent,{{START_DATE_FIELD}},duedate,timetracking")`
@@ -99,16 +97,7 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 
 ---
 
-## Common Scenarios
-
-| Scenario | Command |
-| --- | --- |
-| Format migrate | `/update-subtask {{PROJECT_KEY}}-XXX "migrate ADF"` |
-| Add file paths | `/update-subtask {{PROJECT_KEY}}-XXX "add file paths"` |
-| Fix language | `/update-subtask {{PROJECT_KEY}}-XXX "fix to Thai"` |
-| Add AC | `/update-subtask {{PROJECT_KEY}}-XXX "add AC error handling"` |
-
----
+> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
 ## References
 
