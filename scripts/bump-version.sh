@@ -164,27 +164,14 @@ RELEASE_URL=$(gh release create "v$NEW_VERSION" \
   --generate-notes)
 ok "Release: $RELEASE_URL"
 
-# ── 5. update plugin + copy config ───────────────────────────────────────────
+# ── 5. refresh marketplace + backup config ────────────────────────────────────
+# Note: we do NOT run `claude plugin update` here — it deletes the current
+# session's plugin cache dir, causing hook errors in the running session.
+# Claude Code auto-downloads the new version on next restart.
 
 info "Refreshing marketplace cache..."
 claude plugin marketplace update atlassian-pm 2>&1 | grep -E "✔|✘|Error" || true
 ok "Marketplace refreshed"
-
-info "Updating plugin..."
-claude plugin update atlassian-pm@atlassian-pm 2>&1 | grep -E "✔|✘|already" || true
-
-PLUGIN_CACHE="$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm/$NEW_VERSION"
-if [[ -d "$PLUGIN_CACHE" ]]; then
-  info "Copying config to plugin cache..."
-  for f in project-config.json project-config-team-detail.json; do
-    if [[ -f "$REPO_ROOT/.claude/$f" ]]; then
-      cp "$REPO_ROOT/.claude/$f" "$PLUGIN_CACHE/.claude/$f"
-      ok "Copied $f"
-    fi
-  done
-else
-  warn "Plugin cache not found at $PLUGIN_CACHE — copy config manually after restart"
-fi
 
 # Backup config for future reinstall recovery (read by setup skill Phase 0)
 if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then
@@ -198,4 +185,5 @@ fi
 echo ""
 echo -e "${GREEN}✅ $CURRENT → v$NEW_VERSION complete${NC}"
 echo ""
-echo "  Next: Restart Claude Code, then /atlassian-pm:doctor to verify"
+echo "  Next: In a new terminal: claude plugin update atlassian-pm@atlassian-pm"
+echo "        Then restart Claude Code to activate v$NEW_VERSION"
