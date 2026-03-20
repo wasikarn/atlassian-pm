@@ -63,7 +63,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
 | search-issues | `/atlassian-pm:search-issues` | 3 | jira-cache-server, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
-| activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | Generate activity report from claude-mem history (sessions, observations, effort). Supports date ranges and project/type filters. Runs on Haiku. |
+| activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
 | tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | atlassian-scripts | — | — | — | Python script library for Confluence/Jira REST API operations. Not user-invocable directly; used internally by skills when MCP has limitations (macros, code blocks, parent fields). |
 

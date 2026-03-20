@@ -37,7 +37,7 @@ argument-hint: "[--sprint <id>]"
 
 1. If `--sprint` flag provided → use that sprint ID.
 2. Else → `jira_get_sprints_from_board(board_id, state="active")` (HR7: never hardcode sprint ID)
-3. `jira_get_sprint_issues(sprint_id)` — fetch all issues with fields: `summary,status,assignee,issuetype,customfield_10016,customfield_10015,duedate,parent`
+3. `jira_get_sprint_issues(sprint_id)` — fetch all issues with fields: `summary,status,assignee,issuetype,customfield_10016,{{START_DATE_FIELD}},duedate,parent`
 4. Display sprint summary: name, dates, total issues, SP breakdown
 
 ## Phase 2 — Triage

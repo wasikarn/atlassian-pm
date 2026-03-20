@@ -117,4 +117,4 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
   Password Reset → BEP-203
   ```
 
-- Next: run `/atlassian-pm:story-full BEP-XXX` per story to add subtasks
+- Next: run `/atlassian-pm:story-full {{PROJECT_KEY}}-XXX` per story to add subtasks

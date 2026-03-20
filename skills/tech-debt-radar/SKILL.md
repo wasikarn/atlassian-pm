@@ -30,7 +30,7 @@ JQL (HR2-safe — no parent filter):
 project=BEP AND issuetype=Task AND labels in (tech-debt,chore,spike) ORDER BY created ASC
 ```
 
-Via `jira_search` with fields: `summary,status,assignee,labels,customfield_10016,customfield_10015,duedate,created`
+Via `jira_search` with fields: `summary,status,assignee,labels,customfield_10016,{{START_DATE_FIELD}},duedate,created`
 
 Display: "Found [N] tech debt items: [X] tech-debt, [Y] chore, [Z] spike"
 
