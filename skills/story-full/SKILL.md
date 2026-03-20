@@ -241,6 +241,28 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 - Summary: `[TAG] - Description`
 - ACs: Thai narrative + English technical terms
 
+### 7b. Estimation Calibration
+
+> **🟢 AUTO** — Run for each subtask design. Apply recommendation if confidence is HIGH or MEDIUM. Skip if LOW confidence.
+
+For each subtask in the current design:
+
+```text
+Agent(name: "estimation-calibrator"):
+  story_summary: [subtask summary]
+  service_tag: [BE/FE-Admin/FE-Web]
+  initial_sp: [SP from design]
+  scope_file_count: [count of CREATE+MODIFY rows in scope table]
+  ac_count: [number of ACs in subtask design]
+```
+
+If recommendation differs from initial estimate AND confidence ≥ MEDIUM:
+
+- Update subtask SP to recommended value
+- Note in plan card: "SP adjusted [M→L] based on historical pattern: [reason from calibrator]"
+
+If LOW confidence: keep initial estimate, note "insufficient historical data for calibration".
+
 - **🔄 ITERATE** — Present subtask design as plan cards (tag, scope files, ACs, OE per subtask). Ask: Approve all / Annotate (specify subtask #) / Major rework.
   - Annotate → user specifies subtask + notes → revise ONLY annotated subtasks → re-present (max 3 rounds)
   - Approve → proceed to Alignment Check
