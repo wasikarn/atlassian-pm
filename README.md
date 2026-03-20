@@ -195,6 +195,16 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 Install without cloning the repo — Claude handles everything.
 
+> **Before you begin** — have these ready:
+>
+> - Atlassian API token ([Account Settings → Security → API tokens](https://id.atlassian.net/manage-profile/security/api-tokens))
+> - Jira site URL (e.g. `your-company.atlassian.net`)
+> - Jira project key (e.g. `ABC`)
+> - Board ID (optional — can look up after setup)
+>
+> Setup takes **2–3 minutes** (downloads acli, uv, and syncs the cache server venv).
+> Claude Code must be **restarted once** after setup to activate the MCP server.
+
 **Step 1** — Add marketplace
 
 ```text
@@ -231,6 +241,7 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 
 | Tool | Purpose | Install |
 | --- | --- | --- |
+| [Homebrew](https://brew.sh) | macOS package manager | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
 | [Claude Code](https://claude.ai/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` |
 | [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF publishing | `brew tap atlassian/homebrew-acli && brew install acli` |
 | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | configured by setup (Phase 4) |
