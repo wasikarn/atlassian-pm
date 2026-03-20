@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -13,7 +13,8 @@ Describe what you need in plain English (or Thai) — Claude explores your codeb
 ## Quick Start
 
 ```bash
-/plugin install atlassian-pm@wasikarn/atlassian-pm
+/plugin marketplace add wasikarn/atlassian-pm
+/plugin install atlassian-pm@atlassian-pm
 /atlassian-pm:setup
 ```
 
@@ -233,7 +234,7 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 | [Claude Code](https://claude.ai/claude-code) | AI agent runtime | `npm i -g @anthropic-ai/claude-code` |
 | [acli](https://bobswift.atlassian.net/wiki/spaces/ACLI/overview) | Jira ADF publishing | `brew tap atlassian/homebrew-acli && brew install acli` |
 | [mcp-atlassian](https://github.com/sooperset/mcp-atlassian) | Jira/Confluence MCP | configured by setup (Phase 4) |
-| Python 3.x | REST API scripts | pre-installed on macOS |
+| Python 3.11+ | REST API scripts + cache server | `brew install python@3.11` |
 
 > **uv** (Python package manager) is required for the cache server: `brew install uv`
 
@@ -273,10 +274,10 @@ Edit `.claude/project-config.json`:
 ### 3. Authenticate acli
 
 ```bash
-acli jira login \
-  --server https://your-site.atlassian.net \
-  --user your@email.com \
-  --token <api-token>
+echo "<api-token>" | acli jira auth login \
+  --site https://your-site.atlassian.net \
+  --email your@email.com \
+  --token
 ```
 
 Get your token at **Atlassian Account → Security → API tokens**.
@@ -323,8 +324,8 @@ Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/
 ### 7. Install Jira cache server
 
 ```bash
-cd mcp-servers/jira-cache-server
-uv sync --extra embeddings
+UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm/venv" \
+  uv sync --project mcp-servers/jira-cache-server --extra embeddings
 ```
 
 Reduces token consumption 80–90% for repeated lookups via local SQLite + FTS5. Omit `--extra embeddings` to skip semantic search (~640MB PyTorch/sentence-transformers).
