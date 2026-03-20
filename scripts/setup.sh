@@ -163,6 +163,14 @@ else
   fi
 fi
 
+# --- Backup config to ~/.config/atlassian/ ---
+if [ -f "$CONFIG_FILE" ] && ! _config_has_placeholder "$CONFIG_FILE"; then
+  mkdir -p "$HOME/.config/atlassian"
+  cp "$CONFIG_FILE" "$HOME/.config/atlassian/project-config.json"
+  echo ""
+  echo "[backup] project-config.json → ~/.config/atlassian/project-config.json"
+fi
+
 # --- Check PATH ---
 echo ""
 if echo "$PATH" | tr ':' '\n' | grep -q "$HOME/.local/bin"; then
