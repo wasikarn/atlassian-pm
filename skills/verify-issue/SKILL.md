@@ -120,8 +120,27 @@ If `--fix` is present → apply all fixes found in Phases 2-4:
 1. **Load Templates** — Fetch template for the issue type from `shared-references/`
 2. **Generate** — Preserve original intent, apply template + ADF + Thai + inline code → `tasks/bep-xxx-fixed.json`
 3. **Gate:** User reviews and approves
-4. **Apply** — `acli jira workitem edit --from-json tasks/bep-xxx-fixed.json --yes`
-5. **Cleanup** — `rm tasks/bep-*-fixed.json`
+
+#### ADF Surgery (if auto-fixable structural issues found)
+
+If Phases 2-3 inline checks found structural ADF issues AND classified them as auto-fixable:
+
+> **AUTO** — Invoke adf-surgeon before writing. Surgeon fixes structural issues only. Calling skill retains write responsibility.
+
+```text
+Agent(name: "adf-surgeon"):
+  file_path: tasks/[issue_key].json
+  issues: [list of auto-fixable structural issues from Phases 2-3 checks]
+```
+
+After adf-surgeon returns:
+
+- Review changelog to confirm only structural fixes were applied (no content changes)
+- Proceed to acli write with the repaired file
+- HR6: `cache_invalidate(issue_key)` after write (as normal)
+
+1. **Apply** — `acli jira workitem edit --from-json tasks/bep-xxx-fixed.json --yes`
+2. **Cleanup** — `rm tasks/bep-*-fixed.json`
 
 ```text
 ## Fix Complete
