@@ -24,6 +24,8 @@
 | Import spec | `/spec-to-stories` → `/story-full` (per story) | ≥ 90% |
 | Tech debt audit | `/tech-debt-radar` → `/create-task` (prioritized) | N/A |
 | Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
+| Retro action items | `/sprint-closer` → `/retrospective-analyst` → `/retrospective-action-items` | N/A |
+| Release notes | `/release-planner` → `/sprint-closer` → `/create-release-notes` | N/A |
 
 **Rules:**
 
