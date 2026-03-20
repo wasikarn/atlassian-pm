@@ -6,7 +6,7 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (42 scripts) | `agents/` (17) | `scripts/` (setup/sprint/parse)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (42 scripts) | `agents/` (17) | `scripts/` (setup/sprint/parse/bump-version)
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 23 skills with phases, categories, and argument patterns.
@@ -20,6 +20,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
+**Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge + CHANGELOG, commits, tags, pushes, creates GitHub release, and updates plugin in one step
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
 
 **Workflows:** [`skill-orchestration.md`](skills/shared-references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](skills/shared-references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
