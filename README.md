@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
 
-[![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -441,20 +441,30 @@ skills/                        ← 1 directory = 1 slash command
     ├── hr-rules.md            ← Hard rule definitions (HR1–HR10)
     └── troubleshooting.md     ← Common failures + fixes
 
-agents/                             ← 13 subagent definitions
-├── code-explorer.md (haiku)        ← Codebase exploration before sub-task creation
-├── issue-bootstrap.md (haiku)      ← Pre-fetch issue context in one coordinated pass
-├── issue-reader.md (haiku)         ← Fast Jira issue fetch (deprecated → issue-bootstrap)
-├── jira-search.md (haiku)          ← Jira search with natural language
-├── quality-gate.md (haiku)         ← ADF quality scoring (HR1 enforcement)
-├── pr-description-writer.md (haiku)← Generate PR description from branch + issue
-├── pr-review-jira-sync.md (haiku)  ← Sync merged PR back to Jira (transition + comment)
-├── velocity-tracker.md (haiku)     ← Track velocity history in project config
-├── story-writer.md (sonnet)        ← ADF JSON generation with QG self-fix loop
-├── alignment-checker.md (sonnet)   ← Check story↔subtask alignment (A1-A6)
-├── backlog-groomer.md (sonnet)     ← Backlog readiness checks before sprint planning
-├── retrospective-analyst.md (sonnet) ← Sprint retro analysis + Confluence page
-└── sprint-planner.md (sonnet)      ← Sprint capacity + distribution planning
+agents/                                  ← 17 subagent definitions (3-layer architecture)
+│
+│  Layer 1 — Foundation (compact output, token-optimized)
+├── code-explorer.md (haiku)             ← Codebase exploration; Memory-First Protocol; --domain flag
+├── issue-bootstrap.md (haiku)           ← Pre-fetch issue context; --preset flags; BOOTSTRAP_COMPACT
+├── issue-reader.md (haiku)              ← Fast Jira issue fetch (deprecated → issue-bootstrap)
+├── jira-search.md (haiku)               ← Duplicate confidence scoring (EXACT/HIGH/MEDIUM/LOW)
+├── quality-gate.md (haiku)              ← ADF quality scoring; Pattern Memory; Team Convention Check
+├── pr-description-writer.md (haiku)     ← Generate PR description from branch + issue
+├── pr-review-jira-sync.md (haiku)       ← Sync merged PR back to Jira (transition + comment)
+├── velocity-tracker.md (haiku)          ← Velocity history; anomaly detection (1.5σ); per-member stats
+│
+│  Layer 2 — Analysis (expert reasoning, domain knowledge)
+├── story-writer.md (sonnet)             ← ADF JSON; Convention Memory; Service-Aware AC Defaults
+├── alignment-checker.md (sonnet)        ← AC Coverage Matrix; Predictive Risk Flags; Scope Drift
+├── backlog-groomer.md (sonnet)          ← WSJF scoring; aging alerts; Top Candidates output
+├── retrospective-analyst.md (sonnet)    ← Cross-Sprint Comparison; Team Health Score (0-100)
+├── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
+│
+│  Layer 3 — Synthesis (cross-domain specialists, new in v1.1.0)
+├── estimation-calibrator.md (sonnet)    ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
+├── risk-forecaster.md (sonnet)          ← 4-dimension delivery risk; named mitigations; adjusted scenarios
+├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
+└── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
 
 hooks/                         ← 42 Python hook scripts
 ├── hooks.json                 ← Plugin hook manifest
