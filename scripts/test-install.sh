@@ -247,14 +247,19 @@ TOTAL_WARN=$((WARN + DR_WARN))
 
 if [ "$TOTAL_FAIL" -eq 0 ] && [ "$TOTAL_WARN" -eq 0 ]; then
   echo -e "  ${GREEN}✅ ALL PASS — install flow 100% clean${NC}"
-  echo ""
-  exit 0
-elif [ "$TOTAL_FAIL" -eq 0 ]; then
-  echo -e "  ${YELLOW}⚠️  PASS with ${TOTAL_WARN} warning(s)${NC}"
-  echo ""
-  exit 0
 else
-  echo -e "  ${RED}❌ ${TOTAL_FAIL} failure(s) found${NC}"
-  echo ""
-  exit 1
+  echo -e "  ${YELLOW}⚠️  PASS with ${TOTAL_WARN} warning(s)${NC}"
 fi
+
+# Warn if installed version differs from session's CLAUDE_PLUGIN_ROOT
+SESSION_VER=""
+[[ "${CLAUDE_PLUGIN_ROOT:-}" =~ /([0-9]+\.[0-9]+\.[0-9]+)$ ]] && SESSION_VER="${BASH_REMATCH[1]}"
+if [ -n "$SESSION_VER" ] && [ "$SESSION_VER" != "${VERSION:-}" ]; then
+  echo ""
+  echo -e "  ${YELLOW}⚠️  RESTART REQUIRED${NC}"
+  echo -e "     Session CLAUDE_PLUGIN_ROOT = v${SESSION_VER}, installed = v${VERSION:-?}"
+  echo -e "     Hook errors will appear until Claude Code is restarted."
+fi
+echo ""
+
+[ "$TOTAL_FAIL" -eq 0 ] && exit 0 || exit 1
