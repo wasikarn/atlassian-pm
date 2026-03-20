@@ -2,10 +2,12 @@
 # bump-version.sh — Bump plugin version across all files, tag, push, and create GitHub release.
 #
 # Usage:
-#   ./scripts/bump-version.sh <version>   # explicit: 1.2.0
-#   ./scripts/bump-version.sh patch       # auto-increment patch: 1.1.0 → 1.1.1
-#   ./scripts/bump-version.sh minor       # auto-increment minor: 1.1.0 → 1.2.0
-#   ./scripts/bump-version.sh major       # auto-increment major: 1.1.0 → 2.0.0
+#   ./scripts/bump-version.sh <version> [title]   # explicit: 1.2.0 "My Release"
+#   ./scripts/bump-version.sh patch               # auto-increment patch: 1.1.0 → 1.1.1
+#   ./scripts/bump-version.sh minor               # auto-increment minor: 1.1.0 → 1.2.0
+#   ./scripts/bump-version.sh major               # auto-increment major: 1.1.0 → 2.0.0
+#
+# Title is auto-generated from commits since last tag if not provided.
 #
 # Steps:
 #   1. Validate version + working tree clean
@@ -63,10 +65,10 @@ with open(path, 'w') as f:
 PY
 }
 
-# ── parse arg ─────────────────────────────────────────────────────────────────
+# ── parse args ────────────────────────────────────────────────────────────────
 
 ARG="${1:-}"
-[[ -n "$ARG" ]] || die "Usage: $0 <version|patch|minor|major>"
+[[ -n "$ARG" ]] || die "Usage: $0 <version|patch|minor|major> [title]"
 
 CURRENT=$(current_version)
 
@@ -92,13 +94,27 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   die "Working tree has uncommitted changes — commit or stash first"
 fi
 
+# ── release title ─────────────────────────────────────────────────────────────
+
+if [[ -n "${2:-}" ]]; then
+  RELEASE_TITLE="$2"
+else
+  # Auto-generate from commits since last tag (first commit subject, title-cased)
+  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+  if [[ -n "$LAST_TAG" ]]; then
+    RELEASE_TITLE=$(git log "${LAST_TAG}..HEAD" --oneline --no-merges \
+      | head -1 | sed 's/^[a-f0-9]* //' | sed 's/^[a-z]*: //' \
+      | python3 -c "import sys; s=sys.stdin.read().strip(); print(s[0].upper()+s[1:] if s else 'Release')")
+  else
+    RELEASE_TITLE="Release"
+  fi
+fi
+
 # ── preview ───────────────────────────────────────────────────────────────────
 
 echo ""
 echo -e "  ${CYAN}atlassian-pm${NC}  ${YELLOW}$CURRENT${NC} → ${GREEN}$NEW_VERSION${NC}"
-echo ""
-read -r -p "Release title (e.g. 'Agent Domain Expert Overhaul'): " RELEASE_TITLE
-[[ -n "$RELEASE_TITLE" ]] || die "Release title cannot be empty"
+echo -e "  ${CYAN}Title${NC}  $RELEASE_TITLE"
 echo ""
 
 # ── 1. update files ───────────────────────────────────────────────────────────
@@ -111,9 +127,8 @@ info "Updating README.md badge..."
 sed -i '' "s/version-${CURRENT}-blue\.svg/version-${NEW_VERSION}-blue.svg/g" README.md
 ok "README.md badge → $NEW_VERSION"
 
-# ── 2. confirm ────────────────────────────────────────────────────────────────
+# ── 2. summary ────────────────────────────────────────────────────────────────
 
-echo ""
 echo "────────────────────────────────────────────"
 echo "  Files to commit:"
 git diff --name-only | sed 's/^/    /'
@@ -122,8 +137,6 @@ echo -e "  Tag   : ${GREEN}v${NEW_VERSION}${NC}"
 echo -e "  Title : v${NEW_VERSION} — ${RELEASE_TITLE}"
 echo "────────────────────────────────────────────"
 echo ""
-read -r -p "Commit, tag v$NEW_VERSION, push, and create GitHub release? [y/N] " CONFIRM
-[[ "$CONFIRM" =~ ^[Yy]$ ]] || { warn "Aborted — changes left unstaged"; exit 0; }
 
 # ── 3. commit + tag + push ────────────────────────────────────────────────────
 
