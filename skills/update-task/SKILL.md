@@ -188,6 +188,7 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 
 ## References
 
+- [Update Workflow Patterns](../shared-references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
 - [Task Template](../shared-references/templates-task.md) - Task ADF templates (tech-debt, bug, chore, spike)
 - After: `/verify-issue {{PROJECT_KEY}}-XXX` to check quality

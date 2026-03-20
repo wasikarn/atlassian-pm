@@ -129,6 +129,7 @@ Subtask alignment: [X subtasks checked, Y adjusted]
 
 ## References
 
+- [Update Workflow Patterns](../shared-references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
 - [Story Template](../shared-references/templates-story.md) - Story ADF template + best practices
 - [Verification Checklist](../shared-references/verification-checklist.md) - INVEST, AC quality

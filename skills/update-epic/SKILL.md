@@ -129,6 +129,7 @@ Changes: [list]
 
 ## References
 
+- [Update Workflow Patterns](../shared-references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure
 - [ADF Core Rules](../shared-references/templates-core.md) - CREATE/EDIT rules, panels, styling
 - [Epic Template](../shared-references/templates-epic.md) - Epic ADF template + best practices
 - [Tool Selection](../shared-references/tools.md) - Tool selection
