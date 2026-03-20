@@ -26,7 +26,7 @@ argument-hint: "[story-description]"
 ## Context Object (accumulated across phases)
 
 | Phase | Adds to Context |
-|-------|----------------|
+| ----- | -------------- |
 | 0. Blueprint (optional) | `blueprint_page_id`, `selected_story_index`, `blueprint_acs_hints[]` |
 | 1. Discovery | `epic_data`, `vs_assignment`, `user_requirements`, `user_context` |
 | 2. Write Story | `story_narrative`, `acs[]`, `scope`, `dod` |
@@ -93,8 +93,6 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 ## Part A: Create Story (Phases 1-4)
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 1. Discovery
 
 - Ask: Who? What? Why? Constraints?
@@ -159,7 +157,7 @@ acli jira workitem create --from-json {{artifacts_dir}}/story.json
 
 **Labels (MANDATORY):** Feature label + VS label (e.g., `coupon-web`, `vs2-collect-e2e`)
 
-**Capture story key → ABC-XXX**
+Capture story key → ABC-XXX
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after create.
 
@@ -178,8 +176,6 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ## Part B: Create Sub-tasks (Phases 5-10)
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
 ### 5. Impact Analysis
 
 | Service | Impact | Reason |
@@ -196,46 +192,11 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 > [Parallel Explore](../shared-references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
-
-**What each agent MUST discover:**
-
-| Agent | Must Find |
-|-------|-----------|
-| Backend | Models/Migrations path, Controllers pattern, Routes file, Config enums (any enum to extend?), Auth middleware on similar routes, Existing similar implementation as REF |
-| Frontend | Page dir structure, Service base pattern (`ApiBaseService`?), OAuth/auth lib, Shared UI components (dialogs, icons, layouts) with exact filenames |
-| Shared/Config | `.env` variables consumed by feature, Types/interfaces, Error handling patterns |
-
-**Critical validation:**
-
-- Validate every filename with Glob — don't assume (typos exist in real codebases)
-- Config enums that need new values → include as MODIFY in scope
-- Auth middleware: which routes require `auth:publicApi`? Which are public?
-- Find at least 1 REF pattern per subtask to guide developer
+> See [shared-references/subtask-design-patterns.md](../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 7. Design Sub-tasks
 
 **Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
-
-**Scope table format per subtask** (single Action | File table):
-
-- `CREATE` — new file to create from scratch
-- `MODIFY` — existing file to add/change code
-- `REF` — existing file developer reads as pattern guide (no changes — just follow the pattern)
-- **Minimum 1 REF row per subtask** — never leave developer without a pattern reference
-
-**AC specificity requirements (Tech Lead level):**
-
-- Reference actual method names from Phase 6: e.g., `LineAuthStrategy.handleCallback()`
-- Specify exact HTTP endpoints + status codes: `POST /v2/notification/line-accounts → 201 or 409`
-- Specify data contracts: `{ line_uid, display_name, avatar_url, access_token }`
-- Specify error UI: toast color + exact error message text
-- Specify env vars if consumed by new code
-
-**Config/enum awareness:**
-
-- New feature type → check if config enum needs a new value (add as MODIFY to scope)
-- New unique constraint → specify explicitly in migration AC
-- Middleware → document which middleware applies to each new route in AC
 
 - 1 sub-task per service boundary (split only if complexity warrants)
 - **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer)
@@ -273,34 +234,18 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
 ### 8. Alignment Check
 
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
-
-- [ ] Sum of sub-tasks = Complete Story?
-- [ ] No gaps? No scope creep?
-- [ ] File paths exist? (validate with Glob)
-- [ ] **VS integrity maintained?** (subtasks complete the slice, not horizontal)
-
-If any check fails → auto-adjust subtask scope/design → re-check. Escalate to user only if gap cannot be resolved automatically.
+> See [shared-references/subtask-design-patterns.md](../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 9. Quality Gate — Subtasks (MANDATORY)
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
-
-For each subtask ADF JSON in `{{artifacts_dir}}/`:
-
-1. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass subtask JSON path + issue type `subtask`. Receives: `{score, status, checks_failed[], auto_fixable}`.
-2. If `status = PASS` → proceed
-3. If `status = FAIL` and `auto_fixable = yes` → apply fixes inline → re-invoke quality-gate (max 1 re-invoke)
-4. If still FAIL → escalate to user with specific check failures
-5. Only proceed to Phase 10 when ALL subtasks pass QG
-
-> Report: `Technical X/5 | Subtask Quality X/5 | Overall X%`
+> See [shared-references/subtask-design-patterns.md](../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 10. Create Sub-tasks
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the parent field. MCP may silently ignore parent.
-
 > [Two-Step Subtask](../shared-references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
 
 ```text
@@ -340,27 +285,15 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 → /verify-issue ABC-XXX --with-subtasks
 ```
 
-## Benefits vs Separate Workflow
+---
 
-| Approach | When | Context |
-| --- | --- | --- |
-| `/story-full` | New story from scratch (default) | Preserved across all phases |
-| `/analyze-story` | Story already exists, need subtasks only | Starts from Phase 5 |
+> See [references/decision-guide.md](references/decision-guide.md) for when to use /story-full vs /analyze-story.
 
-## Example
+---
 
-**Input:** "สร้าง story + subtasks สำหรับ admin ดู ad report แบบ monthly"
+> See [references/examples.md](references/examples.md) for a full input/output example.
 
-**Output:**
-
-- Story `ABC-3100`: [FE-Admin] - ดู Ad Report แบบรายเดือน (Monthly Ad Report)
-  - AC1: Display — แสดง report table with impression, click, revenue per billboard
-  - AC2: Filter — เลือกเดือน/ปี แล้ว report อัปเดตตามช่วงเวลา
-  - AC3: Export — กดปุ่ม export ได้ไฟล์ CSV
-- Sub-tasks:
-  - `ABC-3101` [BE] - API endpoint `GET /api/reports/monthly` with date range filter
-  - `ABC-3102` [FE-Admin] - Monthly report page + table component
-  - `ABC-3103` [FE-Admin] - CSV export from report data
+---
 
 ## References
 
@@ -369,3 +302,4 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 - [Subtask Template](../shared-references/templates-subtask.md) - Subtask ADF template + QA
 - [Vertical Slice Guide](../shared-references/vertical-slice-guide.md) - VS patterns, decomposition, labels
 - [Verification Checklist](../shared-references/verification-checklist.md) - INVEST, quality checks
+- [Subtask Design Patterns](../shared-references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
