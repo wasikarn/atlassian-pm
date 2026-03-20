@@ -335,7 +335,7 @@ Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/
 ### 7. Install Jira cache server
 
 ```bash
-UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm/venv" \
+UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/venv" \
   uv sync --project mcp-servers/jira-cache-server --extra embeddings
 ```
 
@@ -369,7 +369,7 @@ Claude Code ──skills──► acli (ADF JSON) ──────────
     ├── MCP ──► mcp-atlassian ──────────────────────────────────────── ┤
     │                                                                  │
     ├── MCP ──► jira-cache-server ── SQLite + FTS5 ──► Jira REST API v3
-    │                └─ (~/.claude/plugins/data/atlassian-pm/jira.db)
+    │                └─ (~/.claude/plugins/data/atlassian-pm-atlassian-pm/jira.db)
     │
     ├── MCP ──► Confluence, Figma, GitHub
     │
