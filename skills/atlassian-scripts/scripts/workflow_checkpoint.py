@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.workflow_state import WorkflowState
 
 # State directory
-TASKS_DIR = Path(__file__).parent.parent.parent.parent.parent / "tasks"
+TASKS_DIR = Path(__file__).parent.parent.parent.parent / "tasks"
 
 
 def cmd_start(args: argparse.Namespace) -> int:

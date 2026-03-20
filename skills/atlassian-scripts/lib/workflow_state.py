@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 # Default state file location
-DEFAULT_STATE_DIR = Path(__file__).parent.parent.parent.parent.parent / "tasks"
+DEFAULT_STATE_DIR = Path(__file__).parent.parent.parent.parent / "tasks"
 STATE_FILE_NAME = ".workflow-state.json"
 STATE_TTL_SECONDS = 24 * 60 * 60  # 24 hours
 

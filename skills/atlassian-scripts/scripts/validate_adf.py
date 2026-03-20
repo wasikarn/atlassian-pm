@@ -120,7 +120,7 @@ Exit codes: 0=pass, 1=fail, 2=error
         "--type",
         "-t",
         required=True,
-        choices=["story", "subtask", "epic", "qa"],
+        choices=["story", "subtask", "epic", "qa", "task"],
         help="Issue type for quality checks",
     )
     parser.add_argument("--fix", action="store_true", help="Auto-fix and write to -fixed.json")

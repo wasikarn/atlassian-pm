@@ -68,6 +68,8 @@ def load_config() -> tuple[dict, dict]:
     """Load both config files. Returns (lean_config, detail_config)."""
     with open(LEAN_CONFIG_PATH) as f:
         lean = json.load(f)
+    if not DETAIL_CONFIG_PATH.exists():
+        return lean, {}
     with open(DETAIL_CONFIG_PATH) as f:
         detail = json.load(f)
     return lean, detail
@@ -104,8 +106,8 @@ def find_sprint_by_name(api: JiraAPI, board_id: int, name: str) -> dict | None:
 
 def get_completed_issues(api: JiraAPI, sprint_id: int) -> list[dict]:
     """Get all completed issues in a sprint with story points."""
-    config = load_config()
-    sp_field = config["jira"]["custom_fields"]["story_points"]
+    lean, _ = load_config()
+    sp_field = lean["jira"]["custom_fields"]["story_points"]
 
     all_issues = []
     start_at = 0

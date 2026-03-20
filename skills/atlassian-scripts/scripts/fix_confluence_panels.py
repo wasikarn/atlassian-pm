@@ -132,8 +132,8 @@ def main():
     try:
         creds = load_credentials()
         api = ConfluenceAPI(
-            base_url=creds["url"],
-            auth_header=get_auth_header(creds),
+            base_url=creds["CONFLUENCE_URL"],
+            auth_header=get_auth_header(creds["CONFLUENCE_USERNAME"], creds["CONFLUENCE_API_TOKEN"]),
             ssl_context=create_ssl_context(),
         )
     except CredentialsError as e:
