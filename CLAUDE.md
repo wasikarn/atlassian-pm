@@ -71,7 +71,7 @@ Loaded on demand from `skills/shared-references/` (23 docs, indexed by `template
 
 **Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post_compact_reinject.py`.
 
-**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku, deprecated→issue-bootstrap), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet).
+**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku, deprecated→issue-bootstrap), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (sonnet, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3).
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
