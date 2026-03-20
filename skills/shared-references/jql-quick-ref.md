@@ -134,4 +134,4 @@ ORDER BY priority DESC, created ASC # Combined
 
 ## Related
 
-- Full JQL reference: `~/.claude/skills/atlassian-cli/references/jql-patterns.md`
+- [tools.md](tools.md) — MCP vs acli decision rules, `jira_search` field presets

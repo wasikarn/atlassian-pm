@@ -64,7 +64,7 @@ Phase 3 structure (specific bullets differ per issue type):
 Add to every Jira update skill:
 
 ```markdown
-> **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
 ```

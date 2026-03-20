@@ -52,7 +52,7 @@ def main() -> None:
             reason = (
                 f"HR4 BLOCKED: Confluence macro detected in MCP update for page {page_id}.\n"
                 f"MCP HTML-escapes macros → page renders raw XML.\n"
-                f"Use: python3 .claude/skills/atlassian-scripts/update_page_storage.py instead."
+                f"Use: python3 .claude/skills/atlassian-scripts/scripts/update_page_storage.py instead."
             )
             print(reason, file=sys.stderr)
             sys.exit(2)
