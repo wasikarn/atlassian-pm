@@ -198,8 +198,9 @@ else
   SKIP=$((SKIP+1))
 fi
 
+REQUIRED=$((TOTAL - SKIP))
 echo ""
-echo "${PASS}/${TOTAL} checks passed  ·  ${FAIL} failed  ·  ${WARN} warnings"
+echo "${PASS}/${REQUIRED} checks passed  ·  ${FAIL} failed  ·  ${WARN} warnings  ·  ${SKIP} optional skipped"
 echo "✓ pass  ✗ fail  ! warning  - optional"
 ```
 
