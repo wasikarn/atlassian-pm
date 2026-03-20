@@ -89,7 +89,7 @@ Then the full context block:
 
 - Try cache first → fallback to MCP (never skip cache)
 - HR2: NEVER add ORDER BY to `parent =` or `parent in` JQL
-- If cache miss → `jira_get_issue` with preset fields (or minimal fields if no preset)
+- If cache miss → `jira_get_issue` with preset fields (or full fields if no preset)
 - If issue not found → return error message immediately (don't retry)
 - Max 8 turns — fetch efficiently, don't over-paginate
 - Linked issues: skip if more than 10 links (report count instead)
