@@ -198,20 +198,12 @@ RELEASE_URL=$(gh release create "v$NEW_VERSION" \
   --notes "$RELEASE_NOTES")
 ok "Release: $RELEASE_URL"
 
-# ── 9. plugin update ─────────────────────────────────────────────────────────
-
-info "Refreshing marketplace cache..."
-claude plugin marketplace update atlassian-pm 2>&1 | grep -E "✔|✘|Error" || true
-ok "Marketplace refreshed"
-
-info "Updating plugin..."
-claude plugin update atlassian-pm@atlassian-pm 2>&1 | grep -E "✔|✘|already" || true
-
 # ── done ─────────────────────────────────────────────────────────────────────
 
 echo ""
 echo -e "${GREEN}✅ $OLD_VERSION → v$NEW_VERSION complete${NC}"
 echo ""
 echo "  Next:"
-echo "  1. Restart Claude Code to load v$NEW_VERSION"
-echo "  2. /atlassian-pm:doctor to verify"
+echo "  1. claude plugin marketplace update atlassian-pm"
+echo "  2. claude plugin update atlassian-pm@atlassian-pm"
+echo "  3. Restart Claude Code to load v$NEW_VERSION"
