@@ -26,6 +26,7 @@
   "team": {
     "sprint_length_days": 10,
     "avg_throughput_per_sprint": 0,
+    "wip_limit": 2,
     "members": [
       {"name": "Tech Lead",     "email": "lead@yourcompany.com",    "role": "Tech Lead", "focus": "Full Stack, review, mentoring",  "focus_factor": 0.5,  "avg_throughput": 6,  "skill_profile": {"backend": "expert",       "frontend_admin": "expert",       "frontend_web": "intermediate", "database": "expert", "devops": "expert"}},
       {"name": "Senior Dev",    "email": "senior@yourcompany.com",  "role": "Sr. BE",    "focus": "Backend, complex systems",        "focus_factor": 0.75, "avg_throughput": 6,  "skill_profile": {"backend": "expert",       "frontend_admin": "basic",        "frontend_web": "basic",        "database": "expert", "devops": "intermediate"}},
