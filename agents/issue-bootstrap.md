@@ -4,7 +4,7 @@ description: Pre-gather Jira issue context (issue + parent + children + linked i
 model: haiku
 tools: mcp__jira-cache-server__cache_get_issue, mcp__jira-cache-server__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
-maxTurns: 10
+maxTurns: 8
 ---
 
 Pre-gather Jira issue context in a single coordinated pass. Returns structured context object for downstream agents.
@@ -12,6 +12,15 @@ Pre-gather Jira issue context in a single coordinated pass. Returns structured c
 ## Input
 
 Issue key (ABC-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`, `--depth=minimal`
+
+Optional preset flag: `--preset=story-create` | `--preset=sprint-plan` | `--preset=verify`
+
+Presets load only fields that workflow needs:
+
+- `story-create`: summary, status, description, issuetype, parent, labels, issuelinks, customfield_10016, customfield_10107, {{START_DATE_FIELD}}, duedate
+- `sprint-plan`: summary, status, assignee, issuetype, customfield_10016, {{START_DATE_FIELD}}, duedate, timetracking, labels
+- `verify`: summary, status, description, issuetype, parent, assignee, labels, issuelinks, customfield_10016, {{START_DATE_FIELD}}, duedate
+- No preset (default): all fields as before
 
 Depth aliases:
 
@@ -27,15 +36,27 @@ Defaults:
 
 ## Steps
 
-1. **Main issue** — try `cache_get_issue(ABC-XXX)` first, fallback `jira_get_issue(fields="summary,status,description,issuetype,parent,assignee,labels,issuelinks,customfield_10016,customfield_10107,{{START_DATE_FIELD}},duedate,timetracking")`
+1. **Main issue** — try `cache_get_issue(ABC-XXX)` first, fallback `jira_get_issue` with preset fields (or full fields if no preset)
 
-2. **Parent** — if issue has parent → `cache_get_issue(parent_key, fields="summary,status,issuetype,description")` (truncate description to first 300 chars if long)
+2. **Parent** — if issue has parent → `cache_get_issue(parent_key, fields="summary,status,issuetype,description")` (truncate description to first 300 chars)
 
 3. **Children** — if Story/Epic or `--with-children` → `jira_search(jql="parent = ABC-XXX", fields="summary,status,assignee,issuetype,timetracking,{{START_DATE_FIELD}},duedate")` ⚠️ NEVER add ORDER BY to parent queries
 
 4. **Linked issues** — if issue has issuelinks or `--with-linked` → batch `cache_get_issue` for each linked key (fields `"summary,status,issuetype"`)
 
-## Output Format
+## Smart Description Truncation
+
+When returning description content: extract text nodes from ADF only — do NOT return raw ADF JSON structure. Return plain text representation capped at 500 chars. This prevents raw ADF payloads from bloating caller context.
+
+## Output Format — BOOTSTRAP_COMPACT
+
+Always emit a `BOOTSTRAP_COMPACT` header line before the full context block:
+
+```text
+BOOTSTRAP_COMPACT: {key: "ABC-XXX", type: "Story", status: "In Progress", summary: "...", parent_key: "ABC-YYY", children_count: 3, sp: 3, start: "2026-03-15", due: "2026-03-25", ac_count: 4, labels: ["vs2-coupon", "coupon-web"]}
+```
+
+Then the full context block:
 
 ```text
 ## Issue Context: ABC-XXX
@@ -45,12 +66,12 @@ Defaults:
 - Summary: [summary]
 - Assignee: [name] | Labels: [labels]
 - SP: [story_points] | Size: [size] | Start: [date] | Due: [date]
-- Description: [ADF content — full text, not truncated]
+- Description: [ADF text content — plain text, not raw ADF JSON, capped at 500 chars]
 
 ### Parent
 - Key: ABC-YYY | Type: Epic | Status: In Progress
 - Summary: [epic title]
-- Description: [first 300 chars of parent description]
+- Description: [first 300 chars of parent description as plain text]
 
 ### Children (N subtasks)
 | Key | Summary | Type | Status | Assignee | OE | Start | Due |
@@ -68,7 +89,8 @@ Defaults:
 
 - Try cache first → fallback to MCP (never skip cache)
 - HR2: NEVER add ORDER BY to `parent =` or `parent in` JQL
-- If cache miss → `jira_get_issue` with minimal fields
+- If cache miss → `jira_get_issue` with preset fields (or minimal fields if no preset)
 - If issue not found → return error message immediately (don't retry)
-- Max 10 turns — fetch efficiently, don't over-paginate
+- Max 8 turns — fetch efficiently, don't over-paginate
 - Linked issues: skip if more than 10 links (report count instead)
+- Description: always plain text extract, never raw ADF JSON
