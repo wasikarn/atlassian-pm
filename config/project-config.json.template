@@ -1,20 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "_comment": "Project-specific Atlassian settings - copy to project-config.json and fill in real values",
-
-  "company": "Acme Corp",
-  "company_lower": "acme",
+  "_comment": "Project-specific Atlassian settings - copy to .claude/project-config.json and fill in real values",
 
   "jira": {
     "site": "acme-corp.atlassian.net",
     "project_key": "PROJ",
     "board_id": 0,
-    "_board_id_note": "Get via: jira_get_agile_boards(project_key='PROJECT_KEY')",
+    "_board_id_note": "Get via: jira_get_agile_boards(project_key='PROJECT_KEY') after setup",
 
     "custom_fields": {
       "start_date": "customfield_10015",
+      "due_date": "duedate",
       "sprint": "customfield_10020",
-      "_note": "Custom field IDs are instance-level. If using different Jira instance, run: acli jira issue get ISSUE-1 --output json | jq '.fields | keys'"
+      "story_points": "customfield_10016",
+      "story_points_legacy": "customfield_10036",
+      "size": "customfield_10107",
+      "original_estimate": "timetracking",
+      "_note": "Custom field IDs are instance-level. Verify via: acli jira issue get ISSUE-1 --output json | jq '.fields | keys'"
     },
 
     "issue_link_types": ["Relates", "Blocks", "Duplicate", "Cloners", "Test Case"],
@@ -28,21 +30,65 @@
 
   "team": {
     "_note": "Team roster for sprint planning and capacity calculation",
+    "sprint_length_days": 10,
+    "avg_throughput_per_sprint": 36,
     "members": [
-      { "name": "Alice", "email": "alice@example.com", "role": "Tech Lead", "focus": "Full Stack, review, mentoring", "avg_sprint": 4.5, "ceiling": 5 },
-      { "name": "Bob", "email": "bob@example.com", "role": "Sr. BE", "focus": "Backend, complex systems", "avg_sprint": 8.5, "ceiling": 9 },
-      { "name": "Charlie", "email": "charlie@example.com", "role": "Jr. FS", "focus": "FE+BE", "avg_sprint": 7.5, "ceiling": 8 },
-      { "name": "Dave", "email": "dave@example.com", "role": "Jr. FS", "focus": "FE+BE", "avg_sprint": 7.5, "ceiling": 8 },
-      { "name": "Eve", "email": "eve@example.com", "role": "FE", "focus": "Frontend", "avg_sprint": 8.5, "ceiling": 9 },
-      { "name": "Frank", "email": null, "role": "QA", "focus": "Testing", "avg_sprint": null, "ceiling": null },
-      { "name": "Grace", "email": null, "role": "QA", "focus": "Testing", "avg_sprint": null, "ceiling": null },
-      { "name": "Helen", "email": null, "role": "UX/UI", "focus": "Design", "avg_sprint": null, "ceiling": null }
-    ],
-    "totals": { "avg_sprint": 36.5, "ceiling": 39 }
+      {
+        "name": "Alice",
+        "email": "alice@example.com",
+        "role": "Tech Lead",
+        "focus": "Full Stack, review, mentoring",
+        "focus_factor": 0.5,
+        "avg_throughput": 6,
+        "skill_profile": {
+          "backend": "expert",
+          "frontend": "expert",
+          "database": "expert",
+          "devops": "intermediate"
+        }
+      },
+      {
+        "name": "Bob",
+        "email": "bob@example.com",
+        "role": "Sr. BE",
+        "focus": "Backend, complex systems",
+        "focus_factor": 0.75,
+        "avg_throughput": 8,
+        "skill_profile": {
+          "backend": "expert",
+          "frontend": "basic",
+          "database": "expert",
+          "devops": "intermediate"
+        }
+      },
+      {
+        "name": "Charlie",
+        "email": "charlie@example.com",
+        "role": "Jr. FS",
+        "focus": "FE+BE",
+        "focus_factor": 0.65,
+        "avg_throughput": 7,
+        "skill_profile": {
+          "backend": "intermediate",
+          "frontend": "intermediate",
+          "database": "basic",
+          "devops": "basic"
+        }
+      },
+      {
+        "name": "Dave",
+        "email": null,
+        "role": "QA",
+        "focus": "Testing",
+        "focus_factor": null,
+        "avg_throughput": null,
+        "skill_profile": { "testing": "intermediate" }
+      }
+    ]
   },
 
   "services": {
-    "_note": "Service tags used in issue summaries and codebase paths. Run /atlassian-pm:setup to configure.",
+    "_note": "Service tags used in issue summaries and codebase paths",
     "tags": [
       { "tag": "[API]", "name": "Backend", "path": "~/Projects/my-project/api" },
       { "tag": "[WEB]", "name": "Frontend", "path": "~/Projects/my-project/web" }

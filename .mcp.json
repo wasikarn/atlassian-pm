@@ -1,3 +1,16 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "jira-cache-server": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project", "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server",
+        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/skills/atlassian-scripts",
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv"
+      }
+    }
+  }
 }

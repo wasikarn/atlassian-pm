@@ -84,6 +84,17 @@ else
   WARN=$((WARN+1))
 fi
 
+# Check 4b: jira-cache-server in .mcp.json
+MCP_JSON="${PLUGIN_ROOT}/.mcp.json"
+if [ -f "$MCP_JSON" ] && python3 -c "import json; d=json.load(open('$MCP_JSON')); exit(0 if 'jira-cache-server' in d.get('mcpServers', {}) else 1)" 2>/dev/null; then
+  echo "  ✓  jira-cache-server configured in .mcp.json"
+  PASS=$((PASS+1))
+else
+  echo "  !  jira-cache-server missing from .mcp.json (cache tools unavailable)"
+  echo "     → Plugin may be outdated — reinstall: /plugin install atlassian-pm@atlassian-pm"
+  WARN=$((WARN+1))
+fi
+
 # Check 5: mcp-atlassian configured
 if claude mcp get mcp-atlassian &>/dev/null; then
   echo "  ✓  mcp-atlassian configured (user scope)"

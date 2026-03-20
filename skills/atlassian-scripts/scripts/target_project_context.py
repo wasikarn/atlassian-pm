@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-CONFIG_PATH = Path(__file__).resolve().parent.parent / "project-config.json"
+CONFIG_PATH = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "project-config.json"
 
 # Framework detection patterns → scan strategies
 FRAMEWORK_PATTERNS = {

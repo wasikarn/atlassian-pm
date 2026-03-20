@@ -30,8 +30,8 @@ if not shutil.which("acli"):
 
 if not shutil.which("qmd"):
     warnings.append(
-        "⚠️  qmd not found on PATH. QMD auto-search hook will use fallback path.\n"
-        "   Install: bun install -g qmd or add bun bin to PATH."
+        "⚠️  qmd not found on PATH. QMD auto-search hook disabled (Glob/Grep will proceed normally).\n"
+        "   Optional install: bun install -g qmd or add bun bin to PATH."
     )
 
 # Check cache DB

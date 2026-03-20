@@ -86,7 +86,7 @@ PRIORITY_FIELD = "priority"
 
 def load_project_config() -> dict:
     """Load project-config.json from .claude/"""
-    config_path = Path(__file__).parent.parent.parent.parent / "project-config.json"
+    config_path = Path(__file__).parent.parent.parent.parent / ".claude" / "project-config.json"
     with open(config_path) as f:
         return json.load(f)
 

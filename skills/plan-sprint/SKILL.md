@@ -20,7 +20,7 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 ## Dynamic Context
 
 - **Today:** !`date +%Y-%m-%d`
-- **Recent commits:** !`git -C /Users/kobig/Codes/Works/tathep/tathep-platform-api log --oneline -5 2>/dev/null || echo "N/A"`
+- **Recent commits:** Read from `services.tags[].path` in `project-config.json` as needed
 
 ## Pre-Meeting Checklist
 
