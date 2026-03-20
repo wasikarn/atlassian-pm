@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-24 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
+30 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -23,6 +23,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | refine-feature | `/atlassian-pm:refine-feature` | 5 | jira-cache-server, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/story-full`. |
 | create-epic | `/atlassian-pm:create-epic` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
 | update-epic | `/atlassian-pm:update-epic` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
+| release-planner | `/atlassian-pm:release-planner` | 9 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
 
 ### Story & Subtask
 
@@ -38,6 +39,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | assign | `/atlassian-pm:assign` | 1 | acli | Quick assign a Jira issue to a team member. Uses acli (HR3-safe). Supports unassign. |
 | verify-issue | `/atlassian-pm:verify-issue` | 6 | jira-cache-server, mcp-atlassian, acli | Verify and improve issue quality: ADF format, INVEST, language, hierarchy alignment (A1–A6). Flags: `--with-subtasks`, `--fix`. |
 | sync-alignment | `/atlassian-pm:sync-alignment` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
+| spec-to-stories | `/atlassian-pm:spec-to-stories` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Convert Confluence spec page to Jira User Stories via spec-parser-agent. Dedup check, QG, batch create with HR5 verification. --dry-run supported. |
 
 ### Sprint Planning
 
@@ -45,6 +47,9 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | --- | --- | --- | --- | --- |
 | plan-sprint | `/atlassian-pm:plan-sprint` | 8 | jira-cache-server, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
 | dependency-chain | `/atlassian-pm:dependency-chain` | 5 | jira-cache-server, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
+| sprint-closer | `/atlassian-pm:sprint-closer` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
+| standup-digest | `/atlassian-pm:standup-digest` | 4 | jira-cache-server, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
+| bulk-reschedule | `/atlassian-pm:bulk-reschedule` | 5 | jira-cache-server, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 
 ### Confluence
 
@@ -59,6 +64,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | --- | --- | --- | --- | --- |
 | search-issues | `/atlassian-pm:search-issues` | 3 | jira-cache-server, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | Generate activity report from claude-mem history (sessions, observations, effort). Supports date ranges and project/type filters. Runs on Haiku. |
+| tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | atlassian-scripts | — | — | — | Python script library for Confluence/Jira REST API operations. Not user-invocable directly; used internally by skills when MCP has limitations (macros, code blocks, parent fields). |
 
 ### Internal Only
@@ -146,6 +152,24 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 /atlassian-pm:feature-blueprint "real-time notifications"  # description
 /atlassian-pm:feature-blueprint BEP-456               # from Jira epic
+
+/atlassian-pm:sprint-closer                           # close active sprint
+/atlassian-pm:sprint-closer --sprint 456              # specific sprint ID
+
+/atlassian-pm:standup-digest                          # today's active sprint
+/atlassian-pm:standup-digest --post                   # post to Confluence
+
+/atlassian-pm:release-planner --name v2.3.0 --epics BEP-50,BEP-51  # with args
+/atlassian-pm:release-planner                         # interactive
+
+/atlassian-pm:bulk-reschedule --sprint 456 --shift +7           # shift sprint 7 days
+/atlassian-pm:bulk-reschedule --issues BEP-123,BEP-124 --shift -3
+
+/atlassian-pm:spec-to-stories 12345 --epic BEP-10     # page-id + epic
+/atlassian-pm:spec-to-stories 12345 --dry-run         # preview only
+
+/atlassian-pm:tech-debt-radar                         # create new radar
+/atlassian-pm:tech-debt-radar --update                # refresh existing page
 ```
 
 ---

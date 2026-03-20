@@ -6,11 +6,11 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (42 scripts) | `agents/` (17) | `scripts/` (setup/sprint/parse/bump-version)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `skills/shared-references/` (23 docs) | `skills/atlassian-scripts/` (16 scripts) | `mcp-servers/jira-cache-server/` (MCP) | `hooks/` (44 scripts) | `agents/` (19) | `scripts/` (setup/sprint/parse/bump-version)
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
-**Skill index:** [skills/README.md](skills/README.md) — all 23 skills with phases, categories, and argument patterns.
-**Hook reference:** [hooks/README.md](hooks/README.md) — all 42 hooks, what they enforce, and how to debug them.
+**Skill index:** [skills/README.md](skills/README.md) — all 30 skills with phases, categories, and argument patterns.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all 44 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 
@@ -72,7 +72,7 @@ Loaded on demand from `skills/shared-references/` (23 docs, indexed by `template
 
 **Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `post_compact_reinject.py`.
 
-**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku, deprecated→issue-bootstrap), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (sonnet, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3).
+**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `issue-reader` (haiku, deprecated→issue-bootstrap), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (sonnet, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3), `sprint-transition-agent` (haiku) — batch sprint issue moves + sprint state transitions; used by sprint-closer Phase 4, `spec-parser-agent` (haiku) — parse Confluence page content into structured requirements (personas, requirements, constraints); used by spec-to-stories Phase 2; receives pre-fetched content, tools: Read only.
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 

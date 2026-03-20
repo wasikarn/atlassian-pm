@@ -17,6 +17,12 @@
 | Update single | `/update-{epic,story,task,subtask}` → verify | ≥ 90% |
 | Update cascade | `/sync-alignment` → verify `--with-subtasks` | ≥ 90% |
 | Plan sprint | `/plan-sprint` → `/dependency-chain` | N/A |
+| Close sprint | `/sprint-closer` → `/retrospective-analyst` | N/A |
+| Daily standup | `/standup-digest` | N/A |
+| Release planning | `/release-planner` → `/plan-sprint` | N/A |
+| Bulk reschedule | `/bulk-reschedule` | N/A |
+| Import spec | `/spec-to-stories` → `/story-full` (per story) | ≥ 90% |
+| Tech debt audit | `/tech-debt-radar` → `/create-task` (prioritized) | N/A |
 
 **Rules:**
 
@@ -117,6 +123,12 @@ flowchart LR
 | `/sync-alignment` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
 | `/plan-sprint` | Sprint exists | — |
 | `/dependency-chain` | Sprint planned | — |
+| `/sprint-closer` | Active sprint with issues | Closed sprint + Confluence review page |
+| `/standup-digest` | Active sprint | Digest output (optional Confluence post) |
+| `/release-planner` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
+| `/bulk-reschedule` | Issues with dates | Updated dates + HR8 alignment |
+| `/spec-to-stories` | Confluence page + epic | Jira User Stories linked to epic |
+| `/tech-debt-radar` | Project with tech-debt issues | Confluence priority matrix page |
 
 ## Repomix Context Packs
 

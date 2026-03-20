@@ -89,6 +89,11 @@
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_hr7_sprint_id_guard.py",
 						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_story_size_guard.py",
+						"timeout": 5
 					}
 				]
 			},
@@ -160,11 +165,21 @@
 				]
 			},
 			{
-				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic",
+				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic|mcp__mcp-atlassian__jira_update_sprint",
 				"hooks": [
 					{
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_hr6_queue_invalidation.py",
+						"timeout": 5
+					}
+				]
+			},
+			{
+				"matcher": "mcp__mcp-atlassian__jira_update_issue",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/post_sprint_capacity_recheck.py",
 						"timeout": 5
 					}
 				]
@@ -296,7 +311,7 @@
 					},
 					{
 						"type": "prompt",
-						"prompt": "First: scan tool calls in this conversation. If none of these Jira write tools appear — jira_create_issue, jira_batch_create_issues, jira_update_issue, jira_transition_issue, jira_delete_issue, jira_add_comment, jira_add_worklog, jira_link_to_epic — respond {\"ok\": true} immediately. Otherwise verify: (1) subtask created → parent verified via jira_get_issue? (2) skill invoked (/story-full, /analyze-story, /plan-sprint) → all phases complete? (3) pending ops (not cache_invalidate) unresolved? Note: HR6 cache_invalidate is handled by command hook — skip it. Complete or Q&A only: {\"ok\": true}. Critical step skipped: {\"ok\": false, \"reason\": \"step missed\"}. Be conservative — only block if confident.",
+						"prompt": "First: scan tool calls in this conversation. If none of these Jira write tools appear \u2014 jira_create_issue, jira_batch_create_issues, jira_update_issue, jira_transition_issue, jira_delete_issue, jira_add_comment, jira_add_worklog, jira_link_to_epic \u2014 respond {\"ok\": true} immediately. Otherwise verify: (1) subtask created \u2192 parent verified via jira_get_issue? (2) skill invoked (/story-full, /analyze-story, /plan-sprint) \u2192 all phases complete? (3) pending ops (not cache_invalidate) unresolved? Note: HR6 cache_invalidate is handled by command hook \u2014 skip it. Complete or Q&A only: {\"ok\": true}. Critical step skipped: {\"ok\": false, \"reason\": \"step missed\"}. Be conservative \u2014 only block if confident.",
 						"timeout": 30
 					}
 				]
