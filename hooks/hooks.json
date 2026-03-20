@@ -139,6 +139,11 @@
 						"type": "command",
 						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_dor_check.py",
 						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "python3 \"${CLAUDE_PLUGIN_ROOT}\"/hooks/pre_wip_limit_check.py",
+						"timeout": 5
 					}
 				]
 			}
