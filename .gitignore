@@ -38,3 +38,6 @@ mcp-servers/jira-cache-server/.coverage
 # Claude Code ephemeral
 .claude/plans/
 
+
+# Git worktrees
+.worktrees/
