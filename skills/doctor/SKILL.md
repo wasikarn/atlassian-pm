@@ -74,7 +74,12 @@ else
 fi
 
 # Check 4: jira-cache-server venv
-VENV_PYTHON="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm}/venv/bin/python"
+# Claude Code names data dirs as "{plugin}-{marketplace}" — resolve dynamically if env not set
+if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
+  _DATA_PARENT="$HOME/.claude/plugins/data"
+  CLAUDE_PLUGIN_DATA=$(ls -d "$_DATA_PARENT"/atlassian-pm-* 2>/dev/null | head -1)
+fi
+VENV_PYTHON="${CLAUDE_PLUGIN_DATA}/venv/bin/python"
 if [ -f "$VENV_PYTHON" ]; then
   echo "  ✓  jira-cache-server venv ready"
   PASS=$((PASS+1))
@@ -136,8 +141,15 @@ else
 fi
 
 # Check 8: git filters configured
+# Skip when running from plugin cache (not a git repo — expected for cache installs)
+_IS_CACHE_INSTALL=false
+[[ "$PLUGIN_ROOT" == *"/.claude/plugins/cache/"* ]] && _IS_CACHE_INSTALL=true
+
 if [ -n "$PLUGIN_ROOT" ] && git -C "$PLUGIN_ROOT" config --get filter.project-config.smudge &>/dev/null; then
   echo "  ✓  git filters configured (smudge/clean)"
+  PASS=$((PASS+1))
+elif [ "$_IS_CACHE_INSTALL" = true ]; then
+  echo "  ✓  git filters n/a (cache install — filters live in source repo)"
   PASS=$((PASS+1))
 else
   echo "  !  git filters not configured"
