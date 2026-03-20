@@ -7,7 +7,6 @@ Symmetric with pre_dod_check.py (Done gate). This gate fires at the other end.
 Confirmation signal: CLAUDE_DOR_CONFIRMED=<issue_key> (set by Claude after manual check).
 Exit codes: 0 = allow (prints {}), 2 = block (prints reason to stderr)
 """
-import json
 import os
 import sys
 from pathlib import Path
