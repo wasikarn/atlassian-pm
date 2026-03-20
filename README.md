@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
 
-[![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-1.0.6-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -441,14 +441,22 @@ skills/                        ← 1 directory = 1 slash command
     ├── hr-rules.md            ← Hard rule definitions (HR1–HR10)
     └── troubleshooting.md     ← Common failures + fixes
 
-agents/                        ← 8 subagent definitions
-├── code-explorer.md (haiku)   ← Codebase exploration
-├── issue-reader.md (haiku)    ← Fast Jira issue fetch
-├── quality-gate.md (haiku)    ← ADF quality scoring
-├── story-writer.md (sonnet)   ← ADF JSON generation
-└── sprint-planner.md (opus)   ← Sprint capacity planning
+agents/                             ← 13 subagent definitions
+├── code-explorer.md (haiku)        ← Codebase exploration before sub-task creation
+├── issue-bootstrap.md (haiku)      ← Pre-fetch issue context in one coordinated pass
+├── issue-reader.md (haiku)         ← Fast Jira issue fetch (deprecated → issue-bootstrap)
+├── jira-search.md (haiku)          ← Jira search with natural language
+├── quality-gate.md (haiku)         ← ADF quality scoring (HR1 enforcement)
+├── pr-description-writer.md (haiku)← Generate PR description from branch + issue
+├── pr-review-jira-sync.md (haiku)  ← Sync merged PR back to Jira (transition + comment)
+├── velocity-tracker.md (haiku)     ← Track velocity history in project config
+├── story-writer.md (sonnet)        ← ADF JSON generation with QG self-fix loop
+├── alignment-checker.md (sonnet)   ← Check story↔subtask alignment (A1-A6)
+├── backlog-groomer.md (sonnet)     ← Backlog readiness checks before sprint planning
+├── retrospective-analyst.md (sonnet) ← Sprint retro analysis + Confluence page
+└── sprint-planner.md (sonnet)      ← Sprint capacity + distribution planning
 
-hooks/                         ← 40 Python hook scripts
+hooks/                         ← 42 Python hook scripts
 ├── hooks.json                 ← Plugin hook manifest
 ├── pre_hr*.py                 ← Block violations before tool execution
 └── post_hr*.py                ← Confirm post-execution state
