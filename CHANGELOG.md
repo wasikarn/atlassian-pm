@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-03-21
+
+### Fixed
+
+- `plugin.json` skills declaration changed from single string `"./skills/"` to explicit array of 7 category paths — required for Claude Code to discover skills in category subdirectories after the v1.3.0 restructure
+
+## [1.3.0] - 2026-03-21
+
+### Added
+
+- `scripts/test-install.sh` — automated install validation pipeline: remove → install → setup simulation → doctor (18 checks, 11 doctor checks); validates config backup/restore and venv recreation
+- `scripts/bump-version.sh` fully automated non-interactive mode — no prompts, reads title from latest commit, runs end-to-end
+
+### Changed
+
+- **Skills reorganized into 7 category subdirectories:** `setup/`, `epic/`, `story/`, `task/`, `sprint/`, `confluence/`, `utilities/` — slash-command skills only in `skills/`
+- **`references/`** moved from `skills/shared-references/` to project root — shared docs now at `references/` (24 files), skills reference via `../../../references/`
+- **Scripts consolidated:** `atlassian-scripts/` and `scripts/` merged into unified `scripts/` with `api/`, `lib/`, `sprint/`, `analysis/`, `docs/` subdirectories
+- **Thin SKILL.md wrapper** at `skills/utilities/atlassian-scripts/SKILL.md` — entry point pointing to `scripts/api/` and `scripts/docs/`
+- `.mcp.json` PYTHONPATH updated: `skills/atlassian-scripts` → `scripts`
+- All internal `sys.path` references in `scripts/sprint/*.py` updated
+- Hook paths updated: `hooks/plugin/guards/pre_hr1_quality_gate.py`, `pre_hr4_confluence_macro_guard.py`
+- `mcp-servers/jira-cache-server/server.py` sys.path updated to use `scripts/`
+
 ## [1.1.0] - 2026-03-20
 
 ### Added

@@ -445,7 +445,11 @@ scripts/                       ← All Python scripts + lib (merged atlassian-sc
 ├── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
 ├── sprint/                    ← Sprint management scripts
 ├── analysis/                  ← Analysis tools (AC mapper, impact suggester, QA matrix)
-└── docs/                      ← Script documentation (README, references, technical notes)
+├── docs/                      ← Script documentation (README, references, technical notes)
+├── setup.sh                   ← One-command setup (idempotent)
+├── bump-version.sh             ← Fully automated version bump + release
+├── test-install.sh             ← Install validation (remove → install → setup simulation → doctor, 18 checks)
+└── git_filter.py              ← Smudge/clean placeholder conversion
 
 agents/                                  ← 18 subagent definitions (3-layer architecture)
 │
@@ -483,9 +487,6 @@ hooks/                         ← 44 Python hook scripts
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (7 hooks)
 
 mcp-servers/jira-cache-server/ ← Local Jira cache (SQLite + FTS5 + embeddings)
-scripts/
-├── setup.sh                   ← One-command setup (idempotent)
-└── git_filter.py              ← Smudge/clean placeholder conversion
 ```
 
 ---
@@ -502,4 +503,4 @@ scripts/
 
 **Dev hot-reload** — after editing skill or agent files, use `/reload-plugins` in Claude Code.
 
-**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error) or a `version` field (version lives in `.claude-plugin/marketplace.json` only). `marketplace.json` must be in `.claude-plugin/` (not repo root).
+**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error) or a `version` field (version lives in `.claude-plugin/marketplace.json` only). `marketplace.json` must be in `.claude-plugin/` (not repo root). When skills are organized in category subdirectories, `skills` must be an array of paths (e.g., `["./skills/setup/", "./skills/story/"]`) — a single `"./skills/"` path will not discover nested categories.
