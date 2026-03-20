@@ -305,7 +305,8 @@ def _init() -> None:
     global cache, embeddings, jira_api
 
     cache = JiraCache()
-    embeddings = EmbeddingStore(cache.conn)
+    # C3: Pass shared write lock so EmbeddingStore serialises SQLite writes with JiraCache
+    embeddings = EmbeddingStore(cache.conn, cache._lock)
 
     try:
         creds = load_credentials()
@@ -382,7 +383,7 @@ def _find_issues_list(data: dict) -> tuple[list[dict] | None, dict | None, str |
     return None, None, None
 
 
-def _paginate_response(result_json: str) -> str:
+def _paginate_response(result_json: str, tool_name: str = "") -> str:
     """Level 2: Return a subset of issues that fits within MAX_RESPONSE_CHARS."""
     try:
         data = json.loads(result_json)
@@ -400,12 +401,17 @@ def _paginate_response(result_json: str) -> str:
     fits = min(fits, total)
 
     parent[key] = issues[:fits]
+    # M5: Only suggest start_at pagination for tools that actually support the parameter
+    if "start_at" in _TOOL_SCHEMAS.get(tool_name, {}):
+        hint = f"Call again with start_at={fits} to get next page"
+    else:
+        hint = f"Reduce batch size — returned {fits} of {total} items"
     data["_pagination"] = {
         "total": total,
         "returned": fits,
         "has_more": fits < total,
         "next_offset": fits,
-        "hint": f"Call again with start_at={fits} to get next page",
+        "hint": hint,
     }
 
     result = json.dumps(data, ensure_ascii=False)
@@ -504,8 +510,9 @@ async def handle_cache_get_issue(args: dict) -> str:
     try:
         issue = _timed_upstream(f"get_issue({issue_key})", jira_api.get_issue, issue_key, fields=fields)
         c.put_issue(issue_key, issue)
+        # C4: Run CPU-bound model inference off the event loop to avoid blocking
         if embeddings and embeddings.available:
-            embeddings.store_embedding(issue_key, _embedding_text(issue))
+            await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
         issue_data = _compact_issue(issue) if compact else issue
         return json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
     except Exception as e:
@@ -516,12 +523,12 @@ async def handle_cache_get_issue(args: dict) -> str:
             return json.dumps(
                 {
                     "source": "stale_cache",
-                    "warning": f"Upstream failed ({e}), returning stale data",
+                    "warning": f"Upstream failed ({type(e).__name__}: {str(e)[:200]}), returning stale data",
                     "issue": issue_data,
                 },
                 ensure_ascii=False,
             )
-        return json.dumps({"error": f"Failed to fetch {issue_key}: {e}"})
+        return json.dumps({"error": f"Failed to fetch {issue_key}: {type(e).__name__}: {str(e)[:200]}"})
 
 
 # --- P1-F: Batch get issues handler ---
@@ -536,6 +543,18 @@ async def handle_cache_get_issues(args: dict) -> str:
 
     # Cap batch size to prevent excessive upstream calls
     issue_keys = issue_keys[:MAX_ISSUE_KEYS_BATCH]
+
+    # S1: Validate key format — mirrors single-issue path (batch path previously skipped this)
+    valid_keys: list[str] = []
+    invalid_keys: list[str] = []
+    for k in issue_keys:
+        try:
+            valid_keys.append(_validate_issue_key(k))
+        except ValueError:
+            invalid_keys.append(k)
+    issue_keys = valid_keys
+    if not issue_keys:
+        return json.dumps({"error": f"No valid issue keys provided. Invalid: {invalid_keys}"})
 
     fields = args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description")
     max_age = args.get("max_age_hours", 24)
@@ -579,17 +598,17 @@ async def handle_cache_get_issues(args: dict) -> str:
     if compact:
         all_issues = [_compact_issue(i) for i in all_issues]
 
-    return json.dumps(
-        {
-            "source": "batch",
-            "total": len(all_issues),
-            "from_cache": len(found_issues),
-            "from_upstream": len(upstream_issues),
-            "still_missing": [k for k in missing_keys if k not in {i.get("key") for i in upstream_issues}],
-            "issues": all_issues,
-        },
-        ensure_ascii=False,
-    )
+    result: dict = {
+        "source": "batch",
+        "total": len(all_issues),
+        "from_cache": len(found_issues),
+        "from_upstream": len(upstream_issues),
+        "still_missing": [k for k in missing_keys if k not in {i.get("key") for i in upstream_issues}],
+        "issues": all_issues,
+    }
+    if invalid_keys:
+        result["invalid_keys"] = invalid_keys
+    return json.dumps(result, ensure_ascii=False)
 
 
 async def handle_cache_search(args: dict) -> str:
@@ -627,7 +646,7 @@ async def handle_cache_search(args: dict) -> str:
                 embeddings.store_batch(results.get("issues", []))
             source = "upstream"
         except Exception as e:
-            return json.dumps({"error": f"Search failed: {e}"})
+            return json.dumps({"error": f"Search failed: {type(e).__name__}: {str(e)[:200]}"})
 
     # Apply response-level offset (pagination page 2+)
     if start_at > 0:
@@ -641,6 +660,9 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     """Get sprint issues with caching."""
     c = _require_cache()
     sprint_id = args["sprint_id"]
+    # S7: Ensure sprint_id is an integer before interpolating into JQL to prevent injection
+    if not isinstance(sprint_id, int):
+        return json.dumps({"error": f"sprint_id must be an integer, got: {type(sprint_id).__name__}"})
     fields = args.get("fields", "summary,status,assignee,issuetype,priority,labels")
     max_age = args.get("max_age_hours", 2)
     force_refresh = args.get("force_refresh", False)
@@ -654,14 +676,14 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     if not force_refresh:
         cached = c.get_search(jql, fields, 50, max_age_hours=max_age)
         if cached:
-            logger.info("Sprint cache HIT: %d", sprint_id)
+            logger.info("Sprint cache HIT: %s", sprint_id)
             results = cached
 
     if results is None:
         if not jira_api:
             return json.dumps({"error": "Sprint not in cache and upstream API not available"})
 
-        logger.info("Sprint cache MISS: %d — fetching upstream", sprint_id)
+        logger.info("Sprint cache MISS: %s — fetching upstream", sprint_id)
         try:
             all_issues: list[dict] = []
             upstream_offset = 0
@@ -688,7 +710,7 @@ async def handle_cache_sprint_issues(args: dict) -> str:
                 embeddings.store_batch(all_issues)
             source = "upstream"
         except Exception as e:
-            return json.dumps({"error": f"Sprint fetch failed: {e}"})
+            return json.dumps({"error": f"Sprint fetch failed: {type(e).__name__}: {str(e)[:200]}"})
 
     # Apply response-level offset (pagination page 2+)
     if response_offset > 0:
@@ -758,10 +780,16 @@ async def handle_cache_refresh(args: dict) -> str:
     if not jira_api:
         return json.dumps({"error": "Upstream API not available"})
 
+    issue_keys = args.get("issue_keys", [])
+    sprint_id = args.get("sprint_id")
+
+    # SILENT-NOOP: Return clear error instead of misleading {"refreshed": 0}
+    if not issue_keys and sprint_id is None:
+        return json.dumps({"error": "Specify issue_keys or sprint_id"})
+
     refreshed = []
 
     # Refresh specific issues — concurrent HTTP via asyncio.to_thread
-    issue_keys = args.get("issue_keys", [])
     if issue_keys:
         async def _refresh_one(key: str) -> tuple[str, dict | None]:
             try:
@@ -786,7 +814,6 @@ async def handle_cache_refresh(args: dict) -> str:
             await asyncio.to_thread(embeddings.store_batch, refreshed_issues)
 
     # Refresh sprint
-    sprint_id = args.get("sprint_id")
     if sprint_id:
         try:
             c.invalidate_sprint(sprint_id)
@@ -837,6 +864,11 @@ async def handle_cache_invalidate(args: dict) -> str:
 
     issue_key = args.get("issue_key")
     if issue_key:
+        # M3: Validate key format — prevents spurious upstream calls on garbage input
+        try:
+            issue_key = _validate_issue_key(issue_key)
+        except ValueError as e:
+            return json.dumps({"error": str(e)})
         removed = c.invalidate_issue(issue_key)
         if embeddings:
             embeddings.remove_embedding(issue_key)
@@ -850,8 +882,9 @@ async def handle_cache_invalidate(args: dict) -> str:
                     issue_key,
                 )
                 c.put_issue(issue_key, issue)
+                # C4: Run CPU-bound model inference off the event loop to avoid blocking
                 if embeddings and embeddings.available:
-                    embeddings.store_embedding(issue_key, _embedding_text(issue))
+                    await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
                 # M9: strip_noise on auto_refresh response
                 clean_issue = strip_noise(issue)
                 return json.dumps(
@@ -899,7 +932,9 @@ def _coerce_args(name: str, args: dict[str, Any]) -> dict[str, Any]:
         return args
 
     coerced = dict(args)
-    for key, value in coerced.items():
+    # M6: Snapshot items before iterating — mutating a dict during iteration is
+    # safe on CPython but undefined per spec (would raise on PyPy/alternate runtimes)
+    for key, value in list(coerced.items()):
         if not isinstance(value, str):
             continue
         expected = schema.get(key)
@@ -918,7 +953,12 @@ def _coerce_args(name: str, args: dict[str, Any]) -> dict[str, Any]:
                 coerced[key] = float(value)
             elif expected == "boolean":
                 coerced[key] = value.lower() in ("true", "1", "yes")
-        except (ValueError, AttributeError):
+            elif expected == "array":
+                # ARRAY-COERCE: Handle JSON-encoded array strings (e.g. "[\"BEP-1\",\"BEP-2\"]")
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    coerced[key] = parsed
+        except (ValueError, AttributeError, json.JSONDecodeError):
             pass  # Leave as-is if conversion fails
     return coerced
 
@@ -968,7 +1008,7 @@ async def main() -> None:  # pragma: no cover
             if len(result) > MAX_RESPONSE_CHARS:
                 # Level 2: Paginate (return subset with has_more)
                 logger.warning("L2 paginate: %d chars for %s", len(result), name)
-                result = _paginate_response(result)
+                result = _paginate_response(result, name)
 
             if len(result) > MAX_RESPONSE_CHARS:
                 # Level 3: Compact (replace issues with minimal summaries)

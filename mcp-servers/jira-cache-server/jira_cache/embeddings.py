@@ -14,6 +14,7 @@ Usage:
 import logging
 import sqlite3
 import struct
+import threading
 from typing import Any
 
 from .cache import extract_adf_text
@@ -47,7 +48,9 @@ def _load_sqlite_vec(conn: sqlite3.Connection) -> bool:
         logger.debug("sqlite-vec extension loaded")
         return True
     except (ImportError, AttributeError, sqlite3.OperationalError) as e:
-        logger.warning("sqlite-vec not available: %s", e)
+        logger.warning(
+            "sqlite-vec not available: %s — run `uv sync --extra embeddings` to enable semantic search", e
+        )
         return False
 
 
@@ -107,10 +110,14 @@ class EmbeddingStore:
     Attributes:
         conn: SQLite connection (shared with JiraCache).
         available: Whether sqlite-vec is loaded and ready.
+        _lock: Shared JiraCache write lock; prevents concurrent SQLite writes.
     """
 
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(self, conn: sqlite3.Connection, lock: threading.Lock | None = None) -> None:
         self.conn = conn
+        # C3: Accept shared JiraCache._lock to serialize SQLite writes across both classes.
+        # Falls back to a private lock when used standalone (e.g. tests).
+        self._lock = lock if lock is not None else threading.Lock()
         self.available = _load_sqlite_vec(conn)
         if self.available:
             self._init_schema()
@@ -172,11 +179,12 @@ class EmbeddingStore:
 
         try:
             vec = self.generate_embedding(text)
-            self.conn.execute(
-                "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
-                (issue_key, _serialize_f32(vec)),
-            )
-            self.conn.commit()
+            with self._lock:
+                self.conn.execute(
+                    "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
+                    (issue_key, _serialize_f32(vec)),
+                )
+                self.conn.commit()
             logger.debug("Stored embedding for %s", issue_key)
             return True
         except Exception as e:
@@ -270,12 +278,13 @@ class EmbeddingStore:
                 (key, _serialize_f32(vec))
                 for (key, _), vec in zip(items, vectors, strict=True)
             ]
-            self.conn.executemany(
-                "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
-                rows,
-            )
-            count = len(rows)
-            self.conn.commit()
+            with self._lock:
+                self.conn.executemany(
+                    "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
+                    rows,
+                )
+                count = len(rows)
+                self.conn.commit()
             logger.info("Batch stored %d embeddings (single commit)", count)
         except Exception as e:
             logger.error("Batch embedding store failed: %s", e)
@@ -288,11 +297,12 @@ class EmbeddingStore:
             return False
 
         try:
-            self.conn.execute(
-                "DELETE FROM issue_embeddings WHERE issue_key = ?",
-                (issue_key,),
-            )
-            self.conn.commit()
+            with self._lock:
+                self.conn.execute(
+                    "DELETE FROM issue_embeddings WHERE issue_key = ?",
+                    (issue_key,),
+                )
+                self.conn.commit()
             return True
         except Exception as e:
             logger.error("Failed to remove embedding %s: %s", issue_key, e)

@@ -26,7 +26,10 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
-DEFAULT_DB_PATH = (Path(_plugin_data) if _plugin_data else Path.home() / ".cache" / "atlassian-pm") / "jira.db"
+# S2: Resolve path to prevent traversal attacks via malformed CLAUDE_PLUGIN_DATA
+DEFAULT_DB_PATH = (
+    Path(os.path.abspath(_plugin_data)) if _plugin_data else Path.home() / ".cache" / "atlassian-pm"
+) / "jira.db"
 
 # Current schema version — increment when adding migrations
 SCHEMA_VERSION = 3
@@ -840,10 +843,11 @@ class JiraCache:
         """Flush buffered stats to SQLite.
 
         L2: Uses _stat_lock (not _lock) to avoid contention with DB writes.
+        C1: Guard check moved inside lock to eliminate TOCTOU race.
         """
-        if self._stat_buffer_count == 0:
-            return
         with self._stat_lock:
+            if self._stat_buffer_count == 0:
+                return
             snapshot = {k: v for k, v in self._stat_buffer.items() if v > 0}
             self._stat_buffer = {k: 0 for k in self._stat_buffer}
             self._stat_buffer_count = 0
@@ -860,8 +864,10 @@ class JiraCache:
         """Get stat value from DB plus unflushed buffer for accurate real-time reads."""
         row = self.conn.execute("SELECT value FROM cache_stats WHERE key = ?", (key,)).fetchone()
         db_val = row[0] if row else 0
-        # Add unflushed buffer
-        return db_val + self._stat_buffer.get(key, 0)
+        # C2: Lock buffer read to avoid race with concurrent _incr_stat
+        with self._stat_lock:
+            buffered = self._stat_buffer.get(key, 0)
+        return db_val + buffered
 
     def get_adaptive_ttl(self, issue_key: str) -> float:
         """Get TTL based on issue status. Done=7d, Active=6h, else=24h."""
