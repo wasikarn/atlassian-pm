@@ -11,7 +11,7 @@ Repair ADF JSON structure for Jira compatibility. Applied after quality-gate ide
 
 ## Input
 
-- Path to ADF JSON file (e.g., `tasks/story.json` or `tasks/subtask-be.json`)
+- Path to ADF JSON file (e.g., `{{artifacts_dir}}/story.json` or `{{artifacts_dir}}/subtask-be.json`)
 - List of issues from quality-gate output (optional — if not provided, run own structural scan)
 
 ## Jira ADF Quirks Embedded Knowledge

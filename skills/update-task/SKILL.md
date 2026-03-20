@@ -93,7 +93,7 @@ Ask the user what they want to update:
 
 ### 4. Generate Update
 
-Generate ADF JSON → `tasks/bep-xxx-update.json`
+Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
 
 **EDIT format (do not include projectKey, type, summary):**
 
@@ -139,7 +139,7 @@ Would you like to apply these changes?
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json tasks/bep-xxx-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

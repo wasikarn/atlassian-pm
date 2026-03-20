@@ -57,7 +57,7 @@ What type of Task do you want to create?
 
 ### 2. Generate Template
 
-Generate ADF JSON based on task type → `tasks/bep-xxx-task.json`
+Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
 
 **tech-debt Template:**
 
@@ -161,7 +161,7 @@ Show preview for user to review:
 **Sections:**
 - [list of sections with emoji]
 
-**Files:** tasks/bep-xxx-task.json
+**Files:** {{artifacts_dir}}/bep-xxx-task.json
 
 Any changes needed before creating?
 ```
@@ -178,7 +178,7 @@ Any changes needed before creating?
 ### 5. Create
 
 ```bash
-acli jira workitem create --from-json tasks/bep-xxx-task.json
+acli jira workitem create --from-json {{artifacts_dir}}/bep-xxx-task.json
 ```
 
 **Capture issue key from output** for use in summary

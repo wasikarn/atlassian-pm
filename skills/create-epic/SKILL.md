@@ -108,7 +108,7 @@ Skip interview questions in Phase 1 for information already documented.
 
 1. **Epic Doc** → `MCP: confluence_create_page(space_key: "{{PROJECT_KEY}}")`
    - Include VS Map table in Epic Doc
-2. **Epic** → `acli jira workitem create --from-json tasks/epic.json`
+2. **Epic** → `acli jira workitem create --from-json {{artifacts_dir}}/epic.json`
    - Add labels: feature label + `vs-planned`
 3. **Link** Epic to Doc
 

@@ -80,7 +80,7 @@ argument-hint: "[issue-key]"
 > ⚠️ Use **Two-Step Workflow** (see [Subtask Template](../shared-references/templates-subtask.md)):
 >
 > **Step 1:** MCP `jira_create_issue` → summary: `[QA] - Test: [Feature Name]`, parent: `{{PROJECT_KEY}}-XXX`
-> **Step 2:** `acli jira workitem edit --from-json tasks/bep-xxx-qa.json --yes`
+> **Step 2:** `acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-qa.json --yes`
 >
 > ⚠️ EDIT JSON uses `"issues": ["ABC-QQQ"]` (not `"parent"` or `"parentKey"`)
 

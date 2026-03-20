@@ -309,6 +309,11 @@
 						"type": "command",
 						"command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
 						"timeout": 60
+					},
+					{
+						"type": "command",
+						"command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}/tasks\"",
+						"timeout": 5
 					}
 				]
 			},

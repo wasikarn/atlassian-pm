@@ -232,15 +232,15 @@ Validate ADF JSON against quality gate before writing to Jira. Enforces HR1 (QG 
 ```bash
 # Validate story ADF
 python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
-  tasks/story.json --type story
+  {{artifacts_dir}}/story.json --type story
 
 # Auto-fix + re-validate → writes -fixed.json
 python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
-  tasks/story.json --type story --fix
+  {{artifacts_dir}}/story.json --type story --fix
 
 # JSON output (for piping)
 python3 .claude/skills/atlassian-scripts/scripts/validate_adf.py \
-  tasks/story.json --type story --json
+  {{artifacts_dir}}/story.json --type story --json
 
 # Options: --verbose (show all checks) | --summary-only
 ```
@@ -333,15 +333,15 @@ Unified write pipeline with all HARD RULES enforced at every step.
 ```bash
 # Create subtask (full 5-step pipeline)
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
-  --parent ABC-1200 --adf tasks/sub.json --assignee user@email.com
+  --parent ABC-1200 --adf {{artifacts_dir}}/sub.json --assignee user@email.com
 
 # Update description only
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py update-description \
-  --issue ABC-1234 --adf tasks/fixed.json --type story
+  --issue ABC-1234 --adf {{artifacts_dir}}/fixed.json --type story
 
 # Dry run (validate only, no writes)
 python3 .claude/skills/atlassian-scripts/scripts/jira_write.py create-subtask \
-  --parent ABC-1200 --adf tasks/sub.json --dry-run
+  --parent ABC-1200 --adf {{artifacts_dir}}/sub.json --dry-run
 ```
 
 ### Subcommands
@@ -425,7 +425,7 @@ python3 .claude/skills/atlassian-scripts/scripts/workflow_checkpoint.py cleanup
 | `complete` | Mark workflow as completed |
 | `cleanup` | Remove stale state files (>24h TTL) |
 
-State persists in `tasks/.workflow-state.json`. Auto-clears after 24h.
+State persists in `{{artifacts_dir}}/.workflow-state.json`. Auto-clears after 24h.
 
 **Exit codes:** 0=success/met, 1=not met/failed, 2=error
 

@@ -65,7 +65,7 @@ MCP: jira_create_issue({
 
 - If parent missing → fix via REST API or re-create
 
-**Step 3:** `acli jira workitem edit --from-json tasks/subtask-xxx.json --yes`
+**Step 3:** `acli jira workitem edit --from-json {{artifacts_dir}}/subtask-xxx.json --yes`
 
 **Batch (≥3 subtasks):** Create all shells → verify all parents → batch edit descriptions
 

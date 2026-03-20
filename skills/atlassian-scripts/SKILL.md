@@ -119,13 +119,13 @@ What do you need to do?
     │     └─ update_jira_description.py --config fixes.json
     │
     ├─ Validate ADF before Jira write (HR1)
-    │     └─ validate_adf.py tasks/story.json --type story [--fix]
+    │     └─ validate_adf.py {{artifacts_dir}}/story.json --type story [--fix]
     │
     ├─ Verify writes took effect (HR3/HR5/HR6)
     │     └─ verify_write.py ABC-1234 --check parent,assignee
     │
     ├─ Create subtask (full pipeline)
-    │     └─ jira_write.py create-subtask --parent ABC-1200 --adf tasks/sub.json
+    │     └─ jira_write.py create-subtask --parent ABC-1200 --adf {{artifacts_dir}}/sub.json
     │
     ├─ Set parent (Epic) on existing issues
     │     └─ jira_set_parent.py --issues ABC-3331,ABC-3332 --parent ABC-3197

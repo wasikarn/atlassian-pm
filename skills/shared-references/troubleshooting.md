@@ -62,7 +62,7 @@ jira_create_issue({
 ```
 
 ```bash
-acli jira workitem edit --from-json tasks/subtask.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/subtask.json --yes
 ```
 
 ### Authentication Errors
@@ -242,7 +242,7 @@ jira_get_issue(
 
 ```bash
 # Validate JSON syntax
-cat tasks/issue.json | jq .
+cat {{artifacts_dir}}/issue.json | jq .
 
 # Test acli connection
 acli jira issue get ABC-1

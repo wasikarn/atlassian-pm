@@ -64,7 +64,7 @@ argument-hint: "[issue-key] [changes]"
 
 ### 4. Generate Update
 
-- Generate ADF JSON → `tasks/bep-xxx-epic-update.json`
+- Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-epic-update.json`
 - Show comparison: Before/After for RICE, objectives, scope
 - **⛔ GATE — DO NOT APPLY** without user approval of all generated changes.
 
@@ -80,7 +80,7 @@ argument-hint: "[issue-key] [changes]"
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json tasks/bep-xxx-epic-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-epic-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

@@ -143,8 +143,8 @@ So that [benefit].
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate to user only if still < 90% after 2 attempts.
 > HR1: DO NOT send Story to Atlassian without QG ≥ 90%.
 
-1. Generate ADF JSON → `tasks/story.json`
-2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `tasks/story.json` + issue type `story`. Receives: `{score, status, checks_failed[], auto_fixable}`.
+1. Generate ADF JSON → `{{artifacts_dir}}/story.json`
+2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Receives: `{score, status, checks_failed[], auto_fixable}`.
 3. If `status = PASS` (≥ 90%) → proceed to Phase 4 automatically
 4. If `status = FAIL` and `auto_fixable = yes` → apply fixes → re-invoke quality-gate (max 1 re-invoke)
 5. If still FAIL after re-invoke → escalate to user with the failed check list
@@ -154,7 +154,7 @@ So that [benefit].
 > **🟢 AUTO** — If Phase 3b QG passed → create automatically. No user interaction needed.
 
 ```bash
-acli jira workitem create --from-json tasks/story.json
+acli jira workitem create --from-json {{artifacts_dir}}/story.json
 ```
 
 **Labels (MANDATORY):** Feature label + VS label (e.g., `coupon-web`, `vs2-collect-e2e`)
@@ -286,7 +286,7 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 
-For each subtask ADF JSON in `tasks/`:
+For each subtask ADF JSON in `{{artifacts_dir}}/`:
 
 1. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass subtask JSON path + issue type `subtask`. Receives: `{score, status, checks_failed[], auto_fixable}`.
 2. If `status = PASS` → proceed
@@ -323,8 +323,8 @@ MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
 # ⚠️ HR8: Distribute subtask dates evenly within parent date range
 
 # Step 3: Update descriptions
-acli jira workitem edit --from-json tasks/subtask-be.json --yes
-acli jira workitem edit --from-json tasks/subtask-fe.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/subtask-be.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/subtask-fe.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.

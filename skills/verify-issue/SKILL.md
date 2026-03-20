@@ -118,7 +118,7 @@ Alignment Issues (--with-subtasks):
 If `--fix` is present → apply all fixes found in Phases 2-4:
 
 1. **Load Templates** — Fetch template for the issue type from `shared-references/`
-2. **Generate** — Preserve original intent, apply template + ADF + Thai + inline code → `tasks/bep-xxx-fixed.json`
+2. **Generate** — Preserve original intent, apply template + ADF + Thai + inline code → `{{artifacts_dir}}/bep-xxx-fixed.json`
 3. **Gate:** User reviews and approves
 
    **ADF Surgery (if auto-fixable structural issues found)**
@@ -129,7 +129,7 @@ If `--fix` is present → apply all fixes found in Phases 2-4:
 
    ```text
    Agent(name: "adf-surgeon"):
-     file_path: tasks/[issue_key].json
+     file_path: {{artifacts_dir}}/[issue_key].json
      issues: [list of auto-fixable structural issues from Phases 2-3 checks]
    ```
 
@@ -139,8 +139,8 @@ If `--fix` is present → apply all fixes found in Phases 2-4:
    - Proceed to acli write with the repaired file
    - HR6: `cache_invalidate(issue_key)` after write (as normal)
 
-4. **Apply** — `acli jira workitem edit --from-json tasks/bep-xxx-fixed.json --yes`
-5. **Cleanup** — `rm tasks/bep-*-fixed.json`
+4. **Apply** — `acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-fixed.json --yes`
+5. **Cleanup** — `rm {{artifacts_dir}}/bep-*-fixed.json`
 
 ```text
 ## Fix Complete

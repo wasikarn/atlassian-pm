@@ -144,7 +144,7 @@ If any check fails → auto-adjust subtask scope/design → re-check. Escalate t
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 
-For each subtask ADF JSON in `tasks/`:
+For each subtask ADF JSON in `{{artifacts_dir}}/`:
 
 1. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass subtask JSON path + issue type `subtask`. Receives: `{score, status, checks_failed[], auto_fixable}`.
 2. If `status = PASS` → proceed
@@ -192,7 +192,7 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 > When creating ≥3 sub-tasks, use batch pattern to save tokens:
 >
 > 1. Create all shells with MCP (parallel calls)
-> 2. Write all ADF JSON as files in `tasks/`
+> 2. Write all ADF JSON as files in `{{artifacts_dir}}/`
 > 3. Run `acli edit --from-json` sequentially (or Python script for batch >5)
 
 ---

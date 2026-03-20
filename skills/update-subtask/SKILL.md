@@ -65,7 +65,7 @@ argument-hint: "[issue-key] [changes]"
 ### 4. Generate Update
 
 - If file paths need updating → `Task(Explore)`
-- Generate ADF JSON → `tasks/bep-xxx-update.json`
+- Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
 - Show Before/After comparison
 - **⛔ GATE — DO NOT APPLY** without user approval of all generated changes.
 
@@ -81,7 +81,7 @@ argument-hint: "[issue-key] [changes]"
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json tasks/bep-xxx-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

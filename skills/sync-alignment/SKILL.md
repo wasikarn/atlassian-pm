@@ -132,7 +132,7 @@ Fetch full description only for artifacts with impact = UPDATE:
 **Per Jira issue:**
 
 - `MCP: jira_get_issue(issue_key, fields="summary,description")`
-- Generate ADF JSON → `tasks/sync-bep-xxx.json`
+- Generate ADF JSON → `{{artifacts_dir}}/sync-bep-xxx.json`
 - Show before/after comparison
 
 **Per Confluence page:**
@@ -140,7 +140,7 @@ Fetch full description only for artifacts with impact = UPDATE:
 - `MCP: confluence_get_page(page_id)`
 - If surgical (text replace) → prepare find/replace pairs
 - If section update → generate new markdown section
-- If full rewrite → generate full content → `tasks/sync-page-xxx.md`
+- If full rewrite → generate full content → `{{artifacts_dir}}/sync-page-xxx.md`
 
 **⛔ GATE — DO NOT EXECUTE** any sync without user approval of ALL generated updates.
 
@@ -162,7 +162,7 @@ Order: Parents first → Children → Confluence
 | Fields only | MCP `jira_update_issue` | — |
 | Code blocks/macros | — | `update_page_storage.py` |
 
-File pattern: `tasks/sync-bep-{type}.json` (Jira) / `tasks/sync-page-xxx.md` (Confluence)
+File pattern: `{{artifacts_dir}}/sync-bep-{type}.json` (Jira) / `{{artifacts_dir}}/sync-page-xxx.md` (Confluence)
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after EVERY Atlassian write.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
@@ -173,11 +173,11 @@ File pattern: `tasks/sync-bep-{type}.json` (Jira) / `tasks/sync-page-xxx.md` (Co
 
 > **🟢 AUTO** — Verify all artifacts automatically. Report results.
 
-Verify with `audit_confluence_pages.py --config tasks/sync-audit.json`
+Verify with `audit_confluence_pages.py --config {{artifacts_dir}}/sync-audit.json`
 
 Output: Summary table (Artifact, Action, Status) + flagged items for review.
 
-Post-sync: `rm tasks/sync-*.json tasks/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
+Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
 
 ---
 
