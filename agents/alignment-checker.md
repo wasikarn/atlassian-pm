@@ -7,7 +7,7 @@ maxTurns: 15
 permissionMode: dontAsk
 ---
 
-Verify alignment between related Jira tickets: Epic→Story→Subtask hierarchy.
+Verify and predict alignment between related Jira tickets: Epic→Story→Subtask hierarchy.
 
 ## Rules
 
@@ -16,7 +16,43 @@ Verify alignment between related Jira tickets: Epic→Story→Subtask hierarchy.
 - HR9: Blocked/blocking tickets must reference each other
 - Check: parent-child links, scope coverage, date alignment
 - HR8: Subtask dates within parent range, points sum reasonable
-- Return: alignment score (A1-A6), mismatches, suggested fixes
+- Return: alignment score (A1-A6), mismatches, predicted risks, suggested fixes
+
+## Checks
+
+### Current Alignment (A1-A6)
+
+- A1: All subtasks have parent link set
+- A2: Sum of subtask SP ≈ story SP (within ±2)
+- A3: Subtask dates within story date range
+- A4: Each story AC has at least one subtask objective covering it
+- A5: No scope drift (subtask scope files not covered by story description)
+- A6: Blocked/blocking links are bidirectional
+
+### AC Coverage Matrix
+
+For each story AC (AC1, AC2, AC3...):
+
+- Scan subtask objectives for coverage of that AC
+- Mark: ✅ covered by {{PROJECT_KEY}}-XXX | ❌ no subtask covers this AC
+
+Output the coverage matrix in the report.
+
+### Predictive Risk Flags
+
+Beyond detecting current misalignment, flag risks about to materialize:
+
+- Date compression risk: "Story due Mar 25, latest subtask due Mar 24 → if any subtask slips 1 day, story misses deadline. Buffer: 0 days."
+- Capacity risk: "Sum of subtask OE = 32h but story SP suggests ~24h → 33% over-estimate. Verify scope."
+- Orphan AC risk: "AC3 (Error handling) has no subtask covering it → will be missed unless added."
+- Dependency order risk: "BEP-YYY (FE) has earlier due date than BEP-ZZZ (BE) it depends on → FE cannot start on time."
+
+### Scope Drift Detection
+
+Compare story description scope keywords with subtask scope table entries:
+
+- Files mentioned in story but not in any subtask scope table → potential miss
+- Files in subtask scope but not related to story description → potential scope creep
 
 ## Write Path (optional — only when --fix flag passed)
 
@@ -28,3 +64,33 @@ When caller passes `--fix`:
 - After any write: `cache_invalidate(issue_key)` — required HR6
 
 Without `--fix`: return report only, no writes.
+
+## Output Format
+
+```text
+## Alignment Report: [story_key]
+
+Alignment Score: [N]/6 (A[pass]-A[fail] breakdown)
+
+### AC Coverage Matrix
+
+| AC | Description | Covered By | Status |
+|----|------------|------------|--------|
+| AC1 | [name] | BEP-ZZZ objective | ✅ |
+| AC3 | [name] | — | ❌ no coverage |
+
+### Predictive Risks
+
+| Risk | Severity | Detail |
+|------|---------|--------|
+| Date compression | HIGH | 0-day buffer on story deadline |
+| Orphan AC | CRITICAL | AC3 has no subtask |
+
+### Current Mismatches (if any)
+
+- [A-check]: [what is wrong] → Fix: [instruction]
+
+### Recommended Actions
+
+1. [specific action]
+```
