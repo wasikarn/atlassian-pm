@@ -74,15 +74,25 @@ else
 fi
 
 # Check 4: jira-cache-server venv
-# Claude Code names data dirs as "{plugin}-{marketplace}" — resolve dynamically if env not set
-if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
-  _DATA_PARENT="$HOME/.claude/plugins/data"
-  CLAUDE_PLUGIN_DATA=$(ls -d "$_DATA_PARENT"/atlassian-pm-* 2>/dev/null | head -1)
-fi
-VENV_PYTHON="${CLAUDE_PLUGIN_DATA}/venv/bin/python"
+# Data dir name is always "{plugin_name}-{marketplace_name}" = "atlassian-pm-atlassian-pm"
+DATA_DIR="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
+VENV_PYTHON="$DATA_DIR/venv/bin/python"
 if [ -f "$VENV_PYTHON" ]; then
   echo "  ✓  jira-cache-server venv ready"
   PASS=$((PASS+1))
+elif command -v uv &>/dev/null && [ -n "$PLUGIN_ROOT" ]; then
+  echo "  ~  jira-cache-server venv missing — recreating..."
+  mkdir -p "$DATA_DIR"
+  if uv venv "$DATA_DIR/venv" --quiet 2>/dev/null && \
+     uv pip install --python "$DATA_DIR/venv/bin/python" \
+       "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --quiet 2>/dev/null; then
+    echo "  ✓  jira-cache-server venv recreated"
+    PASS=$((PASS+1))
+  else
+    echo "  ✗  jira-cache-server venv recreation failed"
+    echo "     → Run: /atlassian-pm:setup"
+    FAIL=$((FAIL+1))
+  fi
 else
   echo "  !  jira-cache-server venv missing (cache features degraded)"
   echo "     → Run: /atlassian-pm:setup"
