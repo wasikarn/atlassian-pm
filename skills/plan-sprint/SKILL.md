@@ -217,6 +217,27 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 **Output:** Risk flags with severity + mitigation
 
+### Risk Assessment
+
+> **🟡 REVIEW** — Run risk-forecaster with sprint-planner output. Present findings. Proceed unless user objects.
+
+```text
+Agent(name: "risk-forecaster"):
+  sprint_id: [sprint_id from lookup]
+  sprint_name: [sprint_name]
+  carry_over_sp: [carry-over SP total from sprint-planner output]
+  utilization_table: [member utilization% from sprint-planner Recommended Assignments table]
+  p2_item_count: [count of P2 items from sprint-planner Prioritized Items table]
+```
+
+Present the Risk Forecast to user. If MEDIUM or higher risk:
+
+- Show Specific Risks section
+- Show Adjusted Risk if mitigations applied
+- Ask: "Apply recommended mitigations before finalizing? (yes/no)"
+
+If user accepts mitigations → apply sprint changes (remove items, add pairing notes) before proceeding to Phase 7.
+
 ## Part C: Approval & Execution (Phases 7-8) — Execution Layer
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
