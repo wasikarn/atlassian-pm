@@ -24,12 +24,7 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 
 ## Pre-Meeting Checklist
 
-> See [Sprint Frameworks](../shared-references/sprint-frameworks.md) for full details
-
-- [ ] **Timebox set:** 45 min × weeks (e.g., 2-week sprint = 90 min)
-- [ ] **PO prepared:** Backlog refined, top items have ACs
-- [ ] **Team prepared:** Capacity conflicts identified, carry-over updated
-- [ ] **Sprint goal draft:** SMART format ready
+> See [references/pre-meeting-checklist.md](references/pre-meeting-checklist.md) for the pre-meeting preparation checklist.
 
 ## ⚠️ Critical: Capacity Before Assignment
 
@@ -61,8 +56,6 @@ argument-hint: "[--sprint <id>] [--carry-over-only]"
 > **Workflow Patterns:** See [workflow-patterns.md](../shared-references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Part A: Data Collection (Phases 1-2) — Execution Layer
-
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
 
 ### 1. Sprint Discovery
 
@@ -131,7 +124,6 @@ Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw th
 
 ## Part B: Strategy Analysis (Phases 3-6)
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
 > **🟢 AUTO** — Phases 3-6 delegated to `sprint-planner` agent. All automated. Escalate only on incomplete data.
 
 ```text
@@ -184,22 +176,7 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 **Input:** Prioritized items + team capacity (hours) + carry-over + skill profiles
 **Method:** Skill matrix match → existing context → hours capacity check → grouping
 
-**Assignment Algorithm:**
-
-1. For each item, determine required skill area (from service tag: [BE]→backend, [FE-Admin]→frontend_admin, etc.)
-2. Score each team member: `Match Score = skill_level × (1 + context_bonus)`
-   - expert=1.0, intermediate=0.8, basic=0.6
-   - context_bonus=0.2 if member has related carry-over items
-3. Check hours capacity: `Available Hours ≥ Estimated Hours` for the item (read from `timetracking.originalEstimate` if set, else estimate from ADF panel)
-4. Assign to highest score member with available capacity
-
-**Rules:**
-
-- Related items → same person (reduce context switching)
-- Blockers → prioritize (unblock others)
-- Critical path → expert-level skill match required
-- Never exceed productive hours ceiling
-- Track cumulative assigned hours vs available hours (not just item count)
+> See [references/assignment-algorithm.md](references/assignment-algorithm.md) for the detailed skill-match scoring algorithm and assignment rules.
 
 **Output:** Assignment recommendation table with hours tracking
 
@@ -240,8 +217,6 @@ Present the Risk Forecast to user. If MEDIUM or higher risk:
 If user accepts mitigations → apply sprint changes (remove items, add pairing notes) before proceeding to Phase 7.
 
 ## Part C: Approval & Execution (Phases 7-8) — Execution Layer
-
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
 
 ### 7. Sprint Plan Review ⚠️ GATE
 
@@ -351,25 +326,13 @@ Subtask alignment: [X checked, Y fixed]
 
 ## Example
 
-**Input:** `/plan-sprint`
-
-**Output:**
-
-```
-Sprint 42 (Apr 7-18) | Capacity: 35 tickets
-Carry-over: 3 tickets (ABC-XXX, ABC-YYY, ABC-ZZZ)
-New work: 32 tickets from backlog
-Assignments:
-  {{SLOT_1}}: 6 tickets (review + complex BE)
-  {{SLOT_2}}: 8 tickets (BE focus)
-  {{SLOT_3}}: 10 tickets (FE-Web + FE-Admin)
-  {{SLOT_4}}: 7 tickets (FE-Admin)
-  {{SLOT_5}}: 4 tickets (Mobile + FE-Web)
-Risk: ABC-XXX blocks 2 downstream tickets
-```
+> See [references/examples.md](references/examples.md) for a full sprint planning input/output example.
 
 ## References
 
 - [Team Capacity](../shared-references/team-capacity.md) - Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
 - [Sprint Frameworks](../shared-references/sprint-frameworks.md) - RICE, Impact/Effort, carry-over model
 - [Tool Selection](../shared-references/tools.md) - MCP vs acli decision rules
+- [Pre-Meeting Checklist](references/pre-meeting-checklist.md)
+- [Assignment Algorithm](references/assignment-algorithm.md)
+- [Examples](references/examples.md)

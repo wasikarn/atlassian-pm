@@ -72,8 +72,6 @@ argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 
 ## Phases
 
-> **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed`.
-
 ### 1. Gather Context
 
 **Input types:**
@@ -350,67 +348,15 @@ Present each story as a numbered card for user to pick creation order.
 
 ## When to Use vs Skip
 
-| Situation | Use `/feature-blueprint`? | Alternative |
-|-----------|--------------------------|-------------|
-| New feature, unclear scope, greenfield | **Yes** | — |
-| Multi-service feature needing architecture review | **Yes** | — |
-| Need cross-role alignment before sprint planning | **Yes** | — |
-| Feature already has clear stories, needs refinement | **No** | `/refine-feature` |
-| Simple bug fix / UI tweak | **No** | `/create-task` or `/story-full` |
-| Requirements already detailed, ready to create | **No** | `/story-full` directly |
-| Single-service, obvious approach | **No** | `/story-full` directly |
-
-### `/feature-blueprint` vs `/refine-feature`
-
-| | `/feature-blueprint` | `/refine-feature` |
-|---|---|---|
-| **When** | Before any Jira artifacts (greenfield) | Refining existing/draft stories |
-| **Input** | Feature idea / concept | Jira key / draft stories |
-| **Output** | Confluence doc + backlog map | Refined stories → `/story-full` |
-| **Roles** | 5 (+ Domain Expert) | 4 (no Domain Expert) |
-| **Scope** | Architecture-level (Epic-sized) | Story-level |
-| **Downstream** | → `/create-epic` → `/story-full` | → `/story-full` |
-
-**Token budget:** S ~40K, M ~80K, L ~120K. Justified by reduced rework + cross-role alignment before implementation.
+> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives and comparison with /refine-feature.
 
 ## S-tier Shortcut
 
-For small features (S-tier), skip Phases 4-5 entirely. Main session generates sections in a **single pass**:
-
-1. Write S1 (Executive Summary) — 1 paragraph
-2. Write S2 (Business Case) — scenarios + non-goals
-3. Write S4 (Architecture) — approach + alternatives (still mandatory)
-4. Write S6 (Risks) — edge cases + risk register
-5. Write S8 (Delivery Plan) — stories + sprint mapping
-
-No subagents launched. ~40K tokens total.
+> See [references/s-tier-shortcut.md](references/s-tier-shortcut.md) for S-tier single-pass generation steps.
 
 ## Example
 
-**Input:** "ระบบ notification แบบ real-time สำหรับ platform (push notification + in-app)"
-
-**Phase 2 output:** Tier M — multi-service (BE + Website + Admin), ~4 stories estimated
-
-**Round 1 highlights:**
-
-| Role | Key Points |
-|------|-----------|
-| PO | 4 scenarios: receive push, view in-app list, mark read, notification preferences. Appetite: 2 sprints. Non-goal: email notifications |
-| Domain Expert | 2 bounded contexts: Notification (new) + User Preference (existing). Events: `NotificationSent`, `NotificationRead`, `PreferenceUpdated` |
-| Tech Lead | New `NotificationService` Effect service + WebSocket for real-time. Alternative: polling vs WebSocket vs SSE → chose WebSocket. L estimate (5 SP) per story |
-| Engineer | Reuse `FCMService` pattern from existing push. 20h total. Gotcha: WebSocket connection management on Next.js |
-| QA | "What if user has 1000 unread?" + "notification arrives while user is on notification page?" + "push permission denied?" |
-
-**Round 2 highlights:**
-
-| Debate | Resolution |
-|--------|-----------|
-| PO wanted notification preferences in MVP | **Kept** — QA flagged edge cases, Engineer confirmed 4h extra is worth it |
-| TL chose WebSocket over SSE | **Challenged by Engineer** — SSE simpler for one-way push → **Revised to SSE** for MVP, WebSocket deferred |
-| QA's "1000 unread" edge case | **Added pagination** — Engineer confirmed, TL agreed on virtual scroll |
-| Domain Expert flagged missing `NotificationBatch` aggregate | **Added** — TL confirmed batch send needed for class reminders |
-
-**Output:** Confluence page with 8 sections + backlog map with 4 stories + 1 spike
+> See [references/examples.md](references/examples.md) for a full input/output example with Round 1 and Round 2 highlights.
 
 ## References
 
@@ -419,4 +365,7 @@ No subagents launched. ~40K tokens total.
 - [Vertical Slice Guide](../shared-references/vertical-slice-guide.md) — VS patterns, labels
 - [Verification Checklist](../shared-references/verification-checklist.md) — Quality criteria (B1-B8 for blueprints)
 - [Tools](../shared-references/tools.md) — Confluence tool selection
+- [Decision Guide](references/decision-guide.md)
+- [S-tier Shortcut](references/s-tier-shortcut.md)
+- [Examples](references/examples.md)
 - After blueprint: `/create-epic` → `/story-full` → `/create-testplan`
