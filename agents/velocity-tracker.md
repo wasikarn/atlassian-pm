@@ -7,7 +7,7 @@ permissionMode: dontAsk
 maxTurns: 15
 ---
 
-Harvest completed sprint data and update the velocity config. Keeps sprint-planner working with real numbers.
+Harvest completed sprint data and update the velocity config. Keeps sprint-planner and risk-forecaster working with real numbers.
 
 ## Input
 
@@ -20,37 +20,71 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
 
 2. **Fetch past sprints** — `jira_get_sprints_from_board(board_id, state="closed", limit=N+2)` → get last N completed sprints
 
-3. **Fetch completed items per sprint** — for each sprint: `jira_get_sprint_issues(sprint_id, fields="summary,status,customfield_10016,issuetype")` → filter Stories + Tasks with status=Done → sum story points
+3. **Fetch items per sprint** — for each sprint: `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,timetracking")` → filter Stories + Tasks → partition into Done vs not-Done
 
 4. **Calculate velocity metrics:**
-   - Per-sprint completed SP (or ticket count if no SP data)
-   - Rolling average (last N sprints): `avg_velocity = sum(completed_sp) / N`
+   - Per-sprint completed SP (Done items only)
+   - Per-sprint planned SP (all items entering sprint)
+   - Completion ratio: `completed_sp / planned_sp` per sprint
+   - Rolling average: `avg_velocity = sum(completed_sp) / N`
    - Standard deviation: `std_dev = sqrt(sum((sp_i - avg)^2) / N)`
-   - Trend: linear regression slope → "improving" (slope > 0.5 SP/sprint), "declining" (slope < -0.5), "stable"
+   - Trend: linear regression slope → "improving" (slope > 0.5), "declining" (slope < -0.5), "stable"
 
-5. **Read current config** — `Read .claude/project-config-team-detail.json` → find `velocity` section
+5. **Anomaly detection** — for each sprint where `|completed_sp - avg_velocity| > 1.5 * std_dev`:
+   - Flag as anomaly with direction: "spike" (above avg) or "dip" (below avg)
+   - Add to `anomalies[]` with sprint name, value, deviation magnitude
 
-6. **Update config** — `Write` updated JSON with:
+6. **Per-member velocity** — if assignee data available from sprint items:
+   - Count completed SP per assignee per sprint
+   - Calculate member-level avg and trend
+   - Add to `member_velocity{}` keyed by assignee email
 
-   ```json
-   "velocity": {
-     "updated_at": "YYYY-MM-DD",
-     "sprints_analyzed": N,
-     "story_points": {
-       "avg_velocity": 39.2,
-       "std_dev": 4.1,
-       "trend": "stable",
-       "history": [
-         {"sprint_id": 45, "sprint_name": "BEP Sprint 45", "completed_sp": 41},
-         {"sprint_id": 44, "sprint_name": "BEP Sprint 44", "completed_sp": 38}
-       ]
-     },
-     "ticket_count": {
-       "avg_velocity": 12.4,
-       "history": [...]
-     }
-   }
-   ```
+7. **Read current config** — `Read .claude/project-config-team-detail.json` → find `velocity` section
+
+8. **Update config** — `Write` updated JSON with full velocity block
+
+## Output Schema (velocity block)
+
+```json
+"velocity": {
+  "updated_at": "YYYY-MM-DD",
+  "sprints_analyzed": 5,
+  "story_points": {
+    "avg_velocity": 39.2,
+    "std_dev": 4.1,
+    "trend": "stable",
+    "history": [
+      {
+        "sprint_id": 45,
+        "sprint_name": "BEP Sprint 45",
+        "completed_sp": 41,
+        "planned_sp": 44,
+        "completion_ratio": 0.93
+      }
+    ]
+  },
+  "ticket_count": {
+    "avg_velocity": 12.4,
+    "history": [...]
+  },
+  "anomalies": [
+    {
+      "sprint_name": "BEP Sprint 42",
+      "completed_sp": 28,
+      "direction": "dip",
+      "deviation": 2.3,
+      "note": "2.3σ below average"
+    }
+  ],
+  "member_velocity": {
+    "member@example.com": {
+      "avg_sp": 6.2,
+      "trend": "stable",
+      "history": [{"sprint_id": 45, "completed_sp": 7}]
+    }
+  }
+}
+```
 
 ## Rules
 
@@ -60,19 +94,22 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
 - If `project-config-team-detail.json` doesn't exist → report: "Run setup.sh to create config files first"
 - Only include Done items in velocity calculation (not carry-over In Progress)
 - Round avg_velocity and std_dev to 1 decimal place
+- Anomaly threshold: 1.5σ deviation (flag but don't block)
+- Member velocity: skip if assignee data unavailable for >50% of items
 
 ## Output
 
-```
+```text
 ## Velocity Update Complete
 Sprints analyzed: [N] (Sprint [X] to Sprint [Y])
-Avg velocity: [X] SP/sprint (σ=[Y])
+Avg velocity: [X] SP/sprint (σ=[Y]) | Completion ratio: [Z]%
 Trend: [improving/stable/declining]
+Anomalies: [N detected — list sprint names]
 Config updated: .claude/project-config-team-detail.json
 
 Sprint breakdown:
-| Sprint | Completed SP | Completed Tickets |
-|--------|-------------|-------------------|
-| BEP Sprint 45 | 41 SP | 13 tickets |
-| BEP Sprint 44 | 38 SP | 11 tickets |
+| Sprint | Completed SP | Planned SP | Ratio | Anomaly? |
+|--------|-------------|-----------|-------|---------|
+| BEP Sprint 45 | 41 SP | 44 SP | 93% | — |
+| BEP Sprint 42 | 28 SP | 43 SP | 65% | ⚠️ dip 2.3σ |
 ```
