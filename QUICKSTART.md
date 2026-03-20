@@ -156,6 +156,8 @@ Skills invoke these automatically. Listed here for reference:
 | Stale issue data | Cache auto-invalidates after writes; force with `cache_invalidate(key)` |
 | Subtask has wrong parent | Enforced by HR5: MCP create → verify parent → acli edit |
 | Sprint ID mismatch | Never hardcode sprint IDs; always resolved via `jira_get_sprints_from_board()` |
+| Reinstalled plugin, config gone | Run `/atlassian-pm:setup` — auto-restores `project-config.json` from `~/.config/atlassian/` backup |
+| Reinstalled plugin, venv missing | Run `/atlassian-pm:setup` — detects missing venv, re-runs `uv sync` automatically |
 
 Full troubleshooting reference: `skills/shared-references/troubleshooting.md`
 
