@@ -1,0 +1,56 @@
+{
+  "_comment": "Team detail — load on-demand for sprint planning (/plan-sprint). NOT auto-loaded at session start.",
+  "_setup": "Copy this file to project-config-team-detail.json and fill in your team's actual data.",
+
+  "git_evidence": {
+    "Tech Lead":    "Fill in: commit count, areas worked on, commit type breakdown (feat/fix/refactor %), specializations",
+    "Senior Dev":   "Fill in: commit count, areas worked on, key features owned",
+    "Junior Dev 1": "Fill in: commit count, areas worked on, fix ratio, notes on review needs"
+  },
+
+  "focus_factor_guide": {
+    "tech_lead": "0.4-0.5 (code review, mentoring, architecture, meetings)",
+    "senior":    "0.7-0.8 (complex tasks, some review, mentoring)",
+    "mid":       "0.75-0.85 (feature work, some review)",
+    "junior":    "0.6-0.7 (learning curve, needs code review, pair programming)"
+  },
+
+  "skill_levels": {
+    "expert":       "1.0x — complex tasks independently",
+    "intermediate": "0.8x — standard tasks, review for complex",
+    "basic":        "0.6x — simple tasks, needs guidance"
+  },
+
+  "velocity": {
+    "throughput_history": [],
+    "story_points": {"avg_velocity": null, "sprints_tracked": 0, "history": []}
+  },
+
+  "review_cost": {
+    "hours_per_junior_per_sprint": 5,
+    "reviewers": {
+      "Tech Lead": ["Junior Dev 1"],
+      "Senior Dev": ["Junior Dev 1"]
+    },
+    "_note": "~30 min/PR × ~10 PRs/sprint per junior = ~5h"
+  },
+
+  "bus_factor": {
+    "critical": [
+      {"area": "Example Area", "sole_owner": "Tech Lead", "mitigation": "Document architecture, cross-train senior"}
+    ],
+    "low_coverage": [
+      {"area": "Example Area", "owners": ["Tech Lead", "Senior Dev"], "gap": "No junior expertise"}
+    ]
+  },
+
+  "growth_tracks": {
+    "Junior Dev 1": {"current_strength": "Frontend intermediate", "growing_toward": "Backend", "recommended_next": "Database basics"}
+  },
+
+  "cross_training": {
+    "priority_1": [
+      {"trainee": "Senior Dev", "skill": "DevOps basics", "trainer": "Tech Lead", "reason": "Bus factor reduction"}
+    ]
+  }
+}

@@ -54,7 +54,9 @@ fi
 
 # --- 0. Check project config ---
 CONFIG_FILE="$PROJECT_DIR/.claude/project-config.json"
-CONFIG_TEMPLATE="$PROJECT_DIR/config/project-config.json.template"
+CONFIG_TEMPLATE="$PROJECT_DIR/.claude/project-config.json.template"
+TEAM_DETAIL_FILE="$PROJECT_DIR/.claude/project-config-team-detail.json"
+TEAM_DETAIL_TEMPLATE="$PROJECT_DIR/.claude/project-config-team-detail.json.template"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   if [ -f "$CONFIG_TEMPLATE" ]; then
@@ -64,6 +66,15 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo ""
   else
     echo "WARNING: No project-config.json or template found"
+  fi
+fi
+
+if [ ! -f "$TEAM_DETAIL_FILE" ]; then
+  if [ -f "$TEAM_DETAIL_TEMPLATE" ]; then
+    cp "$TEAM_DETAIL_TEMPLATE" "$TEAM_DETAIL_FILE"
+    echo "Created .claude/project-config-team-detail.json from template"
+    echo "  → Edit with your team git evidence and velocity history"
+    echo ""
   fi
 fi
 

@@ -1,0 +1,49 @@
+{
+  "_comment": "Lean project config — loaded every session. Detail (git evidence, capacity model, bus factor): @.claude/project-config-team-detail.json (load on-demand for sprint planning)",
+  "_setup": "Copy this file to project-config.json and fill in your values. Run /atlassian-pm:doctor to verify.",
+
+  "jira": {
+    "site": "YOUR-INSTANCE.atlassian.net",
+    "project_key": "YOUR_PROJECT_KEY",
+    "board_id": 0,
+    "custom_fields": {
+      "start_date": "customfield_10015",
+      "due_date": "duedate",
+      "sprint": "customfield_10020",
+      "story_points": "customfield_10016",
+      "story_points_legacy": "customfield_10036",
+      "size": "customfield_10107",
+      "original_estimate": "timetracking"
+    },
+    "issue_link_types": ["Relates", "Blocks", "Duplicate", "Cloners", "Test Case"]
+  },
+
+  "confluence": {
+    "site": "YOUR-INSTANCE.atlassian.net",
+    "space_key": "YOUR_SPACE_KEY"
+  },
+
+  "team": {
+    "sprint_length_days": 10,
+    "avg_throughput_per_sprint": 0,
+    "members": [
+      {"name": "Tech Lead",     "email": "lead@yourcompany.com",    "role": "Tech Lead", "focus": "Full Stack, review, mentoring",  "focus_factor": 0.5,  "avg_throughput": 6,  "skill_profile": {"backend": "expert",       "frontend_admin": "expert",       "frontend_web": "intermediate", "database": "expert", "devops": "expert"}},
+      {"name": "Senior Dev",    "email": "senior@yourcompany.com",  "role": "Sr. BE",    "focus": "Backend, complex systems",        "focus_factor": 0.75, "avg_throughput": 6,  "skill_profile": {"backend": "expert",       "frontend_admin": "basic",        "frontend_web": "basic",        "database": "expert", "devops": "intermediate"}},
+      {"name": "Junior Dev 1",  "email": "junior1@yourcompany.com", "role": "Jr. FS",    "focus": "FE+BE",                          "focus_factor": 0.65, "avg_throughput": 10, "skill_profile": {"backend": "intermediate", "frontend_admin": "intermediate", "frontend_web": "intermediate", "database": "basic",  "devops": "basic"}},
+      {"name": "QA",            "email": null,                       "role": "Jr. QA",    "focus": "Testing",                        "focus_factor": null, "avg_throughput": null, "skill_profile": {"testing": "intermediate"}}
+    ]
+  },
+
+  "services": {
+    "tags": [
+      {"tag": "[BE]",       "name": "Backend",  "path": "~/path/to/backend"},
+      {"tag": "[FE-Admin]", "name": "Admin",    "path": "~/path/to/admin"},
+      {"tag": "[FE-Web]",   "name": "Website",  "path": "~/path/to/website"}
+    ]
+  },
+
+  "environments": {
+    "staging":    {"web": "staging.yourapp.com",    "admin": "admin-staging.yourapp.com",    "api": "api-staging.yourapp.com"},
+    "production": {"web": "yourapp.com",            "admin": "admin.yourapp.com",            "api": "api.yourapp.com"}
+  }
+}

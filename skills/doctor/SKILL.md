@@ -113,7 +113,7 @@ fi
 
 # Check 6: project-config valid (non-placeholder)
 CONFIG_FILE="${PLUGIN_ROOT}/.claude/project-config.json"
-if [ -f "$CONFIG_FILE" ] && ! grep -q "acme-corp.atlassian.net" "$CONFIG_FILE"; then
+if [ -f "$CONFIG_FILE" ] && ! grep -qE "YOUR-INSTANCE|YOUR_PROJECT_KEY|acme-corp\.atlassian\.net" "$CONFIG_FILE"; then
   SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['site'])" 2>/dev/null || echo "?")
   KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c['jira']['project_key'])" 2>/dev/null || echo "?")
   echo "  ✓  project-config valid ($KEY @ $SITE)"
