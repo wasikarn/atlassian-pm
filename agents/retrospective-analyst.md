@@ -75,8 +75,9 @@ Add a `cross_sprint_insights[]` to Phase 4 Synthesize Insights.
 Based on metrics, identify patterns:
 
 - **What went well**: items completed on time, velocity ≥ 90%, low carry-over
-- **What to improve**: high carry-over (>20%), slow cycle time (>5 days avg), QA rejections (>30%), blocked items
+- **What to improve**: high carry-over (>20%), slow cycle time (>6 days avg), QA rejections (>35%), blocked items
 - **Patterns**: specific people or service areas with recurring blockers
+- **Cross-sprint insights**: incorporate `cross_sprint_insights[]` from Phase 3b — flag any metric that is >1.5× the rolling average as a recurring trend
 
 ### Phase 4b: Team Health Score
 
@@ -134,6 +135,9 @@ Output a Confluence-ready retrospective in this structure:
 | Process | [X]/25 | [note] |
 | Quality | [X]/25 | [note] |
 | Flow | [X]/25 | [note] |
+
+## 📈 Cross-Sprint Trends
+[Only if velocity history available: "Velocity 15% above rolling avg", "Carry-over rate 2× avg — recurring pattern"]
 
 ## 🟢 What Went Well
 [Data-driven points: e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
