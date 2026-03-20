@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-30 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
+31 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -33,6 +33,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | analyze-story | `/atlassian-pm:analyze-story` | 7 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
 | create-task | `/atlassian-pm:create-task` | 6 | jira-cache-server, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
 | create-testplan | `/atlassian-pm:create-testplan` | 6 | jira-cache-server, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
+| bug-triage | `/atlassian-pm:bug-triage` | 6 | jira-cache-server, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
 | update-story | `/atlassian-pm:update-story` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
 | update-subtask | `/atlassian-pm:update-subtask` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |
 | update-task | `/atlassian-pm:update-task` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing Jira Task (migrate Wiki→ADF, add details, change type template). |
@@ -170,6 +171,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 /atlassian-pm:tech-debt-radar                         # create new radar
 /atlassian-pm:tech-debt-radar --update                # refresh existing page
+
+/atlassian-pm:bug-triage                              # interactive full intake
+/atlassian-pm:bug-triage "video upload fails iOS 17"  # summary pre-filled
 ```
 
 ---
