@@ -101,3 +101,37 @@ def sample_issue_with_noise():
 def multiple_issues():
     """Return a list of issues for batch testing."""
     return [make_issue(key=f"BEP-{i}", summary=f"Issue {i}", status="To Do") for i in range(1, 6)]
+
+
+def make_page(
+    page_id: str = "12345",
+    title: str = "Test Page",
+    space_key: str = "BEP",
+    body_md: str = "## Overview\n\nPage content.",
+    version_num: int = 1,
+    labels: list | None = None,
+    author: str = "Test Author",
+) -> dict:
+    """Build a minimal Confluence page dict for testing."""
+    return {
+        "id": page_id,
+        "title": title,
+        "space": {"key": space_key},
+        "_body_md": body_md,   # pre-converted Markdown (would normally come from converter)
+        "version": {"number": version_num, "when": "2026-01-01T00:00:00.000Z"},
+        "metadata": {"labels": {"results": [{"name": l} for l in (labels or [])]}},
+        "history": {"createdBy": {"displayName": author}},
+        "_links": {"webui": f"/wiki/spaces/{space_key}/pages/{page_id}"},
+    }
+
+
+@pytest.fixture
+def confluence_cache(cache):
+    """Return a ConfluenceCache sharing the JiraCache connection."""
+    from atlassian_cache.confluence_cache import ConfluenceCache
+    return ConfluenceCache(cache.conn, cache._lock)
+
+
+@pytest.fixture
+def sample_page():
+    return make_page()
