@@ -96,9 +96,8 @@ def walk_and_replace(node: Any, replacements: list[tuple[str, str]]) -> int:
                 if old in node["text"]:
                     node["text"] = node["text"].replace(old, new)
                     changes += 1
-        for key in ("content", "attrs"):
-            if key in node and isinstance(node[key], (list, dict)):
-                changes += walk_and_replace(node[key], replacements)
+        if "content" in node and isinstance(node["content"], (list, dict)):
+            changes += walk_and_replace(node["content"], replacements)
     elif isinstance(node, list):
         for item in node:
             changes += walk_and_replace(item, replacements)
@@ -461,8 +460,10 @@ class JiraAPI:
             logger.warning("%s has no description", issue_key)
             return False, 0
 
-        modified = deepcopy(description)
-        change_count = walk_and_replace(modified, replacements)
+        # dry_run needs a copy to avoid mutating the original for display purposes;
+        # live runs can modify in-place (fresh dict from API)
+        target = deepcopy(description) if dry_run else description
+        change_count = walk_and_replace(target, replacements)
 
         if change_count == 0:
             logger.info("%s: no matches found", issue_key)
@@ -474,7 +475,7 @@ class JiraAPI:
             logger.info("%s: DRY RUN - no changes applied", issue_key)
             return True, change_count
 
-        status = self.update_description(issue_key, modified)
+        status = self.update_description(issue_key, target)
         if status in (200, 204):
             logger.info("%s: updated successfully", issue_key)
             return True, change_count
