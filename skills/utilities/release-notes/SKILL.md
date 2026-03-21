@@ -1,6 +1,8 @@
 ---
 name: release-notes
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 description: |
   Generate Confluence release notes from a Jira Fix Version.
@@ -9,6 +11,7 @@ description: |
   Triggers: "release notes", "create release notes", "generate release notes",
             "release documentation", "changelog", "สร้าง release notes"
 argument-hint: "--version <fix-version-key> [--epic <epic-key>] [--dry-run]"
+effort: medium
 ---
 
 # /release-notes

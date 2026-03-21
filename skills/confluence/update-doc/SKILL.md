@@ -1,6 +1,8 @@
 ---
 name: update-doc
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [mcp-confluence]
 description: |
   Update an existing Confluence page with a 5-phase workflow
@@ -8,6 +10,7 @@ description: |
 
   Triggers: "update doc", "edit doc", "update confluence", "move page"
 argument-hint: "[page-id or title] [--move parent-id]"
+effort: medium
 ---
 
 # /update-doc

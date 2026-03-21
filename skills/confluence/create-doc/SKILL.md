@@ -1,6 +1,8 @@
 ---
 name: create-doc
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [mcp-atlassian, mcp-confluence]
 description: |
   Create Confluence page from template with a 4-phase workflow
@@ -8,6 +10,7 @@ description: |
 
   Triggers: "create doc", "technical spec", "ADR"
 argument-hint: "[template] [title] [--parent page-id]"
+effort: medium
 ---
 
 # /create-doc

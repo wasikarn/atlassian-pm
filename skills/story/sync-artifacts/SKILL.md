@@ -2,6 +2,7 @@
 name: sync-artifacts
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Sync all related artifacts (Epic, Story, Sub-tasks, QA, Confluence) using an 8-phase workflow
@@ -12,6 +13,7 @@ description: |
 
   Triggers: "sync alignment", "sync all", "update related", "cascade all", "align artifacts"
 argument-hint: "[issue-key-or-page-id] [changes]"
+effort: high
 ---
 
 # /sync-artifacts

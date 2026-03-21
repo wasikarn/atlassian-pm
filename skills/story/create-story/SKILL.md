@@ -2,6 +2,7 @@
 name: create-story
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 10-phase workflow
@@ -12,6 +13,7 @@ description: |
 
   Triggers: "story full", "create story + subtasks", "full workflow", "create story with subtasks", "story and subtasks"
 argument-hint: "[story-description]"
+effort: high
 ---
 
 # /create-story

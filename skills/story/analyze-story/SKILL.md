@@ -2,11 +2,15 @@
 name: analyze-story
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Analyze User Story and create Sub-tasks + Technical Note with a 7-phase TA workflow
   MANDATORY: Must explore codebase before creating Sub-tasks
+
+  Triggers: "analyze story", "TA", "technical analysis", "create subtasks", "break down story", "explore story", "วิเคราะห์ story"
 argument-hint: "[issue-key]"
+effort: high
 ---
 
 # /analyze-story

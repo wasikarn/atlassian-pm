@@ -2,12 +2,14 @@
 name: standup-report
 disable-model-invocation: true
 context: fork
+agent: Explore
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Generate daily standup digest from active sprint — categorizes issues by status per assignee, flags anomalies.
   Optional --post flag posts digest as comment to sprint Confluence page.
   Triggers: "standup", "daily digest", "sprint status", "daily summary", "สรุป standup"
 argument-hint: "[--sprint <id>] [--post]"
+effort: low
 ---
 
 # /standup-report

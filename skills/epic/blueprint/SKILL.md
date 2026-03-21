@@ -2,6 +2,7 @@
 name: blueprint
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Multi-perspective feature blueprint on Confluence — 5 roles debate (PO, Domain Expert, Tech Lead, Engineer, QA).
@@ -11,6 +12,7 @@ description: |
   Triggers: "feature blueprint", "architecture doc", "design doc", "blueprint", "feature spec",
   "multi-perspective design", "research feature", "ทำ blueprint"
 argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
+effort: high
 ---
 
 # /blueprint

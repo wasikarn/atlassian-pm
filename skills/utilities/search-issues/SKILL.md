@@ -2,7 +2,9 @@
 name: search-issues
 disable-model-invocation: true
 context: fork
+agent: Explore
 model: haiku
+effort: low
 x-compatibility: [atlassian-cache, mcp-atlassian]
 allowed-tools: Read, Glob, Grep, Bash, Agent, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_text_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_similar_issues
 description: |

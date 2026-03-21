@@ -2,12 +2,14 @@
 name: plan-release
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create a multi-sprint release plan from epics — calculates velocity-based timeline, maps dependencies,
   generates Confluence release page + Jira Fix Version.
   Triggers: "release plan", "release timeline", "release planning", "plan release", "วาง release"
 argument-hint: "[--epics <key1,key2>] [--date <YYYY-MM-DD>] [--name <release-name>]"
+effort: high
 ---
 
 # /plan-release

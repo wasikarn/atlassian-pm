@@ -7,6 +7,7 @@ description: |
 
   Triggers: "assign", "assign issue", "assign to"
 argument-hint: "ABC-XXX [name]"
+effort: low
 ---
 
 # /assign

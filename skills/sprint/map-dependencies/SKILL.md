@@ -2,7 +2,9 @@
 name: map-dependencies
 disable-model-invocation: true
 context: fork
+agent: Explore
 x-compatibility: [atlassian-cache, mcp-atlassian]
+effort: medium
 allowed-tools: Read, Glob, Grep, Bash, Agent, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues, mcp__plugin_atlassian-pm_atlassian-cache__cache_search
 description: |
   Sprint dependency analysis: build dependency graphs, identify critical paths, generate parallel

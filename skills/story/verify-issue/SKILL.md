@@ -2,6 +2,7 @@
 name: verify-issue
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Glob, Grep, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page
 description: |
@@ -13,6 +14,7 @@ description: |
 
   Triggers: "verify", "validate", "check quality", "improve", "migrate format", "QG score", "quality gate"
 argument-hint: "[issue-key] [--with-subtasks] [--fix]"
+effort: medium
 ---
 
 # /verify-issue

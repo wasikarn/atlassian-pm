@@ -2,7 +2,9 @@
 name: activity-report
 disable-model-invocation: true
 context: fork
+agent: Explore
 model: haiku
+effort: low
 x-compatibility: [claude-mem]
 allowed-tools: Read, Glob, Grep, Bash, Agent
 description: |

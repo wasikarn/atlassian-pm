@@ -1,5 +1,6 @@
 ---
 name: setup
+disable-model-invocation: true
 description: |
   First-time setup for atlassian-pm plugin — installs dependencies, collects Jira config,
   creates ~/.config/atlassian/.env, authenticates acli, registers mcp-atlassian, and validates.
@@ -9,6 +10,7 @@ description: |
 
   Triggers: "setup", "atlassian-pm setup", "/setup", "install atlassian-pm", "configure plugin"
 argument-hint: ""
+effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion
 ---
 

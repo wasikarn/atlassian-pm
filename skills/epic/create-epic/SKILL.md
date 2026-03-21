@@ -1,13 +1,16 @@
 ---
 name: create-epic
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Create Epic + Epic Doc from product vision with a 5-phase PM workflow
+  Create Epic + Epic Doc from product vision with a 6-phase PM workflow
   Use when creating a new initiative, have a product vision, or need RICE prioritization
 
   Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE"
 argument-hint: "[epic-title]"
+effort: medium
 ---
 
 # /create-epic

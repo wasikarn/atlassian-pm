@@ -2,6 +2,7 @@
 name: scan-tech-debt
 disable-model-invocation: true
 context: fork
+agent: Explore
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 description: |
   Aggregate all tech-debt/chore/spike issues into a priority matrix dashboard on Confluence.
@@ -9,6 +10,7 @@ description: |
   --update refreshes existing page instead of creating new.
   Triggers: "tech debt", "debt radar", "tech debt dashboard", "chore audit", "สรุป tech debt"
 argument-hint: "[--update]"
+effort: high
 ---
 
 # /scan-tech-debt

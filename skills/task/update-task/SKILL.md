@@ -1,6 +1,8 @@
 ---
 name: update-task
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Update an existing Jira Task with a 6-phase update workflow
@@ -11,6 +13,7 @@ description: |
 
   Triggers: "update task", "edit task", "adjust task"
 argument-hint: "{{PROJECT_KEY}}-XXX [changes]"
+effort: medium
 ---
 
 # /update-task

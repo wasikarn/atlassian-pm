@@ -2,6 +2,7 @@
 name: plan-sprint
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Sprint Planning using an 8-phase workflow
@@ -10,6 +11,7 @@ description: |
 
   Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution"
 argument-hint: "[--sprint <id>] [--carry-over-only]"
+effort: high
 ---
 
 # /plan-sprint

@@ -1,5 +1,6 @@
 ---
 name: doctor
+disable-model-invocation: true
 description: |
   Health check for atlassian-pm environment — runs 10 checks and reports status.
 
@@ -10,6 +11,7 @@ description: |
 
   Triggers: "doctor", "health check", "check setup", "diagnose", "verify install", "/doctor"
 argument-hint: ""
+effort: low
 allowed-tools: Bash
 ---
 

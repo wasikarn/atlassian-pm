@@ -1,12 +1,15 @@
 ---
 name: bug-triage
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Structured bug triage workflow for QA: intake → severity scoring → duplicate check → assign → create Jira Task.
   Distinct from /create-task bug (which is just ticket creation). This skill is a full triage workflow.
   Triggers: "bug triage", "triage bug", "report bug", "new bug", "bug found", "จัดการ bug", "รายงาน bug"
 argument-hint: "[description]"
+effort: medium
 ---
 
 # /bug-triage

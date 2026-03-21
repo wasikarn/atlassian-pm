@@ -2,12 +2,14 @@
 name: close-sprint
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Close an active sprint systematically — triage incomplete issues, execute moves, close sprint, generate Confluence review page.
   Distinct from retrospective-analyst (analysis only). This skill EXECUTES the closure.
   Triggers: "close sprint", "end sprint", "sprint closure", "ปิด sprint"
 argument-hint: "[--sprint <id>]"
+effort: high
 ---
 
 # /close-sprint

@@ -1,13 +1,16 @@
 ---
 name: create-task
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
-  Create a new Jira Task with a 5-phase workflow
+  Create a new Jira Task with a 6-phase workflow
   Supports 4 task types: tech-debt, bug, chore, spike
 
   Triggers: "create task", "new task"
 argument-hint: "[type] [description]"
+effort: medium
 ---
 
 # /create-task

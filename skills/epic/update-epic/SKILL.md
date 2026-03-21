@@ -1,6 +1,8 @@
 ---
 name: update-epic
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Update an existing Epic with a 6-phase update workflow
@@ -11,6 +13,7 @@ description: |
 
   Triggers: "update epic", "edit epic", "adjust epic"
 argument-hint: "[issue-key] [changes]"
+effort: medium
 ---
 
 # /update-epic

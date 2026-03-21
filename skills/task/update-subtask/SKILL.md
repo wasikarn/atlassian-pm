@@ -1,6 +1,8 @@
 ---
 name: update-subtask
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Update an existing Sub-task with a 6-phase update workflow
@@ -11,6 +13,7 @@ description: |
 
   Triggers: "update subtask", "edit subtask", "adjust subtask"
 argument-hint: "[issue-key] [changes]"
+effort: medium
 ---
 
 # /update-subtask

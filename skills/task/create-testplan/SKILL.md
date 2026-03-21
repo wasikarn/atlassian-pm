@@ -1,16 +1,19 @@
 ---
 name: create-testplan
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
-  Create Test Plan + [QA] Sub-task from User Story with a 5-phase QA workflow
+  Create Test Plan + [QA] Sub-task from User Story with a 6-phase QA workflow
 
-  Phases: Discovery → Test Scope Analysis → Design Test Cases → Create [QA] Sub-task → Summary
+  Phases: Discovery → Test Scope Analysis → Design Test Cases → Quality Gate → Create [QA] Sub-task → Summary
 
   Output: [QA] Sub-task in Jira (Test Plan embedded in description)
 
   Triggers: "create test plan", "QA", "test case", "testing"
 argument-hint: "[issue-key]"
+effort: medium
 ---
 
 # /create-testplan

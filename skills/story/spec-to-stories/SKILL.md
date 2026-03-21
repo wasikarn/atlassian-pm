@@ -2,6 +2,7 @@
 name: spec-to-stories
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Convert a Confluence spec/requirements page into Jira User Stories.
@@ -9,6 +10,7 @@ description: |
   --dry-run shows stories + QG scores without creating in Jira.
   Triggers: "spec to stories", "import requirements", "convert spec", "requirements to stories", "แปลง spec"
 argument-hint: "<confluence-page-id> [--epic <key>] [--dry-run]"
+effort: high
 ---
 
 # /spec-to-stories

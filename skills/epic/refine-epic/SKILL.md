@@ -2,6 +2,7 @@
 name: refine-epic
 disable-model-invocation: true
 context: fork
+agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Multi-role debate for refining features and user stories — 4 perspectives challenge each other
@@ -9,6 +10,7 @@ description: |
   Use when: planning new feature, unclear requirements, high-risk stories, or multi-service changes
   Triggers: "refine feature", "team debate", "4 roles review", "PO+TL+Eng+QA", "clarify scope", "high-risk story"
 argument-hint: "[feature-description or ABC-XXX]"
+effort: medium
 ---
 
 # /refine-epic
