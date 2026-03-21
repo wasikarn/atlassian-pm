@@ -73,12 +73,38 @@ MAX_ISSUE_KEYS_BATCH = 100
 # H4: Validate issue key format at MCP boundary (prevent injection)
 _ISSUE_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{0,9}-\d{1,6}$")
 
+# S3: Whitelist for Jira field names — only alphanumeric + underscore + comma + spaces
+# Prevents injection of unexpected chars into the Jira REST API fields parameter.
+_FIELDS_RE = re.compile(r"^[a-zA-Z0-9_,\s]+$")
+
+# S4: max_age_hours valid range: 0 = bypass cache, 8760 = 1 year max
+_MAX_AGE_MIN = 0.0
+_MAX_AGE_MAX = 8760.0
+
 
 def _validate_issue_key(key: str) -> str:
     """Validate issue key format. Returns key if valid, raises ValueError otherwise."""
     if not isinstance(key, str) or not _ISSUE_KEY_RE.match(key):
         raise ValueError(f"Invalid issue key: {key!r}")
     return key
+
+
+def _sanitize_fields(fields: str) -> str:
+    """S3: Sanitize fields parameter — allow only safe Jira field name characters.
+
+    Jira field names are alphanumeric + underscore (e.g. customfield_10015).
+    Rejects anything with special chars that could alter API behavior.
+    """
+    if not isinstance(fields, str) or not _FIELDS_RE.match(fields):
+        raise ValueError(f"Invalid fields value: {fields!r} — only alphanumeric, underscore, comma allowed")
+    return fields.strip()
+
+
+def _clamp_max_age(value: float | None, default: float = 24.0) -> float:
+    """S4: Clamp max_age_hours to [0, 8760]. Prevents negative TTL or overflow."""
+    if value is None:
+        return default
+    return max(_MAX_AGE_MIN, min(float(value), _MAX_AGE_MAX))
 
 
 # --- Globals (initialized on startup) ---
@@ -491,11 +517,11 @@ async def handle_cache_get_issue(args: dict) -> str:
     c = _require_cache()
     try:
         issue_key = _validate_issue_key(args["issue_key"])
+        fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description"))
     except ValueError as e:
         return json.dumps({"error": str(e)})
-    fields = args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description")
     max_age_raw = args.get("max_age_hours")
-    max_age = max_age_raw if max_age_raw is not None else c.get_adaptive_ttl(issue_key)
+    max_age = _clamp_max_age(max_age_raw, default=c.get_adaptive_ttl(issue_key))
     force_refresh = args.get("force_refresh", False)
     compact = args.get("compact", False)
 
@@ -573,8 +599,11 @@ async def handle_cache_get_issues(args: dict) -> str:
     if not issue_keys:
         return json.dumps({"error": f"No valid issue keys provided. Invalid: {invalid_keys}"})
 
-    fields = args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description")
-    max_age = args.get("max_age_hours", 24)
+    try:
+        fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description"))
+    except ValueError as e:
+        return json.dumps({"error": str(e)})
+    max_age = _clamp_max_age(args.get("max_age_hours"), default=24.0)
     compact = args.get("compact", False)
 
     # Batch get from cache
@@ -632,9 +661,12 @@ async def handle_cache_search(args: dict) -> str:
     """JQL search with caching."""
     c = _require_cache()
     jql = args["jql"]
-    fields = args.get("fields", "summary,status,assignee,issuetype,priority")
+    try:
+        fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority"))
+    except ValueError as e:
+        return json.dumps({"error": str(e)})
     limit = min(args.get("limit", 30), 50)
-    max_age = args.get("max_age_hours", 2)
+    max_age = _clamp_max_age(args.get("max_age_hours"), default=2.0)
     force_refresh = args.get("force_refresh", False)
     start_at = args.get("start_at", 0)
 
@@ -680,8 +712,11 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     # S7: Ensure sprint_id is an integer before interpolating into JQL to prevent injection
     if not isinstance(sprint_id, int):
         return json.dumps({"error": f"sprint_id must be an integer, got: {type(sprint_id).__name__}"})
-    fields = args.get("fields", "summary,status,assignee,issuetype,priority,labels")
-    max_age = args.get("max_age_hours", 2)
+    try:
+        fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority,labels"))
+    except ValueError as e:
+        return json.dumps({"error": str(e)})
+    max_age = _clamp_max_age(args.get("max_age_hours"), default=2.0)
     force_refresh = args.get("force_refresh", False)
     response_offset = args.get("start_at", 0)
 
