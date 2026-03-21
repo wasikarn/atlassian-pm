@@ -743,3 +743,28 @@ class TestCachedAtMetadata:
         after = time.time()
         result = cache.get_issue("BEP-100", max_age_hours=24)
         assert before <= result["_cached_at"] <= after
+
+
+class TestGetAllSprints:
+    def test_returns_empty_when_no_sprints(self, cache):
+        assert cache.get_all_sprints() == []
+
+    def test_returns_sprints_with_goals(self, cache):
+        cache.put_sprint(1, {"name": "Sprint 1", "state": "active", "goal": "Ship coupon feature", "startDate": None, "endDate": None})
+        cache.put_sprint(2, {"name": "Sprint 2", "state": "active", "goal": "Fix checkout flow", "startDate": None, "endDate": None})
+        sprints = cache.get_all_sprints()
+        assert len(sprints) == 2
+        ids = {s["sprint_id"] for s in sprints}
+        assert 1 in ids
+        assert 2 in ids
+
+    def test_excludes_sprints_without_goals(self, cache):
+        cache.put_sprint(10, {"name": "Sprint 10", "state": "active", "goal": None, "startDate": None, "endDate": None})
+        cache.put_sprint(11, {"name": "Sprint 11", "state": "active", "goal": "", "startDate": None, "endDate": None})
+        assert cache.get_all_sprints() == []
+
+    def test_returns_name_and_goal(self, cache):
+        cache.put_sprint(5, {"name": "Sprint 5", "state": "active", "goal": "Improve performance", "startDate": None, "endDate": None})
+        sprints = cache.get_all_sprints()
+        assert sprints[0]["name"] == "Sprint 5"
+        assert sprints[0]["goal"] == "Improve performance"

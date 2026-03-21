@@ -839,6 +839,13 @@ class AtlassianCache:
         rows = self.conn.execute("SELECT data FROM issues").fetchall()
         return [json.loads(r["data"]) for r in rows]
 
+    def get_all_sprints(self) -> list[dict]:
+        """Return all cached sprints that have a goal (for reindex)."""
+        rows = self.conn.execute(
+            "SELECT sprint_id, name, goal FROM sprints WHERE goal IS NOT NULL AND goal != ''"
+        ).fetchall()
+        return [{"sprint_id": r["sprint_id"], "name": r["name"], "goal": r["goal"]} for r in rows]
+
     def close(self) -> None:
         """Close database connection (flush stats first)."""
         self._flush_stats()
