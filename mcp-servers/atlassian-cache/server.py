@@ -107,6 +107,43 @@ def _clamp_max_age(value: float | None, default: float = 24.0) -> float:
     return max(_MAX_AGE_MIN, min(float(value), _MAX_AGE_MAX))
 
 
+# --- In-session deduplication — reset per MCP session (process lifetime) ---
+
+_session_returned: set[str] = set()
+_COMPACT_LIST_THRESHOLD = 20
+
+
+def _mark_returned(entity_id: str) -> None:
+    _session_returned.add(entity_id)
+
+
+def _already_returned(entity_id: str) -> bool:
+    return entity_id in _session_returned
+
+
+def _compact_ref(entity_id: str, summary: str) -> dict:
+    """Return minimal reference for already-seen entities."""
+    return {"id": entity_id, "summary": summary, "_ref": "returned_this_session"}
+
+
+def _maybe_compact(issues: list[dict]) -> list[dict] | dict:
+    """Use compact headers+rows format for 20+ issue lists."""
+    if len(issues) < _COMPACT_LIST_THRESHOLD:
+        return issues
+    headers = ["key", "summary", "status", "assignee", "sp"]
+    rows = [
+        [
+            i.get("key", ""),
+            i.get("summary", ""),
+            i.get("status", ""),
+            i.get("assignee", ""),
+            i.get("sp"),
+        ]
+        for i in issues
+    ]
+    return {"format": "compact", "headers": headers, "rows": rows}
+
+
 # --- Globals (initialized on startup) ---
 cache: JiraCache | None = None
 embeddings: EmbeddingStore | None = None
@@ -530,6 +567,7 @@ async def handle_cache_get_issue(args: dict) -> str:
         cached = c.get_issue(issue_key, max_age_hours=max_age)
         if cached:
             logger.info("Cache HIT: %s", issue_key)
+            _mark_returned(issue_key)
             issue_data = _compact_issue(cached) if compact else cached
             return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
 
@@ -556,6 +594,7 @@ async def handle_cache_get_issue(args: dict) -> str:
         # C4: Run CPU-bound model inference off the event loop to avoid blocking
         if embeddings and embeddings.available:
             await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
+        _mark_returned(issue_key)
         issue_data = _compact_issue(issue) if compact else issue
         return json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
     except Exception as e:
@@ -641,8 +680,15 @@ async def handle_cache_get_issues(args: dict) -> str:
 
     all_issues = found_issues + upstream_issues
 
+    for issue in all_issues:
+        key = issue.get("key") if isinstance(issue, dict) else None
+        if key:
+            _mark_returned(key)
+
     if compact:
         all_issues = [_compact_issue(i) for i in all_issues]
+
+    issues_payload = _maybe_compact(all_issues) if not compact else all_issues
 
     result: dict = {
         "source": "batch",
@@ -650,7 +696,7 @@ async def handle_cache_get_issues(args: dict) -> str:
         "from_cache": len(found_issues),
         "from_upstream": len(upstream_issues),
         "still_missing": [k for k in missing_keys if k not in {i.get("key") for i in upstream_issues}],
-        "issues": all_issues,
+        "issues": issues_payload,
     }
     if invalid_keys:
         result["invalid_keys"] = invalid_keys
@@ -701,6 +747,12 @@ async def handle_cache_search(args: dict) -> str:
     if start_at > 0:
         issues = results.get("issues", [])
         results = {**results, "issues": issues[start_at:], "startAt": start_at}
+
+    # Apply compact format for large lists
+    search_issues = results.get("issues", [])
+    compacted = _maybe_compact(search_issues)
+    if compacted is not search_issues:
+        results = {**results, "issues": compacted}
 
     return json.dumps({"source": source, "results": results}, ensure_ascii=False)
 
@@ -768,6 +820,12 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     if response_offset > 0:
         issues = results.get("issues", [])
         results = {**results, "issues": issues[response_offset:], "startAt": response_offset}
+
+    # Apply compact format for large lists
+    sprint_issues = results.get("issues", [])
+    compacted = _maybe_compact(sprint_issues)
+    if compacted is not sprint_issues:
+        results = {**results, "issues": compacted}
 
     return json.dumps({"source": source, "results": results}, ensure_ascii=False)
 

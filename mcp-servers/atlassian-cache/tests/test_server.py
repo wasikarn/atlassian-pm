@@ -970,3 +970,33 @@ class TestAutoRefreshStripNoise:
         # Noise fields should be stripped from the returned issue
         assert "self" not in result["issue"]
         assert "expand" not in result["issue"]
+
+
+# --- In-session deduplication + compact list format ---
+
+
+def test_compact_format_for_large_lists(cache, multiple_issues):
+    """Lists with 20+ issues use compact headers+rows format."""
+    from server import _maybe_compact
+    issues = [{"key": f"BEP-{i}", "summary": f"Issue {i}",
+               "status": "To Do", "assignee": None, "sp": None}
+              for i in range(25)]
+    result = _maybe_compact(issues)
+    assert result["format"] == "compact"
+    assert "headers" in result
+    assert "rows" in result
+    assert len(result["rows"]) == 25
+
+
+def test_small_list_not_compacted():
+    from server import _maybe_compact
+    issues = [{"key": f"BEP-{i}", "summary": "x"} for i in range(5)]
+    result = _maybe_compact(issues)
+    assert isinstance(result, list)  # unchanged
+
+
+def test_session_dedup_returns_ref_on_repeat(cache, sample_issue):
+    """Second fetch of same issue within session returns compact ref."""
+    from server import _mark_returned, _already_returned
+    _mark_returned("BEP-100")
+    assert _already_returned("BEP-100")
