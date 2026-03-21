@@ -446,7 +446,7 @@ TOOLS = [
          }, "required": ["issue_key"]}),
 
     Tool(name="cache_reindex",
-         description="Re-embed all cached entities (Jira issues + Confluence sections). Use after switching embedding models.",
+         description="Re-embed all cached entities (Jira issues, sprint goals, Confluence sections + pages). entity_type: jira | sprint | confluence | all. Use after switching embedding models.",
          inputSchema={"type": "object", "properties": {
              "entity_type": {"type": "string", "enum": ["jira", "sprint", "confluence", "all"], "default": "all"}
          }}),
@@ -931,22 +931,21 @@ async def handle_cache_sprint_issues(args: dict) -> str:
             if embeddings and embeddings.available:
                 await asyncio.to_thread(embeddings.store_batch, all_issues)
             # Fetch sprint metadata and embed goal
-            if jira_api:
-                try:
-                    sprint_meta = await asyncio.to_thread(jira_api.get_sprint, sprint_id)
-                    c.put_sprint(sprint_id, sprint_meta)
-                    goal = sprint_meta.get("goal") or ""
-                    if goal and embeddings and embeddings.available:
-                        sprint_name = sprint_meta.get("name", "")
-                        embed_text = f"{sprint_name} goal: {goal}".strip()
-                        await asyncio.to_thread(
-                            embeddings.store_embedding,
-                            f"sprint::{sprint_id}",
-                            embed_text,
-                            "sprint",
-                        )
-                except Exception as e:
-                    logger.warning("Failed to fetch/embed sprint metadata %s: %s", sprint_id, e)
+            try:
+                sprint_meta = await asyncio.to_thread(jira_api.get_sprint, sprint_id)
+                c.put_sprint(sprint_id, sprint_meta)
+                goal = sprint_meta.get("goal") or ""
+                if goal and embeddings and embeddings.available:
+                    sprint_name = sprint_meta.get("name", "")
+                    embed_text = f"{sprint_name} goal: {goal}".strip()
+                    await asyncio.to_thread(
+                        embeddings.store_embedding,
+                        f"sprint::{sprint_id}",
+                        embed_text,
+                        "sprint",
+                    )
+            except Exception as e:
+                logger.warning("Failed to fetch/embed sprint metadata %s: %s", sprint_id, e)
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Sprint fetch failed: {type(e).__name__}: {str(e)[:200]}"})
