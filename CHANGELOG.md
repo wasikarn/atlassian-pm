@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2026-03-22
+
+### Fixed
+
+- `scripts/test-install.sh` — removed `--extra embeddings` flag from `uv sync` call; `embeddings` optional-dependency was removed from `pyproject.toml` causing Phase 2 venv sync to fail (pipeline: 17→18 passed, 0 failed)
+
+## [1.5.1] - 2026-03-22
+
+### Fixed
+
+- `hooks/plugin/session/check_prerequisites.sh` — corrected cache DB default path check to use `atlassian-pm-atlassian-pm` data dir; false-positive warning on fresh session start after clean install
+
+## [1.5.0] - 2026-03-22
+
+### Added
+
+- **`allowed-tools` scope restriction on all 31 skills** — forked context skills now declare minimal MCP tool sets using fully qualified names (`mcp__<server>__<tool>`), preventing tool sprawl in subagent contexts
+- **`effort` field on all 31 skills** — overrides session reasoning level per skill: `low` (doctor, setup, assign-issue, search-issues), `high` (create-story, analyze-story, plan-sprint, blueprint, spec-to-stories, sync-artifacts, close-sprint, plan-release, scan-tech-debt), `medium` (all others)
+- **`context: fork` on 11 additional skills** — create-epic, update-epic, update-story, create-task, create-testplan, update-subtask, update-task, bug-triage, create-doc, update-doc, release-notes now run in isolated subagent contexts
+- **`agent:` field on all 16 existing forked skills** — explicit agent type (`general-purpose` or `Explore`) per skill
+- **`disable-model-invocation: true`** on doctor and setup — prevents accidental auto-invocation
+- **Domain expert notes** added to all 31 skills — industry frameworks, key metrics, expert decision criteria, and common failure modes per skill
+- **`quality-gate` agent** model upgraded from Haiku to Sonnet — higher accuracy QG scoring
+- **`atlassian-cache` v1.0.0** — unified Jira + Confluence cache with 21 MCP tools; replaces `jira-cache-server`
+  - Confluence tools: `cache_get_confluence_page`, `cache_get_confluence_children`, `cache_get_confluence_section`, `cache_search_confluence`, `cache_find_confluence_related`, `cache_sprint_confluence`, `cache_cross_search`, `cache_refresh_confluence`, `cache_invalidate_confluence`
+  - Sprint tools: `cache_similar_sprints` — sprint goal vector search; `cache_sprint_issues` bulk sprint lookup
+  - DB renamed: `jira.db` → `atlassian.db`; env vars renamed: `JIRA_CACHE_*` → `ATLASSIAN_CACHE_*`; class renamed: `JiraCache` → `AtlassianCache`
+- **Write-invalidation hook** — `cache_write_invalidate.py` auto-clears cache entries after any MCP Atlassian write (HR6 enforcement)
+- **Lazy version-check invalidation** — Jira `updated` field triggers cache refresh without explicit `cache_invalidate` call
+- **Sprint goal embedding** (`cache_similar_sprints`) — vector search over sprint goals for sprint planning context
+- **Confluence page-level embedding** — title + labels embedded for page retrieval via `cache_search_confluence`
+- **Section heading in embeddings** — confluence section text now includes heading prefix for richer retrieval
+
+### Changed
+
+- `update-story` skill moved from `task/` → `story/` category (correct grouping)
+- Token-optimize: 13 reference files (~1,432 tokens saved), 4 mermaid files (~2,930 tokens saved), 8 agent files (~700 tokens saved)
+- `atlassian-cache`: renamed from `jira-cache-server` throughout all references
+
+### Fixed
+
+- `impact_suggester`: correct label extraction using `str.replace` instead of fragile regex; pre-compile regex at module load
+- `thai_validator`: remove unused `KEEP_ENGLISH` set (93 dead strings)
+- `cache_reindex`: remove dead `jira_api` glob import; update tool description
+- `store_batch` calls wrapped in `asyncio.to_thread` — fixes event loop contention in async context
+- `cache_sync`: validate `project_key` before sync; wrap blocking I/O in `asyncio.to_thread`
+- `adf_validator`: pre-extract all sections once per `validate` call (was re-extracting per field)
+- `jira_batch_update`: batch subtask type-check; parallelize updates with `ThreadPoolExecutor`
+- `sprint_rank_by_date`: paginate sprint issue fetch to handle sprints with >50 issues
+- `clear_sprint_dates`: parallelize Jira updates with `ThreadPoolExecutor`
+- `sprint_subtask_alignment`: cache `estimate_oe` result; pre-compute field lookups
+
+### Performance
+
+- 17 performance and correctness fixes across `atlassian-cache`, `scripts/api/`, and `scripts/sprint/`
+
+## [1.4.0] - 2026-03-21
+
+### Added
+
+- **`atlassian-cache` MCP server** (initial integration) — Jira issue cache with vector search, in-session deduplication, and 9 Confluence MCP tools
+- `cache_find_related`, `cache_reindex`, `cache_sync` tools
+- In-session deduplication and compact list format for 20+ issues
+- Resilient hook runner (`hooks/plugin/session/`) — handles stale `CLAUDE_PLUGIN_ROOT` after plugin update mid-session
+
+### Changed
+
+- **12 skills renamed** to verb-noun standard (e.g. `story-analyze` → `analyze-story`) with Good/Bad usage examples added to each SKILL.md
+- `bump-version.sh` — removed `claude plugin update` call to prevent session hook errors when bumping version in the active session
+
+### Fixed
+
+- Hook runner stale path warning after plugin update without session restart
+- `test-install.sh` — warn when install upgrades plugin but session `CLAUDE_PLUGIN_ROOT` still points to old version
+
 ## [1.3.1] - 2026-03-21
 
 ### Fixed
