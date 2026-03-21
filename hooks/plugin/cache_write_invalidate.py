@@ -38,7 +38,7 @@ if __name__ == "__main__":
     plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
     db_path = (
         Path(os.path.abspath(plugin_data)) if plugin_data else Path.home() / ".cache" / "atlassian-pm"
-    ) / "jira.db"
+    ) / "atlassian.db"
 
     tool_input = os.environ.get("TOOL_INPUT", "{}")
     try:

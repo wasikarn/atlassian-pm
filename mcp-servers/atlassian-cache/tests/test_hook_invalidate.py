@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # up to atlassian-
 
 
 def _make_db(tmp_path):
-    db = tmp_path / "jira.db"
+    db = tmp_path / "atlassian.db"
     conn = sqlite3.connect(str(db))
     conn.execute("CREATE TABLE issues (issue_key TEXT PRIMARY KEY)")
     conn.execute("CREATE TABLE searches (cache_key TEXT PRIMARY KEY, result_keys TEXT)")

@@ -26,7 +26,7 @@ from hooks_lib import inject_context, log_event
 from config_loader import load_project_config
 
 _HOOK       = "prompt-issue-prefetch"
-CACHE_DB    = Path.home() / ".cache" / "atlassian-pm" / "jira.db"
+CACHE_DB    = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"
 MAX_KEYS    = 5
 MAX_DESC_LEN = 200  # chars of description to include
 
