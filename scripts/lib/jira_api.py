@@ -474,3 +474,40 @@ class JiraAPI:
 
         logger.error("%s: update failed (HTTP %d)", issue_key, status)
         return False, change_count
+
+    # --- Confluence REST API ---
+
+    def get_confluence_page(
+        self,
+        page_id: str,
+        expand: str = "version,space,body.storage,metadata.labels,history",
+    ) -> dict[str, Any]:
+        """Fetch a Confluence page by ID.
+
+        Args:
+            page_id: Confluence page ID (numeric string)
+            expand: Comma-separated list of expansions
+
+        Returns:
+            Confluence page dict from REST API v1
+        """
+        endpoint = f"/wiki/rest/api/content/{page_id}?expand={expand}"
+        return self._request("GET", endpoint)
+
+    def get_confluence_children(
+        self,
+        page_id: str,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        """Fetch child pages of a Confluence page.
+
+        Args:
+            page_id: Parent page ID
+            limit: Max number of children to return
+
+        Returns:
+            List of child page dicts (id, title, space, version)
+        """
+        endpoint = f"/wiki/rest/api/content/{page_id}/child/page?limit={limit}&expand=version,space"
+        result = self._request("GET", endpoint)
+        return result.get("results", [])

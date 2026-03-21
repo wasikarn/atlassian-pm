@@ -1154,8 +1154,13 @@ async def handle_cache_search_confluence(arguments: dict) -> str:
 
 
 async def handle_cache_get_confluence_children(arguments: dict) -> str:
+    page_id = arguments["page_id"]
     conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    children = conf.get_children(arguments["page_id"])
+    children = conf.get_children(page_id)
+    if not children and jira_api:
+        raw = await asyncio.to_thread(jira_api.get_confluence_children, page_id)
+        conf.put_children(page_id, raw)
+        children = conf.get_children(page_id)
     return json.dumps({"children": children}, ensure_ascii=False)
 
 
@@ -1189,10 +1194,18 @@ async def handle_cache_refresh_confluence(arguments: dict) -> str:
     page_id = arguments["page_id"]
     conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
     conf.invalidate(page_id)
+    if not jira_api:
+        return json.dumps({
+            "status": "invalidated",
+            "page_id": page_id,
+            "message": "No upstream API — cache cleared only.",
+        })
+    page = await asyncio.to_thread(jira_api.get_confluence_page, page_id)
+    conf.put_page(page)
     return json.dumps({
-        "status": "invalidated",
+        "status": "refreshed",
         "page_id": page_id,
-        "message": "Page cleared. Call cache_get_confluence_page to re-fetch.",
+        "title": page.get("title", ""),
     })
 
 

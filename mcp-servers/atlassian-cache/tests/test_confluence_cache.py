@@ -78,6 +78,41 @@ class TestInvalidate:
         confluence_cache.invalidate("ghost")  # should not raise
 
 
+class TestPutAndGetChildren:
+    def test_put_children_stores_links(self, confluence_cache):
+        """put_children stores parent→child links in confluence_links."""
+        confluence_cache.put_page(make_page(page_id="parent", title="Parent"))
+        confluence_cache.put_page(make_page(page_id="child1", title="Child 1"))
+        confluence_cache.put_page(make_page(page_id="child2", title="Child 2"))
+        confluence_cache.put_children("parent", [{"id": "child1"}, {"id": "child2"}])
+        children = confluence_cache.get_children("parent")
+        assert len(children) == 2
+        ids = {c["page_id"] for c in children}
+        assert ids == {"child1", "child2"}
+
+    def test_put_children_replaces_existing(self, confluence_cache):
+        """put_children replaces previous child links for the same parent."""
+        confluence_cache.put_page(make_page(page_id="parent", title="Parent"))
+        confluence_cache.put_page(make_page(page_id="old", title="Old Child"))
+        confluence_cache.put_page(make_page(page_id="new", title="New Child"))
+        confluence_cache.put_children("parent", [{"id": "old"}])
+        confluence_cache.put_children("parent", [{"id": "new"}])
+        children = confluence_cache.get_children("parent")
+        assert len(children) == 1
+        assert children[0]["page_id"] == "new"
+
+    def test_put_children_skips_missing_id(self, confluence_cache):
+        """put_children skips child dicts with no 'id' key."""
+        confluence_cache.put_page(make_page(page_id="parent", title="Parent"))
+        confluence_cache.put_page(make_page(page_id="valid", title="Valid"))
+        confluence_cache.put_children("parent", [{"id": "valid"}, {"title": "no id here"}])
+        children = confluence_cache.get_children("parent")
+        assert len(children) == 1
+
+    def test_get_children_returns_empty_when_none(self, confluence_cache):
+        assert confluence_cache.get_children("nonexistent") == []
+
+
 class TestBodyTruncation:
     def test_confluence_body_truncated_at_500kb(self, confluence_cache):
         """put_page truncates body_md to 500KB to prevent DB bloat."""

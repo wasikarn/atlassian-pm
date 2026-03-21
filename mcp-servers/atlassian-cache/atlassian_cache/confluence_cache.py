@@ -158,6 +158,25 @@ class ConfluenceCache:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def put_children(self, parent_id: str, children: list[dict]) -> None:
+        """Store parent→child page links. Replaces existing children for this parent.
+
+        Args:
+            parent_id: Parent page ID
+            children: List of child page dicts from Confluence API (must have 'id' key)
+        """
+        with self._lock:
+            self.conn.execute(
+                "DELETE FROM confluence_links WHERE from_page_id = ? AND link_type = 'child'",
+                (parent_id,)
+            )
+            self.conn.executemany(
+                "INSERT OR IGNORE INTO confluence_links (from_page_id, to_page_id, link_type) VALUES (?, ?, 'child')",
+                [(parent_id, child["id"]) for child in children if child.get("id")]
+            )
+            self.conn.commit()
+        logger.debug("confluence: stored %d children for page %s", len(children), parent_id)
+
     def get_children(self, page_id: str) -> list[dict]:
         """Return child page stubs from confluence_links."""
         rows = self.conn.execute(
