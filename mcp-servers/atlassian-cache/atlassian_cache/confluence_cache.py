@@ -173,6 +173,11 @@ class ConfluenceCache:
         ).fetchone()
         return dict(row) if row else None
 
+    def get_all_sections(self) -> list[dict]:
+        """Return all stored sections (for reindex)."""
+        rows = self.conn.execute("SELECT * FROM confluence_sections").fetchall()
+        return [dict(r) for r in rows]
+
     def get_sprint_pages(self, sprint_id: int) -> list[dict]:
         rows = self.conn.execute(
             "SELECT p.page_id, p.title, p.url FROM confluence_sprint_links l "

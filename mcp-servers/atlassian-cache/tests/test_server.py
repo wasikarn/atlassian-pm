@@ -1021,4 +1021,31 @@ def test_confluence_tools_registered():
     assert "cache_get_confluence_page" in names
     assert "cache_search_confluence" in names
     assert "cache_cross_search" in names
-    assert len(names) == 18  # 9 Jira + 9 Confluence
+    assert len(names) == 21  # 12 Jira + 9 Confluence
+
+
+def test_new_jira_tools_registered():
+    from server import TOOLS
+    names = {t.name for t in TOOLS}
+    assert "cache_find_related" in names
+    assert "cache_reindex" in names
+    assert "cache_sync" in names
+    assert len(names) == 21  # 12 Jira + 9 Confluence
+
+
+def test_get_all_issues_returns_list(cache, sample_issue):
+    cache.put_issue(sample_issue["key"], sample_issue)
+    issues = cache.get_all_issues()
+    assert isinstance(issues, list)
+    assert len(issues) >= 1
+    assert all("key" in i for i in issues)
+
+
+def test_get_all_sections_returns_list(confluence_cache, sample_page):
+    from atlassian_cache.sections import split_sections
+    confluence_cache.put_page(sample_page)
+    sections = split_sections("12345", sample_page["_body_md"])
+    confluence_cache.put_sections(sections)
+    all_secs = confluence_cache.get_all_sections()
+    assert isinstance(all_secs, list)
+    assert len(all_secs) == len(sections)

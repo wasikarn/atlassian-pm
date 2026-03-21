@@ -421,6 +421,26 @@ TOOLS = [
          inputSchema={"type": "object", "properties": {
              "sprint_id": {"type": "integer"}
          }, "required": ["sprint_id"]}),
+
+    Tool(name="cache_find_related",
+         description="Given a Jira issue key, find semantically similar Jira issues AND related Confluence sections in one call.",
+         inputSchema={"type": "object", "properties": {
+             "issue_key": {"type": "string"},
+             "limit": {"type": "integer", "default": 5}
+         }, "required": ["issue_key"]}),
+
+    Tool(name="cache_reindex",
+         description="Re-embed all cached entities (Jira issues + Confluence sections). Use after switching embedding models.",
+         inputSchema={"type": "object", "properties": {
+             "entity_type": {"type": "string", "enum": ["jira", "confluence", "all"], "default": "all"}
+         }}),
+
+    Tool(name="cache_sync",
+         description="Incremental Jira sync: fetch issues updated since N hours ago and upsert into cache.",
+         inputSchema={"type": "object", "properties": {
+             "project_key": {"type": "string"},
+             "since_hours": {"type": "number", "default": 24.0}
+         }, "required": ["project_key"]}),
 ]
 
 
@@ -1166,6 +1186,62 @@ async def handle_cache_sprint_confluence(arguments: dict) -> str:
     return json.dumps({"pages": pages}, ensure_ascii=False)
 
 
+async def handle_cache_find_related(arguments: dict) -> str:
+    """Find semantically similar Jira issues and Confluence sections for an issue."""
+    key = _validate_issue_key(arguments["issue_key"])
+    limit = min(int(arguments.get("limit", 5)), 20)
+    issue = _require_cache().get_issue(key, max_age_hours=9999)
+    if not issue:
+        return json.dumps({"error": "not_cached"})
+    query = _embedding_text(issue)
+    results = (
+        embeddings.find_similar(query, limit=limit, exclude_keys=[key], entity_type=None)
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"related": results}, ensure_ascii=False)
+
+
+async def handle_cache_reindex(arguments: dict) -> str:
+    """Re-embed all cached entities."""
+    entity_type = arguments.get("entity_type", "all")
+    count = 0
+    c = _require_cache()
+    if embeddings and embeddings.available:
+        if entity_type in ("jira", "all"):
+            issues = c.get_all_issues()
+            count += embeddings.store_batch(issues)
+        if entity_type in ("confluence", "all") and confluence:
+            sections = confluence.get_all_sections()
+            for sec in sections:
+                embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
+                count += 1
+    return json.dumps({"reindexed": count, "entity_type": entity_type}, ensure_ascii=False)
+
+
+async def handle_cache_sync(arguments: dict) -> str:
+    """Incremental Jira sync: fetch issues updated since N hours ago."""
+    from datetime import datetime, timedelta, timezone
+    proj = arguments["project_key"].upper()
+    since_hours = float(arguments.get("since_hours", 24.0))
+    since = datetime.now(tz=timezone.utc) - timedelta(hours=since_hours)
+    jql = f'project = {proj} AND updated >= "{since.strftime("%Y-%m-%d %H:%M")}"'
+    if not jira_api:
+        return json.dumps({"error": "Upstream API not available"})
+    issues = _timed_upstream(
+        f"sync({proj})",
+        jira_api.search_issues,
+        jql,
+        fields="summary,status,assignee,issuetype,priority,labels,parent,description",
+        max_results=200,
+    )
+    issue_list = issues.get("issues", []) if isinstance(issues, dict) else issues
+    c = _require_cache()
+    for issue in issue_list:
+        c.put_issue(issue["key"], issue)
+    return json.dumps({"synced": len(issue_list), "since_hours": since_hours}, ensure_ascii=False)
+
+
 # --- Argument coercion (Claude sends strings for int/bool/number) ---
 
 # Build schema lookup: tool_name -> {param_name: type_spec}
@@ -1235,6 +1311,10 @@ HANDLERS = {
     "cache_refresh_confluence": handle_cache_refresh_confluence,
     "cache_get_confluence_section": handle_cache_get_confluence_section,
     "cache_sprint_confluence": handle_cache_sprint_confluence,
+    # New Jira tools
+    "cache_find_related": handle_cache_find_related,
+    "cache_reindex": handle_cache_reindex,
+    "cache_sync": handle_cache_sync,
 }
 
 

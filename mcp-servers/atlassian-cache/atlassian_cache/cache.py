@@ -827,6 +827,11 @@ class JiraCache:
                 MAX_DB_SIZE_MB,
             )
 
+    def get_all_issues(self) -> list[dict]:
+        """Return all cached issues as raw dicts (for reindex)."""
+        rows = self.conn.execute("SELECT data FROM issues").fetchall()
+        return [json.loads(r["data"]) for r in rows]
+
     def close(self) -> None:
         """Close database connection (flush stats first)."""
         self._flush_stats()
