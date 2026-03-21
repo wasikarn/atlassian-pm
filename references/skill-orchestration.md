@@ -34,21 +34,7 @@
 
 ## HARD RULES
 
-> Full definitions, examples, enforcement: [hr-rules.md](hr-rules.md)
-> Hooks enforce HR2-HR7, HR10 automatically — violations are blocked.
-
-| HR | Rule (one-liner) |
-|----|-----------------|
-| HR1 | QG ≥ 90% before any Atlassian write |
-| HR2 | No ORDER BY with `parent =` / `parent in` in JQL |
-| HR3 | Assignee via `acli` only — MCP silently fails |
-| HR4 | Confluence macros via `update_page_storage.py` only |
-| HR5 | Subtask = Two-Step (MCP create → verify parent → acli edit) |
-| HR6 | `cache_invalidate(key)` after every MCP write |
-| HR7 | Sprint ID always via `jira_get_sprints_from_board()` — never hardcode |
-| HR8 | Subtask dates within parent range; SP sum ≈ parent |
-| HR9 | Story ACs covered by subtask objectives; run `/verify-issue --with-subtasks` |
-| HR10 | Never set sprint field on subtasks — inherited from parent |
+> Full definitions and rationale: [hr-rules.md](hr-rules.md)
 
 ### QG Scoring Reference
 

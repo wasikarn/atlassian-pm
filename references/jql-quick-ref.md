@@ -2,8 +2,6 @@
 
 > JQL patterns for the {{PROJECT_KEY}} project
 
----
-
 ## Common Patterns ({{PROJECT_KEY}} Project)
 
 ### Find Stories by Sprint
@@ -63,8 +61,6 @@ project = {{PROJECT_KEY}} AND type = Epic AND status != Done
 "Epic Link" = ABC-XXX AND type = Story
 ```
 
----
-
 ## Operators
 
 | Operator | Usage | Example |
@@ -76,8 +72,6 @@ project = {{PROJECT_KEY}} AND type = Epic AND status != Done
 | `IS EMPTY` | No value | `assignee IS EMPTY` |
 | `IS NOT EMPTY` | Has value | `fixVersion IS NOT EMPTY` |
 
----
-
 ## Date Functions
 
 ```text
@@ -87,16 +81,12 @@ created >= startOfWeek()    # This week
 created >= startOfMonth()   # This month
 ```
 
----
-
 ## User Functions
 
 ```text
 assignee = currentUser()    # Me
 reporter = currentUser()    # Created by me
 ```
-
----
 
 ## Sprint Functions
 
@@ -105,8 +95,6 @@ sprint IN openSprints()     # Current sprint
 sprint IN futureSprints()   # Future sprints
 sprint IN closedSprints()   # Past sprints
 ```
-
----
 
 ## Order Results
 
@@ -118,8 +106,6 @@ ORDER BY duedate ASC               # Earliest due
 ORDER BY priority DESC, created ASC # Combined
 ```
 
----
-
 ## Examples for /search-issues Command
 
 | Use Case | JQL |
@@ -129,8 +115,6 @@ ORDER BY priority DESC, created ASC # Combined
 | Review sub-tasks | `"Parent Link" = ABC-XXX ORDER BY created` |
 | Find blockers | `project = {{PROJECT_KEY}} AND priority = Highest AND status != Done` |
 | Overdue items | `project = {{PROJECT_KEY}} AND duedate < now() AND status != Done` |
-
----
 
 ## Related
 

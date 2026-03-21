@@ -33,8 +33,6 @@ What do you need?
           └─ Add macros (ToC, Children) → Python script
 ```
 
----
-
 ## Tool Reference
 
 ### Jira Operations
@@ -46,17 +44,7 @@ What do you need?
 
 > ⚠️ **IMPORTANT:** Always use the `fields` parameter to prevent token limit errors!
 >
-> ```python
-> # ❌ Bad - may exceed token limit if the issue has too much data
-> jira_get_issue(issue_key="ABC-XXX")
->
-> # ✅ Good - specify only the fields you need
-> jira_get_issue(
->     issue_key="ABC-XXX",
->     fields="summary,status,description,issuetype,parent",
->     comment_limit=5
-> )
-> ```
+> See [troubleshooting.md](troubleshooting.md) → "Large Output Error" for examples.
 
 | **Create issue** | acli | `acli jira workitem create --from-json file.json` |
 | **Update description** | acli | `acli jira workitem edit --from-json file.json --yes` |
@@ -138,8 +126,6 @@ What do you need to do?
 | **Code search** | Grep | `Grep(pattern: "functionName")` |
 | **Read file** | Read | `Read(file_path: "/path/to/file")` |
 
----
-
 ## acli Commands
 
 ```bash
@@ -156,21 +142,9 @@ acli jira workitem list --project {{PROJECT_KEY}} --limit 10
 acli jira workitem get ABC-XXX
 ```
 
----
-
 ## Effort Sizing
 
 > Canonical size guide: [templates-story.md](templates-story.md#story-best-practices)
-
-| Size | Duration | Hours | SP | Action |
-| --- | --- | --- | --- | --- |
-| XS | < 0.5 day | < 4h | 1 | Single sub-task |
-| S | 0.5-1 day | 4-8h | 2 | Single sub-task |
-| M | 1-2 days | 8-16h | 3 | Single sub-task — Ideal |
-| L | 2-4 days | 16-32h | 5 | Consider splitting (SPIDR) |
-| XL | > 4 days | > 32h | 8 | Must split — use SPIDR |
-
----
 
 ## See Also
 

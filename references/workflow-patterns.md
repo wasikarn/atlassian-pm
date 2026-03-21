@@ -2,8 +2,6 @@
 
 > Referenced by SKILL.md files — single source of truth for common workflow patterns.
 
----
-
 ## Gate Levels
 
 | Level | Symbol | Behavior |
@@ -13,13 +11,9 @@
 | **APPROVAL** | ⛔ | STOP. Wait for explicit user approval before proceeding. |
 | **ITERATE** | 🔄 | Present structured plan → ask user to annotate/approve → if annotated: revise + re-present (max 3 rounds) → if approved: proceed. |
 
----
-
 ## Phase Tracking
 
 > **Phase Tracking:** Use TodoWrite to mark each phase `in_progress` → `completed` as you work.
-
----
 
 ## Quality Gate Scoring
 
@@ -44,8 +38,6 @@ Score against `verification-checklist.md`:
 | Task | `Technical X/5 \| Quality X/6 \| Overall X%` |
 | QA | `Technical X/5 \| QA Quality X/5 \| Overall X%` |
 
----
-
 ## Two-Step Subtask Creation
 
 > HR5: MCP `jira_create_issue` may silently ignore parent field → orphan subtask.
@@ -68,8 +60,6 @@ MCP: jira_create_issue({
 **Step 3:** `acli jira workitem edit --from-json {{artifacts_dir}}/subtask-xxx.json --yes`
 
 **Batch (≥3 subtasks):** Create all shells → verify all parents → batch edit descriptions
-
----
 
 ## Parallel Explore
 
@@ -94,8 +84,6 @@ Merge results into context.
 **Validation:** Validate file paths with Glob. If zero real paths found → re-explore (max 2 attempts). Generic paths like `/src/` are REJECTED.
 
 **Conditional:** Skip if format-only changes (no new scope).
-
----
 
 ## Annotation Cycle (ITERATE Gate)
 
@@ -151,8 +139,6 @@ AskUserQuestion({
 ```
 
 If user selects "Annotate" → follow up asking which numbered items to change and what notes they have.
-
----
 
 ## HR Quick Reference
 

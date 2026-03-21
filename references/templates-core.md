@@ -34,8 +34,6 @@
 > - If you see `Error: json: unknown field "projectKey"` → you are using CREATE format with the EDIT command
 > - If you see `Error: json: unknown field "issues"` → you are using EDIT format with the CREATE command
 
----
-
 ## Panel Types & Colors
 
 | Panel Type | Color | Usage |
@@ -45,8 +43,6 @@
 | `warning` | 🟡 Yellow | Edge cases, validation, UI tests |
 | `error` | 🔴 Red | Error handling, negative tests |
 | `note` | 🟣 Purple | Notes, dependencies, important info |
-
----
 
 ## Important Rules
 
@@ -97,8 +93,6 @@
 > - Validation/Edge cases → `panelType: "warning"`
 > - Error handling → `panelType: "error"`
 
----
-
 ## Table Styling
 
 ### Header Background Colors
@@ -122,8 +116,6 @@ Use the `attrs.background` attribute on `tableHeader` to add background colors:
 
 Row highlighting: use `"attrs": {"background": "HEX"}` on `tableCell` (same pattern as header).
 
----
-
 ## Semantic Table Headers (Colored by Category)
 
 | Category | Color | Hex Code | Usage |
@@ -142,8 +134,6 @@ Row highlighting: use `"attrs": {"background": "HEX"}` on `tableCell` (same patt
 ```
 
 > Same color for entire header row — do not mix colors in same row
-
----
 
 ## EDIT Template (All Issue Types)
 
@@ -186,8 +176,6 @@ jira_update_issue({
 })
 ```
 
----
-
 ## Inline Code
 
 Mark file paths, routes, components, functions with `{"type": "code"}`:
@@ -197,8 +185,6 @@ Mark file paths, routes, components, functions with `{"type": "code"}`:
 ```
 
 Mixed text: wrap only the code portion in marks, leave surrounding text plain.
-
----
 
 ## Common Mistakes
 

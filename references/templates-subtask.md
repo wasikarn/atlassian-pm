@@ -112,14 +112,8 @@ jira_create_issue({
           {"type": "tableRow", "content": [
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "MODIFY"}]}]},
             {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "app/Services/Existing/RegisterService.ts", "marks": [{"type": "code"}]}]}]}
-          ]},
-          {"type": "tableRow", "content": [
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "REF"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "app/Services/Similar/ExistingChannel.ts", "marks": [{"type": "code"}]},
-              {"type": "text", "text": " (pattern reference)"}
-            ]}]}
           ]}
+          // ... repeat pattern for REF rows: tableCell with code-marked path + optional " (pattern reference)" text
         ]
       },
       {"type": "rule"},

@@ -103,6 +103,7 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask.json --yes
 | --- | --- | --- |
 | `JQL syntax error` | Invalid query | Check JQL operators and field names |
 | `Expecting ')' but got 'ORDER'` | ORDER BY with parent query | Use `"Parent Link" = ABC-XXX ORDER BY...` instead of `parent = ABC-XXX ORDER BY...` |
+| `key in (...) ORDER BY` → parse error | ORDER BY not allowed with key in | Remove `ORDER BY` when using `key in (...)` syntax |
 | `Field not found` | Wrong field name | Use `issuetype` not `type` for search |
 | `No issues found` | Empty result | Broaden search criteria |
 
@@ -153,13 +154,6 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask.json --yes
 | Error | Cause | Solution |
 | --- | --- | --- |
 | Issue link "Relates to" → error | Wrong link type name | Correct name is `"Relates"` / valid: `Blocks`, `Duplicate`, `Cloners` |
-
-### JQL Errors
-
-| Error | Cause | Solution |
-| --- | --- | --- |
-| `Expecting ')' but got 'ORDER'` | ORDER BY with `parent =` query | Use `parent = ABC-XXX` without ORDER BY, or `"Parent Link" = ABC-XXX ORDER BY...` |
-| `key in (...) ORDER BY` → parse error | ORDER BY not allowed with key in | Remove `ORDER BY` when using `key in (...)` syntax |
 
 ### Parallel MCP Call Errors
 

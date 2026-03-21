@@ -131,8 +131,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 | No goal | Team has no direction | Define goal before selecting items |
 | Goal doesn't align with items | Completing items but not reaching goal | Review items vs goal |
 
----
-
 ## "Just Enough" Planning
 
 ### Principle
@@ -156,14 +154,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 ✅ Good: Assign only Day 1-2 → rest is self sign-up
 ```
 
-**Benefits:**
-
-- Reduce context switching
-- Whoever is free first picks up work first
-- Flexibility when blockers arise
-
----
-
 ## Task Decomposition
 
 > Subtask size guide: [templates-subtask.md](templates-subtask.md#subtask-best-practices)
@@ -176,8 +166,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 - [ ] Can be demo'd/verified
 - [ ] No dependency on other subtasks completing first (if possible)
 - [ ] Single assignee (no sharing)
-
----
 
 ## Sustainable Pace
 
@@ -199,8 +187,6 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 - [ ] Overtime becoming normal
 
 **Fix:** Reduce scope, not quality
-
----
 
 ## Sprint Planning Checklist
 

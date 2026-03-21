@@ -1,14 +1,5 @@
 # Dependency Frameworks Reference
 
-## Table of Contents
-
-- [Dependency Types](#dependency-types)
-- [Three-Step Resolution](#three-step-resolution)
-- [Critical Path Method](#critical-path-method)
-- [Decoupling Patterns](#decoupling-patterns)
-- [Swim Lane Rules](#swim-lane-rules)
-- [Risk Scoring](#risk-scoring)
-
 ## Dependency Types
 
 ### Finish-to-Start (FS) — Most Common

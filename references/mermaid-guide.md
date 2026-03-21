@@ -324,37 +324,29 @@ Reference: `scripts/confluence/create_player_architecture_page.py`
 ### State Machine (recommended structure)
 
 ```mermaid
+%% LR + invisible subgraph = column grouping; back-edges flow left naturally
 flowchart LR
     START(( )) --> INIT([Initial])
     subgraph STATES[" "]
         direction TB
-        ACTIVE[Active]
-        DEGRADED[Degraded]
-        FAILED([Failed])
+        ACTIVE[Active] --> DEGRADED[Degraded]
     end
-    INIT --> ACTIVE
-    ACTIVE -->|"error"| DEGRADED
-    DEGRADED -->|"recover"| ACTIVE
-    DEGRADED -->|"timeout"| FAILED
     style STATES fill:none,stroke:none
 ```
-
-**Key:** Use `LR` + invisible subgraphs for column grouping. Back-edges (recover) flow left naturally.
 
 ### Architecture Overview (recommended structure)
 
 ```mermaid
+%% TD + named subgraphs per service; cross-subgraph edges flow downward
 flowchart TD
-    subgraph LAYER1["Service A"]
+    subgraph SVC_A["Service A"]
         A1 --> A2
     end
-    subgraph LAYER2["Service B"]
+    subgraph SVC_B["Service B"]
         B1 --> B2
     end
     A2 --> B1
 ```
-
-**Key:** Use `TD` with subgraphs per service/layer. Cross-subgraph edges flow downward. Move shared interfaces (API endpoints) to separate subgraphs between layers to avoid back-edges.
 
 ### Sequence-like Flow
 
