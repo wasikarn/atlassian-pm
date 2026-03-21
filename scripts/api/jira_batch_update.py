@@ -56,6 +56,7 @@ import json
 import logging
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -196,6 +197,33 @@ def check_subtask(api: JiraAPI, issue_key: str) -> bool:
         return False
 
 
+def fetch_subtask_flags(api: JiraAPI, keys: list[str]) -> dict[str, bool]:
+    """Return {key: is_subtask} for all keys in a single JQL query."""
+    if not keys:
+        return {}
+    joined = ", ".join(f'"{k}"' for k in keys)
+    result = api.search_issues(
+        jql=f"key in ({joined})",
+        fields="issuetype",
+        max_results=len(keys),
+    )
+    flags: dict[str, bool] = {}
+    for issue in result.get("issues", []):
+        key = issue["key"]
+        type_name = issue["fields"]["issuetype"]["name"].lower()
+        flags[key] = type_name in ("subtask", "sub-task")
+    return flags
+
+
+def _apply_update(api: JiraAPI, key: str, fields: dict) -> tuple[str, bool, str]:
+    """Apply field update for one issue. Returns (key, success, error_msg)."""
+    try:
+        api.update_fields(key, fields)
+        return key, True, ""
+    except Exception as e:
+        return key, False, str(e)
+
+
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -262,33 +290,43 @@ def main() -> int:
     failed = 0
     all_keys: list[str] = []
 
+    # Batch fetch subtask flags in a single JQL query (Change 1)
+    all_issue_keys = [k for u in updates for k in u["keys"]]
+    subtask_flags = fetch_subtask_flags(api, all_issue_keys)
+
     for i, update in enumerate(updates):
         keys = update["keys"]
         print(f"\n[Group {i + 1}/{len(updates)}] {', '.join(keys)}")
 
+        # Build per-key payloads, skipping keys with no applicable fields
+        key_fields: dict[str, dict] = {}
         for key in keys:
-            # Check if subtask (for HR10)
-            is_subtask = check_subtask(api, key)
-
-            # Build payload
+            is_subtask = subtask_flags.get(key, False)
             fields = build_fields_payload(update, custom_fields, is_subtask)
             if not fields:
                 print(f"  {key}: no applicable fields (skipped)")
-                continue
+            else:
+                key_fields[key] = fields
 
-            # Execute update
-            try:
-                api.update_fields(key, fields)
-                field_names = list(fields.keys())
-                print(f"  {key}: {', '.join(field_names)} \u2705")
-                succeeded += 1
-                all_keys.append(key)
-            except (APIError, IssueNotFoundError) as e:
-                err_msg = str(e)
-                if hasattr(e, "status_code"):
-                    err_msg = f"{e.status_code} {e.reason}"
-                print(f"  {key}: FAILED \u2014 {err_msg}")
-                failed += 1
+        if not key_fields:
+            continue
+
+        # Execute updates concurrently (Change 2)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = {
+                executor.submit(_apply_update, api, key, fields): key
+                for key, fields in key_fields.items()
+            }
+            for future in as_completed(futures):
+                key, success, error_msg = future.result()
+                if success:
+                    field_names = list(key_fields[key].keys())
+                    print(f"  {key}: {', '.join(field_names)} \u2705")
+                    succeeded += 1
+                    all_keys.append(key)
+                else:
+                    print(f"  {key}: FAILED \u2014 {error_msg}")
+                    failed += 1
 
     # Summary
     print(f"\n{'=' * 60}")
