@@ -71,3 +71,27 @@ def test_issues_table_exists_after_migration(conn):
     assert "issues" in tables
     assert "sprints" in tables
     assert "searches" in tables
+
+
+def test_v4_confluence_tables_exist(conn):
+    """v4 migration creates all 5 Confluence tables."""
+    migrate(conn)
+    tables = {r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )}
+    assert "confluence_pages" in tables
+    assert "confluence_links" in tables
+    assert "confluence_searches" in tables
+    assert "confluence_sections" in tables
+
+
+def test_v4_confluence_sections_fk(conn):
+    """confluence_sections has FOREIGN KEY to confluence_pages (enforced)."""
+    migrate(conn)
+    conn.execute("PRAGMA foreign_keys=ON")
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO confluence_sections VALUES (?,?,?,?,?,?)",
+            ("ghost::intro", "ghost-page-id", "Intro", "text", "hash123", "2026-01-01")
+        )
+        conn.commit()

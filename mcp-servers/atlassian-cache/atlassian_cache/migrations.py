@@ -8,7 +8,7 @@ import sqlite3
 logger = logging.getLogger(__name__)
 
 # Increment whenever a new migration step is added
-SCHEMA_VERSION = 3  # Will become 4 and 5 in later tasks
+SCHEMA_VERSION = 4  # Will become 5 in later tasks
 
 # --- DDL ---
 
@@ -88,9 +88,58 @@ ALTER TABLE searches ADD COLUMN sprint_id INTEGER;
 CREATE INDEX IF NOT EXISTS idx_searches_sprint ON searches(sprint_id);
 """
 
+# M4: Migration to v4: add Confluence tables
+_MIGRATION_V4 = """
+CREATE TABLE IF NOT EXISTS confluence_pages (
+    page_id     TEXT PRIMARY KEY,
+    space_key   TEXT NOT NULL,
+    title       TEXT NOT NULL,
+    body_md     TEXT,
+    version_num INTEGER NOT NULL DEFAULT 0,
+    version_when TEXT,
+    labels      TEXT,
+    author      TEXT,
+    cached_at   REAL NOT NULL,
+    url         TEXT
+);
+
+CREATE TABLE IF NOT EXISTS confluence_links (
+    from_page_id TEXT NOT NULL,
+    to_page_id   TEXT NOT NULL,
+    link_type    TEXT DEFAULT 'child',
+    PRIMARY KEY (from_page_id, to_page_id)
+);
+
+CREATE TABLE IF NOT EXISTS confluence_searches (
+    search_key  TEXT PRIMARY KEY,
+    result_json TEXT NOT NULL,
+    cached_at   REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS confluence_sections (
+    section_id   TEXT PRIMARY KEY,
+    page_id      TEXT NOT NULL,
+    heading      TEXT NOT NULL,
+    body_md      TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    cached_at    REAL NOT NULL,
+    FOREIGN KEY (page_id) REFERENCES confluence_pages(page_id)
+);
+
+CREATE TABLE IF NOT EXISTS confluence_sprint_links (
+    page_id   TEXT NOT NULL,
+    sprint_id INTEGER NOT NULL,
+    PRIMARY KEY (page_id, sprint_id)
+);
+
+INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('confluence_hits', 0);
+INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('confluence_misses', 0);
+"""
+
 _MIGRATIONS: dict[int, str] = {
     2: _MIGRATION_V2,
     3: _MIGRATION_V3,
+    4: _MIGRATION_V4,
 }
 
 
