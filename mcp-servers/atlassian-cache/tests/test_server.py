@@ -35,10 +35,12 @@ with patch.dict(
         _strip_response_noise,
         _timed_upstream,
         _validate_issue_key,
+        handle_cache_get_confluence_children,
         handle_cache_get_issue,
         handle_cache_get_issues,
         handle_cache_invalidate,
         handle_cache_refresh,
+        handle_cache_refresh_confluence,
         handle_cache_search,
         handle_cache_similar_issues,
         handle_cache_sprint_issues,
@@ -1121,9 +1123,8 @@ class TestHandleConfluenceChildren:
     """Tests for handle_cache_get_confluence_children — cache-hit and upstream fallback."""
 
     @pytest.mark.asyncio
-    async def test_returns_cached_children(self):
+    async def test_returns_cached_children(self, cache):
         """Returns children from cache without upstream call."""
-        from server import handle_cache_get_confluence_children
         from .conftest import make_page
 
         server.confluence.put_page(make_page(page_id="parent", title="Parent"))
@@ -1135,11 +1136,9 @@ class TestHandleConfluenceChildren:
         assert result["children"][0]["page_id"] == "child1"
 
     @pytest.mark.asyncio
-    async def test_upstream_fallback_stores_and_returns(self):
+    async def test_upstream_fallback_stores_and_returns(self, cache):
         """Falls back to upstream when cache is empty, stores result."""
-        from server import handle_cache_get_confluence_children
         from .conftest import make_page
-        from unittest.mock import MagicMock
 
         # Store child page so get_children join works
         server.confluence.put_page(make_page(page_id="upstream-child", title="Upstream Child"))
@@ -1155,10 +1154,8 @@ class TestHandleConfluenceChildren:
         server.jira_api = None
 
     @pytest.mark.asyncio
-    async def test_no_upstream_returns_empty(self):
+    async def test_no_upstream_returns_empty(self, cache):
         """Returns empty list when cache miss and no jira_api configured."""
-        from server import handle_cache_get_confluence_children
-
         result = json.loads(await handle_cache_get_confluence_children({"page_id": "ghost"}))
         assert result["children"] == []
 
@@ -1167,9 +1164,8 @@ class TestHandleConfluenceRefresh:
     """Tests for handle_cache_refresh_confluence — stub and real re-fetch."""
 
     @pytest.mark.asyncio
-    async def test_no_api_returns_invalidated_status(self):
+    async def test_no_api_returns_invalidated_status(self, cache):
         """Without upstream API, just invalidates and returns status."""
-        from server import handle_cache_refresh_confluence
         from .conftest import make_page
 
         server.confluence.put_page(make_page(page_id="99", title="Old"))
@@ -1178,11 +1174,9 @@ class TestHandleConfluenceRefresh:
         assert result["page_id"] == "99"
 
     @pytest.mark.asyncio
-    async def test_with_api_fetches_and_stores(self):
+    async def test_with_api_fetches_and_stores(self, cache):
         """With upstream API, fetches fresh page and stores it."""
-        from server import handle_cache_refresh_confluence
         from .conftest import make_page
-        from unittest.mock import MagicMock
 
         fresh_page = make_page(page_id="77", title="Fresh Title", version_num=5)
         mock_api = MagicMock()
