@@ -465,7 +465,7 @@ agents/                                  ← 18 subagent definitions (3-layer ar
 ├── code-explorer.md (haiku)             ← Codebase exploration; Memory-First Protocol; --domain flag
 ├── issue-bootstrap.md (haiku)           ← Pre-fetch issue context; --preset flags; BOOTSTRAP_COMPACT
 ├── jira-search.md (haiku)               ← Duplicate confidence scoring (EXACT/HIGH/MEDIUM/LOW)
-├── quality-gate.md (haiku)              ← ADF quality scoring; Pattern Memory; Team Convention Check
+├── quality-gate.md (sonnet)             ← ADF quality scoring; Pattern Memory; Team Convention Check
 ├── pr-description-writer.md (haiku)     ← Generate PR description from branch + issue
 ├── pr-review-jira-sync.md (haiku)       ← Sync merged PR back to Jira (transition + comment)
 ├── velocity-tracker.md (haiku)          ← Velocity history; anomaly detection (1.5σ); per-member stats
