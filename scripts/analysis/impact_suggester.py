@@ -102,6 +102,18 @@ SERVICE_RULES = {
     },
 }
 
+# Pre-compiled version of SERVICE_RULES — avoids recompiling on every analyze_impact call.
+_COMPILED_RULES = {
+    tag: {
+        "keywords": [
+            (re.compile(pattern, re.I), pattern.strip("\\").strip("b"), weight)
+            for pattern, weight in rules["keywords"]
+        ],
+        "threshold": rules["threshold"],
+    }
+    for tag, rules in SERVICE_RULES.items()
+}
+
 
 def extract_text_from_adf(adf: dict) -> str:
     """Recursively extract all text from ADF."""
@@ -125,14 +137,14 @@ def analyze_impact(text: str) -> list[dict]:
     """Analyze text for service impact."""
     results = []
 
-    for tag, rules in SERVICE_RULES.items():
+    for tag, rules in _COMPILED_RULES.items():
         score = 0
         reasons = []
-        for pattern, weight in rules["keywords"]:
-            matches = re.findall(pattern, text, re.I)
+        for compiled_re, label, weight in rules["keywords"]:
+            matches = compiled_re.findall(text)
             if matches:
                 score += weight * len(matches)
-                reasons.append(f"{pattern.strip(chr(92)).strip('b')}: {len(matches)}x")
+                reasons.append(f"{label}: {len(matches)}x")
 
         if score >= rules["threshold"]:
             confidence = min(score / (rules["threshold"] * 3), 1.0)
