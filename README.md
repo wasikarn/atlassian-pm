@@ -470,17 +470,17 @@ agents/                                  ← 18 subagent definitions (3-layer ar
 ├── pr-review-jira-sync.md (haiku)       ← Sync merged PR back to Jira (transition + comment)
 ├── velocity-tracker.md (haiku)          ← Velocity history; anomaly detection (1.5σ); per-member stats
 ├── sprint-transition-agent.md (haiku)   ← Batch sprint issue moves + sprint state transitions
+├── spec-parser-agent.md (haiku)         ← Parse Confluence spec → structured requirements; Read only
 │
 │  Layer 2 — Analysis (expert reasoning, domain knowledge)
 ├── story-writer.md (sonnet)             ← ADF JSON; Convention Memory; Service-Aware AC Defaults
 ├── alignment-checker.md (sonnet)        ← AC Coverage Matrix; Predictive Risk Flags; Scope Drift
 ├── backlog-groomer.md (sonnet)          ← WSJF scoring; aging alerts; Top Candidates output
 ├── retrospective-analyst.md (sonnet)    ← Cross-Sprint Comparison; Team Health Score (0-100)
-├── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
-├── spec-parser-agent.md (haiku)         ← Parse Confluence spec → structured requirements; Read only
+└── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
 │
-│  Layer 3 — Synthesis (cross-domain specialists, new in v1.1.0)
-├── estimation-calibrator.md (sonnet)    ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
+│  Layer 3 — Synthesis (cross-domain specialists)
+├── estimation-calibrator.md (haiku)     ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
 ├── risk-forecaster.md (sonnet)          ← 4-dimension delivery risk; named mitigations; adjusted scenarios
 ├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
 └── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
@@ -492,7 +492,7 @@ hooks/                         ← 44 Python hook scripts
 │   ├── quality/               ← ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/                 ← Read optimization, dedup, field presets (6 hooks)
 │   └── session/               ← Session management, compaction, token filtering (12 hooks)
-└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (7 hooks)
+└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
 
 mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
 ```

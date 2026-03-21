@@ -27,7 +27,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 **Workflows:** [`skill-orchestration.md`](references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
 **Verify:** `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
 
-**Tool selection:** `.claude/rules/tool-selection.md` (auto-loaded for skills/hooks/scripts) · `references/tools.md` (field presets)
+**Tool selection:** `.claude/rules/tool-selection.md` · `.claude/rules/mermaid.md` · `.claude/rules/python-scripts.md` (3 auto-loaded rules) · `references/tools.md` (field presets)
 
 ## Common Mistakes
 
@@ -73,7 +73,7 @@ Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scri
 
 **Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `plugin/session/post_compact_reinject.py`.
 
-**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (sonnet, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3), `sprint-transition-agent` (haiku) — batch sprint issue moves + sprint state transitions; used by close-sprint Phase 4, `spec-parser-agent` (haiku) — parse Confluence page content into structured requirements (personas, requirements, constraints); used by spec-to-stories Phase 2; receives pre-fetched content, tools: Read only.
+**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (haiku), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (haiku, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3), `sprint-transition-agent` (haiku) — batch sprint issue moves + sprint state transitions; used by close-sprint Phase 4, `spec-parser-agent` (haiku, L1) — parse Confluence page content into structured requirements (personas, requirements, constraints); used by spec-to-stories Phase 2; receives pre-fetched content, tools: Read only.
 
 Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
