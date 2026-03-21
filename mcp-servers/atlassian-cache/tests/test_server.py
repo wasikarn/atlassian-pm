@@ -50,6 +50,7 @@ with patch.dict(
         handle_cache_stats,
         handle_cache_text_search,
         _reindex_pages,
+        _reindex_sections,
     )
 
 
@@ -1399,3 +1400,44 @@ class TestReindexPages:
         pages = conf.get_all_pages()
         count = _reindex_pages(pages)
         assert count == 2
+
+
+class TestReindexSectionsWithHeading:
+    """Section embedding text includes heading for better semantic search."""
+
+    def test_heading_included_in_embedding_text(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        sections = [{"section_id": "p1::overview", "heading": "Overview", "body_md": "Some content"}]
+        _reindex_sections(sections)
+
+        call_args = mock_embeddings.store_embedding.call_args_list[0]
+        text_arg = call_args[0][1]  # positional arg at index 1
+        assert "Overview" in text_arg
+        assert "Some content" in text_arg
+
+    def test_heading_only_when_no_body(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        sections = [{"section_id": "p1::intro", "heading": "Introduction", "body_md": ""}]
+        _reindex_sections(sections)
+
+        call_args = mock_embeddings.store_embedding.call_args_list[0]
+        text_arg = call_args[0][1]
+        assert "Introduction" in text_arg
+
+    def test_body_only_when_no_heading(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        sections = [{"section_id": "p1::sec", "body_md": "Just body content"}]
+        _reindex_sections(sections)
+
+        call_args = mock_embeddings.store_embedding.call_args_list[0]
+        text_arg = call_args[0][1]
+        assert "Just body content" in text_arg

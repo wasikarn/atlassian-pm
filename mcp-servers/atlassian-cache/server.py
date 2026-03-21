@@ -1314,7 +1314,10 @@ def _reindex_sections(sections: list) -> int:
     """Blocking helper: store embeddings for Confluence sections."""
     count = 0
     for sec in sections:
-        embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
+        heading = sec.get("heading", "")
+        body = sec.get("body_md", "")
+        embed_text = f"{heading}\n{body}".strip() if heading else body
+        embeddings.store_embedding(sec["section_id"], embed_text, entity_type="confluence")
         count += 1
     return count
 
