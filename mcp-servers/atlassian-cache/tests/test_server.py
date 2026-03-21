@@ -43,6 +43,7 @@ with patch.dict(
         handle_cache_refresh_confluence,
         handle_cache_search,
         handle_cache_similar_issues,
+        handle_cache_similar_sprints,
         handle_cache_sprint_issues,
         handle_cache_stats,
         handle_cache_text_search,
@@ -1099,7 +1100,7 @@ def test_confluence_tools_registered():
     assert "cache_get_confluence_page" in names
     assert "cache_search_confluence" in names
     assert "cache_cross_search" in names
-    assert len(names) == 21  # 12 Jira + 9 Confluence
+    assert len(names) == 22  # 13 Jira + 9 Confluence
 
 
 def test_new_jira_tools_registered():
@@ -1108,7 +1109,7 @@ def test_new_jira_tools_registered():
     assert "cache_find_related" in names
     assert "cache_reindex" in names
     assert "cache_sync" in names
-    assert len(names) == 21  # 12 Jira + 9 Confluence
+    assert len(names) == 22  # 13 Jira + 9 Confluence
 
 
 def test_get_all_issues_returns_list(cache, sample_issue):
@@ -1203,3 +1204,75 @@ def test_get_all_sections_returns_list(confluence_cache, sample_page):
     all_secs = confluence_cache.get_all_sections()
     assert isinstance(all_secs, list)
     assert len(all_secs) == len(sections)
+
+
+class TestHandleSprintGoalEmbedding:
+    """Sprint goal is embedded when fetched upstream."""
+
+    async def test_sprint_goal_embedded_on_upstream_fetch(self, cache, mock_jira_api):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        sprint_meta = {"id": 42, "name": "Sprint 42", "state": "active", "goal": "Ship coupon API", "startDate": None, "endDate": None}
+        mock_jira_api.get_sprint.return_value = sprint_meta
+        mock_jira_api.get_sprint_issues.return_value = {"issues": [], "total": 0}
+
+        result = json.loads(await handle_cache_sprint_issues({"sprint_id": 42}))
+        assert result.get("error") is None
+
+        calls = [str(c) for c in mock_embeddings.store_embedding.call_args_list]
+        assert any("sprint::42" in c for c in calls)
+
+    async def test_sprint_goal_skipped_when_no_goal(self, cache, mock_jira_api):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        sprint_meta = {"id": 10, "name": "Sprint 10", "state": "active", "goal": None}
+        mock_jira_api.get_sprint.return_value = sprint_meta
+        mock_jira_api.get_sprint_issues.return_value = {"issues": [], "total": 0}
+
+        await handle_cache_sprint_issues({"sprint_id": 10})
+        for call in mock_embeddings.store_embedding.call_args_list:
+            assert "sprint::10" not in str(call)
+
+    async def test_sprint_goal_skipped_when_embeddings_unavailable(self, cache, mock_jira_api):
+        server.embeddings = None
+        sprint_meta = {"id": 5, "name": "Sprint 5", "state": "active", "goal": "Some goal"}
+        mock_jira_api.get_sprint.return_value = sprint_meta
+        mock_jira_api.get_sprint_issues.return_value = {"issues": [], "total": 0}
+        result = json.loads(await handle_cache_sprint_issues({"sprint_id": 5}))
+        assert result.get("error") is None
+
+
+class TestHandleCacheSimilarSprints:
+    async def test_returns_error_when_no_embeddings(self, cache):
+        server.embeddings = None
+        result = json.loads(await handle_cache_similar_sprints({"query": "coupon"}))
+        assert "error" in result
+
+    async def test_returns_results_with_sprint_data(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        mock_embeddings.find_similar.return_value = [
+            {"entity_id": "sprint::1", "entity_type": "sprint", "distance": 0.1}
+        ]
+        server.embeddings = mock_embeddings
+        cache.put_sprint(1, {"name": "Sprint 1", "state": "active", "goal": "Coupon system", "startDate": None, "endDate": None})
+
+        result = json.loads(await handle_cache_similar_sprints({"query": "coupon payment"}))
+        assert result["results"][0]["entity_id"] == "sprint::1"
+        assert result["results"][0]["sprint"]["name"] == "Sprint 1"
+        assert result["results"][0]["sprint"]["goal"] == "Coupon system"
+
+    async def test_falls_back_gracefully_on_missing_sprint(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        mock_embeddings.find_similar.return_value = [
+            {"entity_id": "sprint::999", "entity_type": "sprint", "distance": 0.2}
+        ]
+        server.embeddings = mock_embeddings
+        result = json.loads(await handle_cache_similar_sprints({"query": "missing sprint"}))
+        assert result["results"][0]["entity_id"] == "sprint::999"
+        assert "sprint" not in result["results"][0]
