@@ -53,6 +53,7 @@ def setup_server_globals(cache, tmp_path):
     server.cache = cache
     server.embeddings = None
     server.jira_api = None
+    server._session_returned.clear()
     yield
 
 
@@ -993,6 +994,16 @@ def test_small_list_not_compacted():
     issues = [{"key": f"BEP-{i}", "summary": "x"} for i in range(5)]
     result = _maybe_compact(issues)
     assert isinstance(result, list)  # unchanged
+
+
+def test_compact_threshold_boundary():
+    from server import _maybe_compact, _COMPACT_LIST_THRESHOLD
+    # Exactly at threshold — compacts
+    issues_at = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD)]
+    assert isinstance(_maybe_compact(issues_at), dict)  # compacted
+    # One below threshold — stays list
+    issues_below = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD - 1)]
+    assert isinstance(_maybe_compact(issues_below), list)  # unchanged
 
 
 def test_session_dedup_returns_ref_on_repeat(cache, sample_issue):

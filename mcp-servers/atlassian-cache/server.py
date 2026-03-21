@@ -576,6 +576,7 @@ async def handle_cache_get_issue(args: dict) -> str:
         # P2-D: Stale fallback when upstream unavailable
         stale = c.get_issue_stale(issue_key)
         if stale:
+            _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
             return json.dumps(
                 {
@@ -601,6 +602,7 @@ async def handle_cache_get_issue(args: dict) -> str:
         # P2-D: Stale fallback on upstream error
         stale = c.get_issue_stale(issue_key)
         if stale:
+            _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
             return json.dumps(
                 {
