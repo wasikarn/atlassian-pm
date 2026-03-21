@@ -34,6 +34,29 @@ PARENT_TYPES = {"Story", "Task", "Bug"}
 PRIORITY_ORDER = {"Highest": 1, "High": 2, "Medium": 3, "Low": 4, "Lowest": 5}
 
 
+def fetch_all_sprint_issues(api: JiraAPI, sprint_id: int, fields: str) -> list[dict]:
+    """Fetch all issues in a sprint, handling pagination."""
+    all_issues = []
+    start_at = 0
+
+    while True:
+        result = api.get_sprint_issues(
+            sprint_id,
+            fields=fields,
+            max_results=50,
+            start_at=start_at,
+        )
+        issues = result.get("issues", [])
+        all_issues.extend(issues)
+
+        total = result.get("total", 0)
+        if start_at + len(issues) >= total:
+            break
+        start_at += len(issues)
+
+    return all_issues
+
+
 def main():
     parser = argparse.ArgumentParser(description="Re-rank sprint issues by due date + priority")
     parser.add_argument("--sprint", type=int, help="Sprint ID (default: active sprint)")
@@ -70,8 +93,7 @@ def main():
 
     # Fetch sprint issues
     fields = "summary,status,issuetype,priority,duedate,assignee"
-    result = api.get_sprint_issues(sprint_id, fields=fields, max_results=50)
-    all_issues = result.get("issues", [])
+    all_issues = fetch_all_sprint_issues(api, sprint_id, fields=fields)
 
     # Filter to active parent issues only
     parents = []
