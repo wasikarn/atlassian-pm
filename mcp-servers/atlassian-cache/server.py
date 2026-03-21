@@ -8,7 +8,7 @@
 # ///
 """MCP server for Jira data caching with FTS5 and vector search.
 
-Provides 10 tools for cached Jira data access:
+Provides tools for cached Jira data access:
 - cache_get_issue: Get issue (cache-first, upstream fallback, compact mode)
 - cache_get_issues: Batch get multiple issues (single MCP call)
 - cache_search: JQL search with caching

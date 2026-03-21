@@ -167,6 +167,7 @@ class ConfluenceCache:
         return result
 
     def get_section(self, section_id: str) -> dict | None:
+        """Return a stored section by section_id, or None if not found."""
         row = self.conn.execute(
             "SELECT * FROM confluence_sections WHERE section_id = ?", (section_id,)
         ).fetchone()

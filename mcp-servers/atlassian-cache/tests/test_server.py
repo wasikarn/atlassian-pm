@@ -50,7 +50,9 @@ with patch.dict(
 @pytest.fixture(autouse=True)
 def setup_server_globals(cache, tmp_path):
     """Inject test cache into server globals."""
+    from atlassian_cache.confluence_cache import ConfluenceCache
     server.cache = cache
+    server.confluence = ConfluenceCache(server.cache.conn, server.cache._lock)
     server.embeddings = None
     server.jira_api = None
     server._session_returned.clear()
