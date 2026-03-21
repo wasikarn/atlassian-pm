@@ -1011,3 +1011,12 @@ def test_session_dedup_returns_ref_on_repeat(cache, sample_issue):
     from server import _mark_returned, _already_returned
     _mark_returned("BEP-100")
     assert _already_returned("BEP-100")
+
+
+def test_confluence_tools_registered():
+    from server import TOOLS
+    names = {t.name for t in TOOLS}
+    assert "cache_get_confluence_page" in names
+    assert "cache_search_confluence" in names
+    assert "cache_cross_search" in names
+    assert len(names) == 18  # 9 Jira + 9 Confluence

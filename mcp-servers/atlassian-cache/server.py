@@ -48,6 +48,7 @@ if str(_scripts_dir) not in sys.path:
 
 # Local imports (atlassian_cache to avoid namespace collision with scripts/lib)
 from atlassian_cache.cache import JiraCache, strip_noise
+from atlassian_cache.confluence_cache import ConfluenceCache
 from atlassian_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
@@ -148,6 +149,7 @@ def _maybe_compact(issues: list[dict]) -> list[dict] | dict:
 cache: JiraCache | None = None
 embeddings: EmbeddingStore | None = None
 jira_api: JiraAPI | None = None
+confluence: ConfluenceCache | None = None
 
 
 # H6: Safe global accessors (prevent NoneType crashes)
@@ -361,14 +363,73 @@ TOOLS = [
             },
         },
     ),
+    # --- Confluence Tools ---
+    Tool(name="cache_get_confluence_page",
+         description="Fetch a Confluence page by ID. Returns cached body_md if fresh, else fetches from Confluence REST API.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"},
+             "max_age_hours": {"type": "number", "default": 4}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_search_confluence",
+         description="FTS5 keyword search across cached Confluence pages (title, body, labels). Uses BM25 ranking.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 10}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_get_confluence_children",
+         description="Get child pages of a given Confluence page_id from cache.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_find_confluence_related",
+         description="Vector search: find Confluence sections semantically similar to a query string.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 5}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_cross_search",
+         description="Cross-modal vector search across both Jira issues and Confluence sections.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 10}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_invalidate_confluence",
+         description="Remove a Confluence page and its sections from cache.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_refresh_confluence",
+         description="Force-refresh a Confluence page from the Confluence REST API.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_get_confluence_section",
+         description="Fetch a specific Confluence section by section_id (format: '{page_id}::{heading-slug}').",
+         inputSchema={"type": "object", "properties": {
+             "section_id": {"type": "string"}
+         }, "required": ["section_id"]}),
+
+    Tool(name="cache_sprint_confluence",
+         description="Get Confluence pages linked to a sprint via the confluence_sprint_links mapping table.",
+         inputSchema={"type": "object", "properties": {
+             "sprint_id": {"type": "integer"}
+         }, "required": ["sprint_id"]}),
 ]
 
 
 def _init() -> None:
     """Initialize cache, embeddings, and upstream API client."""
-    global cache, embeddings, jira_api
+    global cache, embeddings, jira_api, confluence
 
     cache = JiraCache()
+    confluence = ConfluenceCache(cache.conn, cache._lock)
     # C3: Pass shared write lock so EmbeddingStore serialises SQLite writes with JiraCache
     embeddings = EmbeddingStore(cache.conn, cache._lock)
 
@@ -1028,6 +1089,83 @@ async def handle_cache_invalidate(args: dict) -> str:
     return json.dumps({"error": "Specify issue_key, sprint_id, or all=true"})
 
 
+# --- Confluence Handlers ---
+
+
+async def handle_cache_get_confluence_page(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    page_id = arguments["page_id"]
+    max_age = _clamp_max_age(arguments.get("max_age_hours"), 4.0)
+    result = conf.get_page(page_id, max_age_hours=max_age)
+    if result is None:
+        return json.dumps({"error": "not_cached", "page_id": page_id})
+    _mark_returned(page_id)
+    return json.dumps(result, ensure_ascii=False)[:MAX_RESPONSE_CHARS]
+
+
+async def handle_cache_search_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    results = conf.fts_search(arguments["query"], limit=min(int(arguments.get("limit", 10)), 50))
+    return json.dumps({"results": results}, ensure_ascii=False)
+
+
+async def handle_cache_get_confluence_children(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    children = conf.get_children(arguments["page_id"])
+    return json.dumps({"children": children}, ensure_ascii=False)
+
+
+async def handle_cache_find_confluence_related(arguments: dict) -> str:
+    limit = min(int(arguments.get("limit", 5)), 20)
+    results = (
+        embeddings.find_similar(arguments["query"], limit=limit, entity_type="confluence")
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"related": results}, ensure_ascii=False)
+
+
+async def handle_cache_cross_search(arguments: dict) -> str:
+    limit = min(int(arguments.get("limit", 10)), 20)
+    results = (
+        embeddings.find_similar(arguments["query"], limit=limit, entity_type=None)
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"results": results}, ensure_ascii=False)
+
+
+async def handle_cache_invalidate_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf.invalidate(arguments["page_id"])
+    return json.dumps({"invalidated": arguments["page_id"]})
+
+
+async def handle_cache_refresh_confluence(arguments: dict) -> str:
+    page_id = arguments["page_id"]
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf.invalidate(page_id)
+    return json.dumps({
+        "status": "invalidated",
+        "page_id": page_id,
+        "message": "Page cleared. Call cache_get_confluence_page to re-fetch.",
+    })
+
+
+async def handle_cache_get_confluence_section(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    section = conf.get_section(arguments["section_id"])
+    if section is None:
+        return json.dumps({"error": "not_found"})
+    return json.dumps(section, ensure_ascii=False)[:MAX_RESPONSE_CHARS]
+
+
+async def handle_cache_sprint_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    pages = conf.get_sprint_pages(int(arguments["sprint_id"]))
+    return json.dumps({"pages": pages}, ensure_ascii=False)
+
+
 # --- Argument coercion (Claude sends strings for int/bool/number) ---
 
 # Build schema lookup: tool_name -> {param_name: type_spec}
@@ -1087,6 +1225,16 @@ HANDLERS = {
     "cache_refresh": handle_cache_refresh,
     "cache_stats": handle_cache_stats,
     "cache_invalidate": handle_cache_invalidate,
+    # Confluence
+    "cache_get_confluence_page": handle_cache_get_confluence_page,
+    "cache_search_confluence": handle_cache_search_confluence,
+    "cache_get_confluence_children": handle_cache_get_confluence_children,
+    "cache_find_confluence_related": handle_cache_find_confluence_related,
+    "cache_cross_search": handle_cache_cross_search,
+    "cache_invalidate_confluence": handle_cache_invalidate_confluence,
+    "cache_refresh_confluence": handle_cache_refresh_confluence,
+    "cache_get_confluence_section": handle_cache_get_confluence_section,
+    "cache_sprint_confluence": handle_cache_sprint_confluence,
 }
 
 

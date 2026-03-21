@@ -150,6 +150,36 @@ class ConfluenceCache:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_children(self, page_id: str) -> list[dict]:
+        """Return child page stubs from confluence_links."""
+        rows = self.conn.execute(
+            "SELECT to_page_id FROM confluence_links WHERE from_page_id = ? AND link_type = 'child'",
+            (page_id,)
+        ).fetchall()
+        result = []
+        for r in rows:
+            p = self.conn.execute(
+                "SELECT page_id, title, url FROM confluence_pages WHERE page_id = ?",
+                (r["to_page_id"],)
+            ).fetchone()
+            if p:
+                result.append(dict(p))
+        return result
+
+    def get_section(self, section_id: str) -> dict | None:
+        row = self.conn.execute(
+            "SELECT * FROM confluence_sections WHERE section_id = ?", (section_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+    def get_sprint_pages(self, sprint_id: int) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT p.page_id, p.title, p.url FROM confluence_sprint_links l "
+            "JOIN confluence_pages p ON p.page_id = l.page_id WHERE l.sprint_id = ?",
+            (sprint_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+
     def update_sections(
         self, page_id: str, new_sections: list[SectionData]
     ) -> tuple[list[SectionData], list[str]]:
