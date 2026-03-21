@@ -167,10 +167,10 @@ class TestSchema:
         """Simulate v1 DB and verify v2 migration runs."""
         # Create v1 DB manually
         conn = sqlite3.connect(str(tmp_db))
-        from atlassian_cache.cache import _SCHEMA_V1
+        from atlassian_cache.migrations import _SCHEMA_V1
 
         conn.executescript(_SCHEMA_V1)
-        conn.execute("INSERT OR REPLACE INTO schema_version (version) VALUES (1)")
+        conn.execute("PRAGMA user_version = 1")
         conn.commit()
         conn.close()
 

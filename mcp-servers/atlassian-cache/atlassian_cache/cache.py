@@ -23,6 +23,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from atlassian_cache.migrations import SCHEMA_VERSION, migrate
+
 logger = logging.getLogger(__name__)
 
 _plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
@@ -31,8 +33,8 @@ DEFAULT_DB_PATH = (
     Path(os.path.abspath(_plugin_data)) if _plugin_data else Path.home() / ".cache" / "atlassian-pm"
 ) / "jira.db"
 
-# Current schema version — increment when adding migrations
-SCHEMA_VERSION = 3
+# Current schema version — re-exported from migrations for backwards compatibility
+# SCHEMA_VERSION is imported above from atlassian_cache.migrations
 
 # H3: Whitelist of allowed FTS5 operators (everything else stripped)
 _FTS5_ALLOWED_RE = re.compile(r"[^a-zA-Z0-9\u0E00-\u0E7F\s]")  # Keep alphanumeric + Thai + spaces
@@ -42,90 +44,6 @@ MAX_ADF_DEPTH = 50
 
 # C4: Maximum DB size in MB (warn if exceeded)
 MAX_DB_SIZE_MB = int(os.environ.get("JIRA_CACHE_MAX_DB_MB", "500"))
-
-# --- P0: Migration-based schema ---
-
-# Base schema (version 1) — original tables
-_SCHEMA_V1 = """
-CREATE TABLE IF NOT EXISTS schema_version (
-    version INTEGER PRIMARY KEY
-);
-
-CREATE TABLE IF NOT EXISTS issues (
-    issue_key TEXT PRIMARY KEY,
-    summary TEXT NOT NULL,
-    status TEXT,
-    assignee TEXT,
-    issue_type TEXT,
-    sprint_id INTEGER,
-    parent_key TEXT,
-    priority TEXT,
-    labels TEXT,
-    start_date TEXT,
-    due_date TEXT,
-    description_text TEXT,
-    data TEXT NOT NULL,
-    cached_at TEXT NOT NULL,
-    accessed_at TEXT
-);
-
-CREATE INDEX IF NOT EXISTS idx_issues_sprint ON issues(sprint_id);
-CREATE INDEX IF NOT EXISTS idx_issues_parent ON issues(parent_key);
-CREATE INDEX IF NOT EXISTS idx_issues_cached ON issues(cached_at);
-CREATE INDEX IF NOT EXISTS idx_issues_status ON issues(status);
-CREATE INDEX IF NOT EXISTS idx_issues_assignee ON issues(assignee);
-
-CREATE TABLE IF NOT EXISTS sprints (
-    sprint_id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    state TEXT,
-    start_date TEXT,
-    end_date TEXT,
-    goal TEXT,
-    data TEXT NOT NULL,
-    cached_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS searches (
-    cache_key TEXT PRIMARY KEY,
-    jql TEXT NOT NULL,
-    fields TEXT NOT NULL,
-    result_keys TEXT NOT NULL,
-    total INTEGER,
-    data TEXT NOT NULL,
-    cached_at TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_searches_cached ON searches(cached_at);
-
-CREATE TABLE IF NOT EXISTS cache_stats (
-    key TEXT PRIMARY KEY,
-    value INTEGER DEFAULT 0
-);
-
-INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('hits', 0);
-INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('misses', 0);
-"""
-
-# Migration to v2: drop accessed_at column (P1-B), add purge stats
-_MIGRATION_V2 = """
--- P1-B: accessed_at is unused (deferred stat counting replaces it)
--- SQLite doesn't support DROP COLUMN before 3.35 so we just leave it
--- but stop writing to it. New stat counters for purge tracking:
-INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('purged_issues', 0);
-INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('purged_searches', 0);
-"""
-
-# M3: Migration to v3: add sprint_id to searches table
-_MIGRATION_V3 = """
-ALTER TABLE searches ADD COLUMN sprint_id INTEGER;
-CREATE INDEX IF NOT EXISTS idx_searches_sprint ON searches(sprint_id);
-"""
-
-_MIGRATIONS = {
-    2: _MIGRATION_V2,
-    3: _MIGRATION_V3,
-}
 
 FTS_SCHEMA_SQL = """
 CREATE VIRTUAL TABLE IF NOT EXISTS issues_fts USING fts5(
@@ -295,40 +213,12 @@ class JiraCache:
     # --- P0: Migration system ---
 
     def _get_schema_version(self) -> int:
-        """Get current schema version from DB, or 0 if table doesn't exist."""
-        try:
-            row = self.conn.execute("SELECT MAX(version) FROM schema_version").fetchone()
-            return row[0] if row and row[0] else 0
-        except sqlite3.OperationalError:
-            return 0
-
-    def _set_schema_version(self, version: int) -> None:
-        """Record schema version."""
-        self.conn.execute(
-            "INSERT OR REPLACE INTO schema_version (version) VALUES (?)",
-            (version,),
-        )
+        """Get current schema version from PRAGMA user_version."""
+        return self.conn.execute("PRAGMA user_version").fetchone()[0]
 
     def _init_schema(self) -> None:
-        """Create tables and run migrations."""
-        current = self._get_schema_version()
-
-        if current == 0:
-            # Fresh DB — create base schema
-            self.conn.executescript(_SCHEMA_V1)
-            self._set_schema_version(1)
-            current = 1
-            self.conn.commit()
-
-        # Run pending migrations
-        for ver in range(current + 1, SCHEMA_VERSION + 1):
-            migration = _MIGRATIONS.get(ver)
-            if migration:
-                logger.info("Running migration to schema v%d", ver)
-                self.conn.executescript(migration)
-                self._set_schema_version(ver)
-                self.conn.commit()
-                logger.info("Migration to v%d complete", ver)
+        """Create tables and run migrations via migrations.migrate()."""
+        migrate(self.conn)
 
         # FTS5 setup (idempotent)
         try:
