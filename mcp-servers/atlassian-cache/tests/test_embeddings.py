@@ -86,18 +86,16 @@ class TestGetModel:
 
     def test_loads_model(self):
         mock_model = MagicMock()
-        mock_st_module = MagicMock()
-        mock_st_module.SentenceTransformer.return_value = mock_model
+        mock_st_class = MagicMock(return_value=mock_model)
 
-        # Remove sentence_transformers from sys.modules so `from X import Y` re-imports
-        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
+        with patch("atlassian_cache.embeddings.SentenceTransformer", mock_st_class):
             result = _get_model()
-            mock_st_module.SentenceTransformer.assert_called_once_with("all-MiniLM-L6-v2")
+            mock_st_class.assert_called_once_with("paraphrase-multilingual-MiniLM-L12-v2")
             assert result is mock_model
             assert emb_module._model is mock_model
 
     def test_import_error(self):
-        with patch.dict("sys.modules", {"sentence_transformers": None}), pytest.raises(ImportError):
+        with patch("atlassian_cache.embeddings.SentenceTransformer", None), pytest.raises(ImportError):
             _get_model()
 
     def teardown_method(self):
@@ -218,8 +216,8 @@ class TestFindSimilar:
     def test_success(self):
         conn = MagicMock()
         conn.execute.return_value.fetchall.return_value = [
-            ("BEP-1", 0.1234),
-            ("BEP-2", 0.5678),
+            ("BEP-1", "jira", 0.1234),
+            ("BEP-2", "jira", 0.5678),
         ]
         with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
@@ -227,15 +225,15 @@ class TestFindSimilar:
         with patch.object(store, "generate_embedding", return_value=[0.1] * 384):
             results = store.find_similar("test query", limit=5)
             assert len(results) == 2
-            assert results[0]["issue_key"] == "BEP-1"
+            assert results[0]["entity_id"] == "BEP-1"
             assert results[0]["distance"] == 0.1234
 
     def test_with_excludes(self):
         conn = MagicMock()
         conn.execute.return_value.fetchall.return_value = [
-            ("BEP-1", 0.1),
-            ("BEP-2", 0.2),
-            ("BEP-3", 0.3),
+            ("BEP-1", "jira", 0.1),
+            ("BEP-2", "jira", 0.2),
+            ("BEP-3", "jira", 0.3),
         ]
         with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
@@ -243,7 +241,7 @@ class TestFindSimilar:
         with patch.object(store, "generate_embedding", return_value=[0.1] * 384):
             results = store.find_similar("test", exclude_keys=["BEP-2"])
             assert len(results) == 2
-            keys = [r["issue_key"] for r in results]
+            keys = [r["entity_id"] for r in results]
             assert "BEP-2" not in keys
 
     def test_error(self):
@@ -366,3 +364,33 @@ class TestCount:
         with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.count() == 0
+
+
+def test_model_name_is_multilingual(monkeypatch):
+    """Model should be multilingual MiniLM, not English-only."""
+    import atlassian_cache.embeddings as em
+    em._model = None  # reset lazy cache
+    loaded_name = []
+
+    class FakeST:
+        def __init__(self, name, **_):
+            loaded_name.append(name)
+        def encode(self, *a, **kw):
+            import numpy as np
+            return np.zeros((1, 384) if isinstance(a[0], list) else (384,))
+
+    monkeypatch.setattr("atlassian_cache.embeddings.SentenceTransformer", FakeST, raising=False)
+    from atlassian_cache.embeddings import _get_model
+    _get_model()
+    assert "multilingual" in loaded_name[0]
+
+
+def test_entity_type_filter(cache):
+    """Cross-modal search can filter by entity_type."""
+    from atlassian_cache.embeddings import EmbeddingStore
+    store = EmbeddingStore(cache.conn, cache._lock)
+    if not store.available:
+        pytest.skip("sqlite-vec not available")
+    store.store_embedding("BEP-1", "jira issue text", entity_type="jira")
+    results = store.find_similar("jira issue", entity_type="jira", limit=5)
+    assert all(r["entity_type"] == "jira" for r in results)

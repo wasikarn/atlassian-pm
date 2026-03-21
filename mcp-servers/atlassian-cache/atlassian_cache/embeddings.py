@@ -1,7 +1,9 @@
 """Semantic similarity search using sqlite-vec and sentence-transformers.
 
-Provides vector embeddings for Jira issues, enabling "find similar issues"
-queries beyond keyword matching. Uses all-MiniLM-L6-v2 (384-dim, ~80MB).
+Provides vector embeddings for Jira issues and other entities, enabling
+"find similar issues" queries beyond keyword matching.
+Uses paraphrase-multilingual-MiniLM-L12-v2 (384-dim, ~470MB) for multilingual
+support across Thai, English, and other languages.
 
 Usage:
     from lib.embeddings import EmbeddingStore
@@ -24,6 +26,14 @@ logger = logging.getLogger(__name__)
 # Lazy-loaded globals
 _model = None
 _vec_loaded = False
+
+MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+
+# Module-level reference — patchable in tests via monkeypatch.setattr
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    SentenceTransformer = None  # type: ignore[assignment,misc]
 
 
 def _load_sqlite_vec(conn: sqlite3.Connection) -> bool:
@@ -64,15 +74,13 @@ def _get_model() -> Any:
     if _model is not None:
         return _model
 
-    try:
-        from sentence_transformers import SentenceTransformer
-
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info("Loaded embedding model: all-MiniLM-L6-v2")
-        return _model
-    except ImportError:
+    if SentenceTransformer is None:
         logger.error("sentence-transformers not installed")
-        raise
+        raise ImportError("sentence-transformers not installed — run `uv sync --extra embeddings`")
+
+    _model = SentenceTransformer(MODEL_NAME)
+    logger.info("Loaded embedding model: %s", MODEL_NAME)
+    return _model
 
 
 def _serialize_f32(vec: list[float]) -> bytes:
@@ -81,8 +89,9 @@ def _serialize_f32(vec: list[float]) -> bytes:
 
 
 EMBEDDINGS_SCHEMA = """
-CREATE VIRTUAL TABLE IF NOT EXISTS issue_embeddings USING vec0(
-    issue_key TEXT PRIMARY KEY,
+CREATE VIRTUAL TABLE IF NOT EXISTS embeddings USING vec0(
+    entity_id TEXT PRIMARY KEY,
+    entity_type TEXT,
     embedding float[384]
 );
 """
@@ -164,12 +173,13 @@ class EmbeddingStore:
         embeddings = model.encode(texts, batch_size=32, normalize_embeddings=True)
         return [e.tolist() for e in embeddings]
 
-    def store_embedding(self, issue_key: str, text: str) -> bool:
-        """Generate and store embedding for an issue.
+    def store_embedding(self, entity_id: str, text: str, entity_type: str = "jira") -> bool:
+        """Generate and store embedding for an entity.
 
         Args:
-            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-123')
+            entity_id: Unique entity identifier (e.g., Jira issue key '{{PROJECT_KEY}}-123')
             text: Text to embed (typically summary + description)
+            entity_type: Entity type for cross-modal filtering (default: "jira")
 
         Returns:
             True if stored, False if embeddings not available.
@@ -181,14 +191,14 @@ class EmbeddingStore:
             vec = self.generate_embedding(text)
             with self._lock:
                 self.conn.execute(
-                    "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
-                    (issue_key, _serialize_f32(vec)),
+                    "INSERT OR REPLACE INTO embeddings (entity_id, entity_type, embedding) VALUES (?, ?, ?)",
+                    (entity_id, entity_type, _serialize_f32(vec)),
                 )
                 self.conn.commit()
-            logger.debug("Stored embedding for %s", issue_key)
+            logger.debug("Stored embedding for %s (type=%s)", entity_id, entity_type)
             return True
         except Exception as e:
-            logger.error("Failed to store embedding for %s: %s", issue_key, e)
+            logger.error("Failed to store embedding for %s: %s", entity_id, e)
             return False
 
     def find_similar(
@@ -196,29 +206,38 @@ class EmbeddingStore:
         query: str,
         limit: int = 5,
         exclude_keys: list[str] | None = None,
+        entity_type: str | None = None,
     ) -> list[dict]:
-        """Find issues semantically similar to query text.
+        """Find entities semantically similar to query text.
 
         Args:
             query: Search text
             limit: Maximum results
-            exclude_keys: Issue keys to exclude from results
+            exclude_keys: Entity IDs to exclude from results
+            entity_type: If set, filter results to this entity type only (cross-modal filter)
 
         Returns:
-            List of {issue_key, distance} dicts, sorted by similarity.
+            List of {entity_id, entity_type, distance} dicts, sorted by similarity.
         """
         if not self.available:
             return []
 
         try:
             vec = self.generate_embedding(query)
+            type_clause = "AND entity_type = ?" if entity_type else ""
+            params: list[Any] = [_serialize_f32(vec)]
+            if entity_type:
+                params.append(entity_type)
+            params.append(limit + len(exclude_keys or []))
+
             rows = self.conn.execute(
-                """SELECT issue_key, distance
-                FROM issue_embeddings
+                f"""SELECT entity_id, entity_type, distance
+                FROM embeddings
                 WHERE embedding MATCH ?
+                {type_clause}
                 ORDER BY distance
                 LIMIT ?""",
-                (_serialize_f32(vec), limit + len(exclude_keys or [])),
+                params,
             ).fetchall()
 
             results = []
@@ -227,8 +246,9 @@ class EmbeddingStore:
                 if row[0] not in excluded and len(results) < limit:
                     results.append(
                         {
-                            "issue_key": row[0],
-                            "distance": round(row[1], 4),
+                            "entity_id": row[0],
+                            "entity_type": row[1],
+                            "distance": round(row[2], 4),
                         }
                     )
 
@@ -275,12 +295,12 @@ class EmbeddingStore:
         count = 0
         try:
             rows = [
-                (key, _serialize_f32(vec))
+                (key, "jira", _serialize_f32(vec))
                 for (key, _), vec in zip(items, vectors, strict=True)
             ]
             with self._lock:
                 self.conn.executemany(
-                    "INSERT OR REPLACE INTO issue_embeddings (issue_key, embedding) VALUES (?, ?)",
+                    "INSERT OR REPLACE INTO embeddings (entity_id, entity_type, embedding) VALUES (?, ?, ?)",
                     rows,
                 )
                 count = len(rows)
@@ -291,21 +311,21 @@ class EmbeddingStore:
 
         return count
 
-    def remove_embedding(self, issue_key: str) -> bool:
-        """Remove embedding for an issue."""
+    def remove_embedding(self, entity_id: str) -> bool:
+        """Remove embedding for an entity."""
         if not self.available:
             return False
 
         try:
             with self._lock:
                 self.conn.execute(
-                    "DELETE FROM issue_embeddings WHERE issue_key = ?",
-                    (issue_key,),
+                    "DELETE FROM embeddings WHERE entity_id = ?",
+                    (entity_id,),
                 )
                 self.conn.commit()
             return True
         except Exception as e:
-            logger.error("Failed to remove embedding %s: %s", issue_key, e)
+            logger.error("Failed to remove embedding %s: %s", entity_id, e)
             return False
 
     def count(self) -> int:
@@ -313,7 +333,7 @@ class EmbeddingStore:
         if not self.available:
             return 0
         try:
-            row = self.conn.execute("SELECT COUNT(*) FROM issue_embeddings").fetchone()
+            row = self.conn.execute("SELECT COUNT(*) FROM embeddings").fetchone()
             return row[0] if row else 0
         except Exception:
             return 0
