@@ -41,14 +41,14 @@ from mcp.types import TextContent, Tool
 
 # Add scripts/lib to path for JiraAPI + auth reuse
 # Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/scripts)
-# Fallback for standalone testing: resolve relative to this file (mcp-servers/jira-cache/ -> root -> scripts/)
+# Fallback for standalone testing: resolve relative to this file (mcp-servers/atlassian-cache/ -> root -> scripts/)
 _scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
 if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
-# Local imports (jira_cache to avoid namespace collision with scripts/lib)
-from jira_cache.cache import JiraCache, strip_noise
-from jira_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
+# Local imports (atlassian_cache to avoid namespace collision with scripts/lib)
+from atlassian_cache.cache import JiraCache, strip_noise
+from atlassian_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
@@ -57,7 +57,7 @@ logging.basicConfig(
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     stream=sys.stderr,
 )
-logger = logging.getLogger("jira-cache")
+logger = logging.getLogger("atlassian-cache")
 
 # Claude Code MCP token limit is ~30K chars; keep well under
 MAX_RESPONSE_CHARS = 25_000
@@ -360,7 +360,7 @@ async def _lifespan(server: Server):  # noqa: ARG001
     finally:
         if cache is not None:
             cache.close()
-            logger.info("jira-cache: DB connection closed")
+            logger.info("atlassian-cache: DB connection closed")
 
 
 def _extract_core_fields(issue: dict) -> dict:
@@ -1032,7 +1032,7 @@ HANDLERS = {
 
 async def main() -> None:  # pragma: no cover
     """Run MCP server over stdio."""
-    server = Server("jira-cache", lifespan=_lifespan)
+    server = Server("atlassian-cache", lifespan=_lifespan)
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
@@ -1072,7 +1072,7 @@ async def main() -> None:  # pragma: no cover
             safe_msg = f"{type(e).__name__}: {str(e)[:200]}"
             return [TextContent(type="text", text=json.dumps({"error": safe_msg}))]
 
-    logger.info("Starting jira-cache (stdio)")
+    logger.info("Starting atlassian-cache (stdio)")
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 

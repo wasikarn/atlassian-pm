@@ -19,38 +19,38 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| blueprint | `/atlassian-pm:blueprint` | 10 | jira-cache, mcp-atlassian | Multi-perspective blueprint via 5-role debate (PO, Domain Expert, Tech Lead, Engineer, QA). Outputs Confluence page (8 sections) + backlog map for downstream skills. Supports S/M/L tiers. |
-| refine-epic | `/atlassian-pm:refine-epic` | 5 | jira-cache, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/create-story`. |
-| create-epic | `/atlassian-pm:create-epic` | 6 | jira-cache, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
-| update-epic | `/atlassian-pm:update-epic` | 6 | jira-cache, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
-| plan-release | `/atlassian-pm:plan-release` | 9 | jira-cache, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
+| blueprint | `/atlassian-pm:blueprint` | 10 | atlassian-cache, mcp-atlassian | Multi-perspective blueprint via 5-role debate (PO, Domain Expert, Tech Lead, Engineer, QA). Outputs Confluence page (8 sections) + backlog map for downstream skills. Supports S/M/L tiers. |
+| refine-epic | `/atlassian-pm:refine-epic` | 5 | atlassian-cache, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/create-story`. |
+| create-epic | `/atlassian-pm:create-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
+| update-epic | `/atlassian-pm:update-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
+| plan-release | `/atlassian-pm:plan-release` | 9 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
 
 ### Story & Subtask
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| create-story | `/atlassian-pm:create-story` | 11 | jira-cache, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow: creates User Story + Sub-tasks in one session. Includes codebase exploration, INVEST validation, QG, and blueprint handoff. |
-| analyze-story | `/atlassian-pm:analyze-story` | 7 | jira-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
-| create-task | `/atlassian-pm:create-task` | 6 | jira-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
-| create-testplan | `/atlassian-pm:create-testplan` | 6 | jira-cache, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
-| bug-triage | `/atlassian-pm:bug-triage` | 6 | jira-cache, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
-| update-story | `/atlassian-pm:update-story` | 6 | jira-cache, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
-| update-subtask | `/atlassian-pm:update-subtask` | 6 | jira-cache, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |
-| update-task | `/atlassian-pm:update-task` | 6 | jira-cache, mcp-atlassian, acli | Update an existing Jira Task (migrate Wiki→ADF, add details, change type template). |
+| create-story | `/atlassian-pm:create-story` | 11 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow: creates User Story + Sub-tasks in one session. Includes codebase exploration, INVEST validation, QG, and blueprint handoff. |
+| analyze-story | `/atlassian-pm:analyze-story` | 7 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
+| create-task | `/atlassian-pm:create-task` | 6 | atlassian-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
+| create-testplan | `/atlassian-pm:create-testplan` | 6 | atlassian-cache, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
+| bug-triage | `/atlassian-pm:bug-triage` | 6 | atlassian-cache, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
+| update-story | `/atlassian-pm:update-story` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
+| update-subtask | `/atlassian-pm:update-subtask` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |
+| update-task | `/atlassian-pm:update-task` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing Jira Task (migrate Wiki→ADF, add details, change type template). |
 | assign-issue | `/atlassian-pm:assign-issue` | 1 | acli | Quick assign a Jira issue to a team member. Uses acli (HR3-safe). Supports unassign. |
-| verify-issue | `/atlassian-pm:verify-issue` | 6 | jira-cache, mcp-atlassian, acli | Verify and improve issue quality: ADF format, INVEST, language, hierarchy alignment (A1–A6). Flags: `--with-subtasks`, `--fix`. |
-| sync-artifacts | `/atlassian-pm:sync-artifacts` | 8 | jira-cache, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
-| spec-to-stories | `/atlassian-pm:spec-to-stories` | 8 | jira-cache, mcp-atlassian, mcp-confluence, acli | Convert Confluence spec page to Jira User Stories via spec-parser-agent. Dedup check, QG, batch create with HR5 verification. --dry-run supported. |
+| verify-issue | `/atlassian-pm:verify-issue` | 6 | atlassian-cache, mcp-atlassian, acli | Verify and improve issue quality: ADF format, INVEST, language, hierarchy alignment (A1–A6). Flags: `--with-subtasks`, `--fix`. |
+| sync-artifacts | `/atlassian-pm:sync-artifacts` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
+| spec-to-stories | `/atlassian-pm:spec-to-stories` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Convert Confluence spec page to Jira User Stories via spec-parser-agent. Dedup check, QG, batch create with HR5 verification. --dry-run supported. |
 
 ### Sprint Planning
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| plan-sprint | `/atlassian-pm:plan-sprint` | 8 | jira-cache, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
-| map-dependencies | `/atlassian-pm:map-dependencies` | 5 | jira-cache, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
-| close-sprint | `/atlassian-pm:close-sprint` | 8 | jira-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
-| standup-report | `/atlassian-pm:standup-report` | 4 | jira-cache, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
-| reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | jira-cache, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
+| plan-sprint | `/atlassian-pm:plan-sprint` | 8 | atlassian-cache, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
+| map-dependencies | `/atlassian-pm:map-dependencies` | 5 | atlassian-cache, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
+| close-sprint | `/atlassian-pm:close-sprint` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
+| standup-report | `/atlassian-pm:standup-report` | 4 | atlassian-cache, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
+| reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | atlassian-cache, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 
 ### Confluence
 
@@ -63,10 +63,10 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| search-issues | `/atlassian-pm:search-issues` | 3 | jira-cache, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
+| search-issues | `/atlassian-pm:search-issues` | 3 | atlassian-cache, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
-| scan-tech-debt | `/atlassian-pm:scan-tech-debt` | 6 | jira-cache, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
-| release-notes | `/atlassian-pm:release-notes` | 6 | jira-cache, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
+| scan-tech-debt | `/atlassian-pm:scan-tech-debt` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
+| release-notes | `/atlassian-pm:release-notes` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
 | atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
 
 ---
@@ -77,7 +77,7 @@ The `x-compatibility` frontmatter field lists which external tools a skill depen
 
 | Value | Meaning |
 | --- | --- |
-| `jira-cache` | Uses the jira-cache MCP (local SQLite cache + semantic search via sqlite-vec). Provides `cache_get_issue`, `cache_search`, `cache_similar_issues`. |
+| `atlassian-cache` | Uses the atlassian-cache MCP (local SQLite cache + semantic search via sqlite-vec). Provides `cache_get_issue`, `cache_search`, `cache_similar_issues`. |
 | `mcp-atlassian` | Uses mcp-atlassian for Jira reads and writes (`jira_get_issue`, `jira_create_issue`, `jira_update_issue`, `jira_search`, etc.). |
 | `mcp-confluence` | Uses mcp-atlassian's Confluence tools (`confluence_get_page`, `confluence_create_page`, `confluence_update_page`, `confluence_search`). |
 | `acli` | Uses Atlassian CLI (`acli`) for operations where MCP silently fails: assignee (HR3), parent field on existing issues. |

@@ -137,7 +137,7 @@ if [[ "$MODE" != "--doctor" ]]; then
   if [ "$VENV_OK" = "false" ]; then
     info "Phase 1: uv sync venv..."
     if UV_PROJECT_ENVIRONMENT="${PLUGIN_DATA}/venv" \
-        uv sync --project "${PLUGIN_ROOT}/mcp-servers/jira-cache" \
+        uv sync --project "${PLUGIN_ROOT}/mcp-servers/atlassian-cache" \
         --extra embeddings --quiet 2>&1; then
       pass "venv synced ✓"
     else
@@ -191,23 +191,23 @@ acli jira auth status &>/dev/null && _dr_pass "acli authenticated ($(acli jira a
 command -v uv &>/dev/null && _dr_pass "uv installed ($(uv --version 2>/dev/null | head -1))" || _dr_fail "uv not found"
 # 4 venv
 if [ -f "${PLUGIN_DATA}/venv/bin/python" ]; then
-  _dr_pass "jira-cache venv ready"
+  _dr_pass "atlassian-cache venv ready"
 elif command -v uv &>/dev/null && [ -n "$PLUGIN_ROOT" ]; then
-  echo -e "  ${CYAN}~${NC}  jira-cache venv missing — recreating..."
+  echo -e "  ${CYAN}~${NC}  atlassian-cache venv missing — recreating..."
   mkdir -p "$PLUGIN_DATA"
   if uv venv "$PLUGIN_DATA/venv" --quiet 2>/dev/null && \
      uv pip install --python "$PLUGIN_DATA/venv/bin/python" \
-       "$PLUGIN_ROOT/mcp-servers/jira-cache" --quiet 2>/dev/null; then
-    _dr_pass "jira-cache venv recreated"
+       "$PLUGIN_ROOT/mcp-servers/atlassian-cache" --quiet 2>/dev/null; then
+    _dr_pass "atlassian-cache venv recreated"
   else
-    _dr_fail "jira-cache venv recreation failed → run /atlassian-pm:setup"
+    _dr_fail "atlassian-cache venv recreation failed → run /atlassian-pm:setup"
   fi
 else
-  _dr_warn "jira-cache venv missing → run /atlassian-pm:setup"
+  _dr_warn "atlassian-cache venv missing → run /atlassian-pm:setup"
 fi
 # 4b .mcp.json
-python3 -c "import json; d=json.load(open('$PLUGIN_ROOT/.mcp.json')); exit(0 if 'jira-cache' in d.get('mcpServers',{}) else 1)" 2>/dev/null \
-  && _dr_pass "jira-cache in .mcp.json" || _dr_warn "jira-cache missing from .mcp.json"
+python3 -c "import json; d=json.load(open('$PLUGIN_ROOT/.mcp.json')); exit(0 if 'atlassian-cache' in d.get('mcpServers',{}) else 1)" 2>/dev/null \
+  && _dr_pass "atlassian-cache in .mcp.json" || _dr_warn "atlassian-cache missing from .mcp.json"
 # 5 mcp-atlassian
 claude mcp get mcp-atlassian &>/dev/null && _dr_pass "mcp-atlassian configured" || _dr_fail "mcp-atlassian not registered"
 # 6 project-config

@@ -2,7 +2,7 @@
 name: reschedule-sprint
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache, mcp-atlassian, acli]
+x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Bulk-shift issue dates across a sprint or issue list — shifts start/due dates by N days or to a new start date.
   Uses existing sprint_set_fields.py script. Always previews before executing.

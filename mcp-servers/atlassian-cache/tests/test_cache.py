@@ -1,10 +1,10 @@
-"""Tests for jira_cache.cache module — 100% coverage target."""
+"""Tests for atlassian_cache.cache module — 100% coverage target."""
 
 import sqlite3
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from jira_cache.cache import (
+from atlassian_cache.cache import (
     DEFAULT_TTL,
     PURGE_ISSUES_DAYS,
     PURGE_SEARCHES_HOURS,
@@ -167,7 +167,7 @@ class TestSchema:
         """Simulate v1 DB and verify v2 migration runs."""
         # Create v1 DB manually
         conn = sqlite3.connect(str(tmp_db))
-        from jira_cache.cache import _SCHEMA_V1
+        from atlassian_cache.cache import _SCHEMA_V1
 
         conn.executescript(_SCHEMA_V1)
         conn.execute("INSERT OR REPLACE INTO schema_version (version) VALUES (1)")
@@ -609,7 +609,7 @@ class TestAdaptiveTTL:
 class TestClose:
     def test_close_flushes_stats(self, tmp_db, sample_issue):
         """close() should flush buffered stats."""
-        from jira_cache.cache import JiraCache
+        from atlassian_cache.cache import JiraCache
 
         c = JiraCache(db_path=tmp_db)
         c.put_issue("BEP-100", sample_issue)
@@ -631,7 +631,7 @@ class TestCheckDbSize:
         """DB under limit should not warn."""
         import logging
 
-        with patch.object(logging.getLogger("jira_cache.cache"), "warning") as mock_warn:
+        with patch.object(logging.getLogger("atlassian_cache.cache"), "warning") as mock_warn:
             cache._check_db_size()
             mock_warn.assert_not_called()
 
@@ -643,8 +643,8 @@ class TestCheckDbSize:
         c.put_issue("BEP-1", sample_issue)
         # Temporarily set limit very low to trigger
         with (
-            patch("jira_cache.cache.MAX_DB_SIZE_MB", 0),
-            patch.object(logging.getLogger("jira_cache.cache"), "warning") as mock_warn,
+            patch("atlassian_cache.cache.MAX_DB_SIZE_MB", 0),
+            patch.object(logging.getLogger("atlassian_cache.cache"), "warning") as mock_warn,
         ):
             c._check_db_size()
             mock_warn.assert_called_once()

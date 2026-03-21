@@ -1,7 +1,7 @@
 ---
 name: update-subtask
 disable-model-invocation: true
-x-compatibility: [jira-cache, mcp-atlassian, acli]
+x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Update an existing Sub-task with a 6-phase update workflow
 

@@ -2,7 +2,7 @@
 name: scan-tech-debt
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence]
+x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 description: |
   Aggregate all tech-debt/chore/spike issues into a priority matrix dashboard on Confluence.
   Clusters by service tag + age. Scores effort vs impact. Supports trend comparison via Confluence history.

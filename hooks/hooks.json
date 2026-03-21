@@ -58,7 +58,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__plugin_atlassian-pm_jira-cache__cache_get_issue",
+				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
 				"hooks": [
 					{
 						"type": "command",
@@ -215,7 +215,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__plugin_atlassian-pm_jira-cache__cache_invalidate",
+				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
 				"hooks": [
 					{
 						"type": "command",
@@ -225,7 +225,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__plugin_atlassian-pm_jira-cache__cache_search|mcp__plugin_atlassian-pm_jira-cache__cache_sprint_issues",
+				"matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__plugin_atlassian-pm_atlassian-cache__cache_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues",
 				"hooks": [
 					{
 						"type": "command",
@@ -235,7 +235,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__plugin_atlassian-pm_jira-cache__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
+				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
 				"hooks": [
 					{
 						"type": "command",
@@ -276,7 +276,7 @@
 				]
 			},
 			{
-				"matcher": "mcp__plugin_atlassian-pm_jira-cache__cache_get_issue",
+				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
 				"hooks": [
 					{
 						"type": "command",
@@ -337,7 +337,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
+						"command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
 						"timeout": 60
 					},
 					{
@@ -380,7 +380,7 @@
 		],
 		"PostToolUseFailure": [
 			{
-				"matcher": "mcp__plugin_atlassian-pm_jira-cache__cache_invalidate",
+				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
 				"hooks": [
 					{
 						"type": "command",

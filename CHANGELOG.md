@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.mcp.json` PYTHONPATH updated: `skills/atlassian-scripts` → `scripts`
 - All internal `sys.path` references in `scripts/sprint/*.py` updated
 - Hook paths updated: `hooks/plugin/guards/pre_hr1_quality_gate.py`, `pre_hr4_confluence_macro_guard.py`
-- `mcp-servers/jira-cache-server/server.py` sys.path updated to use `scripts/`
+- `mcp-servers/atlassian-cache-server/server.py` sys.path updated to use `scripts/`
 
 ## [1.1.0] - 2026-03-20
 
@@ -62,14 +62,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Renamed project from `jira-generator` to `atlassian-pm` across all files and configs
-- Hook matchers updated to use canonical plugin MCP tool names (`mcp__plugin_atlassian-pm_jira-cache-server__`)
+- Hook matchers updated to use canonical plugin MCP tool names (`mcp__plugin_atlassian-pm_atlassian-cache-server__`)
 - `post_subtask_alignment_suggest.py`: fixed SPRINT_TOOLS set comparison with correct tool names
 - `setup.sh`: corrected CONFIG_TEMPLATE path (`config/` not `.claude/`)
-- `setup.sh`: added dependency checks at top (acli, uv, jira-cache-server venv)
+- `setup.sh`: added dependency checks at top (acli, uv, atlassian-cache-server venv)
 - `setup.sh`: skip git filter config when not in a git repository (cache install)
 - `sync-skills`: replaced hardcoded dev path with script-relative `SRC_BASE`
 - `skills/setup/SKILL.md`: replaced hardcoded version fallback with dynamic `find` for latest cached version
-- `hooks/hooks.json`: fixed all `mcp__jira-cache-server__` matchers to use full plugin namespace
+- `hooks/hooks.json`: fixed all `mcp__atlassian-cache-server__` matchers to use full plugin namespace
 - `scripts/sprint/*.py` added to `.gitattributes` filter coverage
 
 ### Added
@@ -83,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- MCP jira-cache-server DB path now uses `CLAUDE_PLUGIN_DATA` for persistence across plugin updates
+- MCP atlassian-cache-server DB path now uses `CLAUDE_PLUGIN_DATA` for persistence across plugin updates
 - `setup.sh` and `skills/setup/SKILL.md`: venv installed in `CLAUDE_PLUGIN_DATA/venv` when available
 - SessionStart hook added for automatic venv reinstall detection on plugin update
 - `hooks/hooks.json`: `SubagentStart` event handler added
@@ -97,6 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 21 skills: create-story, plan-sprint, verify-issue, analyze-story, update-story, sync-artifacts, and more
 - 8 subagents: story-writer, sprint-planner, quality-gate, alignment-checker, and more
 - Hook system: 37 hooks enforcing HR1–HR10 guardrails
-- jira-cache-server MCP: SQLite-backed Jira issue cache with semantic search
+- atlassian-cache-server MCP: SQLite-backed Jira issue cache with semantic search
 - atlassian-scripts: 17 Python scripts for Jira/Confluence REST API operations
 - Git smudge/clean filter for placeholder ↔ real value conversion

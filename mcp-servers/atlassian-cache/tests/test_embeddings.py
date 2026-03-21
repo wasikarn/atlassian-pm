@@ -1,12 +1,12 @@
-"""Tests for jira_cache.embeddings module — 100% coverage target."""
+"""Tests for atlassian_cache.embeddings module — 100% coverage target."""
 
 import sqlite3
 import struct
 from unittest.mock import MagicMock, patch
 
-import jira_cache.embeddings as emb_module
+import atlassian_cache.embeddings as emb_module
 import pytest
-from jira_cache.embeddings import (
+from atlassian_cache.embeddings import (
     EmbeddingStore,
     _get_model,
     _load_sqlite_vec,
@@ -110,13 +110,13 @@ class TestGetModel:
 class TestEmbeddingStoreInit:
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
             assert store.available is False
 
     def test_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
             assert store.available is True
             conn.executescript.assert_called_once()
@@ -125,7 +125,7 @@ class TestEmbeddingStoreInit:
     def test_schema_already_exists(self):
         conn = MagicMock()
         conn.executescript.side_effect = sqlite3.OperationalError("table already exists")
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
             # "already exists" should be silently ignored
             assert store.available is True
@@ -133,7 +133,7 @@ class TestEmbeddingStoreInit:
     def test_schema_other_error(self):
         conn = MagicMock()
         conn.executescript.side_effect = sqlite3.OperationalError("disk I/O error")
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
             assert store.available is False
 
@@ -141,7 +141,7 @@ class TestEmbeddingStoreInit:
 class TestGenerateEmbedding:
     def test_calls_model(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         mock_model = MagicMock()
@@ -149,7 +149,7 @@ class TestGenerateEmbedding:
         mock_result.tolist.return_value = [0.1] * 384
         mock_model.encode.return_value = mock_result
 
-        with patch("jira_cache.embeddings._get_model", return_value=mock_model):
+        with patch("atlassian_cache.embeddings._get_model", return_value=mock_model):
             result = store.generate_embedding("test text")
             assert len(result) == 384
             mock_model.encode.assert_called_once_with("test text", normalize_embeddings=True)
@@ -158,13 +158,13 @@ class TestGenerateEmbedding:
 class TestGenerateEmbeddingsBatch:
     def test_empty_list(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.generate_embeddings_batch([]) == []
 
     def test_batch_encode(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         mock_model = MagicMock()
@@ -174,7 +174,7 @@ class TestGenerateEmbeddingsBatch:
         mock_e2.tolist.return_value = [0.2] * 384
         mock_model.encode.return_value = [mock_e1, mock_e2]
 
-        with patch("jira_cache.embeddings._get_model", return_value=mock_model):
+        with patch("atlassian_cache.embeddings._get_model", return_value=mock_model):
             result = store.generate_embeddings_batch(["a", "b"])
             assert len(result) == 2
             mock_model.encode.assert_called_once_with(["a", "b"], batch_size=32, normalize_embeddings=True)
@@ -183,13 +183,13 @@ class TestGenerateEmbeddingsBatch:
 class TestStoreEmbedding:
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
         assert store.store_embedding("BEP-1", "text") is False
 
     def test_success(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         with patch.object(store, "generate_embedding", return_value=[0.1] * 384):
@@ -200,7 +200,7 @@ class TestStoreEmbedding:
 
     def test_error(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         with patch.object(store, "generate_embedding", side_effect=Exception("model error")):
@@ -211,7 +211,7 @@ class TestStoreEmbedding:
 class TestFindSimilar:
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
         assert store.find_similar("query") == []
 
@@ -221,7 +221,7 @@ class TestFindSimilar:
             ("BEP-1", 0.1234),
             ("BEP-2", 0.5678),
         ]
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         with patch.object(store, "generate_embedding", return_value=[0.1] * 384):
@@ -237,7 +237,7 @@ class TestFindSimilar:
             ("BEP-2", 0.2),
             ("BEP-3", 0.3),
         ]
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         with patch.object(store, "generate_embedding", return_value=[0.1] * 384):
@@ -248,7 +248,7 @@ class TestFindSimilar:
 
     def test_error(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
 
         with patch.object(store, "generate_embedding", side_effect=Exception("fail")):
@@ -258,13 +258,13 @@ class TestFindSimilar:
 class TestStoreBatch:
     def _make_store(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         return store, conn
 
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
         assert store.store_batch([]) == 0
 
@@ -320,13 +320,13 @@ class TestStoreBatch:
 class TestRemoveEmbedding:
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
         assert store.remove_embedding("BEP-1") is False
 
     def test_success(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.remove_embedding("BEP-1") is True
         conn.execute.assert_called()
@@ -334,7 +334,7 @@ class TestRemoveEmbedding:
     def test_error(self):
         conn = MagicMock()
         conn.execute.side_effect = Exception("fail")
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.remove_embedding("BEP-1") is False
 
@@ -342,27 +342,27 @@ class TestRemoveEmbedding:
 class TestCount:
     def test_not_available(self):
         conn = MagicMock()
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=False):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=False):
             store = EmbeddingStore(conn)
         assert store.count() == 0
 
     def test_success(self):
         conn = MagicMock()
         conn.execute.return_value.fetchone.return_value = (42,)
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.count() == 42
 
     def test_none_row(self):
         conn = MagicMock()
         conn.execute.return_value.fetchone.return_value = None
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.count() == 0
 
     def test_error(self):
         conn = MagicMock()
         conn.execute.side_effect = Exception("fail")
-        with patch("jira_cache.embeddings._load_sqlite_vec", return_value=True):
+        with patch("atlassian_cache.embeddings._load_sqlite_vec", return_value=True):
             store = EmbeddingStore(conn)
         assert store.count() == 0

@@ -1,7 +1,7 @@
 ---
 name: update-epic
 disable-model-invocation: true
-x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Update an existing Epic with a 6-phase update workflow
 

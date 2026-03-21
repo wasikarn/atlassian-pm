@@ -1,11 +1,11 @@
-"""Shared test fixtures for jira-cache tests."""
+"""Shared test fixtures for atlassian-cache tests."""
 
 import sys
 from pathlib import Path
 
 import pytest
 
-# Ensure jira_cache is importable
+# Ensure atlassian_cache is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
@@ -70,7 +70,7 @@ def tmp_db(tmp_path):
 @pytest.fixture
 def cache(tmp_db):
     """Create a JiraCache with a temporary database."""
-    from jira_cache.cache import JiraCache
+    from atlassian_cache.cache import JiraCache
 
     c = JiraCache(db_path=tmp_db)
     yield c

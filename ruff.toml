@@ -26,7 +26,7 @@ ignore = [
 [lint.per-file-ignores]
 "tests/*" = ["B011"]  # assert False allowed in tests
 ".claude/hooks/*" = ["E402"]  # hooks need sys.path.insert before imports
-".claude/skills/jira-cache/server.py" = ["E402"]  # sys.path before local imports
+".claude/skills/atlassian-cache/server.py" = ["E402"]  # sys.path before local imports
 "scripts/*" = ["E402"]  # sys.path before local imports
 
 [format]
