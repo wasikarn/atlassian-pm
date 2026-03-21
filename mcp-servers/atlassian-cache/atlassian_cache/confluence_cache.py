@@ -205,6 +205,17 @@ class ConfluenceCache:
         rows = self.conn.execute("SELECT * FROM confluence_sections").fetchall()
         return [dict(r) for r in rows]
 
+    def get_all_pages(self) -> list[dict]:
+        """Return all cached page metadata (for page-level reindex)."""
+        rows = self.conn.execute(
+            "SELECT page_id, title, labels FROM confluence_pages"
+        ).fetchall()
+        result = []
+        for r in rows:
+            labels = json.loads(r["labels"]) if r["labels"] else []
+            result.append({"page_id": r["page_id"], "title": r["title"], "labels": labels})
+        return result
+
     def get_sprint_pages(self, sprint_id: int) -> list[dict]:
         rows = self.conn.execute(
             "SELECT p.page_id, p.title, p.url FROM confluence_sprint_links l "
