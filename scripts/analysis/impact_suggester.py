@@ -106,7 +106,7 @@ SERVICE_RULES = {
 _COMPILED_RULES = {
     tag: {
         "keywords": [
-            (re.compile(pattern, re.I), pattern.strip("\\").strip("b"), weight)
+            (re.compile(pattern, re.I), pattern.replace("\\b", ""), weight)
             for pattern, weight in rules["keywords"]
         ],
         "threshold": rules["threshold"],
