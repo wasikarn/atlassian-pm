@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [mcp-confluence]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_get_page_children, mcp__mcp-atlassian__confluence_update_page
 description: |
   Update an existing Confluence page with a 5-phase workflow
   Supports: content update, section update, status change, move

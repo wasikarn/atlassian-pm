@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_update_page, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Update an existing Epic with a 6-phase update workflow
 

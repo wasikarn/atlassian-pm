@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_get_project_versions, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_update_page, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue
 description: |
   Generate Confluence release notes from a Jira Fix Version.
   Fetches all resolved issues in the version, groups by type (feature/bugfix/chore),

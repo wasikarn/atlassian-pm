@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Update an existing Jira Task with a 6-phase update workflow
 

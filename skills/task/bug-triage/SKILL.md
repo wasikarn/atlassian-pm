@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Structured bug triage workflow for QA: intake → severity scoring → duplicate check → assign → create Jira Task.
   Distinct from /create-task bug (which is just ticket creation). This skill is a full triage workflow.

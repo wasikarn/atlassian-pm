@@ -4,6 +4,7 @@ disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [mcp-atlassian, mcp-confluence]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_create_remote_issue_link, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_search
 description: |
   Create Confluence page from template with a 4-phase workflow
   Supports: tech-spec, adr, parent (category page)
