@@ -35,10 +35,12 @@ with patch.dict(
         _strip_response_noise,
         _timed_upstream,
         _validate_issue_key,
+        handle_cache_find_confluence_related,
         handle_cache_get_confluence_children,
         handle_cache_get_issue,
         handle_cache_get_issues,
         handle_cache_invalidate,
+        handle_cache_invalidate_confluence,
         handle_cache_refresh,
         handle_cache_refresh_confluence,
         handle_cache_search,
@@ -47,6 +49,7 @@ with patch.dict(
         handle_cache_sprint_issues,
         handle_cache_stats,
         handle_cache_text_search,
+        _reindex_pages,
     )
 
 
@@ -1276,3 +1279,123 @@ class TestHandleCacheSimilarSprints:
         result = json.loads(await handle_cache_similar_sprints({"query": "missing sprint"}))
         assert result["results"][0]["entity_id"] == "sprint::999"
         assert "sprint" not in result["results"][0]
+
+
+class TestPageLevelEmbedding:
+    """Page title+labels are embedded when a page is refreshed."""
+
+    async def test_page_embedded_on_refresh(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        mock_api = MagicMock()
+        server.jira_api = mock_api
+        mock_api.get_confluence_page.return_value = {
+            "id": "p1",
+            "title": "Coupon Design Doc",
+            "space": {"key": "BEP"},
+            "_body_md": "## Overview\nContent",
+            "version": {"number": 1, "when": "2026-01-01T00:00:00.000Z"},
+            "metadata": {"labels": {"results": [{"name": "design"}, {"name": "coupon"}]}},
+            "history": {"createdBy": {"displayName": "Alice"}},
+            "_links": {"webui": "/wiki/spaces/BEP/pages/p1"},
+        }
+
+        await handle_cache_refresh_confluence({"page_id": "p1"})
+        server.jira_api = None
+
+        calls = [str(c) for c in mock_embeddings.store_embedding.call_args_list]
+        assert any("page::p1" in c for c in calls)
+        assert any("design" in c or "coupon" in c for c in calls)
+
+    async def test_page_embedding_removed_on_invalidate(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        await handle_cache_invalidate_confluence({"page_id": "p99"})
+
+        calls = [str(c) for c in mock_embeddings.remove_embedding.call_args_list]
+        assert any("page::p99" in c for c in calls)
+
+    async def test_page_embedding_skipped_when_no_embeddings(self, cache):
+        server.embeddings = None
+        mock_api = MagicMock()
+        server.jira_api = mock_api
+        mock_api.get_confluence_page.return_value = {
+            "id": "p2", "title": "Test", "space": {"key": "BEP"},
+            "_body_md": "content",
+            "version": {"number": 1, "when": "2026-01-01T00:00:00.000Z"},
+            "metadata": {"labels": {"results": []}},
+            "history": {"createdBy": {"displayName": "Bob"}},
+            "_links": {"webui": "/wiki/spaces/BEP/pages/p2"},
+        }
+        result = json.loads(await handle_cache_refresh_confluence({"page_id": "p2"}))
+        assert result["status"] == "refreshed"
+        server.jira_api = None
+
+
+class TestFindConfluenceRelatedWithPages:
+    """cache_find_confluence_related returns both sections and page-level results."""
+
+    async def test_includes_page_results(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        mock_embeddings.find_similar.side_effect = [
+            [{"entity_id": "p1::overview", "entity_type": "confluence", "distance": 0.1}],
+            [{"entity_id": "page::p2", "entity_type": "confluence_page", "distance": 0.15}],
+        ]
+        server.embeddings = mock_embeddings
+
+        result = json.loads(await handle_cache_find_confluence_related({"query": "coupon", "limit": 5}))
+        related = result["related"]
+        entity_ids = [r["entity_id"] for r in related]
+        assert "p1::overview" in entity_ids
+        assert "page::p2" in entity_ids
+
+    async def test_sorted_by_distance(self, cache):
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        mock_embeddings.find_similar.side_effect = [
+            [{"entity_id": "sec::a", "entity_type": "confluence", "distance": 0.3}],
+            [{"entity_id": "page::b", "entity_type": "confluence_page", "distance": 0.1}],
+        ]
+        server.embeddings = mock_embeddings
+
+        result = json.loads(await handle_cache_find_confluence_related({"query": "test", "limit": 5}))
+        related = result["related"]
+        assert related[0]["entity_id"] == "page::b"  # closer distance first
+
+
+class TestReindexPages:
+    """_reindex_pages helper embeds all cached pages."""
+
+    def test_embeds_pages(self, cache):
+        from tests.conftest import make_page
+        from atlassian_cache.confluence_cache import ConfluenceCache
+        conf = ConfluenceCache(cache.conn, cache._lock)
+        conf.put_page(make_page(page_id="x1", title="Design Doc", labels=["design"]))
+
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+
+        pages = conf.get_all_pages()
+        count = _reindex_pages(pages)
+        assert count == 1
+        calls = [str(c) for c in mock_embeddings.store_embedding.call_args_list]
+        assert any("page::x1" in c for c in calls)
+
+    def test_returns_count(self, cache):
+        from tests.conftest import make_page
+        from atlassian_cache.confluence_cache import ConfluenceCache
+        conf = ConfluenceCache(cache.conn, cache._lock)
+        conf.put_page(make_page(page_id="y1", title="A"))
+        conf.put_page(make_page(page_id="y2", title="B"))
+        mock_embeddings = MagicMock()
+        mock_embeddings.available = True
+        server.embeddings = mock_embeddings
+        pages = conf.get_all_pages()
+        count = _reindex_pages(pages)
+        assert count == 2
