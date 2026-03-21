@@ -6,16 +6,16 @@ Verifies that Jira writes actually took effect by reading back from API.
 
 Usage:
     # Verify parent link
-    python verify_write.py BEP-1234 --check parent --expected-parent BEP-1200
+    python verify_write.py {{PROJECT_KEY}}-1234 --check parent --expected-parent {{PROJECT_KEY}}-1200
 
     # Verify assignee
-    python verify_write.py BEP-1234 --check assignee
+    python verify_write.py {{PROJECT_KEY}}-1234 --check assignee
 
     # Verify multiple issues
-    python verify_write.py BEP-1234 BEP-1235 --check parent,assignee
+    python verify_write.py {{PROJECT_KEY}}-1234 {{PROJECT_KEY}}-1235 --check parent,assignee
 
     # JSON output
-    python verify_write.py BEP-1234 --check parent --json
+    python verify_write.py {{PROJECT_KEY}}-1234 --check parent --json
 
 Exit codes:
     0 = all checks passed
@@ -173,9 +173,9 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python verify_write.py BEP-1234 --check parent --expected-parent BEP-1200
-  python verify_write.py BEP-1234 BEP-1235 --check parent,assignee
-  python verify_write.py BEP-1234 --check parent,assignee,description --json
+  python verify_write.py {{PROJECT_KEY}}-1234 --check parent --expected-parent {{PROJECT_KEY}}-1200
+  python verify_write.py {{PROJECT_KEY}}-1234 {{PROJECT_KEY}}-1235 --check parent,assignee
+  python verify_write.py {{PROJECT_KEY}}-1234 --check parent,assignee,description --json
 
 Available checks: parent, assignee, description
 Exit codes: 0=pass, 1=fail, 2=error

@@ -11,7 +11,7 @@ Generate a PR description from Jira context and local git state.
 
 ## Input
 
-Branch name or PR context (e.g., `feature/BEP-123-coupon-collection`) + optional: working directory path.
+Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`) + optional: working directory path.
 
 ## Steps
 
@@ -30,7 +30,7 @@ Branch name or PR context (e.g., `feature/BEP-123-coupon-collection`) + optional
 
 ```markdown
 ## 🎯 Jira Issue
-[{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/BEP-XXX) — [issue summary]
+[{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/{{PROJECT_KEY}}-XXX) — [issue summary]
 **Type:** [Subtask/Story] | **Status:** [status] | **Assignee:** [name]
 
 ## 📋 Acceptance Criteria Addressed

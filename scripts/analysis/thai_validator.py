@@ -190,7 +190,7 @@ def validate_text(texts: list[str]) -> list[dict]:
         if len(text) > 20:
             for pattern, message in ALL_ENGLISH_PATTERNS:
                 if re.match(pattern, text) and not any(
-                    text.startswith(p) for p in ("src/", "http", "/api", "GET ", "POST ", "BEP-")
+                    text.startswith(p) for p in ("src/", "http", "/api", "GET ", "POST ", "{{PROJECT_KEY}}-")
                 ):
                     issues.append(
                         {

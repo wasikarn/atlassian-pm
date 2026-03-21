@@ -197,7 +197,7 @@ Ask questions in order. Each is a plain chat message.
    - Store as: `JIRA_SITE`, and set as `jira.site` + `confluence.site`
 
 2. **Project key**
-   - Ask: "What is your Jira project key? (e.g. `BEP`, `PROJ`)"
+   - Ask: "What is your Jira project key? (e.g. `{{PROJECT_KEY}}`, `PROJ`)"
    - Validate: `^[A-Z][A-Z0-9]+$` — re-ask if invalid
    - Store as: `PROJECT_KEY` → `jira.project_key`, `SPACE_KEY` → `confluence.space_key`
 

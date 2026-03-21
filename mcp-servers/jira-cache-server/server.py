@@ -101,7 +101,7 @@ TOOLS = [
         inputSchema={
             "type": "object",
             "properties": {
-                "issue_key": {"type": "string", "description": "Jira issue key (e.g., BEP-123)"},
+                "issue_key": {"type": "string", "description": "Jira issue key (e.g., {{PROJECT_KEY}}-123)"},
                 "fields": {
                     "type": "string",
                     "description": "Comma-separated fields for upstream fetch (default: summary,status,assignee,issuetype,priority,labels,parent,description)",
@@ -136,7 +136,7 @@ TOOLS = [
                 "issue_keys": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of Jira issue keys (e.g., ['BEP-123', 'BEP-456'])",
+                    "description": "List of Jira issue keys (e.g., ['{{PROJECT_KEY}}-123', '{{PROJECT_KEY}}-456'])",
                 },
                 "fields": {
                     "type": "string",
@@ -254,7 +254,7 @@ TOOLS = [
                 "issue_keys": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Issue keys to refresh (e.g., ['BEP-123', 'BEP-456'])",
+                    "description": "Issue keys to refresh (e.g., ['{{PROJECT_KEY}}-123', '{{PROJECT_KEY}}-456'])",
                 },
                 "sprint_id": {
                     "type": "integer",
@@ -954,7 +954,7 @@ def _coerce_args(name: str, args: dict[str, Any]) -> dict[str, Any]:
             elif expected == "boolean":
                 coerced[key] = value.lower() in ("true", "1", "yes")
             elif expected == "array":
-                # ARRAY-COERCE: Handle JSON-encoded array strings (e.g. "[\"BEP-1\",\"BEP-2\"]")
+                # ARRAY-COERCE: Handle JSON-encoded array strings (e.g. "[\"{{PROJECT_KEY}}-1\",\"{{PROJECT_KEY}}-2\"]")
                 parsed = json.loads(value)
                 if isinstance(parsed, list):
                     coerced[key] = parsed

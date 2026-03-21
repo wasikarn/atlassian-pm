@@ -205,7 +205,7 @@ jira_get_issue(
 
 | Issue | Solution |
 | --- | --- |
-| Can't find parent Epic | Search: `project = BEP AND type = Epic` |
+| Can't find parent Epic | Search: `project = {{PROJECT_KEY}} AND type = Epic` |
 | Story not found | Verify issue key, check permissions |
 
 ### Phase 2: Design

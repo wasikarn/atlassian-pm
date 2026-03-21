@@ -46,7 +46,7 @@ Found [N] matches | Showing top 5 by relevance
 | Key | Summary | Status | Confidence | Match Reason |
 |-----|---------|--------|------------|-------------|
 | {{PROJECT_KEY}}-XXX | [summary] | In Progress | HIGH | Same epic + keyword match |
-| BEP-YYY | [summary] | Done | MEDIUM | Keyword overlap, different service |
+| {{PROJECT_KEY}}-YYY | [summary] | Done | MEDIUM | Keyword overlap, different service |
 
 Recommendation: [EXACT/HIGH match found → link existing | MEDIUM/LOW → safe to create new]
 ```

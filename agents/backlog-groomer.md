@@ -13,7 +13,7 @@ Assess backlog readiness before sprint planning. Groups stories by readiness cat
 
 One of:
 
-- JQL query: `project = BEP AND status in ("To Do", "Backlog") AND issuetype = Story`
+- JQL query: `project = {{PROJECT_KEY}} AND status in ("To Do", "Backlog") AND issuetype = Story`
 - Epic key: `{{PROJECT_KEY}}-XXX` → auto-generates JQL for children
 - Sprint label: `vs2-coupon` → filters by label
 
@@ -89,7 +89,7 @@ Round WSJF to 1 decimal. Higher = pull first.
 | Key | Summary | SP | VS Label | WSJF | Value Density | Aging? |
 |-----|---------|-----|----------|------|--------------|--------|
 | {{PROJECT_KEY}}-XXX | [summary] | 3 | vs2-coupon | 8.4 | 1.8 | — |
-| BEP-YYY | [summary] | 5 | vs2-coupon | 6.1 | 0.4 | ⚠️ low value density |
+| {{PROJECT_KEY}}-YYY | [summary] | 5 | vs2-coupon | 6.1 | 0.4 | ⚠️ low value density |
 
 ### All Sprint-Ready ([N])
 

@@ -219,7 +219,7 @@ echo "✓ pass  ✗ fail  ! warning  - optional"
 ```text
 /doctor --fix                         # no flags exist — doctor is read-only, it never fixes anything
 /doctor                               # running after every single code change is unnecessary overhead
-/doctor BEP-123                       # takes no arguments — issue keys are ignored
+/doctor {{PROJECT_KEY}}-123                       # takes no arguments — issue keys are ignored
 ```
 
 **Common mistakes:**

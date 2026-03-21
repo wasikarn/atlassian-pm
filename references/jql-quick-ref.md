@@ -1,15 +1,15 @@
 # JQL Quick Reference
 
-> JQL patterns for the BEP project
+> JQL patterns for the {{PROJECT_KEY}} project
 
 ---
 
-## Common Patterns (BEP Project)
+## Common Patterns ({{PROJECT_KEY}} Project)
 
 ### Find Stories by Sprint
 
 ```text
-project = BEP AND type = Story AND sprint IN openSprints()
+project = {{PROJECT_KEY}} AND type = Story AND sprint IN openSprints()
 ```
 
 ### Find Sub-tasks of Story
@@ -23,38 +23,38 @@ parent = ABC-XXX
 ### Find My Assigned Issues
 
 ```text
-project = BEP AND assignee = currentUser() AND status != Done
+project = {{PROJECT_KEY}} AND assignee = currentUser() AND status != Done
 ```
 
 ### Find Unassigned Work
 
 ```text
-project = BEP AND assignee IS EMPTY AND status = "To Do"
+project = {{PROJECT_KEY}} AND assignee IS EMPTY AND status = "To Do"
 ```
 
 ### Find Recently Updated
 
 ```text
-project = BEP AND updated >= -7d ORDER BY updated DESC
+project = {{PROJECT_KEY}} AND updated >= -7d ORDER BY updated DESC
 ```
 
 ### Find by Tag (Label)
 
 ```text
-project = BEP AND labels = "BE"
-project = BEP AND labels IN ("FE-Admin", "FE-Web")
+project = {{PROJECT_KEY}} AND labels = "BE"
+project = {{PROJECT_KEY}} AND labels IN ("FE-Admin", "FE-Web")
 ```
 
 ### Find QA Sub-tasks
 
 ```text
-project = BEP AND type = Sub-task AND summary ~ "[QA]"
+project = {{PROJECT_KEY}} AND type = Sub-task AND summary ~ "[QA]"
 ```
 
 ### Find Epics
 
 ```text
-project = BEP AND type = Epic AND status != Done
+project = {{PROJECT_KEY}} AND type = Epic AND status != Done
 ```
 
 ### Find Stories in Epic
@@ -124,11 +124,11 @@ ORDER BY priority DESC, created ASC # Combined
 
 | Use Case | JQL |
 | --- | --- |
-| Find story before creating | `project = BEP AND type = Story AND summary ~ "keyword"` |
-| Check my sprint work | `project = BEP AND assignee = currentUser() AND sprint IN openSprints()` |
+| Find story before creating | `project = {{PROJECT_KEY}} AND type = Story AND summary ~ "keyword"` |
+| Check my sprint work | `project = {{PROJECT_KEY}} AND assignee = currentUser() AND sprint IN openSprints()` |
 | Review sub-tasks | `"Parent Link" = ABC-XXX ORDER BY created` |
-| Find blockers | `project = BEP AND priority = Highest AND status != Done` |
-| Overdue items | `project = BEP AND duedate < now() AND status != Done` |
+| Find blockers | `project = {{PROJECT_KEY}} AND priority = Highest AND status != Done` |
+| Overdue items | `project = {{PROJECT_KEY}} AND duedate < now() AND status != Done` |
 
 ---
 

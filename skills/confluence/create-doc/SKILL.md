@@ -90,7 +90,7 @@ Show preview for user to review:
 
 **Template:** [tech-spec/adr]
 **Title:** [title]
-**Space:** BEP
+**Space:** {{PROJECT_KEY}}
 
 [Show markdown content]
 
@@ -132,7 +132,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 ## ✅ Document Created: [Title]
 
 **Template:** [type]
-**Space:** BEP
+**Space:** {{PROJECT_KEY}}
 
 🔗 [View in Confluence](URL)
 
@@ -163,7 +163,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 ```text
 /create-doc "Video Upload API"          # missing template type — forces interactive prompt
 /create-doc                             # no args — causes full interactive discovery flow
-/create-doc tech-spec "BEP-42 notes"   # wrong skill — Jira issue descriptions use /create-story or /create-task
+/create-doc tech-spec "{{PROJECT_KEY}}-42 notes"   # wrong skill — Jira issue descriptions use /create-story or /create-task
 /create-doc adr "Cache Strategy"       # valid creation, but forgetting to run fix_confluence_code_blocks.py
                                         # after if the ADR body contains code blocks (HR4 violation)
 ```
@@ -179,7 +179,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 
 ## References
 
-- Space: `BEP`
+- Space: `{{PROJECT_KEY}}`
 - MCP Tool: `confluence_create_page`
 - Scripts: `.claude/skills/scripts/api/`
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices

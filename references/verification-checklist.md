@@ -12,7 +12,7 @@
 | **T2: Panel Structure** | valid panelType (info, success, warning, error, note); panel content is array; no nested tables in panels |
 | **T3: Inline Code Marks** | file paths marked (e.g., `app/Models/User.ts`); API routes marked (e.g., `/api/v1/credits`); component names marked; technical terms marked appropriately |
 | **T4: Links** | parent link exists (sub-tasks); epic link exists (stories); child count matches (parents); external links valid |
-| **T5: Required Fields** | summary filled; description not empty; issue type correct; project key correct (BEP); assignee/reporter set (if required) |
+| **T5: Required Fields** | summary filled; description not empty; issue type correct; project key correct ({{PROJECT_KEY}}); assignee/reporter set (if required) |
 
 ---
 

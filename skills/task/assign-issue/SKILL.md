@@ -47,19 +47,19 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 ### ✅ Good
 
 ```text
-/assign-issue BEP-88 {{SLOT_3}}             # assign by first name (case-insensitive lookup)
-/assign-issue BEP-88 {{SLOT_4}}         # assign to another team member
-/assign-issue BEP-88 unassign           # remove current assignee
-/assign-issue BEP-112 {{SLOT_5}}        # special case: email resolved from config, not Jira display name
+/assign-issue {{PROJECT_KEY}}-88 {{SLOT_3}}             # assign by first name (case-insensitive lookup)
+/assign-issue {{PROJECT_KEY}}-88 {{SLOT_4}}         # assign to another team member
+/assign-issue {{PROJECT_KEY}}-88 unassign           # remove current assignee
+/assign-issue {{PROJECT_KEY}}-112 {{SLOT_5}}        # special case: email resolved from config, not Jira display name
 ```
 
 ### ❌ Bad
 
 ```text
 /assign-issue                           # missing issue key and name — both are required
-/assign-issue BEP-88                    # missing assignee name — skill cannot guess who to assign to
-/assign-issue BEP-88 {{SLOT_6}}@example.com  # email works but prefer first-name lookup from project-config.json
-/assign-issue BEP-88 "Product Owner"    # role name, not a team member name — lookup will fail
+/assign-issue {{PROJECT_KEY}}-88                    # missing assignee name — skill cannot guess who to assign to
+/assign-issue {{PROJECT_KEY}}-88 {{SLOT_6}}@example.com  # email works but prefer first-name lookup from project-config.json
+/assign-issue {{PROJECT_KEY}}-88 "Product Owner"    # role name, not a team member name — lookup will fail
 ```
 
 **Common mistakes:**

@@ -37,7 +37,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 - ✅ `parent = ABC-123`
 - ❌ `parent = ABC-123 ORDER BY created DESC`
-- ✅ `project = BEP AND issuetype = Story ORDER BY created DESC` (no parent filter)
+- ✅ `project = {{PROJECT_KEY}} AND issuetype = Story ORDER BY created DESC` (no parent filter)
 
 ---
 

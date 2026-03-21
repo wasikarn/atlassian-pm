@@ -6,10 +6,10 @@ This script converts markdown to Confluence storage format with proper
 
 Example usage:
     # Create new page
-    python create_confluence_page.py --space BEP --title "My Page" --content-file content.md
+    python create_confluence_page.py --space {{PROJECT_KEY}} --title "My Page" --content-file content.md
 
     # Create as child of parent page
-    python create_confluence_page.py --space BEP --title "My Page" --parent-id 123456 --content-file content.md
+    python create_confluence_page.py --space {{PROJECT_KEY}} --title "My Page" --parent-id 123456 --content-file content.md
 
     # Update existing page
     python create_confluence_page.py --page-id 123456 --content-file content.md
@@ -64,10 +64,10 @@ def main() -> int:
         epilog="""
 Examples:
   # Create new page
-  python create_confluence_page.py --space BEP --title "API Spec" --content-file spec.md
+  python create_confluence_page.py --space {{PROJECT_KEY}} --title "API Spec" --content-file spec.md
 
   # Create as child page
-  python create_confluence_page.py --space BEP --title "Sub Page" --parent-id 123456 --content-file content.md
+  python create_confluence_page.py --space {{PROJECT_KEY}} --title "Sub Page" --parent-id 123456 --content-file content.md
 
   # Update existing page
   python create_confluence_page.py --page-id 123456 --content-file updated.md
@@ -76,12 +76,12 @@ Examples:
   python create_confluence_page.py --page-id 123456 --content "# Updated Title"
 
   # Dry run (preview storage format)
-  python create_confluence_page.py --space BEP --title "Test" --content "# Hello" --dry-run
+  python create_confluence_page.py --space {{PROJECT_KEY}} --title "Test" --content "# Hello" --dry-run
         """,
     )
 
     # Create mode arguments
-    parser.add_argument("--space", help="Space key for new page (e.g., BEP)")
+    parser.add_argument("--space", help="Space key for new page (e.g., {{PROJECT_KEY}})")
     parser.add_argument("--title", help="Page title")
     parser.add_argument("--parent-id", help="Parent page ID for new page")
 

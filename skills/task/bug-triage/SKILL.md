@@ -106,7 +106,7 @@ Present to user — auto-proceed unless user objects (🟡 REVIEW).
 Search for existing bugs before creating a new one.
 
 1. Run `cache_search(query="[bug_summary]", limit=5)` for semantic matches
-2. Run `jira_search(jql="project = BEP AND issuetype = Task AND text ~ '[keywords]' ORDER BY created DESC", fields="summary,status,assignee")` with extracted keywords
+2. Run `jira_search(jql="project = {{PROJECT_KEY}} AND issuetype = Task AND text ~ '[keywords]' ORDER BY created DESC", fields="summary,status,assignee")` with extracted keywords
 
 If duplicate found:
 
@@ -236,7 +236,7 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 ```text
 /create-task bug "Upload broken"           # skips severity scoring, duplicate check, and assignee recommendation — use /bug-triage
 /bug-triage "It's broken"                  # intake too vague; agent cannot score severity without repro steps and environment
-/bug-triage "BEP-99"                       # passing an issue key makes no sense here — triage creates a new ticket
+/bug-triage "{{PROJECT_KEY}}-99"                       # passing an issue key makes no sense here — triage creates a new ticket
 /bug-triage "CSS misaligned on mobile"     # cosmetic P3 does not need full triage workflow — /create-task bug is sufficient
 ```
 

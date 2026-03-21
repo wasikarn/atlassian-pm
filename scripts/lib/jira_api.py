@@ -21,10 +21,10 @@ Usage:
         ssl_context=create_ssl_context()
     )
 
-    issue = api.get_issue("BEP-2819")
+    issue = api.get_issue("{{PROJECT_KEY}}-2819")
     description = issue["fields"]["description"]
     # ... modify ADF ...
-    api.update_description("BEP-2819", modified_description)
+    api.update_description("{{PROJECT_KEY}}-2819", modified_description)
 """
 
 import json
@@ -41,7 +41,7 @@ from .exceptions import APIError, IssueNotFoundError
 
 logger = logging.getLogger(__name__)
 
-# Validate Jira issue key format (e.g., BEP-123, PROJ-1)
+# Validate Jira issue key format (e.g., {{PROJECT_KEY}}-123, PROJ-1)
 _ISSUE_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{0,9}-\d{1,6}$")
 
 
@@ -49,7 +49,7 @@ def _validate_issue_key(issue_key: str) -> str:
     """Validate issue key format to prevent URL path injection.
 
     Args:
-        issue_key: Key to validate (e.g., 'BEP-123')
+        issue_key: Key to validate (e.g., '{{PROJECT_KEY}}-123')
 
     Returns:
         The validated issue key.
@@ -188,7 +188,7 @@ class JiraAPI:
         """Get Jira issue with ADF description via REST API v3.
 
         Args:
-            issue_key: Jira issue key (e.g., 'BEP-2819')
+            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-2819')
             fields: Comma-separated field names to return
 
         Returns:
@@ -302,7 +302,7 @@ class JiraAPI:
         """Update issue description with ADF via REST API v3.
 
         Args:
-            issue_key: Jira issue key (e.g., 'BEP-2819')
+            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-2819')
             description_adf: ADF document for the new description
 
         Returns:
@@ -335,10 +335,10 @@ class JiraAPI:
         """Create a new Jira issue via REST API v3.
 
         Args:
-            project_key: Project key (e.g., 'BEP')
+            project_key: Project key (e.g., '{{PROJECT_KEY}}')
             issue_type: Issue type name (e.g., 'Story', 'Task', 'Subtask', 'Epic')
             summary: Issue summary/title
-            parent_key: Parent issue key for subtasks (e.g., 'BEP-1200')
+            parent_key: Parent issue key for subtasks (e.g., '{{PROJECT_KEY}}-1200')
             additional_fields: Extra fields to set on creation
 
         Returns:
@@ -369,7 +369,7 @@ class JiraAPI:
         """Update arbitrary fields on a Jira issue via REST API v3.
 
         Args:
-            issue_key: Jira issue key (e.g., 'BEP-2819')
+            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-2819')
             fields: Dictionary of field IDs to values
 
         Returns:

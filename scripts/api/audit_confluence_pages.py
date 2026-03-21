@@ -10,7 +10,7 @@ Example usage:
 
     # Audit single page
     python audit_confluence_pages.py --page-id 987654321 \
-        --should-have "BEP-2883" "2026" \
+        --should-have "{{PROJECT_KEY}}-2883" "2026" \
         --should-not-have "2025-01-21"
 
     # Dry run (just check, no changes)
@@ -118,7 +118,7 @@ def load_config(config_path: str) -> list[dict]:
         {
             "page_id": "987654321",
             "label": "Epic Parent Page",
-            "should_have": ["BEP-2883", "2026"],
+            "should_have": ["{{PROJECT_KEY}}-2883", "2026"],
             "should_not_have": ["2025-01-21"]
         }
     ]
@@ -139,7 +139,7 @@ Examples:
 
   # Audit single page
   python audit_confluence_pages.py --page-id 987654321 \\
-      --should-have "BEP-2883" "2026" \\
+      --should-have "{{PROJECT_KEY}}-2883" "2026" \\
       --should-not-have "2025-01-21"
 
 Config JSON format:
@@ -147,7 +147,7 @@ Config JSON format:
     {
       "page_id": "987654321",
       "label": "Epic Parent Page",
-      "should_have": ["BEP-2883"],
+      "should_have": ["{{PROJECT_KEY}}-2883"],
       "should_not_have": ["2025"]
     }
   ]

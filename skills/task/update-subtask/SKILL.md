@@ -104,19 +104,19 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 ### ✅ Good
 
 ```text
-/update-subtask BEP-112                        # agent reads current state + parent dates, then asks what to change
-/update-subtask BEP-112 migrate                # convert Wiki markup → ADF format
-/update-subtask BEP-112 "add file paths"       # agent runs Task(Explore) to discover actual paths, then updates
-/update-subtask BEP-112 "fix language Thai"    # translate description to Thai with English transliteration
+/update-subtask {{PROJECT_KEY}}-112                        # agent reads current state + parent dates, then asks what to change
+/update-subtask {{PROJECT_KEY}}-112 migrate                # convert Wiki markup → ADF format
+/update-subtask {{PROJECT_KEY}}-112 "add file paths"       # agent runs Task(Explore) to discover actual paths, then updates
+/update-subtask {{PROJECT_KEY}}-112 "fix language Thai"    # translate description to Thai with English transliteration
 ```
 
 ### ❌ Bad
 
 ```text
 /update-subtask                                # missing issue key — cannot fetch current state
-/update-subtask BEP-101                        # BEP-101 is a User Story — use /update-story instead
-/update-subtask BEP-112 "set start 2025-01-01 due 2025-03-01"  # dates outside parent range → HR8 violation
-/update-subtask BEP-112 "add to sprint 42"    # HR10: subtask sprint is inherited from parent — never set directly
+/update-subtask {{PROJECT_KEY}}-101                        # {{PROJECT_KEY}}-101 is a User Story — use /update-story instead
+/update-subtask {{PROJECT_KEY}}-112 "set start 2025-01-01 due 2025-03-01"  # dates outside parent range → HR8 violation
+/update-subtask {{PROJECT_KEY}}-112 "add to sprint 42"    # HR10: subtask sprint is inherited from parent — never set directly
 ```
 
 **Common mistakes:**

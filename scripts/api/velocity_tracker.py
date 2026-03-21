@@ -9,7 +9,7 @@ Usage:
     python velocity_tracker.py --sprint-id 607
 
     # Track by sprint name
-    python velocity_tracker.py --sprint-name "BEP Sprint-31"
+    python velocity_tracker.py --sprint-name "{{PROJECT_KEY}} Sprint-31"
 
     # Dry run (show data, don't update config)
     python velocity_tracker.py --sprint-id 607 --dry-run
@@ -270,7 +270,7 @@ def main() -> int:
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--sprint-id", type=int, help="Sprint ID to track")
-    group.add_argument("--sprint-name", help="Sprint name to track (e.g., 'BEP Sprint-31')")
+    group.add_argument("--sprint-name", help="Sprint name to track (e.g., '{{PROJECT_KEY}} Sprint-31')")
     group.add_argument("--summary", action="store_true", help="Show current velocity summary")
     parser.add_argument("--dry-run", action="store_true", help="Show data without updating config")
     parser.add_argument("--verbose", "-v", action="store_true")

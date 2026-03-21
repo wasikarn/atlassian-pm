@@ -8,7 +8,7 @@ Reads Story ADF JSON from stdin, extracts AC panels, and generates
 a QA subtask ADF with AC coverage matrix and test case panels.
 
 Usage:
-    echo '{"story_adf": {...}, "story_key": "BEP-123"}' | python3 qa_matrix_generator.py
+    echo '{"story_adf": {...}, "story_key": "{{PROJECT_KEY}}-123"}' | python3 qa_matrix_generator.py
 
 Input JSON:
     story_adf: Story ADF JSON (description field from Jira)
@@ -290,7 +290,7 @@ def main():
         sys.exit(1)
 
     story_adf = input_data.get("story_adf", {})
-    story_key = input_data.get("story_key", "BEP-XXX")
+    story_key = input_data.get("story_key", "{{PROJECT_KEY}}-XXX")
     story_summary = input_data.get("story_summary", "Feature")
 
     acs = extract_acs(story_adf)

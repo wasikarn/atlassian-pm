@@ -122,32 +122,32 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:create-story                            # interactive, no args
 /atlassian-pm:create-story "admin monthly report"     # description as seed
 
-/atlassian-pm:analyze-story BEP-123                   # issue key
-/atlassian-pm:create-testplan BEP-123                 # issue key
+/atlassian-pm:analyze-story {{PROJECT_KEY}}-123                   # issue key
+/atlassian-pm:create-testplan {{PROJECT_KEY}}-123                 # issue key
 
-/atlassian-pm:verify-issue BEP-123                    # single issue
-/atlassian-pm:verify-issue BEP-123 --with-subtasks    # story + all subtasks
-/atlassian-pm:verify-issue BEP-123 --with-subtasks --fix  # verify + auto-fix
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-123                    # single issue
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-123 --with-subtasks    # story + all subtasks
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-123 --with-subtasks --fix  # verify + auto-fix
 
 /atlassian-pm:plan-sprint                             # next future sprint
 /atlassian-pm:plan-sprint --sprint 456                # specific sprint ID
 /atlassian-pm:plan-sprint --carry-over-only           # carry-over analysis only
 
 /atlassian-pm:map-dependencies                        # current sprint
-/atlassian-pm:map-dependencies --keys BEP-10,BEP-11  # specific issues
+/atlassian-pm:map-dependencies --keys {{PROJECT_KEY}}-10,{{PROJECT_KEY}}-11  # specific issues
 
 /atlassian-pm:search-issues "credit top-up"           # keyword search
-/atlassian-pm:search-issues BEP-123 --children        # list subtasks
+/atlassian-pm:search-issues {{PROJECT_KEY}}-123 --children        # list subtasks
 /atlassian-pm:search-issues --sprint current --assignee me
 
-/atlassian-pm:assign-issue BEP-123 Kobi               # assign by name
-/atlassian-pm:assign-issue BEP-123 unassign           # remove assignee
+/atlassian-pm:assign-issue {{PROJECT_KEY}}-123 Kobi               # assign by name
+/atlassian-pm:assign-issue {{PROJECT_KEY}}-123 unassign           # remove assignee
 
 /atlassian-pm:activity-report                         # today
 /atlassian-pm:activity-report --hours 48 --project tathep-platform-api
 
 /atlassian-pm:blueprint "real-time notifications"     # description
-/atlassian-pm:blueprint BEP-456                       # from Jira epic
+/atlassian-pm:blueprint {{PROJECT_KEY}}-456                       # from Jira epic
 
 /atlassian-pm:close-sprint                            # close active sprint
 /atlassian-pm:close-sprint --sprint 456               # specific sprint ID
@@ -155,13 +155,13 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:standup-report                          # today's active sprint
 /atlassian-pm:standup-report --post                   # post to Confluence
 
-/atlassian-pm:plan-release --name v2.3.0 --epics BEP-50,BEP-51  # with args
+/atlassian-pm:plan-release --name v2.3.0 --epics {{PROJECT_KEY}}-50,{{PROJECT_KEY}}-51  # with args
 /atlassian-pm:plan-release                            # interactive
 
 /atlassian-pm:reschedule-sprint --sprint 456 --shift +7         # shift sprint 7 days
-/atlassian-pm:reschedule-sprint --issues BEP-123,BEP-124 --shift -3
+/atlassian-pm:reschedule-sprint --issues {{PROJECT_KEY}}-123,{{PROJECT_KEY}}-124 --shift -3
 
-/atlassian-pm:spec-to-stories 12345 --epic BEP-10     # page-id + epic
+/atlassian-pm:spec-to-stories 12345 --epic {{PROJECT_KEY}}-10     # page-id + epic
 /atlassian-pm:spec-to-stories 12345 --dry-run         # preview only
 
 /atlassian-pm:scan-tech-debt                          # create new radar

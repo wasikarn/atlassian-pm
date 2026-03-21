@@ -1,6 +1,6 @@
 # Sprint Planning Frameworks
 
-> Source: BEP project experience
+> Source: {{PROJECT_KEY}} project experience
 > Used by: `/plan-sprint` skill (Phase 3-6 strategy analysis)
 
 ## RICE Scoring

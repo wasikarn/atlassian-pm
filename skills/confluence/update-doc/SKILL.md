@@ -281,7 +281,7 @@ Update type?
 
 ## References
 
-- Space: `BEP`
+- Space: `{{PROJECT_KEY}}`
 - MCP Tool: `confluence_update_page`, `confluence_get_page`
 - Scripts: `.claude/skills/scripts/api/`
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices

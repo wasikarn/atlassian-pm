@@ -17,7 +17,7 @@ Create or update a Confluence page with proper code block formatting.
 ```bash
 # Create new page
 python3 .claude/scripts/api/create_confluence_page.py \
-  --space BEP --title "Technical Spec: Feature X" --content-file content.md
+  --space {{PROJECT_KEY}} --title "Technical Spec: Feature X" --content-file content.md
 
 # Create as child page
 # Add: --parent-id 123456789
@@ -33,7 +33,7 @@ python3 .claude/scripts/api/create_confluence_page.py \
 
 | Argument | Mode | Required | Description |
 | --- | --- | --- | --- |
-| `--space` | Create | ✅ | Space key (e.g., BEP) |
+| `--space` | Create | ✅ | Space key (e.g., {{PROJECT_KEY}}) |
 | `--title` | Create | ✅ | Page title |
 | `--parent-id` | Create | ❌ | Parent page ID |
 | `--page-id` | Update | ✅ | Page ID to update |

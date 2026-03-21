@@ -122,18 +122,18 @@ Coverage: X ACs → Y test scenarios (100%)
 ### ✅ Good
 
 ```text
-/create-testplan BEP-101                # create [QA] sub-task for story BEP-101; agent reads all ACs first
-/create-testplan BEP-101                # after bug fix: creates verification sub-task with regression cases
-/create-testplan BEP-215                # story with 5 ACs → agent maps 100% coverage before designing test cases
+/create-testplan {{PROJECT_KEY}}-101                # create [QA] sub-task for story {{PROJECT_KEY}}-101; agent reads all ACs first
+/create-testplan {{PROJECT_KEY}}-101                # after bug fix: creates verification sub-task with regression cases
+/create-testplan {{PROJECT_KEY}}-215                # story with 5 ACs → agent maps 100% coverage before designing test cases
 ```
 
 ### ❌ Bad
 
 ```text
 /create-testplan                        # missing story key — skill cannot fetch ACs without it
-/create-testplan BEP-112               # BEP-112 is a Sub-task, not a Story — test plan must target the parent story (1 Story = 1 [QA] Sub-task)
-/create-testplan BEP-101               # run before ACs are finalized — test cases will be incomplete and need full rework
-/create-testplan BEP-101               # calling a second time on a story that already has a [QA] sub-task — creates a duplicate; check first
+/create-testplan {{PROJECT_KEY}}-112               # {{PROJECT_KEY}}-112 is a Sub-task, not a Story — test plan must target the parent story (1 Story = 1 [QA] Sub-task)
+/create-testplan {{PROJECT_KEY}}-101               # run before ACs are finalized — test cases will be incomplete and need full rework
+/create-testplan {{PROJECT_KEY}}-101               # calling a second time on a story that already has a [QA] sub-task — creates a duplicate; check first
 ```
 
 ### ❌ Bad (correct key, wrong approach)

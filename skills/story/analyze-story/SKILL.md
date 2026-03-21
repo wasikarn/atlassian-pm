@@ -148,18 +148,18 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 ### ✅ Good
 
 ```text
-/analyze-story BEP-123                   # existing story key → Phase 1 bootstraps from Jira, all 7 phases run correctly
-/analyze-story BEP-456                   # story with complex cross-service ACs → codebase exploration discovers real file paths per service
-/analyze-story BEP-789                   # story already has epic context → event flow table auto-populated in Phase 2
+/analyze-story {{PROJECT_KEY}}-123                   # existing story key → Phase 1 bootstraps from Jira, all 7 phases run correctly
+/analyze-story {{PROJECT_KEY}}-456                   # story with complex cross-service ACs → codebase exploration discovers real file paths per service
+/analyze-story {{PROJECT_KEY}}-789                   # story already has epic context → event flow table auto-populated in Phase 2
 ```
 
 ### ❌ Bad
 
 ```text
 /analyze-story                           # no issue key → Phase 1 has nothing to bootstrap; skill cannot proceed
-/analyze-story BEP-10                    # passing an Epic key — analyze-story expects a Story, not an Epic; orphan subtasks will be created
+/analyze-story {{PROJECT_KEY}}-10                    # passing an Epic key — analyze-story expects a Story, not an Epic; orphan subtasks will be created
 /analyze-story "add payment feature"     # free-text description instead of key — story doesn't exist yet; use /create-story instead
-/analyze-story BEP-123 --skip-explore   # skipping codebase exploration is not a valid flag and violates the MANDATORY explore phase
+/analyze-story {{PROJECT_KEY}}-123 --skip-explore   # skipping codebase exploration is not a valid flag and violates the MANDATORY explore phase
 ```
 
 **Common mistakes:**

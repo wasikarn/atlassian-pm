@@ -158,7 +158,7 @@ def get_issue_key(tool_input: dict) -> str | None:
     """Extract issue key from tool_input, trying common field names in priority order.
 
     Priority: issue_key → issue_key_or_id → key
-    Returns uppercase key (e.g. "BEP-123") or None if not found.
+    Returns uppercase key (e.g. "{{PROJECT_KEY}}-123") or None if not found.
     """
     for field in ("issue_key", "issue_key_or_id", "key"):
         if field in tool_input:
@@ -184,8 +184,8 @@ def get_parent_key(tool_input: dict) -> str | None:
     """Extract parent issue key from tool_input.additional_fields.
 
     Handles both formats:
-      - Dict:   {"parent": {"key": "BEP-X"}}
-      - String: {"parent": "BEP-X"}
+      - Dict:   {"parent": {"key": "{{PROJECT_KEY}}-X"}}
+      - String: {"parent": "{{PROJECT_KEY}}-X"}
 
     Returns the parent key string, or None if not present.
     """

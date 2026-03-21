@@ -7,8 +7,8 @@ Usage:
     from lib.cache import JiraCache
 
     cache = JiraCache()  # Uses ~/.cache/atlassian-pm/jira.db
-    cache.put_issue("BEP-123", issue_data)
-    cached = cache.get_issue("BEP-123", max_age_hours=24)
+    cache.put_issue("{{PROJECT_KEY}}-123", issue_data)
+    cached = cache.get_issue("{{PROJECT_KEY}}-123", max_age_hours=24)
     results = cache.text_search("coupon payment", limit=10)
 """
 
@@ -361,7 +361,7 @@ class JiraCache:
         """Get cached issue if fresh enough.
 
         Args:
-            issue_key: Jira issue key (e.g., 'BEP-123')
+            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-123')
             max_age_hours: Maximum age in hours before considered stale
 
         Returns:

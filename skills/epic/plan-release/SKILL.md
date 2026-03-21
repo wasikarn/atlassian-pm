@@ -48,7 +48,7 @@ If no `--name`: ask "Release name? (e.g. v2.3.0)"
 For each epic key:
 
 1. `cache_get_issue(key)` — epic details, summary, status
-2. JQL: `project=BEP AND parent = KEY ORDER BY created ASC` — child stories + tasks
+2. JQL: `project={{PROJECT_KEY}} AND parent = KEY ORDER BY created ASC` — child stories + tasks
 3. Sum SP: `total_sp = sum(story.customfield_10016 for all children)`
 
 Display summary table: Epic | Summary | Stories | Total SP
@@ -74,9 +74,9 @@ Using map-dependencies pattern:
 🔄 ITERATE (max 3 rounds): Present sprint allocation plan:
 
 ```
-Sprint 1 (2026-04-01 → 2026-04-14): Epic BEP-50 (stories: 4, SP: 35)
-Sprint 2 (2026-04-15 → 2026-04-28): Epic BEP-51 (stories: 3, SP: 28)
-Sprint 3 (2026-04-29 → 2026-05-12): Epic BEP-52 (stories: 5, SP: 40)  ← buffer sprint
+Sprint 1 (2026-04-01 → 2026-04-14): Epic {{PROJECT_KEY}}-50 (stories: 4, SP: 35)
+Sprint 2 (2026-04-15 → 2026-04-28): Epic {{PROJECT_KEY}}-51 (stories: 3, SP: 28)
+Sprint 3 (2026-04-29 → 2026-05-12): Epic {{PROJECT_KEY}}-52 (stories: 5, SP: 40)  ← buffer sprint
 ```
 
 Ask: "Adjust allocation? (annotate with changes or approve)"
@@ -96,7 +96,7 @@ Check: all sprints have dates, all epics assigned, critical path documented.
 
 ## Phase 8 — Confluence Release Page
 
-Create page: "[release_name] Release Plan" in BEP space.
+Create page: "[release_name] Release Plan" in {{PROJECT_KEY}} space.
 
 Structure:
 
@@ -140,9 +140,9 @@ Display: "Fix Version [name] created. [N] epics linked."
 ### ✅ Good
 
 ```text
-/plan-release --epics BEP-50,BEP-51,BEP-52 --name v2.3.0 --date 2026-06-30   # full args → no prompts, runs all 9 phases automatically
-/plan-release --epics BEP-50,BEP-51 --name v2.3.0                             # no target date → calculates end date from velocity
-/plan-release --epics BEP-48 --name v2.2.1 --date 2026-04-15                  # single-epic patch release with hard deadline
+/plan-release --epics {{PROJECT_KEY}}-50,{{PROJECT_KEY}}-51,{{PROJECT_KEY}}-52 --name v2.3.0 --date 2026-06-30   # full args → no prompts, runs all 9 phases automatically
+/plan-release --epics {{PROJECT_KEY}}-50,{{PROJECT_KEY}}-51 --name v2.3.0                             # no target date → calculates end date from velocity
+/plan-release --epics {{PROJECT_KEY}}-48 --name v2.2.1 --date 2026-04-15                  # single-epic patch release with hard deadline
 ```
 
 ### ❌ Bad
@@ -150,8 +150,8 @@ Display: "Fix Version [name] created. [N] epics linked."
 ```text
 /plan-release                                              # no epics → Phase 1 prompts for keys; partial info produces a shallow plan
 /plan-release --name v2.3.0                                # release name without epics → can't calculate SP or sprint count
-/plan-release --epics BEP-50,BEP-51                        # epics with no story-point estimates → velocity calculation will be 0 or wrong
-/plan-release --epics BEP-50 --date 2026-04-01             # date in the past — sprint sequencing produces negative slots
+/plan-release --epics {{PROJECT_KEY}}-50,{{PROJECT_KEY}}-51                        # epics with no story-point estimates → velocity calculation will be 0 or wrong
+/plan-release --epics {{PROJECT_KEY}}-50 --date 2026-04-01             # date in the past — sprint sequencing produces negative slots
 ```
 
 **Common mistakes:**

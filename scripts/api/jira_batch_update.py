@@ -19,19 +19,19 @@ Config format (updates.json):
     {
       "updates": [
         {
-          "keys": ["BEP-3263", "BEP-3264"],
+          "keys": ["{{PROJECT_KEY}}-3263", "{{PROJECT_KEY}}-3264"],
           "start_date": "2026-02-11",
           "due_date": "2026-02-12"
         },
         {
-          "keys": ["BEP-3265"],
+          "keys": ["{{PROJECT_KEY}}-3265"],
           "start_date": "2026-02-12",
           "due_date": "2026-02-14",
           "story_points": 3,
           "labels": ["fe-web"]
         },
         {
-          "keys": ["BEP-2722"],
+          "keys": ["{{PROJECT_KEY}}-2722"],
           "sprint": 640
         }
       ]

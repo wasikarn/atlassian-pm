@@ -6,7 +6,7 @@ State persists in tasks/.workflow-state.json.
 
 Usage:
     # Start a workflow
-    python workflow_checkpoint.py start story-full BEP-1200
+    python workflow_checkpoint.py start story-full {{PROJECT_KEY}}-1200
 
     # Record quality gate pass
     python workflow_checkpoint.py pass-gate qg-story 94.5
@@ -146,7 +146,7 @@ def main() -> int:
     # Common args for workflow identification
     def add_workflow_args(p: argparse.ArgumentParser) -> None:
         p.add_argument("workflow", help="Workflow name (e.g., story-full)")
-        p.add_argument("context_key", help="Context key (e.g., BEP-1200)")
+        p.add_argument("context_key", help="Context key (e.g., {{PROJECT_KEY}}-1200)")
 
     # start
     p = subparsers.add_parser("start", help="Start new workflow")

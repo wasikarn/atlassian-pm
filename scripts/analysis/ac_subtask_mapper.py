@@ -13,7 +13,7 @@ Usage:
 Input JSON:
     service_tags: list of tags (e.g. ["BE", "FE-Admin", "FE-Web", "QA"])
     story_adf: Story ADF JSON (description field from Jira)
-    story_key: Parent story key (e.g. "BEP-123")
+    story_key: Parent story key (e.g. "{{PROJECT_KEY}}-123")
     story_summary: Parent story summary
 
 Output JSON:
@@ -270,7 +270,7 @@ def main():
 
     service_tags = input_data.get("service_tags", ["BE", "FE-Admin"])
     story_adf = input_data.get("story_adf", {})
-    story_key = input_data.get("story_key", "BEP-XXX")
+    story_key = input_data.get("story_key", "{{PROJECT_KEY}}-XXX")
     story_summary = input_data.get("story_summary", "Feature")
 
     acs = extract_acs_from_adf(story_adf)

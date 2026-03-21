@@ -360,7 +360,7 @@ Present each story as a numbered card for user to pick creation order.
 
 ```text
 /blueprint "Real-time video analytics dashboard"          # feature description seeds all 5 roles with focused context
-/blueprint BEP-48                                         # epic key → reads existing scope + children before debating
+/blueprint {{PROJECT_KEY}}-48                                         # epic key → reads existing scope + children before debating
 /blueprint "Multi-tenant permission system" --tier L      # explicitly request full tier for new domain / system-level work
 /blueprint 12345678                                       # Confluence page ID → reads existing spec doc as input
 ```
@@ -370,7 +370,7 @@ Present each story as a numbered card for user to pick creation order.
 ```text
 /blueprint "add button to export CSV"                     # single-story scope → use /create-story directly, blueprint is overkill
 /blueprint                                                # no input → debate has no grounding, all 5 roles produce generic output
-/blueprint BEP-50                                         # running after Jira stories already exist defeats the purpose — blueprint informs Jira creation, not the reverse
+/blueprint {{PROJECT_KEY}}-50                                         # running after Jira stories already exist defeats the purpose — blueprint informs Jira creation, not the reverse
 /blueprint "improve UX" --tier M                          # vague description forces PO + TL to guess scope; Phase 1 gate will block anyway
 ```
 

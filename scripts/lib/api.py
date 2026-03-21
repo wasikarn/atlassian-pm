@@ -166,7 +166,7 @@ class ConfluenceAPI:
         """Create a new Confluence page.
 
         Args:
-            space_key: Space key (e.g., "BEP")
+            space_key: Space key (e.g., "{{PROJECT_KEY}}")
             title: Page title
             content: Page content in storage format (HTML)
             parent_id: Optional parent page ID

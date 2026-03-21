@@ -6,19 +6,19 @@ This script uses the Jira REST API v3 directly to set/change/remove the parent.
 
 Usage:
     # Set parent on single issue
-    python jira_set_parent.py --issues BEP-3331 --parent BEP-3197
+    python jira_set_parent.py --issues {{PROJECT_KEY}}-3331 --parent {{PROJECT_KEY}}-3197
 
     # Set parent on multiple issues
-    python jira_set_parent.py --issues BEP-3331,BEP-3332,BEP-3333 --parent BEP-3197
+    python jira_set_parent.py --issues {{PROJECT_KEY}}-3331,{{PROJECT_KEY}}-3332,{{PROJECT_KEY}}-3333 --parent {{PROJECT_KEY}}-3197
 
     # Remove parent from issues
-    python jira_set_parent.py --issues BEP-3331 --remove
+    python jira_set_parent.py --issues {{PROJECT_KEY}}-3331 --remove
 
     # Dry run (verify current parent, no writes)
-    python jira_set_parent.py --issues BEP-3331,BEP-3332 --parent BEP-3197 --dry-run
+    python jira_set_parent.py --issues {{PROJECT_KEY}}-3331,{{PROJECT_KEY}}-3332 --parent {{PROJECT_KEY}}-3197 --dry-run
 
     # Verbose output
-    python jira_set_parent.py --issues BEP-3331 --parent BEP-3197 -v
+    python jira_set_parent.py --issues {{PROJECT_KEY}}-3331 --parent {{PROJECT_KEY}}-3197 -v
 
 Exit codes:
     0 = all updates succeeded
@@ -126,12 +126,12 @@ def main() -> int:
     parser.add_argument(
         "--issues", "-i",
         required=True,
-        help="Comma-separated issue keys (e.g., BEP-3331,BEP-3332)",
+        help="Comma-separated issue keys (e.g., {{PROJECT_KEY}}-3331,{{PROJECT_KEY}}-3332)",
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
         "--parent", "-p",
-        help="Parent issue key to set (e.g., BEP-3197)",
+        help="Parent issue key to set (e.g., {{PROJECT_KEY}}-3197)",
     )
     group.add_argument(
         "--remove",

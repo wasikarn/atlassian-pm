@@ -27,7 +27,7 @@ argument-hint: "[--update]"
 JQL (HR2-safe — no parent filter):
 
 ```
-project=BEP AND issuetype=Task AND labels in (tech-debt,chore,spike) ORDER BY created ASC
+project={{PROJECT_KEY}} AND issuetype=Task AND labels in (tech-debt,chore,spike) ORDER BY created ASC
 ```
 
 Via `jira_search` with fields: `summary,status,assignee,labels,customfield_10016,{{START_DATE_FIELD}},duedate,created`
@@ -81,7 +81,7 @@ Check: issue count > 0, at least one quadrant populated, all required sections p
 ## Phase 6 — Confluence Page
 
 **If `--update`:** `confluence_get_page` + `confluence_update_page`
-**Else:** `confluence_create_page` in BEP space: "Tech Debt Radar"
+**Else:** `confluence_create_page` in {{PROJECT_KEY}} space: "Tech Debt Radar"
 
 Page structure (storage format — HR4: no macros via MCP):
 
@@ -118,7 +118,7 @@ quadrantChart
     quadrant-2 Quick Win
     quadrant-3 Avoid
     quadrant-4 Fill-in
-    BEP-123: [0.2, 0.8]
+    {{PROJECT_KEY}}-123: [0.2, 0.8]
     ...
 ```
 
@@ -140,8 +140,8 @@ quadrantChart
                                         # Phase 4 trend read will fail; omit --update for first-time creation
 /scan-tech-debt                         # running without --update when a page already exists —
                                         # creates a second "Tech Debt Radar" page (duplicate)
-/scan-tech-debt "BEP-99 is high priority"   # free-text args are ignored — skill takes no filter args
-/scan-tech-debt --create BEP-55         # wrong expectation: this skill only aggregates existing labeled
+/scan-tech-debt "{{PROJECT_KEY}}-99 is high priority"   # free-text args are ignored — skill takes no filter args
+/scan-tech-debt --create {{PROJECT_KEY}}-55         # wrong expectation: this skill only aggregates existing labeled
                                         # issues into Confluence; it does not create Jira tasks
 ```
 

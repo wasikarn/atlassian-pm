@@ -94,7 +94,7 @@ Show: "Ready to close sprint [name]. This is irreversible."
 
 ## Phase 6 — Confluence Review Page
 
-Create Confluence page in BEP space: "Sprint [name] Review"
+Create Confluence page in {{PROJECT_KEY}} space: "Sprint [name] Review"
 
 Page structure:
 

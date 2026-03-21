@@ -199,7 +199,7 @@ Priority 2: [Action] — reduces delay impact by [N] days
 ```text
 /map-dependencies                               # defaults to current active sprint — resolves via jira_get_sprints_from_board
 /map-dependencies --sprint 47                   # sprint ID obtained from jira_get_sprints_from_board(board_id=2, state="active")
-/map-dependencies --keys BEP-210,BEP-211,BEP-212  # analyze a specific subset of issues instead of the full sprint
+/map-dependencies --keys {{PROJECT_KEY}}-210,{{PROJECT_KEY}}-211,{{PROJECT_KEY}}-212  # analyze a specific subset of issues instead of the full sprint
 /map-dependencies --sprint 47 --mermaid-only    # output only the dependency graph, skip swim lane and CPM tables
 ```
 
@@ -209,7 +209,7 @@ Priority 2: [Action] — reduces delay impact by [N] days
 /map-dependencies --sprint 47                   # ❌ sprint ID hardcoded without calling jira_get_sprints_from_board first (HR7)
 /map-dependencies                               # ❌ run without an active sprint and no --keys specified — Phase 1 returns empty scope
 /plan-sprint                                    # ❌ wrong skill — /map-dependencies is analysis only; use /plan-sprint to assign work
-/map-dependencies --keys BEP-210               # ❌ single issue with no linked items — dependency graph is meaningless without context
+/map-dependencies --keys {{PROJECT_KEY}}-210               # ❌ single issue with no linked items — dependency graph is meaningless without context
 ```
 
 **Common mistakes:**

@@ -15,10 +15,10 @@ Usage:
     python jira_write.py create-epic --adf tasks/epic.json --start-date 2026-02-10
 
     # Create subtask (two-step: REST create + acli edit)
-    python jira_write.py create-subtask --parent BEP-1200 --adf tasks/sub.json --assignee email
+    python jira_write.py create-subtask --parent {{PROJECT_KEY}}-1200 --adf tasks/sub.json --assignee email
 
     # Update description (validate first)
-    python jira_write.py update-description --issue BEP-1234 --adf tasks/fixed.json
+    python jira_write.py update-description --issue {{PROJECT_KEY}}-1234 --adf tasks/fixed.json
 
     # Dry run (validate + report, no writes)
     python jira_write.py create-story --adf tasks/story.json --dry-run
@@ -163,7 +163,7 @@ def verify_parent(api: JiraAPI, issue_key: str, expected_parent: str) -> bool:
 
 
 def parse_acli_key(output: str) -> str | None:
-    """Extract issue key (e.g., BEP-1234) from acli create output."""
+    """Extract issue key (e.g., {{PROJECT_KEY}}-1234) from acli create output."""
     match = re.search(r"([A-Z]+-\d+)", output)
     return match.group(1) if match else None
 
@@ -478,12 +478,12 @@ def main() -> int:
 
     # create-subtask
     sub = subparsers.add_parser("create-subtask", help="Create Subtask with parent")
-    sub.add_argument("--parent", required=True, help="Parent story key (e.g., BEP-1200)")
+    sub.add_argument("--parent", required=True, help="Parent story key (e.g., {{PROJECT_KEY}}-1200)")
     add_common_args(sub)
 
     # update-description
     upd = subparsers.add_parser("update-description", help="Update issue description")
-    upd.add_argument("--issue", required=True, help="Issue key (e.g., BEP-1234)")
+    upd.add_argument("--issue", required=True, help="Issue key (e.g., {{PROJECT_KEY}}-1234)")
     upd.add_argument("--adf", required=True, help="Path to ADF JSON file")
     upd.add_argument(
         "--type", "-t", choices=["story", "subtask", "epic", "qa"], help="Issue type for validation (default: subtask)"

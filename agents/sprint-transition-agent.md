@@ -49,9 +49,9 @@ Output structured JSON:
 
 ```json
 {
-  "moved": ["BEP-123", "BEP-124"],
-  "failed": ["BEP-125"],
-  "skipped": ["BEP-126 (HR10: subtask)"]
+  "moved": ["{{PROJECT_KEY}}-123", "{{PROJECT_KEY}}-124"],
+  "failed": ["{{PROJECT_KEY}}-125"],
+  "skipped": ["{{PROJECT_KEY}}-126 (HR10: subtask)"]
 }
 ```
 

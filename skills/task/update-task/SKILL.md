@@ -165,19 +165,19 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 ### ✅ Good
 
 ```text
-/update-task BEP-88                       # agent reads current state, then asks what to change
-/update-task BEP-88 migrate               # migrate Wiki markup → ADF format
-/update-task BEP-88 add-details           # add missing ACs or reference links to existing task
-/update-task BEP-88 change-type chore     # switch template from tech-debt → chore
+/update-task {{PROJECT_KEY}}-88                       # agent reads current state, then asks what to change
+/update-task {{PROJECT_KEY}}-88 migrate               # migrate Wiki markup → ADF format
+/update-task {{PROJECT_KEY}}-88 add-details           # add missing ACs or reference links to existing task
+/update-task {{PROJECT_KEY}}-88 change-type chore     # switch template from tech-debt → chore
 ```
 
 ### ❌ Bad
 
 ```text
 /update-task                              # missing issue key — agent cannot fetch current state
-/update-task BEP-55                       # BEP-55 is a User Story — use /update-story instead
-/update-task BEP-88 "change to story"     # cannot change issue type Task→Story via this skill — use Jira UI directly
-/update-task BEP-88 "rewrite everything"  # scope too vague; agent must infer change type — be explicit
+/update-task {{PROJECT_KEY}}-55                       # {{PROJECT_KEY}}-55 is a User Story — use /update-story instead
+/update-task {{PROJECT_KEY}}-88 "change to story"     # cannot change issue type Task→Story via this skill — use Jira UI directly
+/update-task {{PROJECT_KEY}}-88 "rewrite everything"  # scope too vague; agent must infer change type — be explicit
 ```
 
 **Common mistakes:**

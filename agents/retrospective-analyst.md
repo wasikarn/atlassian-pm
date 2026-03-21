@@ -13,7 +13,7 @@ Generate a data-driven retrospective for a completed sprint. Analyzes real Jira 
 
 ## Input
 
-Sprint ID or sprint name (e.g., `BEP Sprint 42` or sprint ID `123`).
+Sprint ID or sprint name (e.g., `{{PROJECT_KEY}} Sprint 42` or sprint ID `123`).
 Optional: `--action-items` flag to auto-create Jira tasks for action items.
 
 ## Steps
@@ -143,7 +143,7 @@ Output a Confluence-ready retrospective in this structure:
 [Data-driven points: e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
 
 ## 🔴 What to Improve
-[Data-driven points: e.g., "3 items carried over from previous sprint (BEP-AAA, BEP-BBB, BEP-CCC)", "BEP-DDD spent 4 days blocked"]
+[Data-driven points: e.g., "3 items carried over from previous sprint ({{PROJECT_KEY}}-AAA, {{PROJECT_KEY}}-BBB, {{PROJECT_KEY}}-CCC)", "{{PROJECT_KEY}}-DDD spent 4 days blocked"]
 
 ## 💡 Action Items
 | # | Action | Owner | Due | Jira Key |
@@ -154,7 +154,7 @@ Output a Confluence-ready retrospective in this structure:
 | Key | Summary | Status | SP | Cycle Time | Notes |
 |-----|---------|--------|----|------------|-------|
 | {{PROJECT_KEY}}-XXX | [summary] | Done | 3 | 2.5 days | ✅ |
-| BEP-YYY | [summary] | Carry-over | 5 | — | ⚠️ moved to next sprint |
+| {{PROJECT_KEY}}-YYY | [summary] | Carry-over | 5 | — | ⚠️ moved to next sprint |
 ```
 
 ### Phase 6: Action Items (if --action-items flag)

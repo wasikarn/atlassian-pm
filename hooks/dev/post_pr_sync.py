@@ -2,12 +2,13 @@
 """PR sync: inject Jira transition context after gh pr create.
 
 PostToolUse hook for Bash.
-When Claude runs 'gh pr create', extracts BEP-XXX from the command or output
+When Claude runs 'gh pr create', extracts {{PROJECT_KEY}}-XXX from the command or output
 and injects additionalContext telling Claude to transition the issue to In Review.
 
 Exit codes: always 0 (PostToolUse cannot block)
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -16,7 +17,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from hooks_lib import inject_context, log_event, parse_stdin
 
 _HOOK = "pr-sync"
-_ISSUE_RE = re.compile(r'\b(BEP-\d+)\b', re.IGNORECASE)
+
+
+def _project_key() -> str:
+    try:
+        plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT", "")
+        config_path = Path(plugin_root) / ".claude" / "project-config.json"
+        return json.loads(config_path.read_text()).get("jira", {}).get("project_key", "")
+    except Exception:
+        return ""
+
+
+_pk = _project_key()
+_ISSUE_RE = re.compile(rf'\b({re.escape(_pk)}-\d+)\b', re.IGNORECASE) if _pk else None
 
 
 def _find_issue_key(command: str, response: str) -> str | None:
@@ -42,9 +55,13 @@ def main() -> None:
     if isinstance(response, dict):
         response = json.dumps(response)
 
+    if not _ISSUE_RE:
+        print("{}")
+        return
+
     issue_key = _find_issue_key(command, str(response))
     if not issue_key:
-        log_event(_HOOK, "SKIP", {"reason": "no_bep_key", "cmd": command[:80]})
+        log_event(_HOOK, "SKIP", {"reason": "no_issue_key", "cmd": command[:80]})
         print("{}")
         return
 

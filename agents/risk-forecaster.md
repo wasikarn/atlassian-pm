@@ -103,16 +103,16 @@ Overall Risk: 🟡 MEDIUM (58/100)
 
 ### Specific Risks
 
-1. 🟠 HIGH — BEP-301 (payment integration): {{SLOT_2}} is sole BE expert with payment domain knowledge. If 1-day absence → sprint miss.
-   Mitigation: Pair {{SLOT_3}} with {{SLOT_2}} on BEP-301 for knowledge transfer before sprint start.
+1. 🟠 HIGH — {{PROJECT_KEY}}-301 (payment integration): {{SLOT_2}} is sole BE expert with payment domain knowledge. If 1-day absence → sprint miss.
+   Mitigation: Pair {{SLOT_3}} with {{SLOT_2}} on {{PROJECT_KEY}}-301 for knowledge transfer before sprint start.
 
 2. 🟡 MEDIUM — Backend at 94% utilization: no buffer for scope discovery.
-   Mitigation: Move BEP-315 (P3 chore, 3 SP) to next sprint → reduces BE load to 78%.
+   Mitigation: Move {{PROJECT_KEY}}-315 (P3 chore, 3 SP) to next sprint → reduces BE load to 78%.
 
 ### Adjusted Risk (if mitigations applied)
 
-- Remove BEP-315: Capacity 65→50, Team 60→45
-- Add pair on BEP-301: Team 45→30
+- Remove {{PROJECT_KEY}}-315: Capacity 65→50, Team 60→45
+- Add pair on {{PROJECT_KEY}}-301: Team 45→30
 Revised Overall: 🟢 LOW (39/100)
 
 ### Recommendation

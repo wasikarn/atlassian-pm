@@ -8,7 +8,7 @@ State persists in tasks/.workflow-state.json.
 Usage:
     from lib.workflow_state import WorkflowState
 
-    ws = WorkflowState("story-full", "BEP-1200")
+    ws = WorkflowState("story-full", "{{PROJECT_KEY}}-1200")
     ws.start()
     ws.pass_gate("qg-story", 94.5)
     ws.advance("create-story")
@@ -32,7 +32,7 @@ class WorkflowState:
 
     Attributes:
         workflow: Workflow name (e.g., "story-full")
-        context_key: Issue key or identifier (e.g., "BEP-1200")
+        context_key: Issue key or identifier (e.g., "{{PROJECT_KEY}}-1200")
         state_dir: Directory for state file
     """
 

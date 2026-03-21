@@ -61,7 +61,7 @@ Epic (Jira)
 - Receive input: `{{PROJECT_KEY}}-XXX` (Jira key) or Confluence page ID
 - `MCP: jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
 - Determine artifact type: Epic / Story / Sub-task
-- If Confluence page ID → `MCP: confluence_get_page(page_id)` → extract BEP keys → pivot to Jira
+- If Confluence page ID → `MCP: confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of starting artifact + description of what changed.
 
 ### 2. Build Artifact Graph
@@ -196,26 +196,26 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 ### ✅ Good
 
 ```text
-/sync-artifacts BEP-123 "AC3 updated — added rate limit constraint: max 3 redemptions per user"
+/sync-artifacts {{PROJECT_KEY}}-123 "AC3 updated — added rate limit constraint: max 3 redemptions per user"
 # origin story key + precise change description → Phase 3 classifies as MEDIUM, cascades to subtasks + Confluence Tech Note
 
-/sync-artifacts BEP-10 "epic scope narrowed: removed loyalty points integration from must-have list"
+/sync-artifacts {{PROJECT_KEY}}-10 "epic scope narrowed: removed loyalty points integration from must-have list"
 # epic key + scope change → HIGH impact, cascades DOWN to all child stories and subtasks
 
 /sync-artifacts 98765432 "updated API response schema in Tech Note — added pagination fields"
-# Confluence page ID → Phase 1 pivots to Jira via embedded BEP keys, syncs affected subtask descriptions
+# Confluence page ID → Phase 1 pivots to Jira via embedded {{PROJECT_KEY}} keys, syncs affected subtask descriptions
 
-/sync-artifacts BEP-456 "fix typo in AC2 wording, no logic change"
+/sync-artifacts {{PROJECT_KEY}}-456 "fix typo in AC2 wording, no logic change"
 # LOW impact change → Phase 5 codebase exploration skipped automatically, only wording updated
 ```
 
 ### ❌ Bad
 
 ```text
-/sync-artifacts BEP-123                          # missing change description → Phase 1 gate blocks; agent cannot classify or plan sync
+/sync-artifacts {{PROJECT_KEY}}-123                          # missing change description → Phase 1 gate blocks; agent cannot classify or plan sync
 /sync-artifacts                                   # no origin artifact → Phase 1 cannot build artifact graph at all
-/sync-artifacts BEP-123 "update description"     # too vague → Phase 3 cannot determine impact level or which artifacts to update
-/sync-artifacts BEP-123 "fix AC"                 # use /verify-issue BEP-123 --fix instead — sync-artifacts is for cascading changes, not single-issue fixes
+/sync-artifacts {{PROJECT_KEY}}-123 "update description"     # too vague → Phase 3 cannot determine impact level or which artifacts to update
+/sync-artifacts {{PROJECT_KEY}}-123 "fix AC"                 # use /verify-issue {{PROJECT_KEY}}-123 --fix instead — sync-artifacts is for cascading changes, not single-issue fixes
 ```
 
 **Common mistakes:**

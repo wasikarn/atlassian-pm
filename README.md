@@ -322,7 +322,7 @@ claude mcp add --scope user mcp-atlassian -- \
   --confluence-spaces-filter=YOUR_SPACE_KEY
 ```
 
-> **Note:** `~/.config/atlassian/.env` must exist first (Step 4). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `BEP`).
+> **Note:** `~/.config/atlassian/.env` must exist first (Step 4). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `{{PROJECT_KEY}}`).
 
 ### 6. Run setup
 

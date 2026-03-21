@@ -9,11 +9,11 @@ Usage:
     python update_jira_description.py --config fixes.json
 
     # Single issue with inline replacements
-    python update_jira_description.py --issue BEP-2819 \
+    python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \
         --find "billboard_ids" --replace "billboard_codes"
 
     # Multiple replacements for single issue
-    python update_jira_description.py --issue BEP-2819 \
+    python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \
         --find "old1" --replace "new1" \
         --find "old2" --replace "new2"
 
@@ -22,10 +22,10 @@ Usage:
 
 Config JSON format:
     {
-        "BEP-2819": [
+        "{{PROJECT_KEY}}-2819": [
             ["billboard_ids", "billboard_codes"]
         ],
-        "BEP-2755": [
+        "{{PROJECT_KEY}}-2755": [
             ["old text", "new text"],
             ["another old", "another new"]
         ]
@@ -76,7 +76,7 @@ def load_config(config_path: str) -> dict[str, list[tuple[str, str]]]:
 
     Expected format:
     {
-        "BEP-2819": [
+        "{{PROJECT_KEY}}-2819": [
             ["old_text", "new_text"],
             ["another_old", "another_new"]
         ]
@@ -144,7 +144,7 @@ Examples:
   python update_jira_description.py --config fixes.json
 
   # Fix single issue
-  python update_jira_description.py --issue BEP-2819 \\
+  python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \\
       --find "billboard_ids" --replace "billboard_codes"
 
   # Dry run
@@ -152,14 +152,14 @@ Examples:
 
 Config JSON format:
   {
-    "BEP-2819": [["old_text", "new_text"]],
-    "BEP-2755": [["old1", "new1"], ["old2", "new2"]]
+    "{{PROJECT_KEY}}-2819": [["old_text", "new_text"]],
+    "{{PROJECT_KEY}}-2755": [["old1", "new1"], ["old2", "new2"]]
   }
         """,
     )
 
     parser.add_argument("--config", help="Path to JSON config file with fix definitions")
-    parser.add_argument("--issue", help="Single issue key to fix (e.g., BEP-2819)")
+    parser.add_argument("--issue", help="Single issue key to fix (e.g., {{PROJECT_KEY}}-2819)")
     parser.add_argument(
         "--find",
         action="append",

@@ -1,6 +1,6 @@
 # Vertical Slice Guide
 
-> **Reference:** Scrum Guide, StoriesOnBoard, SAFe — applied in BEP project
+> **Reference:** Scrum Guide, StoriesOnBoard, SAFe — applied in {{PROJECT_KEY}} project
 
 ## Quick Reference
 

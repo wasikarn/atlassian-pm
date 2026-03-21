@@ -56,7 +56,7 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
     "history": [
       {
         "sprint_id": 45,
-        "sprint_name": "BEP Sprint 45",
+        "sprint_name": "{{PROJECT_KEY}} Sprint 45",
         "completed_sp": 41,
         "planned_sp": 44,
         "completion_ratio": 0.93
@@ -69,7 +69,7 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
   },
   "anomalies": [
     {
-      "sprint_name": "BEP Sprint 42",
+      "sprint_name": "{{PROJECT_KEY}} Sprint 42",
       "completed_sp": 28,
       "direction": "dip",
       "deviation": 2.3,
@@ -110,6 +110,6 @@ Config updated: .claude/project-config-team-detail.json
 Sprint breakdown:
 | Sprint | Completed SP | Planned SP | Ratio | Anomaly? |
 |--------|-------------|-----------|-------|---------|
-| BEP Sprint 45 | 41 SP | 44 SP | 93% | — |
-| BEP Sprint 42 | 28 SP | 43 SP | 65% | ⚠️ dip 2.3σ |
+| {{PROJECT_KEY}} Sprint 45 | 41 SP | 44 SP | 93% | — |
+| {{PROJECT_KEY}} Sprint 42 | 28 SP | 43 SP | 65% | ⚠️ dip 2.3σ |
 ```

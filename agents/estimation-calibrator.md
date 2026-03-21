@@ -18,7 +18,7 @@ Calibrate story point estimates using historical data from similar completed sto
 
 ## Steps
 
-1. **Semantic similarity search** — `cache_similar_issues(query=story_summary, limit=10, filters={issuetype:"Story", status:"Done"})`. If tool returns `{"error": "Embeddings not available..."}` → fall back to `cache_search` with JQL: `project = BEP AND issuetype = Story AND status = Done AND labels = <service_tag>` and note "semantic similarity unavailable — using keyword fallback"
+1. **Semantic similarity search** — `cache_similar_issues(query=story_summary, limit=10, filters={issuetype:"Story", status:"Done"})`. If tool returns `{"error": "Embeddings not available..."}` → fall back to `cache_search` with JQL: `project = {{PROJECT_KEY}} AND issuetype = Story AND status = Done AND labels = <service_tag>` and note "semantic similarity unavailable — using keyword fallback"
 
 2. **Filter to relevant results** — keep only results where service tag matches and status = Done. Take top 5 by similarity score.
 
@@ -54,9 +54,9 @@ Similar completed stories:
 
 | Key | Summary | Estimated SP | Cycle Time | Carry-over? |
 |-----|---------|-------------|-----------|------------|
-| BEP-201 | [BE] Auth callback | 3 SP | 2.1 days | No |
-| BEP-187 | [BE] OAuth integration | 3 SP | 5.2 days | Yes ⚠️ |
-| BEP-156 | [BE] Line webhook | 3 SP | 2.8 days | No |
+| {{PROJECT_KEY}}-201 | [BE] Auth callback | 3 SP | 2.1 days | No |
+| {{PROJECT_KEY}}-187 | [BE] OAuth integration | 3 SP | 5.2 days | Yes ⚠️ |
+| {{PROJECT_KEY}}-156 | [BE] Line webhook | 3 SP | 2.8 days | No |
 
 Complexity signals:
 

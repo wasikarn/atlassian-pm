@@ -73,7 +73,7 @@ For each story draft: `cache_similar_issues(text=narrative+acs, limit=3)`
 Flag if similarity score **> 0.8**:
 
 ```
-⚠ Story [N] may duplicate BEP-123 (similarity: 0.87): "[existing summary]"
+⚠ Story [N] may duplicate {{PROJECT_KEY}}-123 (similarity: 0.87): "[existing summary]"
 ```
 
 ## Phase 5 — Review Stories
@@ -113,8 +113,8 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 - Coverage map: spec section → story key(s)
 
   ```
-  User Authentication → BEP-201, BEP-202
-  Password Reset → BEP-203
+  User Authentication → {{PROJECT_KEY}}-201, {{PROJECT_KEY}}-202
+  Password Reset → {{PROJECT_KEY}}-203
   ```
 
 - Next: run `/atlassian-pm:create-story {{PROJECT_KEY}}-XXX` per story to add subtasks
@@ -127,8 +127,8 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 
 ```text
 /spec-to-stories 98765432 --dry-run                     # preview extracted stories + QG scores before creating anything in Jira
-/spec-to-stories 98765432 --epic BEP-10                 # link all generated stories to epic BEP-10; parent verified per HR5
-/spec-to-stories 98765432 --epic BEP-10 --dry-run       # safest first run: validate story output + dedup flags before committing to Jira
+/spec-to-stories 98765432 --epic {{PROJECT_KEY}}-10                 # link all generated stories to epic {{PROJECT_KEY}}-10; parent verified per HR5
+/spec-to-stories 98765432 --epic {{PROJECT_KEY}}-10 --dry-run       # safest first run: validate story output + dedup flags before committing to Jira
 ```
 
 ### ❌ Bad
@@ -137,7 +137,7 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 /spec-to-stories                                         # no page ID → Phase 1 cannot fetch spec; skill cannot proceed
 /spec-to-stories "User Authentication Spec"             # page title instead of page ID → confluence_get_page requires numeric ID, not title
 /spec-to-stories 98765432                               # creating directly without --dry-run first — dedup flags and QG scores not reviewed before Jira write
-/spec-to-stories 98765432 --epic BEP-10                 # page has no structured spec (e.g. meeting notes) → spec-parser-agent produces low-quality requirements; run /blueprint first to create a proper spec page
+/spec-to-stories 98765432 --epic {{PROJECT_KEY}}-10                 # page has no structured spec (e.g. meeting notes) → spec-parser-agent produces low-quality requirements; run /blueprint first to create a proper spec page
 ```
 
 **Common mistakes:**

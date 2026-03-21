@@ -45,7 +45,7 @@ Beyond detecting current misalignment, flag risks about to materialize:
 - Date compression risk: "Story due Mar 25, latest subtask due Mar 24 → if any subtask slips 1 day, story misses deadline. Buffer: 0 days."
 - Capacity risk: "Sum of subtask OE = 32h but story SP suggests ~24h → 33% over-estimate. Verify scope."
 - Orphan AC risk: "AC3 (Error handling) has no subtask covering it → will be missed unless added."
-- Dependency order risk: "BEP-YYY (FE) has earlier due date than BEP-ZZZ (BE) it depends on → FE cannot start on time."
+- Dependency order risk: "{{PROJECT_KEY}}-YYY (FE) has earlier due date than {{PROJECT_KEY}}-ZZZ (BE) it depends on → FE cannot start on time."
 
 ### Scope Drift Detection
 
@@ -76,7 +76,7 @@ Alignment Score: [N]/6 (A[pass]-A[fail] breakdown)
 
 | AC | Description | Covered By | Status |
 |----|------------|------------|--------|
-| AC1 | [name] | BEP-ZZZ objective | ✅ |
+| AC1 | [name] | {{PROJECT_KEY}}-ZZZ objective | ✅ |
 | AC3 | [name] | — | ❌ no coverage |
 
 ### Predictive Risks

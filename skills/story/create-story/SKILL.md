@@ -310,7 +310,7 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 ### ❌ Bad
 
 ```text
-/create-story BEP-123                    # passing existing issue key — story already exists; use /analyze-story BEP-123 instead
+/create-story {{PROJECT_KEY}}-123                    # passing existing issue key — story already exists; use /analyze-story {{PROJECT_KEY}}-123 instead
 /create-story "authentication"           # too vague → Discovery phase loops, VS assignment ambiguous, weak ACs
 /create-story "redesign entire checkout" # scope too large → INVEST Small check fails, needs epic decomposition first
 /create-story "add feature"             # no context → generic output, wastes all 11 phases; run /blueprint first for complex features
@@ -318,7 +318,7 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 
 **Common mistakes:**
 
-- Passing a Jira issue key (e.g. `BEP-123`) — that story already exists; use `/analyze-story` to add subtasks to it instead.
+- Passing a Jira issue key (e.g. `{{PROJECT_KEY}}-123`) — that story already exists; use `/analyze-story` to add subtasks to it instead.
 - Skipping `/blueprint` for complex features with multiple stories — without blueprint context the Discovery phase must interview from scratch every time, and VS assignment is error-prone.
 - Using `/create-story` when no epic exists and the feature spans multiple vertical slices — create the epic first (`/create-epic`) so the story has a parent and VS labels to anchor to.
 - Confusing this skill with `/analyze-story` — `/create-story` creates a brand-new story + subtasks end-to-end; `/analyze-story` works on an existing story that already has a Jira key.

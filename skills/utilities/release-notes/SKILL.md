@@ -59,7 +59,7 @@ Display version details:
 
 ```python
 jira_search(
-    jql="project = BEP AND fixVersion = '[version_name]' AND resolution = Done",
+    jql="project = {{PROJECT_KEY}} AND fixVersion = '[version_name]' AND resolution = Done",
     fields="summary,issuetype,labels,assignee,customfield_10016,parent",
     limit=100
 )
@@ -147,7 +147,7 @@ If `--dry-run`: display full draft and stop.
 
 ```python
 confluence_create_page(
-    space_key="{{SPACE_KEY}}",
+    space_key="{{PROJECT_KEY}}",
     title="Release Notes — [version_name] ([date])",
     body=<ADF content>,
     parent_id=<release-notes-parent-page-id if exists>
@@ -213,7 +213,7 @@ jira_add_comment(
 ```text
 /release-notes --version v2.3.0 --dry-run               # preview draft before publishing — always do this first
 /release-notes --version v2.3.0                          # publish release notes for a specific fix version
-/release-notes --version v2.3.0 --epic BEP-10            # scope notes to a specific epic within the version
+/release-notes --version v2.3.0 --epic {{PROJECT_KEY}}-10            # scope notes to a specific epic within the version
 /release-notes --dry-run                                 # interactive version selection + preview (no publish)
 ```
 

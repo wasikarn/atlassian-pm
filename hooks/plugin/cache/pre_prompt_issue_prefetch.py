@@ -1,6 +1,6 @@
-"""UserPromptSubmit hook: pre-fetch issue data from cache when user mentions BEP-XXX keys.
+"""UserPromptSubmit hook: pre-fetch issue data from cache when user mentions {{PROJECT_KEY}}-XXX keys.
 
-When the user's prompt contains Jira issue keys (e.g. "ดู BEP-456" or "update BEP-123"),
+When the user's prompt contains Jira issue keys (e.g. "ดู {{PROJECT_KEY}}-456" or "update {{PROJECT_KEY}}-123"),
 this hook queries the local SQLite cache directly and injects a summary as additionalContext
 — before Claude starts processing.
 
@@ -55,7 +55,7 @@ def main() -> None:
     if not raw_keys:
         sys.exit(0)
 
-    # Deduplicate preserving order, normalise to BEP-NNN uppercase
+    # Deduplicate preserving order, normalise to {{PROJECT_KEY}}-NNN uppercase
     seen: set[str] = set()
     keys: list[str] = []
     for n in raw_keys:

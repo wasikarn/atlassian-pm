@@ -55,18 +55,18 @@ Flag these patterns:
 === Standup Digest — [date] (Sprint Day [N]) ===
 
 {{SLOT_2}}
-  Done: BEP-123 [BE] User auth endpoint (3 SP)
-  In Progress: BEP-124 [BE] JWT refresh flow (5 SP)
-  Blocked: BEP-125 — blocked since Day 4
+  Done: {{PROJECT_KEY}}-123 [BE] User auth endpoint (3 SP)
+  In Progress: {{PROJECT_KEY}}-124 [BE] JWT refresh flow (5 SP)
+  Blocked: {{PROJECT_KEY}}-125 — blocked since Day 4
 
 {{SLOT_3}}
-  In Progress: BEP-130 [FE-Admin] Dashboard component (3 SP)
-  No Update: BEP-131 [FE-Admin] Table pagination — no update 3 days ⚠
+  In Progress: {{PROJECT_KEY}}-130 [FE-Admin] Dashboard component (3 SP)
+  No Update: {{PROJECT_KEY}}-131 [FE-Admin] Table pagination — no update 3 days ⚠
 
 === Anomalies ===
 
-- BEP-132: Overdue (due 2026-03-18, still In Progress) — assignee: {{SLOT_4}}
-- BEP-133: Late start (Day 7, still To Do) — unassigned
+- {{PROJECT_KEY}}-132: Overdue (due 2026-03-18, still In Progress) — assignee: {{SLOT_4}}
+- {{PROJECT_KEY}}-133: Late start (Day 7, still To Do) — unassigned
 ```
 
 **If `--post` flag:** post this output as a comment on the sprint's Confluence page via `confluence_add_comment`.

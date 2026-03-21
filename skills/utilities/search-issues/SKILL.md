@@ -29,7 +29,7 @@ argument-hint: "[keyword] [--filters]"
 
 | Input | Generated JQL |
 | --- | --- |
-| `"credit"` | `project = BEP AND summary ~ "credit"` |
+| `"credit"` | `project = {{PROJECT_KEY}} AND summary ~ "credit"` |
 | `ABC-123` | `key = ABC-123` |
 | `ABC-123 --children` | `parent = ABC-123` |
 | `--sprint current` | `sprint IN openSprints()` |
@@ -67,7 +67,7 @@ If embeddings not available (sqlite-vec not installed) → skip gracefully, no e
 
 ```text
 ## Search Results
-Query: `project = BEP AND summary ~ "credit"`
+Query: `project = {{PROJECT_KEY}} AND summary ~ "credit"`
 Found: 5 issues
 
 | Key | Type | Summary | Status |
@@ -114,7 +114,7 @@ If no semantic matches above threshold → omit the section entirely.
 
 ```text
 /search-issues "credit wallet"                          # keyword search + semantic similarity check
-/search-issues BEP-42 --children                        # list all subtasks of a parent issue
+/search-issues {{PROJECT_KEY}}-42 --children                        # list all subtasks of a parent issue
 /search-issues --sprint current --assignee me           # my open items in active sprint
 /search-issues --type Story --status "In Progress"      # filter by type + status
 /search-issues --jql "labels = tech-debt AND sprint IN openSprints()"   # custom JQL filter
@@ -124,7 +124,7 @@ If no semantic matches above threshold → omit the section entirely.
 
 ```text
 /search-issues                                          # no query — produces empty or full-project dump
-/search-issues --jql "parent = BEP-42 ORDER BY created"    # HR2 violation: ORDER BY with parent= causes JQL parser error
+/search-issues --jql "parent = {{PROJECT_KEY}}-42 ORDER BY created"    # HR2 violation: ORDER BY with parent= causes JQL parser error
 /search-issues "payment flow" --sprint current          # valid, but using this for sprint planning decisions —
                                                         # use /plan-sprint instead; search-issues only surfaces issues
 /create-story "Add credit feature"                      # creating without running /search-issues first —

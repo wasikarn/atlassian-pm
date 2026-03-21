@@ -25,8 +25,8 @@ QUIRK-1: Panel nodes missing panelType
   Context rules: Objective panels → "info", Scope panels → "note", AC panels → "success", Tech Notes → "warning"
 
 QUIRK-2: inlineCard with relative URL
-  Problem: {"type":"inlineCard","attrs":{"url":"/browse/BEP-123"}} → Jira cannot resolve relative URL → renders as broken link
-  Fix: Expand to absolute URL: "https://<site>.atlassian.net/browse/BEP-123"
+  Problem: {"type":"inlineCard","attrs":{"url":"/browse/{{PROJECT_KEY}}-123"}} → Jira cannot resolve relative URL → renders as broken link
+  Fix: Expand to absolute URL: "https://<site>.atlassian.net/browse/{{PROJECT_KEY}}-123"
   Site: read from .claude/project-config.json → jira.site
 
 QUIRK-3: Table cell with direct text node

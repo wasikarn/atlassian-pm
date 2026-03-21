@@ -57,7 +57,7 @@ Silently improve tool calls without blocking.
 | `post_filter_mcp_response.py` | jira_get_issue, jira_search | Strips noise fields from MCP response to save context tokens |
 | `post_auto_parse_large_output.py` | search/sprint/get tools | Auto-parses large issue lists into structured summaries |
 | `post_cache_suggest.py` | jira_get_issue, jira_search | Suggests cache tools for future reads |
-| `post_pr_sync.py` | PostToolUse Bash | Detects `gh pr create` → injects context to transition linked BEP issue to "In Review" |
+| `post_pr_sync.py` | PostToolUse Bash | Detects `gh pr create` → injects context to transition linked {{PROJECT_KEY}} issue to "In Review" |
 
 ### Workflow hooks
 

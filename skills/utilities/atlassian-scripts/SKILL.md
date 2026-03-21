@@ -62,10 +62,10 @@ uv run scripts/api/fix_confluence_code_blocks.py --page-id 123456789
 uv run scripts/api/update_page_storage.py --page-id 123456789 --add-toc
 # Add Table of Contents macro — MCP cannot render macros (HR4)
 
-uv run scripts/api/jira_set_parent.py --issues BEP-55 --parent BEP-10
+uv run scripts/api/jira_set_parent.py --issues {{PROJECT_KEY}}-55 --parent {{PROJECT_KEY}}-10
 # Set epic parent on existing issue — MCP and acli silently fail for this operation
 
-uv run scripts/api/jira_write.py --subtask --parent BEP-42 --summary "[BE] Add endpoint"
+uv run scripts/api/jira_write.py --subtask --parent {{PROJECT_KEY}}-42 --summary "[BE] Add endpoint"
 # Create subtask with full HR1/HR3/HR5/HR6 compliance built in
 ```
 

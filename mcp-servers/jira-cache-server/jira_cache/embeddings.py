@@ -7,7 +7,7 @@ Usage:
     from lib.embeddings import EmbeddingStore
 
     store = EmbeddingStore(conn)  # Reuses JiraCache's SQLite connection
-    store.store_embedding("BEP-123", "coupon collection API endpoint")
+    store.store_embedding("{{PROJECT_KEY}}-123", "coupon collection API endpoint")
     similar = store.find_similar("coupon payment flow", limit=5)
 """
 
@@ -168,7 +168,7 @@ class EmbeddingStore:
         """Generate and store embedding for an issue.
 
         Args:
-            issue_key: Jira issue key (e.g., 'BEP-123')
+            issue_key: Jira issue key (e.g., '{{PROJECT_KEY}}-123')
             text: Text to embed (typically summary + description)
 
         Returns:

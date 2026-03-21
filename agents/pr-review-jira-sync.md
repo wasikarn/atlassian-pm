@@ -50,10 +50,10 @@ PR info: branch name, PR number, PR URL, or merge commit message (any one of the
 
 Transitioned:
 - {{PROJECT_KEY}}-XXX ([summary]): In Progress → Done ✅
-- BEP-YYY ([summary]): already Done, skipped
+- {{PROJECT_KEY}}-YYY ([summary]): already Done, skipped
 
 PR comment posted: [yes/no]
 
-Story BEP-ZZZ: 3/3 subtasks Done
+Story {{PROJECT_KEY}}-ZZZ: 3/3 subtasks Done
 → Offer: Transition story to Done? (awaiting confirmation)
 ```

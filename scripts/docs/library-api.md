@@ -30,7 +30,7 @@ page = api.get_page("123456")
 print(page["title"])
 
 # Create page
-result = api.create_page("BEP", "My Page", "<p>Content</p>", parent_id="123")
+result = api.create_page("{{PROJECT_KEY}}", "My Page", "<p>Content</p>", parent_id="123")
 
 # Update page
 result = api.update_page("123456", "Title", "<p>New content</p>", version=2)

@@ -135,7 +135,7 @@ Epic Doc: [link] | Epic: [link]
 
 ```text
 /create-epic "Video Playback Quality Improvements"   # clear title seeds discovery with focused problem scope
-/create-epic BEP-45                                  # existing epic key → reads current state, prompts for update scope
+/create-epic {{PROJECT_KEY}}-45                                  # existing epic key → reads current state, prompts for update scope
 /create-epic "Multi-language subtitle support"       # after running /blueprint — picks up blueprint_backlog_map automatically
 /create-epic "Offline Download Feature"              # triggers full 5-phase workflow: discovery → RICE → scope → QG → create
 ```
@@ -146,7 +146,7 @@ Epic Doc: [link] | Epic: [link]
 /create-epic                                         # no title → discovery phase asks generic questions, output is shallow
 /create-epic "improve performance"                   # vague — no clear problem narrative, RICE scoring will be guesswork
 /create-epic "Add dark mode toggle"                  # single-screen UI change → use /create-story directly, epic is overkill
-/create-epic "BEP-50 fix scope"                     # updating an existing epic → use /update-epic BEP-50 instead
+/create-epic "{{PROJECT_KEY}}-50 fix scope"                     # updating an existing epic → use /update-epic {{PROJECT_KEY}}-50 instead
 ```
 
 **Common mistakes:**

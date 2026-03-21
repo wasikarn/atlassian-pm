@@ -176,19 +176,19 @@ Quality: wiki → ADF, EN → Thai
 ### ✅ Good
 
 ```text
-/verify-issue BEP-123                            # quick quality check on a story — reports ADF, INVEST, language issues
-/verify-issue BEP-123 --with-subtasks            # full hierarchy check — includes A1-A6 alignment checks across story + all subtasks
-/verify-issue BEP-123 --with-subtasks --fix      # review alignment report first, then apply all auto-fixes in one pass
-/verify-issue BEP-456 --fix                      # targeted fix on a single subtask with known ADF/language issues
+/verify-issue {{PROJECT_KEY}}-123                            # quick quality check on a story — reports ADF, INVEST, language issues
+/verify-issue {{PROJECT_KEY}}-123 --with-subtasks            # full hierarchy check — includes A1-A6 alignment checks across story + all subtasks
+/verify-issue {{PROJECT_KEY}}-123 --with-subtasks --fix      # review alignment report first, then apply all auto-fixes in one pass
+/verify-issue {{PROJECT_KEY}}-456 --fix                      # targeted fix on a single subtask with known ADF/language issues
 ```
 
 ### ❌ Bad
 
 ```text
 /verify-issue                                    # no issue key → Phase 1 cannot fetch anything; skill cannot proceed
-/verify-issue BEP-123                            # story has subtasks but --with-subtasks omitted → A1-A6 alignment checks never run, gaps missed
-/verify-issue BEP-234 --fix                      # using --fix without first reading the report — changes applied without understanding what is being altered
-/verify-issue BEP-10                             # passing an Epic key when you meant the child Story — Epic-level INVEST and AC checks don't apply
+/verify-issue {{PROJECT_KEY}}-123                            # story has subtasks but --with-subtasks omitted → A1-A6 alignment checks never run, gaps missed
+/verify-issue {{PROJECT_KEY}}-234 --fix                      # using --fix without first reading the report — changes applied without understanding what is being altered
+/verify-issue {{PROJECT_KEY}}-10                             # passing an Epic key when you meant the child Story — Epic-level INVEST and AC checks don't apply
 ```
 
 **Common mistakes:**

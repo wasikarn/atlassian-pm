@@ -30,14 +30,24 @@ def _is_in_progress(transition: str) -> bool:
     return any(kw in t for kw in _IN_PROGRESS_KEYWORDS)
 
 
-def _get_wip_limit() -> int:
+def _load_config() -> dict:
     try:
         plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT", "")
         config_path = Path(plugin_root) / ".claude" / "project-config.json"
-        config = json.loads(config_path.read_text())
-        return int(config.get("team", {}).get("wip_limit", _DEFAULT_WIP_LIMIT))
+        return json.loads(config_path.read_text())
+    except Exception:
+        return {}
+
+
+def _get_wip_limit() -> int:
+    try:
+        return int(_load_config().get("team", {}).get("wip_limit", _DEFAULT_WIP_LIMIT))
     except Exception:
         return _DEFAULT_WIP_LIMIT
+
+
+def _get_project_key() -> str:
+    return _load_config().get("jira", {}).get("project_key", "{{PROJECT_KEY}}")
 
 
 def main() -> None:
@@ -55,11 +65,12 @@ def main() -> None:
         return
 
     wip_limit = _get_wip_limit()
+    project_key = _get_project_key()
     log_event(_HOOK, "REMIND", {"issue_key": issue_key, "wip_limit": wip_limit})
     inject_context(
         f"WIP check: before moving {issue_key} to '{transition}', verify the assignee's "
         f"current In Progress count is below the team limit ({wip_limit}). "
-        f"Run: jira_search(jql=\"project = BEP AND assignee = '<email>' AND status = 'In Progress'\", "
+        f"Run: jira_search(jql=\"project = {project_key} AND assignee = '<email>' AND status = 'In Progress'\", "
         f"fields=\"summary,assignee,status\") to check. "
         f"If count >= {wip_limit}, warn the user before proceeding.",
         event_name="PreToolUse",

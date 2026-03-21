@@ -121,19 +121,19 @@ Subtask alignment: [X subtasks checked, Y adjusted]
 ### ✅ Good
 
 ```text
-/update-story BEP-101                          # agent reads current story + subtasks, then asks what to change
-/update-story BEP-101 "add AC for error state" # adds missing AC; agent runs subtask impact analysis automatically
-/update-story BEP-101 "remove AC-3 (descoped)" # removes AC; agent flags any subtask that only covers AC-3
-/update-story BEP-101 migrate                  # migrate Wiki narrative → ADF format only (no AC changes)
+/update-story {{PROJECT_KEY}}-101                          # agent reads current story + subtasks, then asks what to change
+/update-story {{PROJECT_KEY}}-101 "add AC for error state" # adds missing AC; agent runs subtask impact analysis automatically
+/update-story {{PROJECT_KEY}}-101 "remove AC-3 (descoped)" # removes AC; agent flags any subtask that only covers AC-3
+/update-story {{PROJECT_KEY}}-101 migrate                  # migrate Wiki narrative → ADF format only (no AC changes)
 ```
 
 ### ❌ Bad
 
 ```text
 /update-story                                  # missing issue key — cannot fetch current state
-/update-story BEP-105                          # BEP-105 is a Sub-task — use /update-subtask instead
-/update-story BEP-101 "rewrite all ACs"        # full redesign with cascading subtask changes → use /sync-artifacts BEP-101 instead
-/update-story BEP-101 "change dates"           # changing parent dates requires checking all subtask date ranges (HR8); confirm alignment is reviewed
+/update-story {{PROJECT_KEY}}-105                          # {{PROJECT_KEY}}-105 is a Sub-task — use /update-subtask instead
+/update-story {{PROJECT_KEY}}-101 "rewrite all ACs"        # full redesign with cascading subtask changes → use /sync-artifacts {{PROJECT_KEY}}-101 instead
+/update-story {{PROJECT_KEY}}-101 "change dates"           # changing parent dates requires checking all subtask date ranges (HR8); confirm alignment is reviewed
 ```
 
 **Common mistakes:**

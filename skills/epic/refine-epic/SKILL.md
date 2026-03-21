@@ -163,9 +163,9 @@ Present each story as a numbered plan card for user to pick creation order.
 
 ```text
 /refine-epic "User onboarding flow with email verification"   # clear description → all 4 roles have grounded context
-/refine-epic BEP-55                                           # story/epic key → reads ACs, epic context, dedup check before debate
+/refine-epic {{PROJECT_KEY}}-55                                           # story/epic key → reads ACs, epic context, dedup check before debate
 /refine-epic "Payment retry logic with idempotency keys"      # high-risk, multi-service → 4-role debate catches edge cases early
-/refine-epic BEP-55 "focus on edge cases for concurrent sessions"  # scoped hint directs QA + TL agents to specific risk area
+/refine-epic {{PROJECT_KEY}}-55 "focus on edge cases for concurrent sessions"  # scoped hint directs QA + TL agents to specific risk area
 ```
 
 ### ❌ Bad
@@ -173,7 +173,7 @@ Present each story as a numbered plan card for user to pick creation order.
 ```text
 /refine-epic                                                  # no input → debate brief is empty, all 4 roles produce generic output
 /refine-epic "fix the login bug"                              # too vague and too small — use /create-task or just fix it directly
-/refine-epic BEP-55                                           # running after stories are already in Jira — debate output won't retroactively update created issues
+/refine-epic {{PROJECT_KEY}}-55                                           # running after stories are already in Jira — debate output won't retroactively update created issues
 /refine-epic "everything in the Q2 roadmap"                   # scope too broad — refine one feature or story at a time for useful output
 ```
 
