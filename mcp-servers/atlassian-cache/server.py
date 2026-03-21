@@ -969,7 +969,7 @@ async def handle_cache_similar_issues(args: dict) -> str:
     # Enrich with issue data from cache
     enriched = []
     for item in similar:
-        issue = _require_cache().get_issue(item["issue_key"], max_age_hours=9999)
+        issue = _require_cache().get_issue(item["issue_key"], max_age_hours=_MAX_AGE_MAX)
         if issue:
             enriched.append(
                 {
@@ -1214,7 +1214,7 @@ async def handle_cache_find_related(arguments: dict) -> str:
     """Find semantically similar Jira issues and Confluence sections for an issue."""
     key = _validate_issue_key(arguments["issue_key"])
     limit = min(int(arguments.get("limit", 5)), 20)
-    issue = _require_cache().get_issue(key, max_age_hours=9999)
+    issue = _require_cache().get_issue(key, max_age_hours=_MAX_AGE_MAX)
     if not issue:
         return json.dumps({"error": "not_cached"})
     query = _embedding_text(issue)

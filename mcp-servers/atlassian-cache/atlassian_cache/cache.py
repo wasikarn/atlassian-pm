@@ -159,9 +159,9 @@ def _extract_field(data: dict, *path: str, default: Any = None) -> Any:
 
 
 # H7: TTL constants with env var overrides
-_DEFAULT_TTL_HOURS = float(os.environ.get("JIRA_CACHE_DEFAULT_TTL_HOURS", "24"))
-_DONE_TTL_HOURS = float(os.environ.get("JIRA_CACHE_DONE_TTL_HOURS", "168"))
-_ACTIVE_TTL_HOURS = float(os.environ.get("JIRA_CACHE_ACTIVE_TTL_HOURS", "6"))
+_DEFAULT_TTL_HOURS = float(os.environ.get("ATLASSIAN_CACHE_DEFAULT_TTL_HOURS", "24"))
+_DONE_TTL_HOURS = float(os.environ.get("ATLASSIAN_CACHE_DONE_TTL_HOURS", "168"))
+_ACTIVE_TTL_HOURS = float(os.environ.get("ATLASSIAN_CACHE_ACTIVE_TTL_HOURS", "6"))
 
 STATUS_TTL = {
     "Done": _DONE_TTL_HOURS,
