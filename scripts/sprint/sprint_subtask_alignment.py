@@ -246,6 +246,27 @@ def main():
         if max_sub_due > p_due:
             parent_extensions[parent_key] = max_sub_due
 
+    # Pre-compute distribute_dates once per parent group (avoids O(N) recomputation)
+    parent_distributed_dates: dict[str, list[tuple[str, str]]] = {}
+    if not report_only:
+        for parent_key, subs in subtasks_by_parent.items():
+            p = parents[parent_key]
+            p_start = p["start"]
+            p_due = p["due"]
+            if not p_start or not p_due:
+                continue
+            effective_p_due = parent_extensions.get(parent_key, p_due)
+            missing_in_group = [
+                x
+                for x in subs
+                if not parse_date(x.get("fields", {}).get("{{START_DATE_FIELD}}"))
+                or not x.get("fields", {}).get("duedate")
+            ]
+            if missing_in_group:
+                parent_distributed_dates[parent_key] = distribute_dates(
+                    len(missing_in_group), p_start, effective_p_due
+                )
+
     for s in active_subtasks:
         key = s["key"]
         f = s.get("fields", {})
@@ -274,7 +295,7 @@ def main():
         # Check dates
         if not sub_start or not sub_due:
             missing_dates.append((key, parent_key, sub_start, sub_due))
-            # Fix: distribute within parent range
+            # Fix: use pre-computed distributed dates for this parent group
             if not report_only:
                 siblings = subtasks_by_parent.get(parent_key, [])
                 missing_in_group = [
@@ -283,9 +304,9 @@ def main():
                     if not parse_date(x.get("fields", {}).get("{{START_DATE_FIELD}}"))
                     or not x.get("fields", {}).get("duedate")
                 ]
-                if missing_in_group:
+                dates = parent_distributed_dates.get(parent_key, [])
+                if missing_in_group and dates:
                     idx = next((i for i, x in enumerate(missing_in_group) if x["key"] == key), 0)
-                    dates = distribute_dates(len(missing_in_group), p_start, effective_p_due)
                     if idx < len(dates):
                         new_start, new_due = dates[idx]
                         update_fields["{{START_DATE_FIELD}}"] = new_start
@@ -317,10 +338,10 @@ def main():
 
         # Check OE
         if not oe:
-            missing_oe.append((key, parent_key, f.get("summary", "")))
+            estimated_oe = estimate_oe(f.get("summary", ""))
+            missing_oe.append((key, parent_key, f.get("summary", ""), estimated_oe))
             if not report_only:
-                estimated = estimate_oe(f.get("summary", ""))
-                update_fields["timetracking"] = {"originalEstimate": estimated}
+                update_fields["timetracking"] = {"originalEstimate": estimated_oe}
 
         if update_fields:
             reason_parts = []
@@ -353,8 +374,7 @@ def main():
     print(f"\n⏱️  MISSING ORIGINAL ESTIMATE: {len(missing_oe)}/{len(active_subtasks)}")
     if missing_oe:
         for m in missing_oe[:10]:
-            est = estimate_oe(m[2])
-            print(f"  ⚠️  {m[0]} (parent {m[1]}): → {est} (estimated)")
+            print(f"  ⚠️  {m[0]} (parent {m[1]}): → {m[3]} (estimated)")
         if len(missing_oe) > 10:
             print(f"  ... and {len(missing_oe) - 10} more")
 
