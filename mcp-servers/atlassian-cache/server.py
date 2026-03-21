@@ -844,7 +844,7 @@ async def handle_cache_search(args: dict) -> str:
             )
             c.put_search(jql, fields, limit, results)
             if embeddings and embeddings.available:
-                embeddings.store_batch(results.get("issues", []))
+                await asyncio.to_thread(embeddings.store_batch, results.get("issues", []))
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Search failed: {type(e).__name__}: {str(e)[:200]}"})
@@ -917,7 +917,7 @@ async def handle_cache_sprint_issues(args: dict) -> str:
             results = {"issues": all_issues, "total": len(all_issues)}
             c.put_search(jql, fields, 50, results, sprint_id=sprint_id)
             if embeddings and embeddings.available:
-                embeddings.store_batch(all_issues)
+                await asyncio.to_thread(embeddings.store_batch, all_issues)
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Sprint fetch failed: {type(e).__name__}: {str(e)[:200]}"})
@@ -1046,7 +1046,7 @@ async def handle_cache_refresh(args: dict) -> str:
                 issues = page.get("issues", [])
                 c.put_issues_batch(issues)
                 if embeddings and embeddings.available:
-                    embeddings.store_batch(issues)
+                    await asyncio.to_thread(embeddings.store_batch, issues)
                 refreshed.extend(i.get("key", "") for i in issues)
                 pages_fetched += 1
                 if not issues or start_at + len(issues) >= page.get("total", 0):
