@@ -208,6 +208,7 @@ class AtlassianCache:
         self._stat_buffer: dict[str, int] = {"hits": 0, "misses": 0}
         self._stat_flush_threshold = int(os.environ.get("ATLASSIAN_CACHE_STAT_FLUSH_THRESHOLD", "20"))
         self._stat_buffer_count = 0
+        self._last_purge_ts: float = 0.0  # guard: skip purge if ran recently
         self._init_schema()
         self._apply_pragmas()
         self._purge_stale()
@@ -254,6 +255,14 @@ class AtlassianCache:
 
     # --- Issue Operations ---
 
+    @staticmethod
+    def _parse_cached_at(value: str) -> datetime:
+        """Parse cached_at ISO string; treat naive timestamps as UTC for backwards compat."""
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
     def get_issue(self, issue_key: str, max_age_hours: float = 24.0) -> dict | None:
         """Get cached issue if fresh enough.
 
@@ -273,8 +282,8 @@ class AtlassianCache:
             self._incr_stat("misses")
             return None
 
-        cached_at = datetime.fromisoformat(row["cached_at"])
-        if datetime.now() - cached_at > timedelta(hours=max_age_hours):
+        cached_at = self._parse_cached_at(row["cached_at"])
+        if datetime.now(tz=timezone.utc) - cached_at > timedelta(hours=max_age_hours):
             self._incr_stat("misses")
             return None
 
@@ -318,7 +327,7 @@ class AtlassianCache:
         labels_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
         assignee_name = (fields.get("assignee") or {}).get("displayName", "")
 
-        now = datetime.now().isoformat()
+        # Use the already-computed UTC timestamp — avoids a second time syscall
         with self._lock:
             self._put_issue_row(
                 issue_key,
@@ -326,7 +335,7 @@ class AtlassianCache:
                 description_text,
                 sprint_id,
                 data,
-                now,
+                now_iso,
                 labels_text=labels_text,
                 assignee_name=assignee_name,
             )
@@ -374,6 +383,25 @@ class AtlassianCache:
             ),
         )
 
+    def _prepare_issue_row_args(self, issue_data: dict, now: str) -> tuple | None:
+        """Extract and prepare all field args for _put_issue_row from raw issue data.
+
+        Returns None if issue_data has no key. Used by both put_issues_batch and put_search
+        to avoid duplicating the field extraction logic.
+        """
+        key = issue_data.get("key")
+        if not key:
+            return None
+        issue_data = strip_noise(issue_data)
+        fields = issue_data.get("fields", {})
+        description_text = extract_adf_text(fields.get("description"))
+        sprint_id = self._extract_sprint_id(fields)
+        labels_raw = fields.get("labels", [])
+        labels_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
+        assignee_name = (fields.get("assignee") or {}).get("displayName", "")
+        return (key, fields, description_text, sprint_id, issue_data, now,
+                labels_text, assignee_name)
+
     def put_issues_batch(self, issues: list[dict]) -> int:
         """Bulk insert issues in a single transaction.
 
@@ -386,32 +414,15 @@ class AtlassianCache:
             Number of issues cached.
         """
         count = 0
-        now = datetime.now().isoformat()
+        now = datetime.now(tz=timezone.utc).isoformat()
         with self._lock:
             for issue_data in issues:
-                key = issue_data.get("key")
-                if not key:
-                    continue
-                # P2-A: Strip noise before storing
-                issue_data = strip_noise(issue_data)
-                fields = issue_data.get("fields", {})
-                description_text = extract_adf_text(fields.get("description"))
-                sprint_id = self._extract_sprint_id(fields)
-                labels_raw = fields.get("labels", [])
-                labels_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
-                assignee_name = (fields.get("assignee") or {}).get("displayName", "")
-
-                self._put_issue_row(
-                    key,
-                    fields,
-                    description_text,
-                    sprint_id,
-                    issue_data,
-                    now,
-                    labels_text=labels_text,
-                    assignee_name=assignee_name,
-                )
-                count += 1
+                args = self._prepare_issue_row_args(issue_data, now)
+                if args:
+                    key, fields, desc, sprint_id, data, ts, lbl, asgn = args
+                    self._put_issue_row(key, fields, desc, sprint_id, data, ts,
+                                        labels_text=lbl, assignee_name=asgn)
+                    count += 1
 
             if count > 0:
                 self.conn.commit()
@@ -441,10 +452,10 @@ class AtlassianCache:
             issue_keys,
         ).fetchall()
 
-        cutoff = datetime.now() - timedelta(hours=max_age_hours)
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(hours=max_age_hours)
         found = {}
         for row in rows:
-            cached_at = datetime.fromisoformat(row["cached_at"])
+            cached_at = self._parse_cached_at(row["cached_at"])
             if cached_at >= cutoff:
                 found[row["issue_key"]] = json.loads(row["data"])
 
@@ -523,8 +534,8 @@ class AtlassianCache:
         if not row:
             return None
 
-        cached_at = datetime.fromisoformat(row["cached_at"])
-        if datetime.now() - cached_at > timedelta(hours=max_age_hours):
+        cached_at = self._parse_cached_at(row["cached_at"])
+        if datetime.now(tz=timezone.utc) - cached_at > timedelta(hours=max_age_hours):
             return None
 
         self._incr_stat("hits")
@@ -546,7 +557,7 @@ class AtlassianCache:
         cache_key = self._search_key(jql, fields, limit)
         issues = data.get("issues", [])
         result_keys = [i.get("key", "") for i in issues]
-        now = datetime.now().isoformat()
+        now = datetime.now(tz=timezone.utc).isoformat()
 
         with self._lock:
             self.conn.execute(
@@ -564,22 +575,13 @@ class AtlassianCache:
                     sprint_id,
                 ),
             )
-            # H8: Batch insert issues in same transaction
+            # H8: Batch insert issues in same transaction using shared _put_issue_row
             for issue_data in issues:
-                key = issue_data.get("key")
-                if not key:
-                    continue
-                issue_data = strip_noise(issue_data)
-                issue_fields = issue_data.get("fields", {})
-                description_text = extract_adf_text(issue_fields.get("description"))
-                sid = self._extract_sprint_id(issue_fields)
-                labels_raw = issue_fields.get("labels", [])
-                lbl_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
-                asgn_name = (issue_fields.get("assignee") or {}).get("displayName", "")
-                self._put_issue_row(
-                    key, issue_fields, description_text, sid, issue_data, now,
-                    labels_text=lbl_text, assignee_name=asgn_name,
-                )
+                args = self._prepare_issue_row_args(issue_data, now)
+                if args:
+                    key, flds, desc, sprint_id, data, ts, lbl, asgn = args
+                    self._put_issue_row(key, flds, desc, sprint_id, data, ts,
+                                        labels_text=lbl, assignee_name=asgn)
             self.conn.commit()
         logger.debug("Cached search + %d issues (single transaction)", len(issues))
 
@@ -661,8 +663,17 @@ class AtlassianCache:
 
     # --- P1-E: Stale data purge ---
 
+    _PURGE_MIN_INTERVAL_S = 3600  # Skip purge if ran less than 1h ago
+
     def _purge_stale(self) -> dict[str, int]:
-        """Purge stale issues (>7d) and searches (>24h) on startup."""
+        """Purge stale issues (>7d) and searches (>24h) on startup.
+
+        Guarded by _last_purge_ts to avoid expensive DELETE scans on every
+        process restart (MCP servers restart frequently).
+        """
+        now_ts = time.time()
+        if now_ts - self._last_purge_ts < self._PURGE_MIN_INTERVAL_S:
+            return {"purged_issues": 0, "purged_searches": 0}
         now = datetime.now()
         issue_cutoff = (now - timedelta(days=PURGE_ISSUES_DAYS)).isoformat()
         search_cutoff = (now - timedelta(hours=PURGE_SEARCHES_HOURS)).isoformat()
@@ -692,10 +703,12 @@ class AtlassianCache:
                     PURGE_SEARCHES_HOURS,
                 )
 
+        self._last_purge_ts = now_ts
         return {"purged_issues": purged_issues, "purged_searches": purged_searches}
 
     def purge_stale(self) -> dict[str, int]:
-        """Public interface for stale data purge."""
+        """Public interface for stale data purge. Always runs (bypasses startup guard)."""
+        self._last_purge_ts = 0.0  # Reset guard so _purge_stale always runs
         return self._purge_stale()
 
     # --- Statistics ---
@@ -835,9 +848,24 @@ class AtlassianCache:
             )
 
     def get_all_issues(self) -> list[dict]:
-        """Return all cached issues as raw dicts (for reindex)."""
-        rows = self.conn.execute("SELECT data FROM issues").fetchall()
-        return [json.loads(r["data"]) for r in rows]
+        """Return minimal issue dicts for reindex (key + fields.summary/description only).
+
+        Avoids loading full JSON blobs — reindex only needs summary and description for
+        embedding_text(). Returns synthetic dicts compatible with embedding_text().
+        """
+        rows = self.conn.execute(
+            "SELECT issue_key, summary, description_text FROM issues"
+        ).fetchall()
+        return [
+            {
+                "key": r["issue_key"],
+                "fields": {
+                    "summary": r["summary"] or "",
+                    "description": r["description_text"] or "",
+                },
+            }
+            for r in rows
+        ]
 
     def get_all_sprints(self) -> list[dict]:
         """Return all cached sprints that have a goal (for reindex)."""

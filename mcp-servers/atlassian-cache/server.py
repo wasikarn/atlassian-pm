@@ -26,6 +26,7 @@ Usage:
 """
 
 import asyncio
+import collections
 import json
 import logging
 import re
@@ -114,12 +115,15 @@ def _clamp_max_age(value: float | None, default: float = 24.0) -> float:
 
 # --- In-session deduplication — reset per MCP session (process lifetime) ---
 
-_session_returned: set[str] = set()
+_SESSION_RETURNED_MAX = 5000  # bounded to prevent unbounded memory growth
+_session_returned: collections.OrderedDict[str, None] = collections.OrderedDict()
 _COMPACT_LIST_THRESHOLD = 20
 
 
 def _mark_returned(entity_id: str) -> None:
-    _session_returned.add(entity_id)
+    _session_returned[entity_id] = None
+    if len(_session_returned) > _SESSION_RETURNED_MAX:
+        _session_returned.popitem(last=False)  # evict oldest entry
 
 
 def _already_returned(entity_id: str) -> bool:
@@ -997,7 +1001,7 @@ async def handle_cache_similar_issues(args: dict) -> str:
     # Enrich with issue data from cache
     enriched = []
     for item in similar:
-        issue = _require_cache().get_issue(item["issue_key"], max_age_hours=_MAX_AGE_MAX)
+        issue = _require_cache().get_issue(item["entity_id"], max_age_hours=_MAX_AGE_MAX)
         if issue:
             enriched.append(
                 {
@@ -1072,16 +1076,14 @@ async def handle_cache_refresh(args: dict) -> str:
                 return key, None
 
         refresh_results = await asyncio.gather(*[_refresh_one(k) for k in issue_keys])
-        # Store serially — SQLite conn not safe from multiple threads concurrently
-        refreshed_issues = []
-        for key, issue in refresh_results:
-            if issue:
-                c.put_issue(key, issue)
-                refreshed_issues.append(issue)
-                refreshed.append(key)
+        refreshed_issues = [(key, issue) for key, issue in refresh_results if issue]
+        # Batch write all refreshed issues in a single transaction
+        if refreshed_issues:
+            c.put_issues_batch([issue for _, issue in refreshed_issues])
+            refreshed.extend(key for key, _ in refreshed_issues)
         # Batch encode + store embeddings off the event loop (model inference is CPU-bound)
         if refreshed_issues and embeddings and embeddings.available:
-            await asyncio.to_thread(embeddings.store_batch, refreshed_issues)
+            await asyncio.to_thread(embeddings.store_batch, [issue for _, issue in refreshed_issues])
 
     # Refresh sprint
     if sprint_id:
@@ -1223,8 +1225,10 @@ async def handle_cache_find_confluence_related(arguments: dict) -> str:
     if not embeddings or not embeddings.available:
         return json.dumps({"related": []}, ensure_ascii=False)
     query = arguments["query"]
-    section_results = embeddings.find_similar(query, limit=limit, entity_type="confluence")
-    page_results = embeddings.find_similar(query, limit=limit, entity_type="confluence_page")
+    # Generate embedding once and reuse for both entity_type queries (avoids double inference)
+    vec = await asyncio.to_thread(embeddings.generate_embedding, query)
+    section_results = embeddings.find_similar_by_embedding(vec, limit=limit, entity_type="confluence")
+    page_results = embeddings.find_similar_by_embedding(vec, limit=limit, entity_type="confluence_page")
     combined = sorted(section_results + page_results, key=lambda x: x["distance"])[:limit]
     return json.dumps({"related": combined}, ensure_ascii=False)
 
@@ -1310,38 +1314,35 @@ async def handle_cache_find_related(arguments: dict) -> str:
 
 
 def _reindex_sections(sections: list) -> int:
-    """Blocking helper: store embeddings for Confluence sections."""
-    count = 0
+    """Blocking helper: batch-store embeddings for Confluence sections."""
+    entities = []
     for sec in sections:
         heading = sec.get("heading", "")
         body = sec.get("body_md", "")
         embed_text = f"{heading}\n{body}".strip() if heading else body
-        embeddings.store_embedding(sec["section_id"], embed_text, entity_type="confluence")
-        count += 1
-    return count
+        entities.append((sec["section_id"], embed_text, "confluence"))
+    return embeddings.store_batch_entities(entities)
 
 
 def _reindex_sprints(sprints: list[dict]) -> int:
-    """Blocking helper: store embeddings for sprint goals."""
-    count = 0
-    for s in sprints:
-        embed_text = f"{s['name']} goal: {s['goal']}".strip()
-        embeddings.store_embedding(f"sprint::{s['sprint_id']}", embed_text, entity_type="sprint")
-        count += 1
-    return count
+    """Blocking helper: batch-store embeddings for sprint goals."""
+    entities = [
+        (f"sprint::{s['sprint_id']}", f"{s['name']} goal: {s['goal']}".strip(), "sprint")
+        for s in sprints
+    ]
+    return embeddings.store_batch_entities(entities)
 
 
 def _reindex_pages(pages: list[dict]) -> int:
-    """Blocking helper: store page-level embeddings for Confluence pages."""
-    count = 0
+    """Blocking helper: batch-store page-level embeddings for Confluence pages."""
+    entities = []
     for page in pages:
         title = page.get("title", "")
         labels = page.get("labels", [])
         embed_text = f"{title} {' '.join(labels)}".strip()
         if embed_text:
-            embeddings.store_embedding(f"page::{page['page_id']}", embed_text, entity_type="confluence_page")
-            count += 1
-    return count
+            entities.append((f"page::{page['page_id']}", embed_text, "confluence_page"))
+    return embeddings.store_batch_entities(entities)
 
 
 async def handle_cache_reindex(arguments: dict) -> str:
@@ -1385,8 +1386,9 @@ async def handle_cache_sync(arguments: dict) -> str:
     )
     issue_list = issues.get("issues", []) if isinstance(issues, dict) else issues
     c = _require_cache()
-    for issue in issue_list:
-        c.put_issue(issue["key"], issue)
+    c.put_issues_batch(issue_list)
+    if issue_list and embeddings and embeddings.available:
+        await asyncio.to_thread(embeddings.store_batch, issue_list)
     return json.dumps({"synced": len(issue_list), "since_hours": since_hours}, ensure_ascii=False)
 
 

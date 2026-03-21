@@ -67,11 +67,14 @@ class ConfluenceCache:
         """Store or update a Confluence page."""
         fields = _extract_page_fields(page)
         body_md = fields["body_md"]
-        if len(body_md.encode("utf-8")) > MAX_BODY_MD_BYTES:
-            truncated = body_md.encode("utf-8")[:MAX_BODY_MD_BYTES].decode("utf-8", errors="ignore")
-            last_boundary = truncated.rfind("\n## ")
-            fields["body_md"] = truncated[:last_boundary] if last_boundary > 0 else truncated
-            logger.debug("confluence: truncated body_md for page %s to ~500KB", fields["page_id"])
+        # Fast path: Thai/CJK text uses up to 3 bytes per char; skip encode for clearly short strings
+        if len(body_md) > MAX_BODY_MD_BYTES // 3:
+            body_bytes = body_md.encode("utf-8")
+            if len(body_bytes) > MAX_BODY_MD_BYTES:
+                truncated = body_bytes[:MAX_BODY_MD_BYTES].decode("utf-8", errors="ignore")
+                last_boundary = truncated.rfind("\n## ")
+                fields["body_md"] = truncated[:last_boundary] if last_boundary > 0 else truncated
+                logger.debug("confluence: truncated body_md for page %s to ~500KB", fields["page_id"])
         now = time.time()
         with self._lock:
             self.conn.execute("""
@@ -86,13 +89,18 @@ class ConfluenceCache:
 
     def get_page(self, page_id: str, max_age_hours: float = 4.0) -> dict | None:
         """Return cached page if fresh, None otherwise."""
+        # Pre-check cached_at only — avoids loading body_md (up to 500KB) on stale miss
+        ts_row = self.conn.execute(
+            "SELECT cached_at FROM confluence_pages WHERE page_id = ?", (page_id,)
+        ).fetchone()
+        if ts_row is None:
+            return None
+        if (time.time() - ts_row["cached_at"]) / 3600 > max_age_hours:
+            return None
         row = self.conn.execute(
             "SELECT * FROM confluence_pages WHERE page_id = ?", (page_id,)
         ).fetchone()
-        if row is None:
-            return None
-        age_hours = (time.time() - row["cached_at"]) / 3600
-        if age_hours > max_age_hours:
+        if row is None:  # pragma: no cover — race between the two queries, practically impossible
             return None
         result = dict(row)
         result["id"] = result["page_id"]  # alias for API compatibility
@@ -178,20 +186,15 @@ class ConfluenceCache:
         logger.debug("confluence: stored %d children for page %s", len(children), parent_id)
 
     def get_children(self, page_id: str) -> list[dict]:
-        """Return child page stubs from confluence_links."""
+        """Return child page stubs from confluence_links (single JOIN query, no N+1)."""
         rows = self.conn.execute(
-            "SELECT to_page_id FROM confluence_links WHERE from_page_id = ? AND link_type = 'child'",
+            """SELECT p.page_id, p.title, p.url
+               FROM confluence_links l
+               JOIN confluence_pages p ON p.page_id = l.to_page_id
+               WHERE l.from_page_id = ? AND l.link_type = 'child'""",
             (page_id,)
         ).fetchall()
-        result = []
-        for r in rows:
-            p = self.conn.execute(
-                "SELECT page_id, title, url FROM confluence_pages WHERE page_id = ?",
-                (r["to_page_id"],)
-            ).fetchone()
-            if p:
-                result.append(dict(p))
-        return result
+        return [dict(r) for r in rows]
 
     def get_section(self, section_id: str) -> dict | None:
         """Return a stored section by section_id, or None if not found."""

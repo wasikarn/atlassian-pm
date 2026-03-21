@@ -19,11 +19,15 @@ class SectionData:
 
 
 _H2_RE = re.compile(r"^## (.+)$", re.MULTILINE)
-_SLUG_RE = re.compile(r"[^a-z0-9\-]")
+_SLUG_RE = re.compile(r"[^a-z0-9\-\u0E00-\u0E7F]")
 
 
 def _slugify(heading: str) -> str:
-    return _SLUG_RE.sub("", heading.lower().replace(" ", "-"))
+    slug = _SLUG_RE.sub("", heading.lower().replace(" ", "-"))
+    if not slug:
+        # Fallback for headings that are entirely stripped (e.g., emoji-only): use hash prefix
+        slug = hashlib.sha256(heading.encode()).hexdigest()[:8]
+    return slug
 
 
 def split_sections(page_id: str, body_md: str) -> list[SectionData]:
@@ -31,6 +35,7 @@ def split_sections(page_id: str, body_md: str) -> list[SectionData]:
 
     Pages with no H2 headings return a single section with heading '_body'.
     Empty pages return an empty list.
+    Duplicate slugs (same heading text) get a numeric suffix to prevent collision.
     """
     if not body_md.strip():
         return []
@@ -38,22 +43,29 @@ def split_sections(page_id: str, body_md: str) -> list[SectionData]:
     matches = list(_H2_RE.finditer(body_md))
     if not matches:
         content = body_md.strip()
-        return [_make_section(page_id, "_body", content)]
+        return [_make_section(page_id, "_body", content, {})]
 
     sections = []
+    seen_slugs: dict[str, int] = {}
     for i, match in enumerate(matches):
         heading = match.group(1).strip()
         start = match.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(body_md)
         content = body_md[start:end].strip()
-        sections.append(_make_section(page_id, heading, content))
+        sections.append(_make_section(page_id, heading, content, seen_slugs))
     return sections
 
 
-def _make_section(page_id: str, heading: str, body_md: str) -> SectionData:
+def _make_section(page_id: str, heading: str, body_md: str, seen_slugs: dict[str, int]) -> SectionData:
     # Use literal "_body" for the sentinel heading to avoid collision with
     # a real "## Body" heading (slugify strips underscores: "_body" → "body").
     slug = heading if heading == "_body" else _slugify(heading)
+    # Deduplicate: append counter suffix if this slug was already used on this page
+    if slug in seen_slugs:
+        seen_slugs[slug] += 1
+        slug = f"{slug}-{seen_slugs[slug]}"
+    else:
+        seen_slugs[slug] = 0
     section_id = f"{page_id}::{slug}"
     content_hash = hashlib.sha256(body_md.encode()).hexdigest()
     return SectionData(

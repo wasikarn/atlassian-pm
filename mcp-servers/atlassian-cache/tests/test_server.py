@@ -654,7 +654,7 @@ class TestHandleCacheSimilarIssues:
     async def test_with_results(self, cache):
         emb = MagicMock()
         emb.available = True
-        emb.find_similar.return_value = [{"issue_key": "BEP-1", "distance": 0.1}]
+        emb.find_similar.return_value = [{"entity_id": "BEP-1", "entity_type": "jira", "distance": 0.1}]
         server.embeddings = emb
         cache.put_issue("BEP-1", make_issue(key="BEP-1"))
         result = json.loads(await handle_cache_similar_issues({"query": "test"}))
@@ -665,7 +665,7 @@ class TestHandleCacheSimilarIssues:
     async def test_missing_cache_issue(self):
         emb = MagicMock()
         emb.available = True
-        emb.find_similar.return_value = [{"issue_key": "BEP-999", "distance": 0.5}]
+        emb.find_similar.return_value = [{"entity_id": "BEP-999", "entity_type": "jira", "distance": 0.5}]
         server.embeddings = emb
         result = json.loads(await handle_cache_similar_issues({"query": "test"}))
         assert result["count"] == 1
@@ -1343,7 +1343,8 @@ class TestFindConfluenceRelatedWithPages:
     async def test_includes_page_results(self, cache):
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
-        mock_embeddings.find_similar.side_effect = [
+        mock_embeddings.generate_embedding.return_value = [0.1] * 384
+        mock_embeddings.find_similar_by_embedding.side_effect = [
             [{"entity_id": "p1::overview", "entity_type": "confluence", "distance": 0.1}],
             [{"entity_id": "page::p2", "entity_type": "confluence_page", "distance": 0.15}],
         ]
@@ -1354,11 +1355,14 @@ class TestFindConfluenceRelatedWithPages:
         entity_ids = [r["entity_id"] for r in related]
         assert "p1::overview" in entity_ids
         assert "page::p2" in entity_ids
+        # Verify embedding was generated only once
+        mock_embeddings.generate_embedding.assert_called_once()
 
     async def test_sorted_by_distance(self, cache):
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
-        mock_embeddings.find_similar.side_effect = [
+        mock_embeddings.generate_embedding.return_value = [0.1] * 384
+        mock_embeddings.find_similar_by_embedding.side_effect = [
             [{"entity_id": "sec::a", "entity_type": "confluence", "distance": 0.3}],
             [{"entity_id": "page::b", "entity_type": "confluence_page", "distance": 0.1}],
         ]
@@ -1380,13 +1384,16 @@ class TestReindexPages:
 
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
+        mock_embeddings.store_batch_entities.return_value = 1
         server.embeddings = mock_embeddings
 
         pages = conf.get_all_pages()
         count = _reindex_pages(pages)
         assert count == 1
-        calls = [str(c) for c in mock_embeddings.store_embedding.call_args_list]
-        assert any("page::x1" in c for c in calls)
+        mock_embeddings.store_batch_entities.assert_called_once()
+        entities = mock_embeddings.store_batch_entities.call_args[0][0]
+        entity_ids = [e[0] for e in entities]
+        assert "page::x1" in entity_ids
 
     def test_returns_count(self, cache):
         from tests.conftest import make_page
@@ -1396,6 +1403,7 @@ class TestReindexPages:
         conf.put_page(make_page(page_id="y2", title="B"))
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
+        mock_embeddings.store_batch_entities.return_value = 2
         server.embeddings = mock_embeddings
         pages = conf.get_all_pages()
         count = _reindex_pages(pages)
@@ -1405,39 +1413,46 @@ class TestReindexPages:
 class TestReindexSectionsWithHeading:
     """Section embedding text includes heading for better semantic search."""
 
+    def _get_entities(self, mock_embeddings):
+        """Extract entities list from store_batch_entities call."""
+        return mock_embeddings.store_batch_entities.call_args[0][0]
+
     def test_heading_included_in_embedding_text(self, cache):
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
+        mock_embeddings.store_batch_entities.return_value = 1
         server.embeddings = mock_embeddings
 
         sections = [{"section_id": "p1::overview", "heading": "Overview", "body_md": "Some content"}]
         _reindex_sections(sections)
 
-        call_args = mock_embeddings.store_embedding.call_args_list[0]
-        text_arg = call_args[0][1]  # positional arg at index 1
+        entities = self._get_entities(mock_embeddings)
+        text_arg = entities[0][1]  # (entity_id, text, entity_type)[1]
         assert "Overview" in text_arg
         assert "Some content" in text_arg
 
     def test_heading_only_when_no_body(self, cache):
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
+        mock_embeddings.store_batch_entities.return_value = 1
         server.embeddings = mock_embeddings
 
         sections = [{"section_id": "p1::intro", "heading": "Introduction", "body_md": ""}]
         _reindex_sections(sections)
 
-        call_args = mock_embeddings.store_embedding.call_args_list[0]
-        text_arg = call_args[0][1]
+        entities = self._get_entities(mock_embeddings)
+        text_arg = entities[0][1]
         assert "Introduction" in text_arg
 
     def test_body_only_when_no_heading(self, cache):
         mock_embeddings = MagicMock()
         mock_embeddings.available = True
+        mock_embeddings.store_batch_entities.return_value = 1
         server.embeddings = mock_embeddings
 
         sections = [{"section_id": "p1::sec", "body_md": "Just body content"}]
         _reindex_sections(sections)
 
-        call_args = mock_embeddings.store_embedding.call_args_list[0]
-        text_arg = call_args[0][1]
+        entities = self._get_entities(mock_embeddings)
+        text_arg = entities[0][1]
         assert "Just body content" in text_arg

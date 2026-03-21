@@ -257,6 +257,97 @@ class EmbeddingStore:
             logger.error("Similarity search failed: %s", e)
             return []
 
+    def find_similar_by_embedding(
+        self,
+        embedding: list[float],
+        limit: int = 5,
+        exclude_keys: list[str] | None = None,
+        entity_type: str | None = None,
+    ) -> list[dict]:
+        """Find entities similar to a pre-computed embedding vector.
+
+        Avoids a redundant model.encode() call when the caller already holds the vector.
+        Same return format as find_similar.
+        """
+        if not self.available:
+            return []
+
+        try:
+            type_clause = "AND entity_type = ?" if entity_type else ""
+            params: list[Any] = [_serialize_f32(embedding)]
+            if entity_type:
+                params.append(entity_type)
+            params.append(limit + len(exclude_keys or []))
+
+            rows = self.conn.execute(
+                f"""SELECT entity_id, entity_type, distance
+                FROM embeddings
+                WHERE embedding MATCH ?
+                {type_clause}
+                ORDER BY distance
+                LIMIT ?""",
+                params,
+            ).fetchall()
+
+            results = []
+            excluded = set(exclude_keys or [])
+            for row in rows:
+                if row[0] not in excluded and len(results) < limit:
+                    results.append(
+                        {
+                            "entity_id": row[0],
+                            "entity_type": row[1],
+                            "distance": round(row[2], 4),
+                        }
+                    )
+            return results
+        except Exception as e:
+            logger.error("Similarity search (by embedding) failed: %s", e)
+            return []
+
+    def store_batch_entities(self, entities: list[tuple[str, str, str]]) -> int:
+        """Batch store embeddings for generic (non-issue) entities.
+
+        Args:
+            entities: List of (entity_id, text, entity_type) tuples.
+
+        Returns:
+            Number of embeddings stored.
+        """
+        if not self.available or not entities:
+            return 0
+
+        # Filter empty texts
+        valid = [(eid, text, etype) for eid, text, etype in entities if text.strip()]
+        if not valid:
+            return 0
+
+        try:
+            texts = [text for _, text, _ in valid]
+            vectors = self.generate_embeddings_batch(texts)
+        except Exception as e:
+            logger.error("Batch entity embedding encode failed: %s", e)
+            return 0
+
+        count = 0
+        try:
+            rows = [
+                (eid, etype, _serialize_f32(vec))
+                for (eid, _, etype), vec in zip(valid, vectors, strict=True)
+            ]
+            with self._lock:
+                self.conn.executemany(
+                    "INSERT OR REPLACE INTO embeddings (entity_id, entity_type, embedding) VALUES (?, ?, ?)",
+                    rows,
+                )
+                count = len(rows)
+                self.conn.commit()
+            logger.info("Batch stored %d entity embeddings (single commit)", count)
+        except Exception as e:
+            logger.error("Batch entity embedding store failed: %s", e)
+
+        return count
+
     def store_batch(self, issues: list[dict]) -> int:
         """P1-C: Batch store embeddings using batch encoding.
 

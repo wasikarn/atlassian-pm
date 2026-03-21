@@ -239,13 +239,58 @@ def _apply_migration_v5(conn: sqlite3.Connection) -> None:
     """)
 
 
+# M6: Migration to v6: index on confluence_sections.page_id + fix FTS truncation 50K→512K
+def _apply_migration_v6(conn: sqlite3.Connection) -> None:
+    """Apply v6: page_id index on confluence_sections, fix confluence_fts truncation."""
+    # Step 1: Add missing index — was omitted from v4, causes full table scan per get_sections
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_confluence_sections_page ON confluence_sections(page_id)"
+    )
+
+    # Step 2: Fix FTS truncation mismatch — triggers cap at 50K but app allows 512K.
+    # Drop and recreate all three confluence_fts triggers with the correct limit.
+    conn.execute("DROP TRIGGER IF EXISTS confluence_fts_insert")
+    conn.execute("DROP TRIGGER IF EXISTS confluence_fts_delete")
+    conn.execute("DROP TRIGGER IF EXISTS confluence_fts_update")
+
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_insert AFTER INSERT ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(rowid, page_id, title, body_text, labels_text)
+            VALUES (new.rowid, new.page_id, new.title,
+                    COALESCE(SUBSTR(new.body_md, 1, 512000), ''),
+                    COALESCE(new.labels, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_delete AFTER DELETE ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(confluence_fts, rowid, page_id, title, body_text, labels_text)
+            VALUES ('delete', old.rowid, old.page_id, old.title,
+                    COALESCE(SUBSTR(old.body_md, 1, 512000), ''),
+                    COALESCE(old.labels, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_update AFTER UPDATE ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(confluence_fts, rowid, page_id, title, body_text, labels_text)
+            VALUES ('delete', old.rowid, old.page_id, old.title,
+                    COALESCE(SUBSTR(old.body_md, 1, 512000), ''),
+                    COALESCE(old.labels, ''));
+            INSERT INTO confluence_fts(rowid, page_id, title, body_text, labels_text)
+            VALUES (new.rowid, new.page_id, new.title,
+                    COALESCE(SUBSTR(new.body_md, 1, 512000), ''),
+                    COALESCE(new.labels, ''));
+        END
+    """)
+
+
 _MIGRATIONS: dict[int, Union[str, Callable[[sqlite3.Connection], None]]] = {
     2: _MIGRATION_V2,
     3: _MIGRATION_V3,
     4: _MIGRATION_V4,
     5: _apply_migration_v5,
+    6: _apply_migration_v6,
 }
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 def migrate(conn: sqlite3.Connection) -> None:
