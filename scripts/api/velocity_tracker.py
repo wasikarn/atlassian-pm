@@ -92,23 +92,19 @@ def get_sprint_info(api: JiraAPI, board_id: int, sprint_id: int) -> dict | None:
 
 
 def find_sprint_by_name(api: JiraAPI, board_id: int, name: str) -> dict | None:
-    """Find sprint by name across all states."""
-    for state in ["closed", "active", "future"]:
-        try:
-            result = api.get_board_sprints(board_id, state=state)
-            for sprint in result.get("values", []):
-                if sprint["name"] == name:
-                    return sprint
-        except APIError:
-            continue
+    """Find sprint by name across all states (single API call)."""
+    try:
+        result = api.get_board_sprints(board_id, state="closed,active,future")
+        for sprint in result.get("values", []):
+            if sprint["name"] == name:
+                return sprint
+    except APIError:
+        pass
     return None
 
 
-def get_completed_issues(api: JiraAPI, sprint_id: int) -> list[dict]:
+def get_completed_issues(api: JiraAPI, sprint_id: int, sp_field: str) -> list[dict]:
     """Get all completed issues in a sprint with story points."""
-    lean, _ = load_config()
-    sp_field = lean["jira"]["custom_fields"]["story_points"]
-
     all_issues = []
     start_at = 0
 
@@ -281,6 +277,7 @@ def main() -> int:
         logging.getLogger().setLevel(logging.DEBUG)
 
     lean, detail = load_config()
+    sp_field = lean["jira"]["custom_fields"]["story_points"]
 
     if args.summary:
         print_summary(lean, detail)
@@ -316,14 +313,13 @@ def main() -> int:
 
     # Get completed issues
     print("\nFetching completed issues...")
-    issues = get_completed_issues(api, sprint_id)
+    issues = get_completed_issues(api, sprint_id, sp_field)
 
     if not issues:
         print("No completed issues found.")
         return 0
 
     # Calculate velocity
-    sp_field = lean["jira"]["custom_fields"]["story_points"]
     velocity = calculate_velocity(issues, sp_field)
 
     # Display results
