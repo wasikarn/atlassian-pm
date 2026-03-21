@@ -34,13 +34,11 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
-]
-
-[package.optional-dependencies]
-embeddings = [
     { name = "sentence-transformers" },
     { name = "sqlite-vec" },
 ]
+
+[package.optional-dependencies]
 test = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -53,10 +51,10 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0,<9" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24,<1" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=6.0,<7" },
-    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0.0,<4" },
-    { name = "sqlite-vec", marker = "extra == 'embeddings'", specifier = ">=0.1.1,<1" },
+    { name = "sentence-transformers", specifier = ">=3.0.0,<4" },
+    { name = "sqlite-vec", specifier = ">=0.1.1,<1" },
 ]
-provides-extras = ["embeddings", "test"]
+provides-extras = ["test"]
 
 [[package]]
 name = "attrs"
