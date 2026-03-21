@@ -25,6 +25,7 @@ def test_split_no_h2():
     sections = split_sections("P3", md)
     assert len(sections) == 1
     assert sections[0].heading == "_body"
+    assert sections[0].section_id == "P3::_body"  # sentinel must not be slugified
 
 
 def test_split_section_id_slugification():

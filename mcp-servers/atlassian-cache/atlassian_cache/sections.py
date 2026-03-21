@@ -51,7 +51,9 @@ def split_sections(page_id: str, body_md: str) -> list[SectionData]:
 
 
 def _make_section(page_id: str, heading: str, body_md: str) -> SectionData:
-    slug = _slugify(heading)
+    # Use literal "_body" for the sentinel heading to avoid collision with
+    # a real "## Body" heading (slugify strips underscores: "_body" → "body").
+    slug = heading if heading == "_body" else _slugify(heading)
     section_id = f"{page_id}::{slug}"
     content_hash = hashlib.sha256(body_md.encode()).hexdigest()
     return SectionData(
