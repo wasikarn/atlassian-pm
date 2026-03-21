@@ -113,6 +113,36 @@ class TestPutAndGetChildren:
         assert confluence_cache.get_children("nonexistent") == []
 
 
+class TestGetAllPages:
+    def test_returns_empty_when_no_pages(self, confluence_cache):
+        assert confluence_cache.get_all_pages() == []
+
+    def test_returns_page_metadata(self, confluence_cache):
+        from tests.conftest import make_page
+        confluence_cache.put_page(make_page(page_id="111", title="Coupon Design", labels=["design", "coupon"]))
+        confluence_cache.put_page(make_page(page_id="222", title="Sprint Planning"))
+        pages = confluence_cache.get_all_pages()
+        assert len(pages) == 2
+        ids = {p["page_id"] for p in pages}
+        assert "111" in ids and "222" in ids
+
+    def test_returns_labels_as_list(self, confluence_cache):
+        from tests.conftest import make_page
+        confluence_cache.put_page(make_page(page_id="333", title="Tagged Page", labels=["api", "backend"]))
+        pages = confluence_cache.get_all_pages()
+        page = next(p for p in pages if p["page_id"] == "333")
+        assert isinstance(page["labels"], list)
+        assert "api" in page["labels"]
+        assert "backend" in page["labels"]
+
+    def test_handles_null_labels(self, confluence_cache):
+        from tests.conftest import make_page
+        confluence_cache.put_page(make_page(page_id="444", title="No Labels"))
+        pages = confluence_cache.get_all_pages()
+        page = next(p for p in pages if p["page_id"] == "444")
+        assert page["labels"] == []
+
+
 class TestBodyTruncation:
     def test_confluence_body_truncated_at_500kb(self, confluence_cache):
         """put_page truncates body_md to 500KB to prevent DB bloat."""

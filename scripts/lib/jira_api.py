@@ -294,6 +294,13 @@ class JiraAPI:
         )
         return self._request("GET", f"/rest/agile/1.0/sprint/{sprint_id}/issue?{params}")
 
+    def get_sprint(self, sprint_id: int) -> dict[str, Any]:
+        """Get sprint metadata from Jira Agile API.
+
+        Returns dict with id, name, state, startDate, endDate, goal, etc.
+        """
+        return self._request("GET", f"/rest/agile/1.0/sprint/{sprint_id}")
+
     def update_description(
         self,
         issue_key: str,

@@ -316,6 +316,18 @@ TOOLS = [
         },
     ),
     Tool(
+        name="cache_similar_sprints",
+        description="Find sprints semantically similar to a query using vector embeddings on sprint goals. Returns sprints ranked by goal similarity. Requires sprint data to be cached first (via cache_sprint_issues).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Text to find similar sprint goals for"},
+                "limit": {"type": "integer", "description": "Max results (default: 5)", "default": 5},
+            },
+            "required": ["query"],
+        },
+    ),
+    Tool(
         name="cache_refresh",
         description="Force-refresh issue(s) from Jira upstream, ignoring cache. Use after making changes to issues or when cache is stale.",
         inputSchema={
@@ -434,9 +446,9 @@ TOOLS = [
          }, "required": ["issue_key"]}),
 
     Tool(name="cache_reindex",
-         description="Re-embed all cached entities (Jira issues + Confluence sections). Use after switching embedding models.",
+         description="Re-embed all cached entities (Jira issues, sprint goals, Confluence sections + pages). entity_type: jira | sprint | confluence | all. Use after switching embedding models.",
          inputSchema={"type": "object", "properties": {
-             "entity_type": {"type": "string", "enum": ["jira", "confluence", "all"], "default": "all"}
+             "entity_type": {"type": "string", "enum": ["jira", "sprint", "confluence", "all"], "default": "all"}
          }}),
 
     Tool(name="cache_sync",
@@ -918,6 +930,22 @@ async def handle_cache_sprint_issues(args: dict) -> str:
             c.put_search(jql, fields, 50, results, sprint_id=sprint_id)
             if embeddings and embeddings.available:
                 await asyncio.to_thread(embeddings.store_batch, all_issues)
+            # Fetch sprint metadata and embed goal
+            try:
+                sprint_meta = await asyncio.to_thread(jira_api.get_sprint, sprint_id)
+                c.put_sprint(sprint_id, sprint_meta)
+                goal = sprint_meta.get("goal") or ""
+                if goal and embeddings and embeddings.available:
+                    sprint_name = sprint_meta.get("name", "")
+                    embed_text = f"{sprint_name} goal: {goal}".strip()
+                    await asyncio.to_thread(
+                        embeddings.store_embedding,
+                        f"sprint::{sprint_id}",
+                        embed_text,
+                        "sprint",
+                    )
+            except Exception as e:
+                logger.warning("Failed to fetch/embed sprint metadata %s: %s", sprint_id, e)
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Sprint fetch failed: {type(e).__name__}: {str(e)[:200]}"})
@@ -988,6 +1016,32 @@ async def handle_cache_similar_issues(args: dict) -> str:
         },
         ensure_ascii=False,
     )
+
+
+async def handle_cache_similar_sprints(args: dict) -> str:
+    """Semantic search for sprints by goal text."""
+    if not embeddings or not embeddings.available:
+        return json.dumps({"error": "Embeddings not available"})
+
+    query = args["query"]
+    limit = min(args.get("limit", 5), 20)
+    similar = embeddings.find_similar(query, limit=limit, entity_type="sprint")
+
+    enriched = []
+    for item in similar:
+        sprint_id_str = item["entity_id"].replace("sprint::", "")
+        try:
+            sprint_id = int(sprint_id_str)
+        except ValueError:
+            enriched.append(item)
+            continue
+        sprint = _require_cache().get_sprint(sprint_id, max_age_hours=_MAX_AGE_MAX)
+        if sprint:
+            enriched.append({**item, "sprint": sprint})
+        else:
+            enriched.append(item)
+
+    return json.dumps({"results": enriched}, ensure_ascii=False)
 
 
 async def handle_cache_refresh(args: dict) -> str:
@@ -1166,12 +1220,13 @@ async def handle_cache_get_confluence_children(arguments: dict) -> str:
 
 async def handle_cache_find_confluence_related(arguments: dict) -> str:
     limit = min(int(arguments.get("limit", 5)), 20)
-    results = (
-        embeddings.find_similar(arguments["query"], limit=limit, entity_type="confluence")
-        if embeddings and embeddings.available
-        else []
-    )
-    return json.dumps({"related": results}, ensure_ascii=False)
+    if not embeddings or not embeddings.available:
+        return json.dumps({"related": []}, ensure_ascii=False)
+    query = arguments["query"]
+    section_results = embeddings.find_similar(query, limit=limit, entity_type="confluence")
+    page_results = embeddings.find_similar(query, limit=limit, entity_type="confluence_page")
+    combined = sorted(section_results + page_results, key=lambda x: x["distance"])[:limit]
+    return json.dumps({"related": combined}, ensure_ascii=False)
 
 
 async def handle_cache_cross_search(arguments: dict) -> str:
@@ -1186,8 +1241,11 @@ async def handle_cache_cross_search(arguments: dict) -> str:
 
 async def handle_cache_invalidate_confluence(arguments: dict) -> str:
     conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    conf.invalidate(arguments["page_id"])
-    return json.dumps({"invalidated": arguments["page_id"]})
+    page_id = arguments["page_id"]
+    conf.invalidate(page_id)
+    if embeddings:
+        embeddings.remove_embedding(f"page::{page_id}")
+    return json.dumps({"invalidated": page_id})
 
 
 async def handle_cache_refresh_confluence(arguments: dict) -> str:
@@ -1202,6 +1260,18 @@ async def handle_cache_refresh_confluence(arguments: dict) -> str:
         })
     page = await asyncio.to_thread(jira_api.get_confluence_page, page_id)
     conf.put_page(page)
+    if embeddings and embeddings.available:
+        title = page.get("title", "")
+        labels_results = page.get("metadata", {}).get("labels", {}).get("results", [])
+        labels_str = " ".join(lbl["name"] for lbl in labels_results if "name" in lbl)
+        embed_text = f"{title} {labels_str}".strip()
+        if embed_text:
+            await asyncio.to_thread(
+                embeddings.store_embedding,
+                f"page::{page_id}",
+                embed_text,
+                "confluence_page",
+            )
     return json.dumps({
         "status": "refreshed",
         "page_id": page_id,
@@ -1243,8 +1313,34 @@ def _reindex_sections(sections: list) -> int:
     """Blocking helper: store embeddings for Confluence sections."""
     count = 0
     for sec in sections:
-        embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
+        heading = sec.get("heading", "")
+        body = sec.get("body_md", "")
+        embed_text = f"{heading}\n{body}".strip() if heading else body
+        embeddings.store_embedding(sec["section_id"], embed_text, entity_type="confluence")
         count += 1
+    return count
+
+
+def _reindex_sprints(sprints: list[dict]) -> int:
+    """Blocking helper: store embeddings for sprint goals."""
+    count = 0
+    for s in sprints:
+        embed_text = f"{s['name']} goal: {s['goal']}".strip()
+        embeddings.store_embedding(f"sprint::{s['sprint_id']}", embed_text, entity_type="sprint")
+        count += 1
+    return count
+
+
+def _reindex_pages(pages: list[dict]) -> int:
+    """Blocking helper: store page-level embeddings for Confluence pages."""
+    count = 0
+    for page in pages:
+        title = page.get("title", "")
+        labels = page.get("labels", [])
+        embed_text = f"{title} {' '.join(labels)}".strip()
+        if embed_text:
+            embeddings.store_embedding(f"page::{page['page_id']}", embed_text, entity_type="confluence_page")
+            count += 1
     return count
 
 
@@ -1257,9 +1353,14 @@ async def handle_cache_reindex(arguments: dict) -> str:
         if entity_type in ("jira", "all"):
             issues = c.get_all_issues()
             count += await asyncio.to_thread(embeddings.store_batch, issues)
+        if entity_type in ("sprint", "all"):
+            sprints = c.get_all_sprints()
+            count += await asyncio.to_thread(_reindex_sprints, sprints)
         if entity_type in ("confluence", "all") and confluence:
             sections = confluence.get_all_sections()
             count += await asyncio.to_thread(_reindex_sections, sections)
+            pages = confluence.get_all_pages()
+            count += await asyncio.to_thread(_reindex_pages, pages)
     return json.dumps({"reindexed": count, "entity_type": entity_type}, ensure_ascii=False)
 
 
@@ -1345,6 +1446,7 @@ HANDLERS = {
     "cache_sprint_issues": handle_cache_sprint_issues,
     "cache_text_search": handle_cache_text_search,
     "cache_similar_issues": handle_cache_similar_issues,
+    "cache_similar_sprints": handle_cache_similar_sprints,
     "cache_refresh": handle_cache_refresh,
     "cache_stats": handle_cache_stats,
     "cache_invalidate": handle_cache_invalidate,
