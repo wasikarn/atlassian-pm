@@ -825,7 +825,7 @@ class TestInit:
         }
         # server.load_credentials etc. are already MagicMock from module-level patch
         old_load = server.load_credentials
-        old_jc = server.JiraCache
+        old_jc = server.AtlassianCache
         old_es = server.EmbeddingStore
         try:
             server.load_credentials = MagicMock(return_value=mock_creds)
@@ -835,31 +835,31 @@ class TestInit:
             mock_api = MagicMock()
             server.JiraAPI = MagicMock(return_value=mock_api)
             mock_cache = MagicMock(conn=MagicMock())
-            server.JiraCache = MagicMock(return_value=mock_cache)
+            server.AtlassianCache = MagicMock(return_value=mock_cache)
             server.EmbeddingStore = MagicMock()
             server._init()
             assert server.cache is mock_cache
             assert server.jira_api is mock_api
         finally:
             server.load_credentials = old_load
-            server.JiraCache = old_jc
+            server.AtlassianCache = old_jc
             server.EmbeddingStore = old_es
 
     def test_credential_failure(self, tmp_path):
         """_init() handles credential failure gracefully."""
-        old_jc = server.JiraCache
+        old_jc = server.AtlassianCache
         old_es = server.EmbeddingStore
         old_load = server.load_credentials
         try:
             mock_cache = MagicMock(conn=MagicMock())
-            server.JiraCache = MagicMock(return_value=mock_cache)
+            server.AtlassianCache = MagicMock(return_value=mock_cache)
             server.EmbeddingStore = MagicMock()
             server.load_credentials = MagicMock(side_effect=Exception("no creds"))
             server._init()
             assert server.cache is mock_cache
             assert server.jira_api is None
         finally:
-            server.JiraCache = old_jc
+            server.AtlassianCache = old_jc
             server.EmbeddingStore = old_es
             server.load_credentials = old_load
 

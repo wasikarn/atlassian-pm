@@ -9,7 +9,7 @@ from atlassian_cache.cache import (
     PURGE_ISSUES_DAYS,
     PURGE_SEARCHES_HOURS,
     SCHEMA_VERSION,
-    JiraCache,
+    AtlassianCache,
     _extract_field,
     extract_adf_text,
     strip_noise,
@@ -146,12 +146,12 @@ class TestStripNoise:
         assert assignee == {"displayName": "User"}
 
 
-# --- JiraCache schema & migration ---
+# --- AtlassianCache schema & migration ---
 
 
 class TestSchema:
     def test_fresh_db_creates_schema(self, tmp_db):
-        c = JiraCache(db_path=tmp_db)
+        c = AtlassianCache(db_path=tmp_db)
         assert c._get_schema_version() == SCHEMA_VERSION
         # Verify tables exist
         tables = c.conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -174,8 +174,8 @@ class TestSchema:
         conn.commit()
         conn.close()
 
-        # Open with JiraCache — should run migration to v2
-        c = JiraCache(db_path=tmp_db)
+        # Open with AtlassianCache — should run migration to v2
+        c = AtlassianCache(db_path=tmp_db)
         assert c._get_schema_version() == SCHEMA_VERSION
         # purge stats should exist
         row = c.conn.execute("SELECT value FROM cache_stats WHERE key = 'purged_issues'").fetchone()
@@ -189,15 +189,15 @@ class TestSchema:
         conn.commit()
         conn.close()
 
-        c = JiraCache(db_path=tmp_db)
+        c = AtlassianCache(db_path=tmp_db)
         assert c._get_schema_version() == SCHEMA_VERSION
         c.close()
 
     def test_fts5_idempotent(self, tmp_db):
         """Creating cache twice doesn't crash on existing FTS5."""
-        c1 = JiraCache(db_path=tmp_db)
+        c1 = AtlassianCache(db_path=tmp_db)
         c1.close()
-        c2 = JiraCache(db_path=tmp_db)
+        c2 = AtlassianCache(db_path=tmp_db)
         c2.close()
 
 
@@ -614,9 +614,9 @@ class TestAdaptiveTTL:
 class TestClose:
     def test_close_flushes_stats(self, tmp_db, sample_issue):
         """close() should flush buffered stats."""
-        from atlassian_cache.cache import JiraCache
+        from atlassian_cache.cache import AtlassianCache
 
-        c = JiraCache(db_path=tmp_db)
+        c = AtlassianCache(db_path=tmp_db)
         c.put_issue("BEP-100", sample_issue)
         c.get_issue("BEP-100")  # hit buffered
         c.close()
@@ -644,7 +644,7 @@ class TestCheckDbSize:
         """DB over limit should log warning."""
         import logging
 
-        c = JiraCache(db_path=tmp_db)
+        c = AtlassianCache(db_path=tmp_db)
         c.put_issue("BEP-1", sample_issue)
         # Temporarily set limit very low to trigger
         with (
@@ -657,7 +657,7 @@ class TestCheckDbSize:
 
     def test_no_file(self, tmp_path):
         """Non-existent DB file should not crash."""
-        c = JiraCache(db_path=tmp_path / "test.db")
+        c = AtlassianCache(db_path=tmp_path / "test.db")
         # DB exists at this point (created by __init__), so test with a fake path
         old_path = c.db_path
         c.db_path = tmp_path / "nonexistent.db"
@@ -671,12 +671,12 @@ class TestCheckDbSize:
 
 def test_pragma_wal_applied_on_open(tmp_db):
     """WAL mode and mmap are set at connection open, even on existing DBs."""
-    from atlassian_cache.cache import JiraCache
+    from atlassian_cache.cache import AtlassianCache
     # First open — creates DB
-    c1 = JiraCache(db_path=tmp_db)
+    c1 = AtlassianCache(db_path=tmp_db)
     c1.close()
     # Second open — opens an existing DB (the real test)
-    c = JiraCache(db_path=tmp_db)
+    c = AtlassianCache(db_path=tmp_db)
     mode = c.conn.execute("PRAGMA journal_mode").fetchone()[0]
     assert mode == "wal"
     mmap = c.conn.execute("PRAGMA mmap_size").fetchone()[0]

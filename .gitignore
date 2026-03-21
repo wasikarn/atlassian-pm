@@ -28,7 +28,7 @@ output/
 # Tasks
 tasks/
 
-mcp-servers/jira-cache-server/.coverage
+mcp-servers/atlassian-cache/.coverage
 /.idea/
 /tmp/
 

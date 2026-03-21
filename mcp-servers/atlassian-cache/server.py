@@ -6,9 +6,9 @@
 #     "sentence-transformers>=2.2.0,<4",
 # ]
 # ///
-"""MCP server for Jira data caching with FTS5 and vector search.
+"""MCP server for Jira + Confluence data caching with FTS5 and vector search.
 
-Provides tools for cached Jira data access:
+Provides tools for cached Atlassian data access:
 - cache_get_issue: Get issue (cache-first, upstream fallback, compact mode)
 - cache_get_issues: Batch get multiple issues (single MCP call)
 - cache_search: JQL search with caching
@@ -47,7 +47,7 @@ if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
 # Local imports (atlassian_cache to avoid namespace collision with scripts/lib)
-from atlassian_cache.cache import JiraCache, strip_noise
+from atlassian_cache.cache import AtlassianCache, strip_noise
 from atlassian_cache.confluence_cache import ConfluenceCache
 from atlassian_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
@@ -150,14 +150,14 @@ def _maybe_compact(issues: list[dict]) -> list[dict] | dict:
 
 
 # --- Globals (initialized on startup) ---
-cache: JiraCache | None = None
+cache: AtlassianCache | None = None
 embeddings: EmbeddingStore | None = None
 jira_api: JiraAPI | None = None
 confluence: ConfluenceCache | None = None
 
 
 # H6: Safe global accessors (prevent NoneType crashes)
-def _require_cache() -> JiraCache:
+def _require_cache() -> AtlassianCache:
     """Get cache or raise RuntimeError."""
     if cache is None:
         raise RuntimeError("Cache not initialized")
@@ -452,9 +452,9 @@ def _init() -> None:
     """Initialize cache, embeddings, and upstream API client."""
     global cache, embeddings, jira_api, confluence
 
-    cache = JiraCache()
+    cache = AtlassianCache()
     confluence = ConfluenceCache(cache.conn, cache._lock)
-    # C3: Pass shared write lock so EmbeddingStore serialises SQLite writes with JiraCache
+    # C3: Pass shared write lock so EmbeddingStore serialises SQLite writes with AtlassianCache
     embeddings = EmbeddingStore(cache.conn, cache._lock)
 
     try:

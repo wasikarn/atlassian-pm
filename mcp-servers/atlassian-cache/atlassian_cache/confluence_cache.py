@@ -1,11 +1,11 @@
 """Confluence page cache backed by the shared atlassian-cache SQLite database.
 
 No independent SQLite connection — ConfluenceCache receives the shared conn
-from JiraCache. Closing JiraCache.conn is sufficient; ConfluenceCache holds
+from AtlassianCache. Closing AtlassianCache.conn is sufficient; ConfluenceCache holds
 no independent resources.
 
 Usage:
-    cache = JiraCache(db_path=...)
+    cache = AtlassianCache(db_path=...)
     confluence = ConfluenceCache(cache.conn, cache._lock)
     confluence.put_page(page_dict)
     page = confluence.get_page("12345", max_age_hours=4)
@@ -48,11 +48,11 @@ def _extract_page_fields(page: dict) -> dict:
 class ConfluenceCache:
     """Cache for Confluence pages with FTS5 and section-level storage.
 
-    Shares the SQLite connection from JiraCache. No close() method —
-    connection lifetime is managed by JiraCache.
+    Shares the SQLite connection from AtlassianCache. No close() method —
+    connection lifetime is managed by AtlassianCache.
 
     Reads (get_page, get_version, get_sections) do not acquire _lock — this
-    is consistent with JiraCache and safe under CPython's sqlite3 C-level
+    is consistent with AtlassianCache and safe under CPython's sqlite3 C-level
     serialisation. Write methods (put_page, invalidate, put_sections) always
     acquire _lock before executing.
     """

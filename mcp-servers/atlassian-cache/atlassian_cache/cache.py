@@ -1,12 +1,12 @@
-"""SQLite-based cache for Jira data with FTS5 full-text search.
+"""SQLite-based cache for Jira + Confluence data with FTS5 full-text search.
 
 Provides structured caching with TTL expiration, full-text search on
 issue summaries/descriptions, and ADF text extraction for indexing.
 
 Usage:
-    from lib.cache import JiraCache
+    from atlassian_cache.cache import AtlassianCache
 
-    cache = JiraCache()  # Uses ~/.cache/atlassian-pm/atlassian.db
+    cache = AtlassianCache()  # Uses ~/.cache/atlassian-pm/atlassian.db
     cache.put_issue("{{PROJECT_KEY}}-123", issue_data)
     cached = cache.get_issue("{{PROJECT_KEY}}-123", max_age_hours=24)
     results = cache.text_search("coupon payment", limit=10)
@@ -44,7 +44,7 @@ _FTS5_ALLOWED_RE = re.compile(r"[^a-zA-Z0-9\u0E00-\u0E7F\s]")  # Keep alphanumer
 MAX_ADF_DEPTH = 50
 
 # C4: Maximum DB size in MB (warn if exceeded)
-MAX_DB_SIZE_MB = int(os.environ.get("JIRA_CACHE_MAX_DB_MB", "500"))
+MAX_DB_SIZE_MB = int(os.environ.get("ATLASSIAN_CACHE_MAX_DB_MB", "500"))
 
 # NOTE: This FTS schema is only applied on fresh v1 databases. For databases
 # that have gone through v5 migration, issues_fts is recreated by the migration
@@ -175,11 +175,11 @@ STATUS_TTL = {
 DEFAULT_TTL = _DEFAULT_TTL_HOURS
 
 # --- P1-E: Stale data purge thresholds (with env overrides) ---
-PURGE_ISSUES_DAYS = int(os.environ.get("JIRA_CACHE_PURGE_ISSUES_DAYS", "7"))
-PURGE_SEARCHES_HOURS = int(os.environ.get("JIRA_CACHE_PURGE_SEARCHES_HOURS", "24"))
+PURGE_ISSUES_DAYS = int(os.environ.get("ATLASSIAN_CACHE_PURGE_ISSUES_DAYS", "7"))
+PURGE_SEARCHES_HOURS = int(os.environ.get("ATLASSIAN_CACHE_PURGE_SEARCHES_HOURS", "24"))
 
 
-class JiraCache:
+class AtlassianCache:
     """SQLite cache for Jira issues with FTS5 full-text search.
 
     Attributes:
@@ -206,13 +206,13 @@ class JiraCache:
         self._stat_lock = threading.Lock()
         # P1-B: In-memory stat buffer (flush every N calls or on get_stats)
         self._stat_buffer: dict[str, int] = {"hits": 0, "misses": 0}
-        self._stat_flush_threshold = int(os.environ.get("JIRA_CACHE_STAT_FLUSH_THRESHOLD", "20"))
+        self._stat_flush_threshold = int(os.environ.get("ATLASSIAN_CACHE_STAT_FLUSH_THRESHOLD", "20"))
         self._stat_buffer_count = 0
         self._init_schema()
         self._apply_pragmas()
         self._purge_stale()
         self._check_db_size()
-        logger.debug("JiraCache initialized at %s", self.db_path)
+        logger.debug("AtlassianCache initialized at %s", self.db_path)
 
     # --- P0: Migration system ---
 

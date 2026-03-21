@@ -2,9 +2,9 @@
 user-invocable: false
 ---
 
-# Jira Cache Server
+# Atlassian Cache Server
 
-MCP server providing local SQLite cache for Jira data. Reduces token consumption by caching issues, sprints, and search results locally with TTL expiration.
+MCP server providing local SQLite cache for Jira + Confluence data. Reduces token consumption by caching issues, sprints, pages, and search results locally with TTL expiration.
 
 ## Architecture
 
@@ -71,7 +71,7 @@ mcp-servers/atlassian-cache/
 ├── server.py           # MCP entry point + 9 tool handlers
 ├── pyproject.toml      # Dependencies (core + embeddings + test extras)
 └── atlassian_cache/
-    ├── __init__.py     # Exports JiraCache, EmbeddingStore
+    ├── __init__.py     # Exports AtlassianCache, EmbeddingStore
     ├── cache.py        # SQLite + FTS5 cache (issues, sprints, searches)
     └── embeddings.py   # sqlite-vec + sentence-transformers
 ```

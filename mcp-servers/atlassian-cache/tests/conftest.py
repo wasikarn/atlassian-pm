@@ -69,10 +69,10 @@ def tmp_db(tmp_path):
 
 @pytest.fixture
 def cache(tmp_db):
-    """Create a JiraCache with a temporary database."""
-    from atlassian_cache.cache import JiraCache
+    """Create a AtlassianCache with a temporary database."""
+    from atlassian_cache.cache import AtlassianCache
 
-    c = JiraCache(db_path=tmp_db)
+    c = AtlassianCache(db_path=tmp_db)
     yield c
     c.close()
 
@@ -127,7 +127,7 @@ def make_page(
 
 @pytest.fixture
 def confluence_cache(cache):
-    """Return a ConfluenceCache sharing the JiraCache connection."""
+    """Return a ConfluenceCache sharing the AtlassianCache connection."""
     from atlassian_cache.confluence_cache import ConfluenceCache
     return ConfluenceCache(cache.conn, cache._lock)
 

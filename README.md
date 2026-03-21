@@ -332,7 +332,7 @@ claude mcp add --scope user mcp-atlassian -- \
 
 Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/clean filters.
 
-### 7. Install Jira cache server
+### 7. Install Atlassian cache server
 
 ```bash
 UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/venv" \
@@ -486,7 +486,7 @@ hooks/                         ← 44 Python hook scripts
 │   └── session/               ← Session management, compaction, token filtering (12 hooks)
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (7 hooks)
 
-mcp-servers/atlassian-cache/ ← Local Jira cache (SQLite + FTS5 + embeddings)
+mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
 ```
 
 ---

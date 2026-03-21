@@ -6,9 +6,9 @@ Uses paraphrase-multilingual-MiniLM-L12-v2 (384-dim, ~470MB) for multilingual
 support across Thai, English, and other languages.
 
 Usage:
-    from lib.embeddings import EmbeddingStore
+    from atlassian_cache.embeddings import EmbeddingStore
 
-    store = EmbeddingStore(conn)  # Reuses JiraCache's SQLite connection
+    store = EmbeddingStore(conn)  # Reuses AtlassianCache's SQLite connection
     store.store_embedding("{{PROJECT_KEY}}-123", "coupon collection API endpoint")
     similar = store.find_similar("coupon payment flow", limit=5)
 """
@@ -117,14 +117,14 @@ class EmbeddingStore:
     384-dimensional embeddings from sentence-transformers.
 
     Attributes:
-        conn: SQLite connection (shared with JiraCache).
+        conn: SQLite connection (shared with AtlassianCache).
         available: Whether sqlite-vec is loaded and ready.
-        _lock: Shared JiraCache write lock; prevents concurrent SQLite writes.
+        _lock: Shared AtlassianCache write lock; prevents concurrent SQLite writes.
     """
 
     def __init__(self, conn: sqlite3.Connection, lock: threading.Lock | None = None) -> None:
         self.conn = conn
-        # C3: Accept shared JiraCache._lock to serialize SQLite writes across both classes.
+        # C3: Accept shared AtlassianCache._lock to serialize SQLite writes across both classes.
         # Falls back to a private lock when used standalone (e.g. tests).
         self._lock = lock if lock is not None else threading.Lock()
         self.available = _load_sqlite_vec(conn)

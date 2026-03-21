@@ -37,7 +37,7 @@ if not shutil.which("qmd"):
 # Check cache DB
 if not CACHE_DB.exists():
     warnings.append(
-        f"⚠️  Jira cache DB not found: {CACHE_DB}\n"
+        f"⚠️  Atlassian cache DB not found: {CACHE_DB}\n"
         "   HR10 subtask detection (cross-session) and cache-prefer hook degraded.\n"
         "   Start atlassian-cache MCP to initialize: see atlassian-cache/SKILL.md"
     )

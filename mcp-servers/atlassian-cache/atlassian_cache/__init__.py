@@ -1,6 +1,6 @@
-"""Jira Cache Server library modules."""
+"""Atlassian Cache Server library modules (Jira + Confluence)."""
 
-from .cache import JiraCache
+from .cache import AtlassianCache
 from .embeddings import EmbeddingStore
 
-__all__ = ["EmbeddingStore", "JiraCache"]
+__all__ = ["EmbeddingStore", "AtlassianCache"]
