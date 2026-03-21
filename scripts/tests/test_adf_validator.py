@@ -517,18 +517,18 @@ class TestS1Invest:
 
     def test_valid_acs(self):
         adf = _story_adf(num_acs=2)
-        r = self.v._check_s1_invest(adf)
+        r = self.v._check_s1_invest(self.v._extract_sections(adf))
         assert r.status == CheckStatus.PASS
 
     def test_too_many_acs(self):
         adf = _story_adf(num_acs=6)
-        r = self.v._check_s1_invest(adf)
+        r = self.v._check_s1_invest(self.v._extract_sections(adf))
         assert r.status == CheckStatus.WARN
         assert "6" in r.message
 
     def test_no_acs(self):
         adf = _doc(_heading("Acceptance Criteria"))
-        r = self.v._check_s1_invest(adf)
+        r = self.v._check_s1_invest(self.v._extract_sections(adf))
         assert r.status == CheckStatus.FAIL
 
 
@@ -538,12 +538,12 @@ class TestS2Narrative:
 
     def test_valid_narrative(self):
         adf = _story_adf()
-        r = self.v._check_s2_narrative(adf)
+        r = self.v._check_s2_narrative(self.v._extract_sections(adf), adf)
         assert r.status == CheckStatus.PASS
 
     def test_missing_narrative(self):
         adf = _doc(_heading("Other"), _paragraph(_text("no narrative")))
-        r = self.v._check_s2_narrative(adf)
+        r = self.v._check_s2_narrative(self.v._extract_sections(adf), adf)
         assert r.status == CheckStatus.FAIL
 
 
