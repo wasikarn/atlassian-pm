@@ -16,6 +16,7 @@ def _make_db(tmp_path):
     conn.execute("CREATE TABLE confluence_sections (section_id TEXT, page_id TEXT)")
     conn.execute("INSERT INTO issues VALUES ('BEP-99')")
     conn.execute("INSERT INTO confluence_pages VALUES ('P1')")
+    conn.execute("INSERT INTO searches VALUES ('k1', '[\"BEP-10\"]')")
     conn.commit()
     conn.close()
     return db
@@ -49,3 +50,14 @@ def test_invalidate_noop_when_no_key(tmp_path):
     db = _make_db(tmp_path)
     from hooks.plugin.cache_write_invalidate import _invalidate_db
     _invalidate_db(db)  # no key or page_id — should be a no-op
+
+
+def test_invalidate_does_not_evict_other_issues_from_searches(tmp_path):
+    """BEP-1 invalidation must not evict search rows containing only BEP-10."""
+    db = _make_db(tmp_path)
+    from hooks.plugin.cache_write_invalidate import _invalidate_db
+    _invalidate_db(db, issue_key="BEP-1")
+    conn = sqlite3.connect(str(db))
+    row = conn.execute("SELECT * FROM searches WHERE cache_key = 'k1'").fetchone()
+    conn.close()
+    assert row is not None  # BEP-10 row must survive BEP-1 invalidation

@@ -22,7 +22,7 @@ def _invalidate_db(db_path, issue_key=None, page_id=None):
         conn = sqlite3.connect(str(db_path), timeout=5)
         if issue_key:
             conn.execute("DELETE FROM issues WHERE issue_key = ?", (issue_key,))
-            conn.execute("DELETE FROM searches WHERE result_keys LIKE ?", (f"%{issue_key}%",))
+            conn.execute("DELETE FROM searches WHERE result_keys LIKE ?", (f'%"{issue_key}"%',))
             conn.commit()
         if page_id:
             conn.execute("DELETE FROM confluence_sections WHERE page_id = ?", (page_id,))
