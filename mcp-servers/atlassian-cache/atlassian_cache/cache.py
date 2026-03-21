@@ -273,8 +273,8 @@ class JiraCache:
         self.conn.executescript("""
             PRAGMA journal_mode=WAL;
             PRAGMA synchronous=NORMAL;
-            PRAGMA cache_size=-65536;
-            PRAGMA mmap_size=268435456;
+            PRAGMA cache_size=-65536;        -- 64 MB in kibibytes (negative = kB)
+            PRAGMA mmap_size=268435456;      -- 256 MB memory-mapped I/O
             PRAGMA temp_store=MEMORY;
             PRAGMA foreign_keys=ON;
         """)

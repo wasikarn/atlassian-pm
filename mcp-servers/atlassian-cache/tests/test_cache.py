@@ -667,6 +667,10 @@ class TestCheckDbSize:
 def test_pragma_wal_applied_on_open(tmp_db):
     """WAL mode and mmap are set at connection open, even on existing DBs."""
     from atlassian_cache.cache import JiraCache
+    # First open — creates DB
+    c1 = JiraCache(db_path=tmp_db)
+    c1.close()
+    # Second open — opens an existing DB (the real test)
     c = JiraCache(db_path=tmp_db)
     mode = c.conn.execute("PRAGMA journal_mode").fetchone()[0]
     assert mode == "wal"
