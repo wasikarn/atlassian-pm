@@ -206,9 +206,9 @@ class TestSchema:
 
 class TestPragmas:
     def test_pragmas_applied(self, cache):
-        # Just check one PRAGMA to verify they were set
+        # Check PRAGMAs set at connection open time
         row = cache.conn.execute("PRAGMA cache_size").fetchone()
-        assert row[0] == -16000
+        assert row[0] == -65536  # 64MB in kilobytes
 
         row = cache.conn.execute("PRAGMA temp_store").fetchone()
         assert row[0] == 2  # MEMORY = 2
@@ -659,6 +659,22 @@ class TestCheckDbSize:
         c._check_db_size()  # Should not crash
         c.db_path = old_path
         c.close()
+
+
+# --- PRAGMA at connection open ---
+
+
+def test_pragma_wal_applied_on_open(tmp_db):
+    """WAL mode and mmap are set at connection open, even on existing DBs."""
+    from atlassian_cache.cache import JiraCache
+    c = JiraCache(db_path=tmp_db)
+    mode = c.conn.execute("PRAGMA journal_mode").fetchone()[0]
+    assert mode == "wal"
+    mmap = c.conn.execute("PRAGMA mmap_size").fetchone()[0]
+    assert mmap >= 268_435_456  # 256MB
+    cache_size = c.conn.execute("PRAGMA cache_size").fetchone()[0]
+    assert cache_size == -65536  # 64MB in kilobytes
+    c.close()
 
 
 # --- L4: get_stats no db_path ---

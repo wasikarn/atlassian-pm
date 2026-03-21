@@ -47,9 +47,6 @@ MAX_DB_SIZE_MB = int(os.environ.get("JIRA_CACHE_MAX_DB_MB", "500"))
 
 # Base schema (version 1) — original tables
 _SCHEMA_V1 = """
-PRAGMA journal_mode=WAL;
-PRAGMA synchronous=NORMAL;
-
 CREATE TABLE IF NOT EXISTS schema_version (
     version INTEGER PRIMARY KEY
 );
@@ -272,6 +269,15 @@ class JiraCache:
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        # Apply PRAGMAs before any migration — WAL must be set first
+        self.conn.executescript("""
+            PRAGMA journal_mode=WAL;
+            PRAGMA synchronous=NORMAL;
+            PRAGMA cache_size=-65536;
+            PRAGMA mmap_size=268435456;
+            PRAGMA temp_store=MEMORY;
+            PRAGMA foreign_keys=ON;
+        """)
         self.conn.row_factory = sqlite3.Row
         self._lock = threading.Lock()
         # L2: Separate lock for stat buffer (avoid contention with DB writes)
@@ -335,10 +341,7 @@ class JiraCache:
     # --- P2-C: SQLite PRAGMA tuning ---
 
     def _apply_pragmas(self) -> None:
-        """Apply session-level performance PRAGMAs."""
-        self.conn.execute("PRAGMA cache_size = -16000")  # 16MB (vs default 2MB)
-        self.conn.execute("PRAGMA mmap_size = 67108864")  # 64MB mmap
-        self.conn.execute("PRAGMA temp_store = MEMORY")  # FTS5 temp in RAM
+        """Apply additional session-level PRAGMAs (WAL + perf PRAGMAs already set at open time)."""
         self.conn.execute("PRAGMA busy_timeout = 5000")  # Wait 5s on lock contention
         self.conn.execute("PRAGMA wal_autocheckpoint = 100")  # Checkpoint every 100 pages
 
