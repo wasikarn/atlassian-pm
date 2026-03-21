@@ -45,6 +45,9 @@ MAX_ADF_DEPTH = 50
 # C4: Maximum DB size in MB (warn if exceeded)
 MAX_DB_SIZE_MB = int(os.environ.get("JIRA_CACHE_MAX_DB_MB", "500"))
 
+# NOTE: This FTS schema is only applied on fresh v1 databases. For databases
+# that have gone through v5 migration, issues_fts is recreated by the migration
+# with the porter tokenizer — these statements are no-ops on v5+ databases.
 FTS_SCHEMA_SQL = """
 CREATE VIRTUAL TABLE IF NOT EXISTS issues_fts USING fts5(
     issue_key UNINDEXED,

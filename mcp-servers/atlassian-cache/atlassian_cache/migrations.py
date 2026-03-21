@@ -193,14 +193,17 @@ def _apply_migration_v5(conn: sqlite3.Connection) -> None:
     """)
 
     # Step 5: Create confluence_fts virtual table
+    # content='' (contentless) because confluence_pages has body_md and labels,
+    # not body_text and labels_text. Triggers transform the data manually on every
+    # write, so SQLite never needs to read columns from the base table for FTS.
+    # Using content=confluence_pages would cause 'rebuild' to fail at runtime.
     conn.execute("""
         CREATE VIRTUAL TABLE IF NOT EXISTS confluence_fts USING fts5(
             page_id UNINDEXED,
             title,
             body_text,
             labels_text,
-            content=confluence_pages,
-            content_rowid=rowid,
+            content='',
             tokenize='porter unicode61'
         )
     """)
