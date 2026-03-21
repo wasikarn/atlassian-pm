@@ -1,7 +1,7 @@
 ---
 name: bug-triage
 disable-model-invocation: true
-x-compatibility: [jira-cache, mcp-atlassian, acli]
+x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Structured bug triage workflow for QA: intake → severity scoring → duplicate check → assign → create Jira Task.
   Distinct from /create-task bug (which is just ticket creation). This skill is a full triage workflow.

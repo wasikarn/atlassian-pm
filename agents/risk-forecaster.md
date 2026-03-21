@@ -2,7 +2,7 @@
 name: risk-forecaster
 description: Analyze delivery risk of a sprint before it starts. Combines capacity signals, complexity hotspots, dependency chains, and team patterns into an overall risk score with specific mitigations.
 model: sonnet
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__jira-cache__cache_sprint_issues
+tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__atlassian-cache__cache_sprint_issues
 permissionMode: dontAsk
 maxTurns: 12
 ---

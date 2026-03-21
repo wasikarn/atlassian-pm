@@ -50,9 +50,12 @@ with patch.dict(
 @pytest.fixture(autouse=True)
 def setup_server_globals(cache, tmp_path):
     """Inject test cache into server globals."""
+    from atlassian_cache.confluence_cache import ConfluenceCache
     server.cache = cache
+    server.confluence = ConfluenceCache(server.cache.conn, server.cache._lock)
     server.embeddings = None
     server.jira_api = None
+    server._session_returned.clear()
     yield
 
 
@@ -379,6 +382,82 @@ class TestHandleCacheGetIssue:
         await handle_cache_get_issue({"issue_key": "BEP-1"})
         emb.store_embedding.assert_called_once()
         server.embeddings = None
+
+    # --- T12: Lazy version-check tests ---
+
+    @pytest.mark.asyncio
+    async def test_lazy_hit_when_upstream_unchanged(self, cache, mock_jira_api):
+        """T12: Stale cache + upstream 'updated' unchanged → serve from cache (lazy HIT)."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        # Simulate upstream returning the same or older 'updated' timestamp
+        cached = cache.get_issue_stale("BEP-1")
+        cached_at_iso = cached["_cached_at_iso"]
+        mock_jira_api.get_issue.return_value = {"fields": {"updated": cached_at_iso}}
+        # max_age_hours=0 forces stale path
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "cache"
+        # Should have called upstream only once (the cheap updated-field check)
+        mock_jira_api.get_issue.assert_called_once()
+        call_kwargs = mock_jira_api.get_issue.call_args
+        assert call_kwargs.kwargs.get("fields") == "updated" or (
+            len(call_kwargs.args) > 1 and call_kwargs.args[1] == "updated"
+        )
+
+    @pytest.mark.asyncio
+    async def test_lazy_miss_when_upstream_changed(self, cache, mock_jira_api):
+        """T12: Stale cache + upstream 'updated' is newer → full refresh (lazy MISS)."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        # First call: cheap check returns a newer upstream timestamp
+        # Second call: full refresh
+        full_issue = make_issue(key="BEP-1", summary="Updated upstream")
+        mock_jira_api.get_issue.side_effect = [
+            {"fields": {"updated": "2099-12-31T23:59:59.000+0000"}},  # newer → lazy miss
+            full_issue,  # full refresh
+        ]
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "upstream"
+        assert mock_jira_api.get_issue.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_skipped_without_cached_at(self, cache, mock_jira_api):
+        """T12: If cached data has no _cached_at (pre-T12 entry), lazy check is skipped."""
+        # Insert a raw issue without _cached_at metadata (simulates legacy entry)
+        cache.conn.execute(
+            "INSERT OR REPLACE INTO issues (issue_key, summary, data, cached_at) VALUES (?, ?, ?, ?)",
+            ("BEP-1", "Legacy", '{"key": "BEP-1", "fields": {"summary": "Legacy"}}', "2000-01-01T00:00:00"),
+        )
+        cache.conn.commit()
+        full_issue = make_issue(key="BEP-1")
+        mock_jira_api.get_issue.return_value = full_issue
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        # Falls through to full refresh
+        assert result["source"] == "upstream"
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_error_falls_through(self, cache, mock_jira_api):
+        """T12: If lazy check throws, fall through to full refresh silently."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        full_issue = make_issue(key="BEP-1", summary="Refreshed")
+        mock_jira_api.get_issue.side_effect = [
+            Exception("network error"),  # lazy check fails
+            full_issue,  # full refresh succeeds
+        ]
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "upstream"
+        assert mock_jira_api.get_issue.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_skipped_when_no_jira_api(self, cache):
+        """T12: Lazy check is skipped when jira_api is None."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        server.jira_api = None
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        # Falls through to stale_cache path (no API available)
+        assert result["source"] == "stale_cache"
 
 
 class TestHandleCacheGetIssues:
@@ -970,3 +1049,79 @@ class TestAutoRefreshStripNoise:
         # Noise fields should be stripped from the returned issue
         assert "self" not in result["issue"]
         assert "expand" not in result["issue"]
+
+
+# --- In-session deduplication + compact list format ---
+
+
+def test_compact_format_for_large_lists(cache, multiple_issues):
+    """Lists with 20+ issues use compact headers+rows format."""
+    from server import _maybe_compact
+    issues = [{"key": f"BEP-{i}", "summary": f"Issue {i}",
+               "status": "To Do", "assignee": None, "sp": None}
+              for i in range(25)]
+    result = _maybe_compact(issues)
+    assert result["format"] == "compact"
+    assert "headers" in result
+    assert "rows" in result
+    assert len(result["rows"]) == 25
+
+
+def test_small_list_not_compacted():
+    from server import _maybe_compact
+    issues = [{"key": f"BEP-{i}", "summary": "x"} for i in range(5)]
+    result = _maybe_compact(issues)
+    assert isinstance(result, list)  # unchanged
+
+
+def test_compact_threshold_boundary():
+    from server import _maybe_compact, _COMPACT_LIST_THRESHOLD
+    # Exactly at threshold — compacts
+    issues_at = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD)]
+    assert isinstance(_maybe_compact(issues_at), dict)  # compacted
+    # One below threshold — stays list
+    issues_below = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD - 1)]
+    assert isinstance(_maybe_compact(issues_below), list)  # unchanged
+
+
+def test_session_dedup_returns_ref_on_repeat(cache, sample_issue):
+    """Second fetch of same issue within session returns compact ref."""
+    from server import _mark_returned, _already_returned
+    _mark_returned("BEP-100")
+    assert _already_returned("BEP-100")
+
+
+def test_confluence_tools_registered():
+    from server import TOOLS
+    names = {t.name for t in TOOLS}
+    assert "cache_get_confluence_page" in names
+    assert "cache_search_confluence" in names
+    assert "cache_cross_search" in names
+    assert len(names) == 21  # 12 Jira + 9 Confluence
+
+
+def test_new_jira_tools_registered():
+    from server import TOOLS
+    names = {t.name for t in TOOLS}
+    assert "cache_find_related" in names
+    assert "cache_reindex" in names
+    assert "cache_sync" in names
+    assert len(names) == 21  # 12 Jira + 9 Confluence
+
+
+def test_get_all_issues_returns_list(cache, sample_issue):
+    cache.put_issue(sample_issue["key"], sample_issue)
+    issues = cache.get_all_issues()
+    assert isinstance(issues, list)
+    assert len(issues) >= 1
+    assert all("key" in i for i in issues)
+
+
+def test_get_all_sections_returns_list(confluence_cache, sample_page):
+    from atlassian_cache.sections import split_sections
+    confluence_cache.put_page(sample_page)
+    sections = split_sections("12345", sample_page["_body_md"])
+    confluence_cache.put_sections(sections)
+    all_secs = confluence_cache.get_all_sections()
+    assert isinstance(all_secs, list)
+    assert len(all_secs) == len(sections)

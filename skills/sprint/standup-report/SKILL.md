@@ -2,7 +2,7 @@
 name: standup-report
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache, mcp-atlassian]
+x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Generate daily standup digest from active sprint — categorizes issues by status per assignee, flags anomalies.
   Optional --post flag posts digest as comment to sprint Confluence page.

@@ -1,7 +1,7 @@
 ---
 name: release-notes
 disable-model-invocation: true
-x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence]
+x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 description: |
   Generate Confluence release notes from a Jira Fix Version.
   Fetches all resolved issues in the version, groups by type (feature/bugfix/chore),

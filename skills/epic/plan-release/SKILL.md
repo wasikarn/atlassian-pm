@@ -2,7 +2,7 @@
 name: plan-release
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create a multi-sprint release plan from epics — calculates velocity-based timeline, maps dependencies,
   generates Confluence release page + Jira Fix Version.

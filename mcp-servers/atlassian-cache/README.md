@@ -9,7 +9,7 @@ MCP server providing local SQLite cache for Jira data. Reduces token consumption
 ## Architecture
 
 ```text
-Claude Code ──stdio──> jira-cache ──REST API──> Jira Cloud
+Claude Code ──stdio──> atlassian-cache ──REST API──> Jira Cloud
                               │
                         SQLite + FTS5 + sqlite-vec
                         (~/.cache/atlassian-pm/jira.db)
@@ -53,7 +53,7 @@ Claude Code ──stdio──> jira-cache ──REST API──> Jira Cloud
 
 ```bash
 # 1. Install dependencies (uv manages the venv)
-cd mcp-servers/jira-cache
+cd mcp-servers/atlassian-cache
 uv sync --extra embeddings
 
 # 2. Verify credentials exist
@@ -67,10 +67,10 @@ uv run server.py
 ## Files
 
 ```text
-mcp-servers/jira-cache/
+mcp-servers/atlassian-cache/
 ├── server.py           # MCP entry point + 9 tool handlers
 ├── pyproject.toml      # Dependencies (core + embeddings + test extras)
-└── jira_cache/
+└── atlassian_cache/
     ├── __init__.py     # Exports JiraCache, EmbeddingStore
     ├── cache.py        # SQLite + FTS5 cache (issues, sprints, searches)
     └── embeddings.py   # sqlite-vec + sentence-transformers

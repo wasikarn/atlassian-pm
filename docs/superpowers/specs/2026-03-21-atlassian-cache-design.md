@@ -124,14 +124,24 @@ CREATE VIRTUAL TABLE confluence_fts USING fts5(
 );
 ```
 
-BM25 column weights (passed as `bm25(issues_fts, 10.0, 5.0, 2.0, 1.0)` in queries):
+BM25 column weights for `issues_fts` (passed as `bm25(issues_fts, 10.0, 5.0, 2.0, 1.0)` in queries):
 
-| Column | Weight |
-|--------|--------|
+> Note: FTS5 `UNINDEXED` columns (`issue_key`) are excluded from BM25 positional arguments. The 4-weight list maps directly to the 4 indexed columns.
+
+| Indexed Column | Weight |
+| -------------- | ------ |
 | summary | 10.0 |
 | description_text | 5.0 |
 | labels_text | 2.0 |
 | assignee_name | 1.0 |
+
+BM25 column weights for `confluence_fts` (passed as `bm25(confluence_fts, 10.0, 5.0, 2.0)` in queries):
+
+| Indexed Column | Weight |
+| -------------- | ------ |
+| title | 10.0 |
+| body_text | 5.0 |
+| labels_text | 2.0 |
 
 ### v6 — BGE-M3 Vector Migration (Phase 2, future)
 
@@ -282,7 +292,7 @@ Expected savings: ~80-90% of embedding cost when only one section changes.
 
 ### BM25 Weights
 
-Queries use `bm25(issues_fts, 10.0, 5.0, 2.0, 1.0)` for column-weighted relevance.
+Queries use `bm25(issues_fts, 10.0, 5.0, 2.0, 1.0)` for Jira and `bm25(confluence_fts, 10.0, 5.0, 2.0)` for Confluence — weights match the indexed column order defined in Section 3.
 
 ### New Fields
 
@@ -292,7 +302,7 @@ Queries use `bm25(issues_fts, 10.0, 5.0, 2.0, 1.0)` for column-weighted relevanc
 
 ## 9. SQLite PRAGMA Configuration
 
-Applied once at connection open:
+Applied once at connection open, **before any schema migration runs**:
 
 ```sql
 PRAGMA journal_mode=WAL;
@@ -302,6 +312,8 @@ PRAGMA mmap_size=268435456; -- 256MB
 PRAGMA temp_store=MEMORY;
 PRAGMA foreign_keys=ON;
 ```
+
+WAL mode is set before migrations to ensure all migration transactions use the WAL journal. Applying PRAGMAs at connection-open time (not in a migration step) avoids the ordering dependency between Phase 2 (schema) and Phase 9 (PRAGMA) in the implementation plan.
 
 WAL + synchronous=NORMAL: safe for concurrent reads, no fsync on every write. Target: sub-100ms FTS queries on 100k+ issues.
 
@@ -338,7 +350,7 @@ WAL + synchronous=NORMAL: safe for concurrent reads, no fsync on every write. Ta
 | `cache_invalidate_confluence` | Invalidate a Confluence page cache entry |
 | `cache_refresh_confluence` | Force-refresh a Confluence page from API |
 | `cache_get_confluence_section` | Fetch a specific section by section_id |
-| `cache_sprint_confluence` | Get Confluence pages linked to a sprint |
+| `cache_sprint_confluence` | Get Confluence pages associated with a sprint via a `confluence_sprint_links` mapping table (page_id → sprint_id), populated when `cache_sprint_issues` fetches sprint data and any linked Confluence pages are discovered |
 
 ---
 
@@ -354,9 +366,9 @@ Track returned entity keys per session in `_session_returned: set[str]`. On repe
 
 Expected savings: ~95% on repeated references within one agent execution.
 
-### TOON Compact List Format
+### Compact List Format
 
-For responses with 20+ issues, use table-style compact format instead of object array:
+For responses with 20+ issues, tools (`cache_get_issues`, `cache_sprint_issues`, `cache_search`, `cache_cross_search`) use a table-style compact format instead of a JSON object array. The 20-issue threshold was chosen based on observed token savings: below 20 items, the header overhead negates the savings. Format:
 
 ```json
 {
@@ -405,7 +417,7 @@ dependencies = ["mcp>=1.0.0,<2"]
 [project.optional-dependencies]
 embeddings = [
     "sqlite-vec>=0.1.1,<1",
-    "sentence-transformers>=2.2.0,<4",
+    "sentence-transformers>=3.0.0,<4",  # >=3.0 required for ONNX backend (Phase 2); also supports Phase 1 MiniLM
 ]
 test = [
     "pytest>=8.0,<9",
@@ -443,7 +455,7 @@ async def _lifespan(server: Server):
 app = Server("atlassian-cache", lifespan=_lifespan)
 ```
 
-Shared SQLite connection between `JiraCache` and `ConfluenceCache` — single WAL journal, no cross-module lock contention.
+Shared SQLite connection between `JiraCache` and `ConfluenceCache` — single WAL journal, no cross-module lock contention. `ConfluenceCache` owns no independent resources (no separate cursors or prepared statements kept open); calling `cache.close()` safely closes the shared connection for both modules. `ConfluenceCache` does not implement its own `close()` method.
 
 ---
 
@@ -455,7 +467,7 @@ Shared SQLite connection between `JiraCache` and `ConfluenceCache` — single WA
 - `tests/test_confluence_cache.py` — Confluence page CRUD, section storage, FTS
 - `tests/test_embeddings.py` — EmbeddingModel lazy load, search ranking
 - `tests/test_sections.py` — H2 splitter, hash diff detection
-- `tests/test_migrations.py` — v1→v6 migration chain
+- `tests/test_migrations.py` — v1→v6 migration chain; each step tested in isolation; `PRAGMA user_version` sentinel verified after each step; partial failure (interrupted migration) tested via injected exception; fresh-DB path (no prior version) tested separately
 
 ### Fixtures
 
@@ -484,7 +496,7 @@ Shared SQLite connection between `JiraCache` and `ConfluenceCache` — single WA
 | 4 | `embeddings.py` — multilingual MiniLM Phase 1, cross-modal search |
 | 5 | 9 new Confluence MCP tools in `server.py` |
 | 6 | 3 new Jira tools: `cache_find_related`, `cache_reindex`, `cache_sync` |
-| 7 | In-session deduplication + TOON compact format |
+| 7 | In-session deduplication + compact list format (20+ issue threshold) |
 | 8 | Hybrid invalidation: TTL upgrade + lazy version-check + write-hook |
 | 9 | PRAGMA optimisation + SQLite WAL tuning |
 | 10 | Integration tests, coverage ≥ 100%, doctor script update |

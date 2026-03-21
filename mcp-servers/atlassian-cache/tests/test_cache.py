@@ -1,10 +1,10 @@
-"""Tests for jira_cache.cache module — 100% coverage target."""
+"""Tests for atlassian_cache.cache module — 100% coverage target."""
 
 import sqlite3
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from jira_cache.cache import (
+from atlassian_cache.cache import (
     DEFAULT_TTL,
     PURGE_ISSUES_DAYS,
     PURGE_SEARCHES_HOURS,
@@ -167,10 +167,10 @@ class TestSchema:
         """Simulate v1 DB and verify v2 migration runs."""
         # Create v1 DB manually
         conn = sqlite3.connect(str(tmp_db))
-        from jira_cache.cache import _SCHEMA_V1
+        from atlassian_cache.migrations import _SCHEMA_V1
 
         conn.executescript(_SCHEMA_V1)
-        conn.execute("INSERT OR REPLACE INTO schema_version (version) VALUES (1)")
+        conn.execute("PRAGMA user_version = 1")
         conn.commit()
         conn.close()
 
@@ -206,9 +206,9 @@ class TestSchema:
 
 class TestPragmas:
     def test_pragmas_applied(self, cache):
-        # Just check one PRAGMA to verify they were set
+        # Check PRAGMAs set at connection open time
         row = cache.conn.execute("PRAGMA cache_size").fetchone()
-        assert row[0] == -16000
+        assert row[0] == -65536  # 64MB in kilobytes
 
         row = cache.conn.execute("PRAGMA temp_store").fetchone()
         assert row[0] == 2  # MEMORY = 2
@@ -573,6 +573,11 @@ class TestStatistics:
         cache.put_issue("BEP-100", sample_issue)
         cache.vacuum()  # Should not crash
 
+    def test_cache_stats_includes_embedding_available(self, cache):
+        """cache.get_stats() must always return embedding_available field."""
+        stats = cache.get_stats()
+        assert "embedding_available" in stats
+
 
 # --- Adaptive TTL ---
 
@@ -609,7 +614,7 @@ class TestAdaptiveTTL:
 class TestClose:
     def test_close_flushes_stats(self, tmp_db, sample_issue):
         """close() should flush buffered stats."""
-        from jira_cache.cache import JiraCache
+        from atlassian_cache.cache import JiraCache
 
         c = JiraCache(db_path=tmp_db)
         c.put_issue("BEP-100", sample_issue)
@@ -631,7 +636,7 @@ class TestCheckDbSize:
         """DB under limit should not warn."""
         import logging
 
-        with patch.object(logging.getLogger("jira_cache.cache"), "warning") as mock_warn:
+        with patch.object(logging.getLogger("atlassian_cache.cache"), "warning") as mock_warn:
             cache._check_db_size()
             mock_warn.assert_not_called()
 
@@ -643,8 +648,8 @@ class TestCheckDbSize:
         c.put_issue("BEP-1", sample_issue)
         # Temporarily set limit very low to trigger
         with (
-            patch("jira_cache.cache.MAX_DB_SIZE_MB", 0),
-            patch.object(logging.getLogger("jira_cache.cache"), "warning") as mock_warn,
+            patch("atlassian_cache.cache.MAX_DB_SIZE_MB", 0),
+            patch.object(logging.getLogger("atlassian_cache.cache"), "warning") as mock_warn,
         ):
             c._check_db_size()
             mock_warn.assert_called_once()
@@ -661,6 +666,26 @@ class TestCheckDbSize:
         c.close()
 
 
+# --- PRAGMA at connection open ---
+
+
+def test_pragma_wal_applied_on_open(tmp_db):
+    """WAL mode and mmap are set at connection open, even on existing DBs."""
+    from atlassian_cache.cache import JiraCache
+    # First open — creates DB
+    c1 = JiraCache(db_path=tmp_db)
+    c1.close()
+    # Second open — opens an existing DB (the real test)
+    c = JiraCache(db_path=tmp_db)
+    mode = c.conn.execute("PRAGMA journal_mode").fetchone()[0]
+    assert mode == "wal"
+    mmap = c.conn.execute("PRAGMA mmap_size").fetchone()[0]
+    assert mmap >= 268_435_456  # 256MB
+    cache_size = c.conn.execute("PRAGMA cache_size").fetchone()[0]
+    assert cache_size == -65536  # 64MB in kilobytes
+    c.close()
+
+
 # --- L4: get_stats no db_path ---
 
 
@@ -671,3 +696,50 @@ class TestStatsNoDbPath:
         assert "db_path" not in stats
         # But db_size_mb should still be there
         assert "db_size_mb" in stats
+
+
+# --- Task 12: Lazy version-check — _cached_at contract ---
+
+
+class TestCachedAtMetadata:
+    def test_cached_issue_includes_cached_at_field(self, cache, sample_issue):
+        """put_issue stores _cached_at so lazy version-check can read it."""
+        cache.put_issue(sample_issue["key"], sample_issue)
+        result = cache.get_issue("BEP-100", max_age_hours=24)
+        assert result is not None
+        assert "_cached_at" in result
+        assert isinstance(result["_cached_at"], float)
+        assert "_cached_at_iso" in result
+
+    def test_cached_at_iso_is_string(self, cache, sample_issue):
+        """_cached_at_iso is a valid ISO 8601 string."""
+        cache.put_issue(sample_issue["key"], sample_issue)
+        result = cache.get_issue("BEP-100", max_age_hours=24)
+        assert isinstance(result["_cached_at_iso"], str)
+        # Should parse as a valid datetime
+        from datetime import datetime
+        dt = datetime.fromisoformat(result["_cached_at_iso"].replace("Z", "+00:00"))
+        assert dt is not None
+
+    def test_lazy_version_check_skips_when_fresh(self, cache, sample_issue):
+        """When cache is within TTL, no upstream API call is needed."""
+        cache.put_issue(sample_issue["key"], sample_issue)
+        result = cache.get_issue("BEP-100", max_age_hours=24)
+        # Result is returned from cache — no API needed
+        assert result is not None
+
+    def test_lazy_version_check_triggers_when_stale(self, cache, sample_issue):
+        """When max_age_hours=0, cache miss triggers upstream path."""
+        cache.put_issue(sample_issue["key"], sample_issue)
+        # max_age=0 means TTL=0 — everything is considered stale
+        result = cache.get_issue("BEP-100", max_age_hours=0)
+        assert result is None  # stale — caller must fetch upstream
+
+    def test_cached_at_survives_put_roundtrip(self, cache, sample_issue):
+        """_cached_at is preserved through put→get roundtrip and is recent."""
+        import time
+        before = time.time()
+        cache.put_issue(sample_issue["key"], sample_issue)
+        after = time.time()
+        result = cache.get_issue("BEP-100", max_age_hours=24)
+        assert before <= result["_cached_at"] <= after

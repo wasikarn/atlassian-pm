@@ -3,8 +3,8 @@ name: search-issues
 disable-model-invocation: true
 context: fork
 model: haiku
-x-compatibility: [jira-cache, mcp-atlassian]
-allowed-tools: Read, Glob, Grep, Bash, Agent, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache__cache_search, mcp__plugin_atlassian-pm_jira-cache__cache_text_search, mcp__plugin_atlassian-pm_jira-cache__cache_similar_issues
+x-compatibility: [atlassian-cache, mcp-atlassian]
+allowed-tools: Read, Glob, Grep, Bash, Agent, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_text_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_similar_issues
 description: |
   Search for existing Jira issues to prevent duplicates — invoke proactively whenever the user
   wants to create any new issue (story/task/epic/subtask) before they start creating.

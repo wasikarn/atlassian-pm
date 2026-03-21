@@ -8,7 +8,7 @@
 # ///
 """MCP server for Jira data caching with FTS5 and vector search.
 
-Provides 10 tools for cached Jira data access:
+Provides tools for cached Jira data access:
 - cache_get_issue: Get issue (cache-first, upstream fallback, compact mode)
 - cache_get_issues: Batch get multiple issues (single MCP call)
 - cache_search: JQL search with caching
@@ -41,14 +41,15 @@ from mcp.types import TextContent, Tool
 
 # Add scripts/lib to path for JiraAPI + auth reuse
 # Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/scripts)
-# Fallback for standalone testing: resolve relative to this file (mcp-servers/jira-cache/ -> root -> scripts/)
+# Fallback for standalone testing: resolve relative to this file (mcp-servers/atlassian-cache/ -> root -> scripts/)
 _scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
 if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
 
-# Local imports (jira_cache to avoid namespace collision with scripts/lib)
-from jira_cache.cache import JiraCache, strip_noise
-from jira_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
+# Local imports (atlassian_cache to avoid namespace collision with scripts/lib)
+from atlassian_cache.cache import JiraCache, strip_noise
+from atlassian_cache.confluence_cache import ConfluenceCache
+from atlassian_cache.embeddings import EmbeddingStore, embedding_text as _embedding_text
 from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
@@ -57,7 +58,7 @@ logging.basicConfig(
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     stream=sys.stderr,
 )
-logger = logging.getLogger("jira-cache")
+logger = logging.getLogger("atlassian-cache")
 
 # Claude Code MCP token limit is ~30K chars; keep well under
 MAX_RESPONSE_CHARS = 25_000
@@ -76,6 +77,10 @@ _ISSUE_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{0,9}-\d{1,6}$")
 # S3: Whitelist for Jira field names — only alphanumeric + underscore + comma + spaces
 # Prevents injection of unexpected chars into the Jira REST API fields parameter.
 _FIELDS_RE = re.compile(r"^[a-zA-Z0-9_,\s]+$")
+
+# S5: Validate project key format — Jira project keys are 2–10 uppercase alphanumeric chars
+# starting with a letter. Prevents JQL injection via project_key interpolation.
+_PROJECT_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{1,9}$")
 
 # S4: max_age_hours valid range: 0 = bypass cache, 8760 = 1 year max
 _MAX_AGE_MIN = 0.0
@@ -107,10 +112,48 @@ def _clamp_max_age(value: float | None, default: float = 24.0) -> float:
     return max(_MAX_AGE_MIN, min(float(value), _MAX_AGE_MAX))
 
 
+# --- In-session deduplication — reset per MCP session (process lifetime) ---
+
+_session_returned: set[str] = set()
+_COMPACT_LIST_THRESHOLD = 20
+
+
+def _mark_returned(entity_id: str) -> None:
+    _session_returned.add(entity_id)
+
+
+def _already_returned(entity_id: str) -> bool:
+    return entity_id in _session_returned
+
+
+def _compact_ref(entity_id: str, summary: str) -> dict:
+    """Return minimal reference for already-seen entities."""
+    return {"id": entity_id, "summary": summary, "_ref": "returned_this_session"}
+
+
+def _maybe_compact(issues: list[dict]) -> list[dict] | dict:
+    """Use compact headers+rows format for 20+ issue lists."""
+    if len(issues) < _COMPACT_LIST_THRESHOLD:
+        return issues
+    headers = ["key", "summary", "status", "assignee", "sp"]
+    rows = [
+        [
+            i.get("key", ""),
+            i.get("summary", ""),
+            i.get("status", ""),
+            i.get("assignee", ""),
+            i.get("sp"),
+        ]
+        for i in issues
+    ]
+    return {"format": "compact", "headers": headers, "rows": rows}
+
+
 # --- Globals (initialized on startup) ---
 cache: JiraCache | None = None
 embeddings: EmbeddingStore | None = None
 jira_api: JiraAPI | None = None
+confluence: ConfluenceCache | None = None
 
 
 # H6: Safe global accessors (prevent NoneType crashes)
@@ -324,14 +367,93 @@ TOOLS = [
             },
         },
     ),
+    # --- Confluence Tools ---
+    Tool(name="cache_get_confluence_page",
+         description="Fetch a Confluence page by ID. Returns cached body_md if fresh, else fetches from Confluence REST API.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"},
+             "max_age_hours": {"type": "number", "default": 4}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_search_confluence",
+         description="FTS5 keyword search across cached Confluence pages (title, body, labels). Uses BM25 ranking.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 10}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_get_confluence_children",
+         description="Get child pages of a given Confluence page_id from cache.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_find_confluence_related",
+         description="Vector search: find Confluence sections semantically similar to a query string.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 5}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_cross_search",
+         description="Cross-modal vector search across both Jira issues and Confluence sections.",
+         inputSchema={"type": "object", "properties": {
+             "query": {"type": "string"},
+             "limit": {"type": "integer", "default": 10}
+         }, "required": ["query"]}),
+
+    Tool(name="cache_invalidate_confluence",
+         description="Remove a Confluence page and its sections from cache.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_refresh_confluence",
+         description="Force-refresh a Confluence page from the Confluence REST API.",
+         inputSchema={"type": "object", "properties": {
+             "page_id": {"type": "string"}
+         }, "required": ["page_id"]}),
+
+    Tool(name="cache_get_confluence_section",
+         description="Fetch a specific Confluence section by section_id (format: '{page_id}::{heading-slug}').",
+         inputSchema={"type": "object", "properties": {
+             "section_id": {"type": "string"}
+         }, "required": ["section_id"]}),
+
+    Tool(name="cache_sprint_confluence",
+         description="Get Confluence pages linked to a sprint via the confluence_sprint_links mapping table.",
+         inputSchema={"type": "object", "properties": {
+             "sprint_id": {"type": "integer"}
+         }, "required": ["sprint_id"]}),
+
+    Tool(name="cache_find_related",
+         description="Given a Jira issue key, find semantically similar Jira issues AND related Confluence sections in one call.",
+         inputSchema={"type": "object", "properties": {
+             "issue_key": {"type": "string"},
+             "limit": {"type": "integer", "default": 5}
+         }, "required": ["issue_key"]}),
+
+    Tool(name="cache_reindex",
+         description="Re-embed all cached entities (Jira issues + Confluence sections). Use after switching embedding models.",
+         inputSchema={"type": "object", "properties": {
+             "entity_type": {"type": "string", "enum": ["jira", "confluence", "all"], "default": "all"}
+         }}),
+
+    Tool(name="cache_sync",
+         description="Incremental Jira sync: fetch issues updated since N hours ago and upsert into cache.",
+         inputSchema={"type": "object", "properties": {
+             "project_key": {"type": "string"},
+             "since_hours": {"type": "number", "default": 24.0}
+         }, "required": ["project_key"]}),
 ]
 
 
 def _init() -> None:
     """Initialize cache, embeddings, and upstream API client."""
-    global cache, embeddings, jira_api
+    global cache, embeddings, jira_api, confluence
 
     cache = JiraCache()
+    confluence = ConfluenceCache(cache.conn, cache._lock)
     # C3: Pass shared write lock so EmbeddingStore serialises SQLite writes with JiraCache
     embeddings = EmbeddingStore(cache.conn, cache._lock)
 
@@ -360,7 +482,7 @@ async def _lifespan(server: Server):  # noqa: ARG001
     finally:
         if cache is not None:
             cache.close()
-            logger.info("jira-cache: DB connection closed")
+            logger.info("atlassian-cache: DB connection closed")
 
 
 def _extract_core_fields(issue: dict) -> dict:
@@ -530,14 +652,35 @@ async def handle_cache_get_issue(args: dict) -> str:
         cached = c.get_issue(issue_key, max_age_hours=max_age)
         if cached:
             logger.info("Cache HIT: %s", issue_key)
+            _mark_returned(issue_key)
             issue_data = _compact_issue(cached) if compact else cached
             return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+
+        # T12: Lazy version-check — if stale by TTL, do a cheap upstream 'updated' check
+        # before committing to a full refresh (~50ms vs full fetch)
+        if jira_api:
+            stale_cached = c.get_issue_stale(issue_key)
+            if stale_cached and "_cached_at" in stale_cached:
+                try:
+                    resp = await asyncio.to_thread(jira_api.get_issue, issue_key, fields="updated")
+                    upstream_updated = (resp.get("fields") or {}).get("updated", "")
+                    cached_at_iso = stale_cached.get("_cached_at_iso", "")
+                    if upstream_updated and cached_at_iso and upstream_updated <= cached_at_iso:
+                        # Issue unchanged upstream — serve stale data as cache hit
+                        logger.info("Cache LAZY-HIT: %s (upstream unchanged)", issue_key)
+                        _mark_returned(issue_key)
+                        issue_data = _compact_issue(stale_cached) if compact else stale_cached
+                        return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+                    logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
+                except Exception:
+                    pass  # On any error, fall through to full refresh
 
     # Cache miss or force_refresh — fetch upstream
     if not jira_api:
         # P2-D: Stale fallback when upstream unavailable
         stale = c.get_issue_stale(issue_key)
         if stale:
+            _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
             return json.dumps(
                 {
@@ -556,12 +699,14 @@ async def handle_cache_get_issue(args: dict) -> str:
         # C4: Run CPU-bound model inference off the event loop to avoid blocking
         if embeddings and embeddings.available:
             await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
+        _mark_returned(issue_key)
         issue_data = _compact_issue(issue) if compact else issue
         return json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
     except Exception as e:
         # P2-D: Stale fallback on upstream error
         stale = c.get_issue_stale(issue_key)
         if stale:
+            _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
             return json.dumps(
                 {
@@ -641,8 +786,15 @@ async def handle_cache_get_issues(args: dict) -> str:
 
     all_issues = found_issues + upstream_issues
 
+    for issue in all_issues:
+        key = issue.get("key") if isinstance(issue, dict) else None
+        if key:
+            _mark_returned(key)
+
     if compact:
         all_issues = [_compact_issue(i) for i in all_issues]
+
+    issues_payload = _maybe_compact(all_issues) if not compact else all_issues
 
     result: dict = {
         "source": "batch",
@@ -650,7 +802,7 @@ async def handle_cache_get_issues(args: dict) -> str:
         "from_cache": len(found_issues),
         "from_upstream": len(upstream_issues),
         "still_missing": [k for k in missing_keys if k not in {i.get("key") for i in upstream_issues}],
-        "issues": all_issues,
+        "issues": issues_payload,
     }
     if invalid_keys:
         result["invalid_keys"] = invalid_keys
@@ -692,7 +844,7 @@ async def handle_cache_search(args: dict) -> str:
             )
             c.put_search(jql, fields, limit, results)
             if embeddings and embeddings.available:
-                embeddings.store_batch(results.get("issues", []))
+                await asyncio.to_thread(embeddings.store_batch, results.get("issues", []))
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Search failed: {type(e).__name__}: {str(e)[:200]}"})
@@ -701,6 +853,12 @@ async def handle_cache_search(args: dict) -> str:
     if start_at > 0:
         issues = results.get("issues", [])
         results = {**results, "issues": issues[start_at:], "startAt": start_at}
+
+    # Apply compact format for large lists
+    search_issues = results.get("issues", [])
+    compacted = _maybe_compact(search_issues)
+    if compacted is not search_issues:
+        results = {**results, "issues": compacted}
 
     return json.dumps({"source": source, "results": results}, ensure_ascii=False)
 
@@ -759,7 +917,7 @@ async def handle_cache_sprint_issues(args: dict) -> str:
             results = {"issues": all_issues, "total": len(all_issues)}
             c.put_search(jql, fields, 50, results, sprint_id=sprint_id)
             if embeddings and embeddings.available:
-                embeddings.store_batch(all_issues)
+                await asyncio.to_thread(embeddings.store_batch, all_issues)
             source = "upstream"
         except Exception as e:
             return json.dumps({"error": f"Sprint fetch failed: {type(e).__name__}: {str(e)[:200]}"})
@@ -768,6 +926,12 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     if response_offset > 0:
         issues = results.get("issues", [])
         results = {**results, "issues": issues[response_offset:], "startAt": response_offset}
+
+    # Apply compact format for large lists
+    sprint_issues = results.get("issues", [])
+    compacted = _maybe_compact(sprint_issues)
+    if compacted is not sprint_issues:
+        results = {**results, "issues": compacted}
 
     return json.dumps({"source": source, "results": results}, ensure_ascii=False)
 
@@ -882,7 +1046,7 @@ async def handle_cache_refresh(args: dict) -> str:
                 issues = page.get("issues", [])
                 c.put_issues_batch(issues)
                 if embeddings and embeddings.available:
-                    embeddings.store_batch(issues)
+                    await asyncio.to_thread(embeddings.store_batch, issues)
                 refreshed.extend(i.get("key", "") for i in issues)
                 pages_fetched += 1
                 if not issues or start_at + len(issues) >= page.get("total", 0):
@@ -897,6 +1061,7 @@ async def handle_cache_refresh(args: dict) -> str:
 async def handle_cache_stats(args: dict) -> str:
     """Cache statistics."""
     stats = _require_cache().get_stats()
+    stats["embedding_available"] = bool(embeddings and embeddings.available)
     if embeddings:
         stats["embeddings_count"] = embeddings.count()
         stats["embeddings_available"] = embeddings.available
@@ -968,6 +1133,149 @@ async def handle_cache_invalidate(args: dict) -> str:
     return json.dumps({"error": "Specify issue_key, sprint_id, or all=true"})
 
 
+# --- Confluence Handlers ---
+
+
+async def handle_cache_get_confluence_page(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    page_id = arguments["page_id"]
+    max_age = _clamp_max_age(arguments.get("max_age_hours"), 4.0)
+    result = conf.get_page(page_id, max_age_hours=max_age)
+    if result is None:
+        return json.dumps({"error": "not_cached", "page_id": page_id})
+    _mark_returned(page_id)
+    return json.dumps(result, ensure_ascii=False)[:MAX_RESPONSE_CHARS]
+
+
+async def handle_cache_search_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    results = conf.fts_search(arguments["query"], limit=min(int(arguments.get("limit", 10)), 50))
+    return json.dumps({"results": results}, ensure_ascii=False)
+
+
+async def handle_cache_get_confluence_children(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    children = conf.get_children(arguments["page_id"])
+    return json.dumps({"children": children}, ensure_ascii=False)
+
+
+async def handle_cache_find_confluence_related(arguments: dict) -> str:
+    limit = min(int(arguments.get("limit", 5)), 20)
+    results = (
+        embeddings.find_similar(arguments["query"], limit=limit, entity_type="confluence")
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"related": results}, ensure_ascii=False)
+
+
+async def handle_cache_cross_search(arguments: dict) -> str:
+    limit = min(int(arguments.get("limit", 10)), 20)
+    results = (
+        embeddings.find_similar(arguments["query"], limit=limit, entity_type=None)
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"results": results}, ensure_ascii=False)
+
+
+async def handle_cache_invalidate_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf.invalidate(arguments["page_id"])
+    return json.dumps({"invalidated": arguments["page_id"]})
+
+
+async def handle_cache_refresh_confluence(arguments: dict) -> str:
+    page_id = arguments["page_id"]
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf.invalidate(page_id)
+    return json.dumps({
+        "status": "invalidated",
+        "page_id": page_id,
+        "message": "Page cleared. Call cache_get_confluence_page to re-fetch.",
+    })
+
+
+async def handle_cache_get_confluence_section(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    section = conf.get_section(arguments["section_id"])
+    if section is None:
+        return json.dumps({"error": "not_found"})
+    return json.dumps(section, ensure_ascii=False)[:MAX_RESPONSE_CHARS]
+
+
+async def handle_cache_sprint_confluence(arguments: dict) -> str:
+    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    pages = conf.get_sprint_pages(int(arguments["sprint_id"]))
+    return json.dumps({"pages": pages}, ensure_ascii=False)
+
+
+async def handle_cache_find_related(arguments: dict) -> str:
+    """Find semantically similar Jira issues and Confluence sections for an issue."""
+    key = _validate_issue_key(arguments["issue_key"])
+    limit = min(int(arguments.get("limit", 5)), 20)
+    issue = _require_cache().get_issue(key, max_age_hours=9999)
+    if not issue:
+        return json.dumps({"error": "not_cached"})
+    query = _embedding_text(issue)
+    results = (
+        embeddings.find_similar(query, limit=limit, exclude_keys=[key], entity_type=None)
+        if embeddings and embeddings.available
+        else []
+    )
+    return json.dumps({"related": results}, ensure_ascii=False)
+
+
+def _reindex_sections(sections: list) -> int:
+    """Blocking helper: store embeddings for Confluence sections."""
+    count = 0
+    for sec in sections:
+        embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
+        count += 1
+    return count
+
+
+async def handle_cache_reindex(arguments: dict) -> str:
+    """Re-embed all cached entities."""
+    entity_type = arguments.get("entity_type", "all")
+    count = 0
+    c = _require_cache()
+    if embeddings and embeddings.available:
+        if entity_type in ("jira", "all"):
+            issues = c.get_all_issues()
+            count += await asyncio.to_thread(embeddings.store_batch, issues)
+        if entity_type in ("confluence", "all") and confluence:
+            sections = confluence.get_all_sections()
+            count += await asyncio.to_thread(_reindex_sections, sections)
+    return json.dumps({"reindexed": count, "entity_type": entity_type}, ensure_ascii=False)
+
+
+async def handle_cache_sync(arguments: dict) -> str:
+    """Incremental Jira sync: fetch issues updated since N hours ago."""
+    from datetime import datetime, timedelta, timezone
+    proj = arguments["project_key"].upper()
+    if not _PROJECT_KEY_RE.match(proj):
+        return json.dumps({"error": "invalid_project_key"})
+    since_hours = float(arguments.get("since_hours", 24.0))
+    since = datetime.now(tz=timezone.utc) - timedelta(hours=since_hours)
+    jql = f'project = {proj} AND updated >= "{since.strftime("%Y-%m-%d %H:%M")}"'
+    if not jira_api:
+        return json.dumps({"error": "Upstream API not available"})
+    issues = await asyncio.to_thread(
+        _timed_upstream,
+        f"sync({proj})",
+        jira_api.search_issues,
+        jql,
+        fields="summary,status,assignee,issuetype,priority,labels,parent,description",
+        max_results=200,
+    )
+    issue_list = issues.get("issues", []) if isinstance(issues, dict) else issues
+    c = _require_cache()
+    for issue in issue_list:
+        c.put_issue(issue["key"], issue)
+    return json.dumps({"synced": len(issue_list), "since_hours": since_hours}, ensure_ascii=False)
+
+
 # --- Argument coercion (Claude sends strings for int/bool/number) ---
 
 # Build schema lookup: tool_name -> {param_name: type_spec}
@@ -1027,12 +1335,26 @@ HANDLERS = {
     "cache_refresh": handle_cache_refresh,
     "cache_stats": handle_cache_stats,
     "cache_invalidate": handle_cache_invalidate,
+    # Confluence
+    "cache_get_confluence_page": handle_cache_get_confluence_page,
+    "cache_search_confluence": handle_cache_search_confluence,
+    "cache_get_confluence_children": handle_cache_get_confluence_children,
+    "cache_find_confluence_related": handle_cache_find_confluence_related,
+    "cache_cross_search": handle_cache_cross_search,
+    "cache_invalidate_confluence": handle_cache_invalidate_confluence,
+    "cache_refresh_confluence": handle_cache_refresh_confluence,
+    "cache_get_confluence_section": handle_cache_get_confluence_section,
+    "cache_sprint_confluence": handle_cache_sprint_confluence,
+    # New Jira tools
+    "cache_find_related": handle_cache_find_related,
+    "cache_reindex": handle_cache_reindex,
+    "cache_sync": handle_cache_sync,
 }
 
 
 async def main() -> None:  # pragma: no cover
     """Run MCP server over stdio."""
-    server = Server("jira-cache", lifespan=_lifespan)
+    server = Server("atlassian-cache", lifespan=_lifespan)
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
@@ -1072,7 +1394,7 @@ async def main() -> None:  # pragma: no cover
             safe_msg = f"{type(e).__name__}: {str(e)[:200]}"
             return [TextContent(type="text", text=json.dumps({"error": safe_msg}))]
 
-    logger.info("Starting jira-cache (stdio)")
+    logger.info("Starting atlassian-cache (stdio)")
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 

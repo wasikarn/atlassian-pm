@@ -2,7 +2,7 @@
 name: backlog-groomer
 description: Pre-sprint backlog health assessment. Accepts JQL query or epic key, fetches all To Do/Backlog stories, checks readiness criteria (has ACs, SP estimate, epic link, VS label, no unresolved blocker), groups output into Sprint-Ready / Needs AC / Blocked / Missing Estimate / Orphan categories. Also scores WSJF and flags aging items.
 model: sonnet
-tools: Read, mcp__jira-cache__cache_get_issue, mcp__jira-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
+tools: Read, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 20
 ---

@@ -29,7 +29,7 @@ if [[ "$(uname)" != "Darwin" ]]; then
   exit 1
 fi
 
-# Python 3.11+ required for jira-cache
+# Python 3.11+ required for atlassian-cache
 if ! python3 -c "import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)" 2>/dev/null; then
   PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "unknown")
   echo "ERROR: Python 3.11+ required (found: Python $PY_VER)"
@@ -163,14 +163,14 @@ else
   echo "      uv: installed ✓"
 fi
 
-echo "[3/3] Syncing jira-cache venv..."
+echo "[3/3] Syncing atlassian-cache venv..."
 # Resolve data dir: prefer CLAUDE_PLUGIN_DATA env, else discover atlassian-pm-* (new naming), else fallback to atlassian-pm/
 if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
   CLAUDE_PLUGIN_DATA=$(ls -d "$HOME/.claude/plugins/data/atlassian-pm-"* 2>/dev/null | sort -V | tail -1)
   [ -z "$CLAUDE_PLUGIN_DATA" ] && CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm"
 fi
 UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
-  uv sync --project "$PLUGIN_ROOT/mcp-servers/jira-cache" \
+  uv sync --project "$PLUGIN_ROOT/mcp-servers/atlassian-cache" \
   --extra embeddings --quiet \
   && echo "      venv: ready ✓" \
   || echo "      venv: sync failed (cache features degraded — core Jira ops still work)"
@@ -463,8 +463,8 @@ claude mcp get mcp-atlassian &>/dev/null \
   || echo "  ✗  mcp-atlassian: not found — run: /atlassian-pm:setup"
 
 [ -f "${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm}/venv/bin/python" ] \
-  && echo "  ✓  jira-cache: venv ready" \
-  || echo "  !  jira-cache: venv missing (cache features degraded)"
+  && echo "  ✓  atlassian-cache: venv ready" \
+  || echo "  !  atlassian-cache: venv missing (cache features degraded)"
 
 if [ -f "${PLUGIN_ROOT}/.claude/project-config.json" ] && \
    ! grep -q "acme-corp.atlassian.net" "${PLUGIN_ROOT}/.claude/project-config.json"; then
@@ -502,7 +502,7 @@ If **Skip for now**:
 
   ✓  acli              authenticated
   ✓  mcp-atlassian     configured (user scope)
-  ✓  jira-cache venv ready
+  ✓  atlassian-cache venv ready
   ✓  project-config    <KEY> @ <SITE>
 
 → /atlassian-pm:doctor    verify health at any time
