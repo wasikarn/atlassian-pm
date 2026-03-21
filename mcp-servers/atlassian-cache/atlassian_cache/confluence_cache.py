@@ -48,6 +48,11 @@ class ConfluenceCache:
 
     Shares the SQLite connection from JiraCache. No close() method —
     connection lifetime is managed by JiraCache.
+
+    Reads (get_page, get_version, get_sections) do not acquire _lock — this
+    is consistent with JiraCache and safe under CPython's sqlite3 C-level
+    serialisation. Write methods (put_page, invalidate, put_sections) always
+    acquire _lock before executing.
     """
 
     def __init__(self, conn: Any, lock: threading.Lock | None = None) -> None:
@@ -153,6 +158,10 @@ class ConfluenceCache:
         Returns:
             changed: Sections that were new or updated.
             removed: section_ids that were deleted.
+
+        Note: The put (changed) and delete (removed) operations acquire the lock
+        separately. In the rare case of a concurrent write between them, the second
+        acquire may see unexpected state. Acceptable for Confluence cache refresh.
         """
         old_rows = self.get_sections(page_id)
         old_by_id = {r["section_id"]: SectionData(

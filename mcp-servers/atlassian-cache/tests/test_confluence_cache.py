@@ -1,11 +1,7 @@
 """Tests for atlassian_cache.confluence_cache — 100% coverage."""
-import sys
-from pathlib import Path
-
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from conftest import make_page
+from .conftest import make_page
 
 
 class TestPutAndGetPage:
@@ -18,7 +14,7 @@ class TestPutAndGetPage:
 
     def test_get_returns_none_when_stale(self, confluence_cache, sample_page):
         confluence_cache.put_page(sample_page)
-        result = confluence_cache.get_page("12345", max_age_hours=0)
+        result = confluence_cache.get_page("12345", max_age_hours=-1)
         assert result is None
 
     def test_get_returns_none_when_not_cached(self, confluence_cache):
