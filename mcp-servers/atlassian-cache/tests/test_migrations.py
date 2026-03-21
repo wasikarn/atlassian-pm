@@ -28,9 +28,24 @@ def test_migrate_is_idempotent(conn):
     assert version == SCHEMA_VERSION
 
 
-def test_user_version_matches_constant(conn):
-    """user_version after migration equals SCHEMA_VERSION constant."""
+def test_partial_migration_from_v1_applies_remaining_steps(conn):
+    """Starting from v1, migrate() applies v2 and v3 without re-running v1 DDL."""
+    # Bootstrap to v1 manually (avoids calling migrate() which would go to SCHEMA_VERSION)
+    from atlassian_cache import migrations as m
+    conn.executescript(m._SCHEMA_V1)
+    conn.execute("PRAGMA user_version = 1")
+    conn.commit()
+
     migrate(conn)
+
+    # v2 adds purged_issues stat row
+    row = conn.execute("SELECT value FROM cache_stats WHERE key = 'purged_issues'").fetchone()
+    assert row is not None, "purged_issues stat row missing — v2 migration not applied"
+
+    # v3 adds sprint_id column to searches
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(searches)")}
+    assert "sprint_id" in cols, "sprint_id column missing — v3 migration not applied"
+
     assert conn.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
 
 

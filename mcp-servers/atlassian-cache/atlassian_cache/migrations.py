@@ -73,7 +73,7 @@ INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('hits', 0);
 INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('misses', 0);
 """
 
-# Migration to v2: drop accessed_at column (P1-B), add purge stats
+# M2: Migration to v2: drop accessed_at column (P1-B), add purge stats
 _MIGRATION_V2 = """
 -- P1-B: accessed_at is unused (deferred stat counting replaces it)
 -- SQLite doesn't support DROP COLUMN before 3.35 so we just leave it
@@ -108,7 +108,7 @@ def migrate(conn: sqlite3.Connection) -> None:
     if current == 0:
         # Fresh database — apply full v1 schema
         conn.executescript(_SCHEMA_V1)
-        conn.execute(f"PRAGMA user_version = 1")
+        conn.execute("PRAGMA user_version = 1")
         conn.commit()
         current = 1
         logger.info("migrations: initialized schema at v1")
@@ -126,6 +126,9 @@ def migrate(conn: sqlite3.Connection) -> None:
                 stmt = statement.strip()
                 if stmt:
                     conn.execute(stmt)
+            # PRAGMA user_version writes to the DB header outside the WAL journal —
+            # it cannot be rolled back. Must stay AFTER all DML so that any DML
+            # failure raises before this line, leaving user_version unchanged.
             conn.execute(f"PRAGMA user_version = {version}")
             conn.commit()
             logger.info("migrations: v%d applied", version)
