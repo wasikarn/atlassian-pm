@@ -244,3 +244,48 @@ jira_add_comment(
 - [Confluence Templates](../../../references/templates-core.md)
 - [Tools Reference](../../../references/tools.md)
 - Chain from: `/plan-release` → `/close-sprint` → `/release-notes`
+
+---
+
+## 🎓 Domain Expert Notes
+
+### Why This Approach
+
+Release notes serve two distinct audiences with opposing needs: engineers want completeness and traceability (every fix key, every breaking change), while stakeholders want impact narrative ("what does this mean for me?"). The skill's phase structure — fetch → group → draft → review → publish — enforces the separation: grouping by type (Features / Bug Fixes / Improvements) satisfies the engineer audience; the "What's Changed" narrative paragraph satisfies stakeholders.
+
+### Industry Frameworks Used
+
+| Framework | Applied In | Why |
+| --------- | --------- | --- |
+| Keep a Changelog format | Phase 3 page structure (Added/Fixed/Changed groupings) | Industry-standard changelog format (keepachangelog.com) — audiences instantly recognize the structure and can scan for relevant change type |
+| Semantic Versioning (SemVer 2.0) | `--version` argument parsing | MAJOR.MINOR.PATCH signals impact at a glance — MAJOR = breaking change, MINOR = new feature, PATCH = bugfix; aligns stakeholder expectations before they read content |
+| Audience segmentation | Phase 3 narrative paragraph vs. issue table | Internal engineers read the table; external stakeholders read the narrative — single page, two reading paths |
+
+### Key Metrics
+
+- **Coverage ratio:** `(issues in release notes) / (issues in Fix Version with resolution=Done)` — target 100%; any gap means a delivered change is invisible to stakeholders
+- **Time-to-publish:** Duration from sprint close to release notes published — industry target is same-day; notes published >3 days after release lose stakeholder trust
+- **Narrative readability:** The "What's Changed" paragraph should pass the "non-engineer stakeholder test" — zero Jira keys, zero technical acronyms, focus on user-facing outcomes only
+
+### Expert Decision Criteria
+
+- If a Fix Version contains >30 issues → group sub-epics before listing individual tasks to avoid list overload; the narrative paragraph becomes critical at this scale
+- If the release contains any MAJOR version bump (SemVer) → add a dedicated "Breaking Changes" section at the top of Phase 3 draft, before Features — breaking changes must be impossible to miss
+- If `--dry-run` output shows issues in the "Other" group → those issues lack proper issuetype or label classification; fix at the Jira level before publishing, not in the notes
+- If publishing notes for an Unreleased version → add a banner "DRAFT — not yet released" to the Confluence page to prevent stakeholder confusion
+
+### Common Failure Modes
+
+| Symptom | Root Cause | Expert Fix |
+| ------- | --------- | --------- |
+| Phase 2 returns 0 issues | Fix Version not created in Jira, or no issues have `fixVersion` set | Create the version in Jira Project Settings → Versions, then bulk-edit issues to set `fixVersion` |
+| All issues land in "Other" group | Issues use non-standard issuetypes or missing labels | Standardise: Stories → Features, Tasks with `[Bug]` prefix → Bug Fixes, Tasks with `tech-debt` label → Improvements |
+| Confluence page published with broken ADF | ADF draft generated with unsupported macro via MCP (HR4) | Use `--dry-run` first; if macros appear in draft, switch to `update_page_storage.py` for the publish step |
+| Stakeholders ask "what changed for me?" after reading | Notes written for engineers only — all Jira keys, no narrative | The "What's Changed" paragraph is mandatory; tech jargon in that section is a content quality failure |
+| Duplicate "Release Notes" pages in Confluence | Ran without `--update` when page already exists | Add parent page ID convention and check for existing page title before creating |
+
+### Authoritative References
+
+- **Keep a Changelog (keepachangelog.com):** "Don't dump your git log" — curated, human-written changelogs consistently outperform auto-generated ones for stakeholder comprehension
+- **Semantic Versioning 2.0.0 (semver.org):** Version numbers communicate intent — a PATCH release should contain only backwards-compatible bug fixes; audience expectations are set before they open the page
+- **Atlassian Release Management Guide:** Fix Versions in Jira are the canonical grouping unit for releases — sprints are planning units, versions are delivery units; these should never be conflated
