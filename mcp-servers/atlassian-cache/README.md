@@ -54,7 +54,7 @@ Claude Code ──stdio──> atlassian-cache ──REST API──> Jira Cloud
 ```bash
 # 1. Install dependencies (uv manages the venv)
 cd mcp-servers/atlassian-cache
-uv sync --extra embeddings
+uv sync
 
 # 2. Verify credentials exist
 cat ~/.config/atlassian/.env

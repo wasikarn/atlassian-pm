@@ -9,13 +9,11 @@ description = "Unified Jira + Confluence cache MCP server with SQLite FTS5 + vec
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0,<2",
-]
-
-[project.optional-dependencies]
-embeddings = [
     "sqlite-vec>=0.1.1,<1",
     "sentence-transformers>=3.0.0,<4",
 ]
+
+[project.optional-dependencies]
 test = [
     "pytest>=8.0,<9",
     "pytest-asyncio>=0.24,<1",
