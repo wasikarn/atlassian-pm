@@ -383,6 +383,82 @@ class TestHandleCacheGetIssue:
         emb.store_embedding.assert_called_once()
         server.embeddings = None
 
+    # --- T12: Lazy version-check tests ---
+
+    @pytest.mark.asyncio
+    async def test_lazy_hit_when_upstream_unchanged(self, cache, mock_jira_api):
+        """T12: Stale cache + upstream 'updated' unchanged → serve from cache (lazy HIT)."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        # Simulate upstream returning the same or older 'updated' timestamp
+        cached = cache.get_issue_stale("BEP-1")
+        cached_at_iso = cached["_cached_at_iso"]
+        mock_jira_api.get_issue.return_value = {"fields": {"updated": cached_at_iso}}
+        # max_age_hours=0 forces stale path
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "cache"
+        # Should have called upstream only once (the cheap updated-field check)
+        mock_jira_api.get_issue.assert_called_once()
+        call_kwargs = mock_jira_api.get_issue.call_args
+        assert call_kwargs.kwargs.get("fields") == "updated" or (
+            len(call_kwargs.args) > 1 and call_kwargs.args[1] == "updated"
+        )
+
+    @pytest.mark.asyncio
+    async def test_lazy_miss_when_upstream_changed(self, cache, mock_jira_api):
+        """T12: Stale cache + upstream 'updated' is newer → full refresh (lazy MISS)."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        # First call: cheap check returns a newer upstream timestamp
+        # Second call: full refresh
+        full_issue = make_issue(key="BEP-1", summary="Updated upstream")
+        mock_jira_api.get_issue.side_effect = [
+            {"fields": {"updated": "2099-12-31T23:59:59.000+0000"}},  # newer → lazy miss
+            full_issue,  # full refresh
+        ]
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "upstream"
+        assert mock_jira_api.get_issue.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_skipped_without_cached_at(self, cache, mock_jira_api):
+        """T12: If cached data has no _cached_at (pre-T12 entry), lazy check is skipped."""
+        # Insert a raw issue without _cached_at metadata (simulates legacy entry)
+        cache.conn.execute(
+            "INSERT OR REPLACE INTO issues (issue_key, summary, data, cached_at) VALUES (?, ?, ?, ?)",
+            ("BEP-1", "Legacy", '{"key": "BEP-1", "fields": {"summary": "Legacy"}}', "2000-01-01T00:00:00"),
+        )
+        cache.conn.commit()
+        full_issue = make_issue(key="BEP-1")
+        mock_jira_api.get_issue.return_value = full_issue
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        # Falls through to full refresh
+        assert result["source"] == "upstream"
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_error_falls_through(self, cache, mock_jira_api):
+        """T12: If lazy check throws, fall through to full refresh silently."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        full_issue = make_issue(key="BEP-1", summary="Refreshed")
+        mock_jira_api.get_issue.side_effect = [
+            Exception("network error"),  # lazy check fails
+            full_issue,  # full refresh succeeds
+        ]
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        assert result["source"] == "upstream"
+        assert mock_jira_api.get_issue.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_lazy_check_skipped_when_no_jira_api(self, cache):
+        """T12: Lazy check is skipped when jira_api is None."""
+        issue = make_issue(key="BEP-1")
+        cache.put_issue("BEP-1", issue)
+        server.jira_api = None
+        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        # Falls through to stale_cache path (no API available)
+        assert result["source"] == "stale_cache"
+
 
 class TestHandleCacheGetIssues:
     @pytest.mark.asyncio

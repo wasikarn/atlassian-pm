@@ -19,7 +19,8 @@ import os
 import re
 import sqlite3
 import threading
-from datetime import datetime, timedelta
+import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -302,6 +303,11 @@ class JiraCache:
         """
         # P2-A: Strip noise BEFORE storing
         data = strip_noise(data)
+
+        # T12: Embed cache timestamp metadata so callers can do lazy version-checks
+        now_ts = time.time()
+        now_iso = datetime.fromtimestamp(now_ts, tz=timezone.utc).isoformat()
+        data = {**data, "_cached_at": now_ts, "_cached_at_iso": now_iso}
 
         fields = data.get("fields", {})
         description_text = extract_adf_text(fields.get("description"))
