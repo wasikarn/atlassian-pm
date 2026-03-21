@@ -138,7 +138,7 @@ if [[ "$MODE" != "--doctor" ]]; then
     info "Phase 1: uv sync venv..."
     if UV_PROJECT_ENVIRONMENT="${PLUGIN_DATA}/venv" \
         uv sync --project "${PLUGIN_ROOT}/mcp-servers/atlassian-cache" \
-        --extra embeddings --quiet 2>&1; then
+        --quiet 2>&1; then
       pass "venv synced ✓"
     else
       fail "uv sync FAILED"
