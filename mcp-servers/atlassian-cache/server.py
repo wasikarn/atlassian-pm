@@ -78,6 +78,10 @@ _ISSUE_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{0,9}-\d{1,6}$")
 # Prevents injection of unexpected chars into the Jira REST API fields parameter.
 _FIELDS_RE = re.compile(r"^[a-zA-Z0-9_,\s]+$")
 
+# S5: Validate project key format — Jira project keys are 2–10 uppercase alphanumeric chars
+# starting with a letter. Prevents JQL injection via project_key interpolation.
+_PROJECT_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]{1,9}$")
+
 # S4: max_age_hours valid range: 0 = bypass cache, 8760 = 1 year max
 _MAX_AGE_MIN = 0.0
 _MAX_AGE_MAX = 8760.0
@@ -1202,6 +1206,15 @@ async def handle_cache_find_related(arguments: dict) -> str:
     return json.dumps({"related": results}, ensure_ascii=False)
 
 
+def _reindex_sections(sections: list) -> int:
+    """Blocking helper: store embeddings for Confluence sections."""
+    count = 0
+    for sec in sections:
+        embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
+        count += 1
+    return count
+
+
 async def handle_cache_reindex(arguments: dict) -> str:
     """Re-embed all cached entities."""
     entity_type = arguments.get("entity_type", "all")
@@ -1210,12 +1223,10 @@ async def handle_cache_reindex(arguments: dict) -> str:
     if embeddings and embeddings.available:
         if entity_type in ("jira", "all"):
             issues = c.get_all_issues()
-            count += embeddings.store_batch(issues)
+            count += await asyncio.to_thread(embeddings.store_batch, issues)
         if entity_type in ("confluence", "all") and confluence:
             sections = confluence.get_all_sections()
-            for sec in sections:
-                embeddings.store_embedding(sec["section_id"], sec["body_md"], entity_type="confluence")
-                count += 1
+            count += await asyncio.to_thread(_reindex_sections, sections)
     return json.dumps({"reindexed": count, "entity_type": entity_type}, ensure_ascii=False)
 
 
@@ -1223,12 +1234,15 @@ async def handle_cache_sync(arguments: dict) -> str:
     """Incremental Jira sync: fetch issues updated since N hours ago."""
     from datetime import datetime, timedelta, timezone
     proj = arguments["project_key"].upper()
+    if not _PROJECT_KEY_RE.match(proj):
+        return json.dumps({"error": "invalid_project_key"})
     since_hours = float(arguments.get("since_hours", 24.0))
     since = datetime.now(tz=timezone.utc) - timedelta(hours=since_hours)
     jql = f'project = {proj} AND updated >= "{since.strftime("%Y-%m-%d %H:%M")}"'
     if not jira_api:
         return json.dumps({"error": "Upstream API not available"})
-    issues = _timed_upstream(
+    issues = await asyncio.to_thread(
+        _timed_upstream,
         f"sync({proj})",
         jira_api.search_issues,
         jql,
