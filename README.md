@@ -1,6 +1,6 @@
 # atlassian-pm
 
-> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language.
+> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
 [![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -98,9 +98,12 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | --- | --- |
 | `/atlassian-pm:create-story` | **Recommended** — Story + Sub-tasks in one workflow |
 | `/atlassian-pm:create-epic` | Epic + Confluence doc with RICE scoring |
+| `/atlassian-pm:plan-release` | Multi-sprint release plan + Confluence page + Jira Fix Version |
 | `/atlassian-pm:create-task` | Task: `tech-debt`, `bug`, `chore`, or `spike` |
+| `/atlassian-pm:bug-triage` | Full triage: intake → P1/P2/P3 severity → dedup check → assign |
 | `/atlassian-pm:analyze-story ABC-123` | Explore codebase → create Sub-tasks for existing Story |
 | `/atlassian-pm:create-testplan ABC-123` | Test Plan + `[QA]` Sub-tasks from Story ACs |
+| `/atlassian-pm:spec-to-stories 12345` | Convert Confluence spec page → batch-create User Stories |
 
 ### Issue Updates
 
@@ -125,8 +128,11 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | Command | Flags | Description |
 | --- | --- | --- |
 | `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | 8-phase planning: capacity + carry-over + assign |
-| `/atlassian-pm:map-dependencies` | | Critical path + swim lane analysis |
-| `/atlassian-pm:activity-report` | | Work activity report from session history |
+| `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
+| `/atlassian-pm:close-sprint` | `--sprint 123` | Close sprint: triage incomplete → move → Confluence review |
+| `/atlassian-pm:standup-report` | `--post` | Daily standup digest per assignee with anomaly detection |
+| `/atlassian-pm:reschedule-sprint` | `--sprint 123 --shift +7` | Bulk-shift issue dates across a sprint or issue list |
+| `/atlassian-pm:activity-report` | `--hours 48` | Work activity report from session history |
 
 ### Confluence
 
@@ -134,6 +140,8 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | --- | --- |
 | `/atlassian-pm:create-doc` | Create page: `tech-spec`, `adr`, `parent` |
 | `/atlassian-pm:update-doc` | Update or move a Confluence page |
+| `/atlassian-pm:scan-tech-debt` | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
+| `/atlassian-pm:release-notes` | Generate Confluence release notes from a Jira Fix Version |
 
 ---
 
@@ -426,11 +434,11 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← slash-command skills only (7 categories)
+skills/                        ← 31 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
 ├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release
-├── story/                     ← create-story, analyze-story, spec-to-stories, verify-issue, sync-artifacts
-├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-story, update-subtask, update-task
+├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
+├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-subtask, update-task
 ├── sprint/                    ← plan-sprint, map-dependencies, close-sprint, standup-report, reschedule-sprint
 ├── confluence/                ← create-doc, update-doc
 └── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts
