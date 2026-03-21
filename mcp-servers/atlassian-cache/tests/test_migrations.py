@@ -96,3 +96,29 @@ def test_v4_confluence_sections_fk(conn):
             ("ghost::intro", "ghost-page-id", "Intro", "text", "hash123", "2026-01-01")
         )
     # No commit needed — the execute raised before any data was written
+
+
+def test_v5_fts_porter_tokenizer(conn):
+    """v5 creates issues_fts with porter tokenizer (stemming works)."""
+    migrate(conn)
+    # Insert an issue with "running" in summary
+    conn.execute("""INSERT INTO issues
+        (issue_key, summary, status, assignee, issue_type, labels, description_text, data, cached_at)
+        VALUES (?,?,?,?,?,?,?,?,?)""",
+        ("BEP-1", "running tests", "To Do", "alice", "Story", "[]", "", "{}", "2026-01-01")
+    )
+    conn.commit()
+    # Porter stemming: "run" should match "running"
+    rows = conn.execute(
+        "SELECT issue_key FROM issues_fts WHERE issues_fts MATCH 'run'"
+    ).fetchall()
+    assert any(r[0] == "BEP-1" for r in rows)
+
+
+def test_v5_confluence_fts_exists(conn):
+    """v5 creates confluence_fts table."""
+    migrate(conn)
+    tables = {r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )}
+    assert "confluence_fts" in tables

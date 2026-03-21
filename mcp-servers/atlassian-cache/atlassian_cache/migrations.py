@@ -4,11 +4,12 @@ All DDL lives here. cache.py and confluence_cache.py delegate to migrate().
 """
 import logging
 import sqlite3
+from typing import Callable, Union
 
 logger = logging.getLogger(__name__)
 
 # Increment whenever a new migration step is added
-SCHEMA_VERSION = 4  # Will become 5 in later tasks
+# SCHEMA_VERSION is defined after _MIGRATIONS dict (near bottom of module)
 
 # --- DDL ---
 
@@ -136,11 +137,112 @@ INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('confluence_hits', 0);
 INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('confluence_misses', 0);
 """
 
-_MIGRATIONS: dict[int, str] = {
+# M5: Migration to v5: FTS5 porter tokenizer, labels_text/assignee_name columns, confluence_fts
+# Uses a callable instead of raw SQL string because CREATE TRIGGER bodies contain
+# internal semicolons that would break the simple split(";") approach used for v2-v4.
+def _apply_migration_v5(conn: sqlite3.Connection) -> None:
+    """Apply v5: porter tokenizer FTS, new columns, confluence_fts."""
+    # Step 1: Add new columns (simple ALTER TABLE — safe with split approach)
+    conn.execute("ALTER TABLE issues ADD COLUMN labels_text TEXT DEFAULT ''")
+    conn.execute("ALTER TABLE issues ADD COLUMN assignee_name TEXT DEFAULT ''")
+
+    # Step 2: Drop old FTS table and triggers
+    conn.execute("DROP TABLE IF EXISTS issues_fts")
+    conn.execute("DROP TRIGGER IF EXISTS issues_fts_insert")
+    conn.execute("DROP TRIGGER IF EXISTS issues_fts_delete")
+    conn.execute("DROP TRIGGER IF EXISTS issues_fts_update")
+
+    # Step 3: Recreate FTS table with porter tokenizer + new columns
+    conn.execute("""
+        CREATE VIRTUAL TABLE issues_fts USING fts5(
+            issue_key UNINDEXED,
+            summary,
+            description_text,
+            labels_text,
+            assignee_name,
+            content=issues,
+            content_rowid=rowid,
+            tokenize='porter unicode61'
+        )
+    """)
+
+    # Step 4: Recreate triggers for issues_fts
+    conn.execute("""
+        CREATE TRIGGER issues_fts_insert AFTER INSERT ON issues BEGIN
+            INSERT INTO issues_fts(rowid, issue_key, summary, description_text, labels_text, assignee_name)
+            VALUES (new.rowid, new.issue_key, new.summary, new.description_text,
+                    COALESCE(new.labels_text, ''), COALESCE(new.assignee_name, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER issues_fts_delete AFTER DELETE ON issues BEGIN
+            INSERT INTO issues_fts(issues_fts, rowid, issue_key, summary, description_text, labels_text, assignee_name)
+            VALUES ('delete', old.rowid, old.issue_key, old.summary, old.description_text,
+                    COALESCE(old.labels_text, ''), COALESCE(old.assignee_name, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER issues_fts_update AFTER UPDATE ON issues BEGIN
+            INSERT INTO issues_fts(issues_fts, rowid, issue_key, summary, description_text, labels_text, assignee_name)
+            VALUES ('delete', old.rowid, old.issue_key, old.summary, old.description_text,
+                    COALESCE(old.labels_text, ''), COALESCE(old.assignee_name, ''));
+            INSERT INTO issues_fts(rowid, issue_key, summary, description_text, labels_text, assignee_name)
+            VALUES (new.rowid, new.issue_key, new.summary, new.description_text,
+                    COALESCE(new.labels_text, ''), COALESCE(new.assignee_name, ''));
+        END
+    """)
+
+    # Step 5: Create confluence_fts virtual table
+    conn.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS confluence_fts USING fts5(
+            page_id UNINDEXED,
+            title,
+            body_text,
+            labels_text,
+            content=confluence_pages,
+            content_rowid=rowid,
+            tokenize='porter unicode61'
+        )
+    """)
+
+    # Step 6: Create triggers for confluence_fts
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_insert AFTER INSERT ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(rowid, page_id, title, body_text, labels_text)
+            VALUES (new.rowid, new.page_id, new.title,
+                    COALESCE(SUBSTR(new.body_md, 1, 50000), ''),
+                    COALESCE(new.labels, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_delete AFTER DELETE ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(confluence_fts, rowid, page_id, title, body_text, labels_text)
+            VALUES ('delete', old.rowid, old.page_id, old.title,
+                    COALESCE(SUBSTR(old.body_md, 1, 50000), ''),
+                    COALESCE(old.labels, ''));
+        END
+    """)
+    conn.execute("""
+        CREATE TRIGGER IF NOT EXISTS confluence_fts_update AFTER UPDATE ON confluence_pages BEGIN
+            INSERT INTO confluence_fts(confluence_fts, rowid, page_id, title, body_text, labels_text)
+            VALUES ('delete', old.rowid, old.page_id, old.title,
+                    COALESCE(SUBSTR(old.body_md, 1, 50000), ''),
+                    COALESCE(old.labels, ''));
+            INSERT INTO confluence_fts(rowid, page_id, title, body_text, labels_text)
+            VALUES (new.rowid, new.page_id, new.title,
+                    COALESCE(SUBSTR(new.body_md, 1, 50000), ''),
+                    COALESCE(new.labels, ''));
+        END
+    """)
+
+
+_MIGRATIONS: dict[int, Union[str, Callable[[sqlite3.Connection], None]]] = {
     2: _MIGRATION_V2,
     3: _MIGRATION_V3,
     4: _MIGRATION_V4,
+    5: _apply_migration_v5,
 }
+SCHEMA_VERSION = 5
 
 
 def migrate(conn: sqlite3.Connection) -> None:
@@ -163,18 +265,24 @@ def migrate(conn: sqlite3.Connection) -> None:
         logger.info("migrations: initialized schema at v1")
 
     for version in range(current + 1, SCHEMA_VERSION + 1):
-        sql = _MIGRATIONS.get(version)
-        if sql is None:
+        migration = _MIGRATIONS.get(version)
+        if migration is None:
             logger.warning("migrations: no migration defined for v%d", version)
             continue
         logger.info("migrations: applying v%d", version)
         # Each step in its own transaction so failure leaves DB at prior version
         conn.execute("BEGIN")
         try:
-            for statement in sql.split(";"):
-                stmt = statement.strip()
-                if stmt:
-                    conn.execute(stmt)
+            if callable(migration):
+                # Callable migration: receives conn, executes statements directly.
+                # Used when SQL contains trigger bodies with internal semicolons
+                # that would break simple split(";") parsing.
+                migration(conn)
+            else:
+                for statement in migration.split(";"):
+                    stmt = statement.strip()
+                    if stmt:
+                        conn.execute(stmt)
             # PRAGMA user_version writes to the DB header outside the WAL journal —
             # it cannot be rolled back. Must stay AFTER all DML so that any DML
             # failure raises before this line, leaving user_version unchanged.

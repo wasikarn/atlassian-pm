@@ -304,6 +304,11 @@ class JiraCache:
         description_text = extract_adf_text(fields.get("description"))
         sprint_id = self._extract_sprint_id(fields)
 
+        # Extract FTS-searchable text fields (v5 columns)
+        labels_raw = fields.get("labels", [])
+        labels_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
+        assignee_name = (fields.get("assignee") or {}).get("displayName", "")
+
         now = datetime.now().isoformat()
         with self._lock:
             self._put_issue_row(
@@ -313,6 +318,8 @@ class JiraCache:
                 sprint_id,
                 data,
                 now,
+                labels_text=labels_text,
+                assignee_name=assignee_name,
             )
             self.conn.commit()
         logger.debug("Cached issue %s", issue_key)
@@ -325,14 +332,18 @@ class JiraCache:
         sprint_id: int | None,
         data: dict,
         now: str,
+        *,
+        labels_text: str = "",
+        assignee_name: str = "",
     ) -> None:
         """Insert/replace a single issue row WITHOUT commit (for batch use)."""
         self.conn.execute(
             """INSERT OR REPLACE INTO issues
             (issue_key, summary, status, assignee, issue_type, sprint_id,
              parent_key, priority, labels, start_date, due_date,
-             description_text, data, cached_at, accessed_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+             description_text, data, cached_at, accessed_at,
+             labels_text, assignee_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 issue_key,
                 fields.get("summary", ""),
@@ -349,6 +360,8 @@ class JiraCache:
                 json.dumps(data),
                 now,
                 None,  # P1-B: Stop writing accessed_at
+                labels_text,
+                assignee_name,
             ),
         )
 
@@ -375,6 +388,9 @@ class JiraCache:
                 fields = issue_data.get("fields", {})
                 description_text = extract_adf_text(fields.get("description"))
                 sprint_id = self._extract_sprint_id(fields)
+                labels_raw = fields.get("labels", [])
+                labels_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
+                assignee_name = (fields.get("assignee") or {}).get("displayName", "")
 
                 self._put_issue_row(
                     key,
@@ -383,6 +399,8 @@ class JiraCache:
                     sprint_id,
                     issue_data,
                     now,
+                    labels_text=labels_text,
+                    assignee_name=assignee_name,
                 )
                 count += 1
 
@@ -546,7 +564,13 @@ class JiraCache:
                 issue_fields = issue_data.get("fields", {})
                 description_text = extract_adf_text(issue_fields.get("description"))
                 sid = self._extract_sprint_id(issue_fields)
-                self._put_issue_row(key, issue_fields, description_text, sid, issue_data, now)
+                labels_raw = issue_fields.get("labels", [])
+                lbl_text = " ".join(str(lb) for lb in labels_raw) if isinstance(labels_raw, list) else ""
+                asgn_name = (issue_fields.get("assignee") or {}).get("displayName", "")
+                self._put_issue_row(
+                    key, issue_fields, description_text, sid, issue_data, now,
+                    labels_text=lbl_text, assignee_name=asgn_name,
+                )
             self.conn.commit()
         logger.debug("Cached search + %d issues (single transaction)", len(issues))
 
