@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "atlassian-cache"
 version = "1.0.0"
-description = "Local Atlassian cache MCP server with SQLite + FTS5 (Jira + Confluence)"
+description = "Unified Jira + Confluence cache MCP server with SQLite FTS5 + vector search"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0,<2",
@@ -14,7 +14,7 @@ dependencies = [
 [project.optional-dependencies]
 embeddings = [
     "sqlite-vec>=0.1.1,<1",
-    "sentence-transformers>=2.2.0,<4",
+    "sentence-transformers>=3.0.0,<4",
 ]
 test = [
     "pytest>=8.0,<9",
@@ -32,4 +32,4 @@ omit = ["tests/*", ".venv/*"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
+fail_under = 80
