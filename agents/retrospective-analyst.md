@@ -122,7 +122,7 @@ Output a Confluence-ready retrospective in this structure:
 
 ## 📊 Sprint Metrics
 | Metric | Value | Target | Status |
-|--------|-------|--------|--------|
+| ------ | ----- | ------ | ------ |
 | Velocity | [X SP / Y%] | ≥ 90% planned | 🟢/⚠️/🔴 |
 | Carry-over rate | [X%] | ≤ 15% | 🟢/⚠️/🔴 |
 | Avg cycle time | [X days] | ≤ 4 days | 🟢/⚠️/🔴 |
@@ -130,7 +130,7 @@ Output a Confluence-ready retrospective in this structure:
 
 ## 🏥 Team Health Score: [N]/100 ([Healthy/Stable/Needs Attention/At Risk])
 | Dimension | Score | Signal |
-|-----------|-------|--------|
+| --------- | ----- | ------ |
 | Delivery | [X]/25 | [note] |
 | Process | [X]/25 | [note] |
 | Quality | [X]/25 | [note] |
@@ -140,21 +140,21 @@ Output a Confluence-ready retrospective in this structure:
 [Only if velocity history available: "Velocity 15% above rolling avg", "Carry-over rate 2× avg — recurring pattern"]
 
 ## 🟢 What Went Well
-[Data-driven points: e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
+[Data-driven, e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
 
 ## 🔴 What to Improve
-[Data-driven points: e.g., "3 items carried over from previous sprint ({{PROJECT_KEY}}-AAA, {{PROJECT_KEY}}-BBB, {{PROJECT_KEY}}-CCC)", "{{PROJECT_KEY}}-DDD spent 4 days blocked"]
+[Data-driven, e.g., "3 carry-overs ({{PROJECT_KEY}}-AAA, -BBB, -CCC)", "{{PROJECT_KEY}}-DDD spent 4 days blocked"]
 
 ## 💡 Action Items
 | # | Action | Owner | Due | Jira Key |
-|---|--------|-------|-----|----------|
+| - | ------ | ----- | --- | -------- |
 | 1 | [specific improvement] | [name] | [date] | [to be created] |
 
 ## 📋 Item Summary
 | Key | Summary | Status | SP | Cycle Time | Notes |
-|-----|---------|--------|----|------------|-------|
+| --- | ------- | ------ | -- | ---------- | ----- |
 | {{PROJECT_KEY}}-XXX | [summary] | Done | 3 | 2.5 days | ✅ |
-| {{PROJECT_KEY}}-YYY | [summary] | Carry-over | 5 | — | ⚠️ moved to next sprint |
+| {{PROJECT_KEY}}-YYY | [summary] | Carry-over | 5 | — | ⚠️ |
 ```
 
 ### Phase 6: Action Items (if --action-items flag)

@@ -52,36 +52,13 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
   "story_points": {
     "avg_velocity": 39.2,
     "std_dev": 4.1,
-    "trend": "stable",
-    "history": [
-      {
-        "sprint_id": 45,
-        "sprint_name": "{{PROJECT_KEY}} Sprint 45",
-        "completed_sp": 41,
-        "planned_sp": 44,
-        "completion_ratio": 0.93
-      }
-    ]
+    "trend": "stable|improving|declining",
+    "history": [{"sprint_id": 45, "sprint_name": "...", "completed_sp": 41, "planned_sp": 44, "completion_ratio": 0.93}]
   },
-  "ticket_count": {
-    "avg_velocity": 12.4,
-    "history": [...]
-  },
-  "anomalies": [
-    {
-      "sprint_name": "{{PROJECT_KEY}} Sprint 42",
-      "completed_sp": 28,
-      "direction": "dip",
-      "deviation": 2.3,
-      "note": "2.3σ below average"
-    }
-  ],
+  "ticket_count": {"avg_velocity": 12.4, "history": [...]},
+  "anomalies": [{"sprint_name": "...", "completed_sp": 28, "direction": "dip|spike", "deviation": 2.3, "note": "2.3σ below average"}],
   "member_velocity": {
-    "member@example.com": {
-      "avg_sp": 6.2,
-      "trend": "stable",
-      "history": [{"sprint_id": 45, "completed_sp": 7}]
-    }
+    "member@example.com": {"avg_sp": 6.2, "trend": "stable", "history": [...]}
   }
 }
 ```

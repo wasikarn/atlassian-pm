@@ -14,54 +14,20 @@ Repair ADF JSON structure for Jira compatibility. Applied after quality-gate ide
 - Path to ADF JSON file (e.g., `{{artifacts_dir}}/story.json` or `{{artifacts_dir}}/subtask-be.json`)
 - List of issues from quality-gate output (optional — if not provided, run own structural scan)
 
-## Jira ADF Quirks Embedded Knowledge
+## Jira ADF Quirks
 
-Known structural issues that cause silent render failures in Jira:
-
-```text
-QUIRK-1: Panel nodes missing panelType
-  Problem: Panel node has no panelType attribute → renders as blank box in Jira
-  Fix: Add panelType based on context (info/note/success/warning/error)
-  Context rules: Objective panels → "info", Scope panels → "note", AC panels → "success", Tech Notes → "warning"
-
-QUIRK-2: inlineCard with relative URL
-  Problem: {"type":"inlineCard","attrs":{"url":"/browse/{{PROJECT_KEY}}-123"}} → Jira cannot resolve relative URL → renders as broken link
-  Fix: Expand to absolute URL: "https://<site>.atlassian.net/browse/{{PROJECT_KEY}}-123"
-  Site: read from .claude/project-config.json → jira.site
-
-QUIRK-3: Table cell with direct text node
-  Problem: Table cell containing {"type":"text","text":"value"} directly → render fail
-  Fix: Wrap in paragraph: {"type":"paragraph","content":[{"type":"text","text":"value"}]}
-
-QUIRK-4: h1 heading in description
-  Problem: h1 in issue description overrides the page heading in Jira UI → visual conflict
-  Fix: Downgrade to h2 (or h3 if nested)
-
-QUIRK-5: Code block language capitalized
-  Problem: {"type":"codeBlock","attrs":{"language":"JavaScript"}} → syntax highlighting fails
-  Fix: Lowercase: {"type":"codeBlock","attrs":{"language":"javascript"}}
-  Known safe values: javascript, typescript, python, bash, json, sql, yaml, go, java, css, html
-
-QUIRK-6: Mention node missing id
-  Problem: Mention with only text, no id → mention does not resolve in Jira, shows as plain text
-  Fix: Cannot auto-fix (requires user lookup) → flag for human resolution
-
-QUIRK-7: Empty paragraph nodes
-  Problem: {"type":"paragraph","content":[]} → can cause unpredictable spacing in Jira
-  Fix: Remove empty paragraph nodes (unless they are intentional line breaks between sections)
-
-QUIRK-8: Nested panels
-  Problem: Panel inside panel → Jira renders only outer panel, inner content may be lost
-  Fix: Flatten to sequential panels (cannot nest)
-
-QUIRK-9: hardBreak outside paragraph
-  Problem: {"type":"hardBreak"} at doc root level or inside panel directly → render error
-  Fix: Wrap in paragraph node
-
-QUIRK-10: bulletList/orderedList items without paragraph wrapper
-  Problem: listItem containing text node directly → inconsistent rendering
-  Fix: Wrap text nodes in paragraph within listItem
-```
+| QUIRK | Problem | Fix |
+| ----- | ------- | --- |
+| QUIRK-1 | Panel missing `panelType` → blank box | Add panelType: Objective→"info", Scope→"note", AC→"success", Tech Notes→"warning" |
+| QUIRK-2 | `inlineCard` with relative URL → broken link | Expand to absolute: `https://<site>.atlassian.net/browse/KEY`. Site from `.claude/project-config.json` |
+| QUIRK-3 | Table cell with direct text node → render fail | Wrap in `{"type":"paragraph","content":[...]}` |
+| QUIRK-4 | `h1` in description overrides page heading | Downgrade to h2 (or h3 if nested) |
+| QUIRK-5 | `codeBlock` language capitalized → highlighting fails | Lowercase: `javascript`, `typescript`, `python`, `bash`, `json`, `sql`, `yaml`, `go`, `java`, `css`, `html` |
+| QUIRK-6 | Mention missing `id` → shows as plain text | Cannot auto-fix → flag for human (requires account ID lookup) |
+| QUIRK-7 | Empty paragraph `{"content":[]}` → unpredictable spacing | Remove unless intentional line break between sections |
+| QUIRK-8 | Nested panels → inner content may be lost | Flatten to sequential panels |
+| QUIRK-9 | `hardBreak` at doc root or inside panel → render error | Wrap in paragraph node |
+| QUIRK-10 | `listItem` with direct text node → inconsistent rendering | Wrap text in paragraph within listItem |
 
 ## Steps
 

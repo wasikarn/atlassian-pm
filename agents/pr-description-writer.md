@@ -30,32 +30,27 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
 
 ```markdown
 ## 🎯 Jira Issue
-[{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/{{PROJECT_KEY}}-XXX) — [issue summary]
+[{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/BEP-XXX) — [issue summary]
 **Type:** [Subtask/Story] | **Status:** [status] | **Assignee:** [name]
 
 ## 📋 Acceptance Criteria Addressed
-[List each AC from the subtask/story that this PR implements]
-- **AC1: [name]** — [Given/When/Then summary in 1 line]
+- **AC1: [name]** — [Given/When/Then in 1 line]
 - **AC2: [name]** — ...
 
 ## 📁 Scope
 | Action | File | Status |
-|--------|------|--------|
+| ------ | ---- | ------ |
 | MODIFY | `path/to/file.ts` | ✅ Changed |
 | CREATE | `path/to/new.ts` | ✅ Changed |
 | REF | `path/to/ref.ts` | ℹ️ Reference only |
 
-[If scope drift detected:]
-⚠️ **Files changed outside declared scope:**
-- `path/to/unexpected.ts` — not in subtask scope table. Consider updating {{PROJECT_KEY}}-XXX scope or splitting into separate PR.
+[If scope drift:] ⚠️ **Files outside declared scope:** `path/to/unexpected.ts` — consider updating {{PROJECT_KEY}}-XXX scope or splitting PR.
 
 ## 🧪 Testing
-[Derive from QA subtask ACs if one exists, otherwise list key scenarios to verify]
-- [ ] [test scenario 1 from AC]
-- [ ] [test scenario 2]
+- [ ] [test scenario from AC]
 
 ## 📝 Notes
-[Any implementation notes, gotchas, or deviations from the original spec]
+[Implementation notes, gotchas, or spec deviations]
 ```
 
 ## Rules

@@ -55,7 +55,7 @@ Load velocity anomaly data from `.claude/project-config-team-detail.json` `veloc
 Generate 3 scenarios automatically:
 
 | Scenario | Capacity Factor | Use When |
-|----------|----------------|---------|
+| -------- | --------------- | -------- |
 | Conservative | 70% of effective capacity | High carry-over, new team member, ambiguous scope |
 | Realistic | 85% of effective capacity | Normal sprint, typical carry-over |
 | Optimistic | 100% of effective capacity | Clear scope, low carry-over, experienced team on known domain |
@@ -100,27 +100,32 @@ Dependency-Aware: items that must merge sequentially (A blocks B) → assign to 
 ### Carry-over Summary
 
 | Key | Summary | Status | Probability | Assignee | Est. Hours |
+| --- | ------- | ------ | ----------- | -------- | ---------- |
 
 ### Three Scenarios Comparison
 
 | Scenario | Total SP | Members at Risk | Recommendation |
-|---------|---------|----------------|---------------|
+| -------- | -------- | --------------- | -------------- |
 | Conservative | 28 SP | none | Use if scope unclear |
 | Realistic | 34 SP | — | Default choice |
-| Optimistic | 40 SP | {{SLOT_2}} 95% | Only if scope fully defined |
+| Optimistic | 40 SP | [name] 95% | Only if scope fully defined |
 
 ### Prioritized Items
 
 | Priority | Key | Summary | Quadrant | Required Skill | Reason |
+| -------- | --- | ------- | -------- | -------------- | ------ |
 
 ### Recommended Assignments
 
 | Member | Productive Hrs | Carry-over Hrs | New Hrs | Total Hrs | Utilization% | Risk Flag |
+| ------ | -------------- | -------------- | ------- | --------- | ------------ | --------- |
 
 ### Skill Gap Warnings
 
 | Domain | Demand (SP) | Available Capacity | Gap | Suggested Action |
+| ------ | ----------- | ------------------ | --- | ---------------- |
 
 ### Risk Flags
 
 | Risk | Severity | Mitigation |
+| ---- | -------- | ---------- |

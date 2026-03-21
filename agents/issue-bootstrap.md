@@ -66,23 +66,21 @@ Then the full context block:
 - Summary: [summary]
 - Assignee: [name] | Labels: [labels]
 - SP: [story_points] | Size: [size] | Start: [date] | Due: [date]
-- Description: [ADF text content — plain text, not raw ADF JSON, capped at 500 chars]
+- Description: [ADF text — plain text, capped at 500 chars]
 
 ### Parent
-- Key: ABC-YYY | Type: Epic | Status: In Progress
-- Summary: [epic title]
-- Description: [first 300 chars of parent description as plain text]
+- Key: ABC-YYY | Type: Epic | Status: In Progress | Summary: [epic title]
+- Description: [first 300 chars, plain text]
 
 ### Children (N subtasks)
 | Key | Summary | Type | Status | Assignee | OE | Start | Due |
-|-----|---------|------|--------|----------|-----|-------|-----|
+| --- | ------- | ---- | ------ | -------- | -- | ----- | --- |
 | ABC-ZZZ | [summary] | Subtask | To Do | [name] | 4h | date | date |
 
 ### Linked Issues
 | Key | Summary | Link Type | Status |
-|-----|---------|-----------|--------|
+| --- | ------- | --------- | ------ |
 | ABC-AAA | [summary] | Blocks → | Done |
-| ABC-BBB | [summary] | ← Blocked by | In Progress |
 ```
 
 ## Rules

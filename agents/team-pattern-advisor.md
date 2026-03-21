@@ -82,47 +82,32 @@ From velocity history:
 
 ```text
 ## Team Pattern Report — Last [N] Sprints ([sprint range])
-
 Generated: [date]
 
-### Summary Scores (based on patterns)
-
+### Summary Scores
 | Dimension | Status | Trend |
-|-----------|--------|-------|
+| --------- | ------ | ----- |
 | Capacity Balance | 🔴 Bottleneck (BE) | Worsening |
 | Estimation Accuracy | 🟡 Moderate (auth stories) | Stable |
 | QA Quality | 🟢 Good | Improving |
 | Carry-over | 🟡 Moderate | Stable |
 
 ### Recurring Issues (3+ sprints)
-
-1. **Backend Capacity Bottleneck** (sprints: 42, 44, 45, 46, 47)
-   - {{SLOT_2}} is sole expert for complex BE tasks
-   - BE utilization: avg 89%, range 82-97%
-   - Carry-over from BE overload: 4 items across last 5 sprints
-   → Recommendation: Upskill {{SLOT_3}} on BE domain — pair on 1 complex BE story per sprint for 3 sprints. OKR target: {{SLOT_3}} reaches "intermediate" BE skill level by Sprint 50.
-
-2. **[BE] Auth Story Underestimation** (7/9 cases)
-   - Stories with auth keywords estimated at M, actual completion time consistent with L
-   - Average overrun: 1.8 SP equivalent
-   → Recommendation: Add rule to project-config — [BE] stories with auth/oauth keywords auto-suggest +1 SP buffer. Update project-config-team-detail.json with this calibration note.
+1. **[pattern name]** (sprints: N, N, N)
+   - [evidence bullet — specific person/service/metric]
+   → Recommendation: [SMART action — names person, metric, timeline]
 
 ### Moderate Concerns (2 sprints)
-
-[similar format]
+[same format as Recurring Issues]
 
 ### Improving Trends
-
-- QA rejection rate: 32% (Sprint 42) → 18% (Sprint 47) — improving for 3 consecutive sprints
-- Cycle time: 4.8 days avg → 3.2 days avg — steady improvement
+- [metric]: [value (Sprint X)] → [value (Sprint Y)] — [trend note]
 
 ### Strategic Recommendations
-
 | Priority | Recommendation | Owner | Metric | Timeline |
-|---------|---------------|-------|--------|---------|
-| HIGH | Upskill {{SLOT_3}} on BE domain | {{SLOT_1}} | {{SLOT_3}} completes 3 BE stories solo | Sprint 50 |
-| HIGH | Add +1 SP buffer rule for [BE] auth stories | {{SLOT_1}} | Estimation deviation < 0.5 SP | Next sprint |
-| MEDIUM | Rotate QA subtask creation — {{SLOT_6}} + {{SLOT_7}} alternate | {{SLOT_1}} | Even QA load distribution | Sprint 48 |
+| -------- | -------------- | ----- | ------ | -------- |
+| HIGH | [action] | [name] | [measurable outcome] | Sprint N |
+| MEDIUM | [action] | [name] | [measurable outcome] | Sprint N |
 ```
 
 ## Rules

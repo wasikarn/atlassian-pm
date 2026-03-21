@@ -26,7 +26,7 @@ Optional: `--limit N` (default 30 stories max)
 2. **For each story, run readiness checks:**
 
 | Check | Pass Criteria | Fail Category |
-|-------|--------------|---------------|
+| ----- | ------------ | ------------- |
 | R1: Has ACs | Description contains "Given" or "When" or acceptance criteria section | Needs AC |
 | R2: Has SP estimate | `customfield_10016` is set and > 0 | Missing Estimate |
 | R3: Epic link | `parent` field is set | Orphan |
@@ -39,26 +39,12 @@ Optional: `--limit N` (default 30 stories max)
 ```text
 WSJF = (Business Value + Time Criticality + Risk Reduction) / Job Size
 
-Business Value (1-10):
-- Epic label priority (P1 epic = 9, P2 = 7, P3 = 5, unknown = 5)
-- VS label: vs1 = +1, vs2 = +2, vs-enabler = +1
-- Keywords: "payment", "revenue", "security" = +2; "chore", "tech-debt" = -2
+BV (1-10): P1 epic=9, P2=7, P3=5; vs1=+1, vs2=+2, vs-enabler=+1; payment/revenue/security=+2; chore/tech-debt=-2
+TC (1-10): sprint label match=8; in sprint goal=9; no signal=5
+RR (1-10): "blocker" label or blocking links=9; dependency links=7; no signals=3
+JS (1-10): XS/1SP=1, S/2SP=2, M/3SP=4, L/5SP=6, XL/8SP=8, XXL/13+SP=10; no estimate → skip
 
-Time Criticality (1-10):
-- Sprint label match for upcoming sprint = 8
-- Mentioned in sprint goal = 9
-- No sprint signal = 5
-
-Risk Reduction (1-10):
-- Labeled "blocker" or has blocking links = 9
-- Has dependency links = 7
-- No risk signals = 3
-
-Job Size (1-10):
-- XS/1 SP = 1, S/2 SP = 2, M/3 SP = 4, L/5 SP = 6, XL/8 SP = 8, XXL/13+ SP = 10
-- No estimate → skip WSJF (can't score without job size)
-
-Round WSJF to 1 decimal. Higher = pull first.
+Round to 1 decimal. Higher = pull first.
 ```
 
 1. **Value Density** — `value_density = Business Value / Job Size`. Flag stories where value_density < 0.5 as "high effort, low value".
