@@ -28,8 +28,8 @@ if ! check_dep uv; then
   export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
 
-if [ -d "$PROJECT_DIR/mcp-servers/jira-cache-server" ]; then
-  echo "  Installing jira-cache-server venv..."
+if [ -d "$PROJECT_DIR/mcp-servers/jira-cache" ]; then
+  echo "  Installing jira-cache venv..."
   UV_BIN="${HOME}/.local/bin/uv"
   command -v uv &>/dev/null && UV_BIN="uv"
   # Fallback: derive data dir using Claude Code naming convention "{plugin}-{marketplace}"
@@ -37,8 +37,8 @@ if [ -d "$PROJECT_DIR/mcp-servers/jira-cache-server" ]; then
     CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
   fi
   mkdir -p "$CLAUDE_PLUGIN_DATA"
-  UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/jira-cache-server" --extra embeddings --quiet
-  cp "$PROJECT_DIR/mcp-servers/jira-cache-server/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
+  UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/jira-cache" --extra embeddings --quiet
+  cp "$PROJECT_DIR/mcp-servers/jira-cache/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
 fi
 
 echo ""

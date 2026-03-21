@@ -779,18 +779,31 @@ class JiraCache:
         # Flush stat buffer before reporting
         self._flush_stats()
 
-        issue_count = self.conn.execute("SELECT COUNT(*) FROM issues").fetchone()[0]
-        sprint_count = self.conn.execute("SELECT COUNT(*) FROM sprints").fetchone()[0]
-        search_count = self.conn.execute("SELECT COUNT(*) FROM searches").fetchone()[0]
+        # P-PERF: Single query for all table counts + issue date range (5 queries → 1)
+        row = self.conn.execute(
+            """SELECT
+                (SELECT COUNT(*) FROM issues),
+                (SELECT COUNT(*) FROM sprints),
+                (SELECT COUNT(*) FROM searches),
+                (SELECT MIN(cached_at) FROM issues),
+                (SELECT MAX(cached_at) FROM issues)"""
+        ).fetchone()
+        issue_count, sprint_count, search_count, oldest, newest = row
 
-        oldest = self.conn.execute("SELECT MIN(cached_at) FROM issues").fetchone()[0]
-        newest = self.conn.execute("SELECT MAX(cached_at) FROM issues").fetchone()[0]
-
-        hits = self._get_stat("hits")
-        misses = self._get_stat("misses")
+        # P-PERF: Batch stat reads — 2 DB round-trips instead of 4
+        stat_rows = {
+            r["key"]: r["value"]
+            for r in self.conn.execute(
+                "SELECT key, value FROM cache_stats WHERE key IN ('hits','misses','purged_issues','purged_searches')"
+            ).fetchall()
+        }
+        with self._stat_lock:
+            buffered = dict(self._stat_buffer)
+        hits = stat_rows.get("hits", 0) + buffered.get("hits", 0)
+        misses = stat_rows.get("misses", 0) + buffered.get("misses", 0)
+        purged_issues = stat_rows.get("purged_issues", 0)
+        purged_searches = stat_rows.get("purged_searches", 0)
         total = hits + misses
-        purged_issues = self._get_stat("purged_issues")
-        purged_searches = self._get_stat("purged_searches")
 
         db_size_mb = self.db_path.stat().st_size / (1024 * 1024) if self.db_path.exists() else 0
 
@@ -817,13 +830,17 @@ class JiraCache:
     # --- Internal ---
 
     def _search_key(self, jql: str, fields: str, limit: int) -> str:
-        """P1-D: Normalized search key to avoid duplicate cache entries."""
+        """P1-D: Normalized search key to avoid duplicate cache entries.
+
+        Uses MD5 (not SHA256) — this is a cache key, not a security hash.
+        MD5 is ~2x faster and produces a shorter key (32 vs 64 hex chars).
+        """
         # Normalize JQL: collapse whitespace, lowercase
         jql_norm = " ".join(jql.lower().split())
         # Normalize fields: sort, strip whitespace
         fields_norm = ",".join(sorted(f.strip() for f in fields.split(",")))
         raw = f"{jql_norm}|{fields_norm}|{limit}"
-        return hashlib.sha256(raw.encode()).hexdigest()
+        return hashlib.md5(raw.encode()).hexdigest()  # noqa: S324
 
     # --- P1-B: Deferred stat counting ---
 

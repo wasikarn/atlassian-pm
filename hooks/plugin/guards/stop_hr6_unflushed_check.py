@@ -4,7 +4,7 @@
 Replaces the prompt-based stop hook with a deterministic Python check.
 Reads session state file and reports any pending cache invalidations.
 
-If the jira-cache-server process is not running, pending state is auto-cleared
+If the jira-cache process is not running, pending state is auto-cleared
 (no cache = no stale risk) and the session is allowed to end.
 
 Output: {"ok": true} or {"ok": false, "reason": "..."}
@@ -20,10 +20,10 @@ from hooks_state import hr6_clear_all_pending, hr6_get_pending
 
 
 def is_cache_server_running() -> bool:
-    """Check if the jira-cache-server process is running."""
+    """Check if the jira-cache process is running."""
     try:
         result = subprocess.run(
-            ["pgrep", "-f", "jira-cache-server/server.py"],
+            ["pgrep", "-f", "jira-cache/server.py"],
             capture_output=True,
             timeout=2,
         )

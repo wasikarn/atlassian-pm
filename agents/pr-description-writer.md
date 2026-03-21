@@ -2,7 +2,7 @@
 name: pr-description-writer
 description: Generate PR description from Jira issue context and git diff. Extracts issue key from branch name, fetches story+subtask, maps changed files to scope table, produces ready-to-use PR description with AC coverage and scope validation.
 model: haiku
-tools: Bash, Read, Glob, Grep, mcp__jira-cache-server__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
+tools: Bash, Read, Glob, Grep, mcp__jira-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 12
 ---

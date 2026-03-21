@@ -2,7 +2,7 @@
 name: estimation-calibrator
 description: Calibrate SP estimates by comparing against historically similar stories. Uses cache_similar_issues for semantic search and velocity history for actual completion data.
 model: haiku
-tools: mcp__plugin_atlassian-pm_jira-cache-server__cache_similar_issues, mcp__plugin_atlassian-pm_jira-cache-server__cache_search, Read
+tools: mcp__plugin_atlassian-pm_jira-cache__cache_similar_issues, mcp__plugin_atlassian-pm_jira-cache__cache_search, Read
 permissionMode: dontAsk
 maxTurns: 8
 ---

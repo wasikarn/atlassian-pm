@@ -1,4 +1,4 @@
-"""Shared test fixtures for jira-cache-server tests."""
+"""Shared test fixtures for jira-cache tests."""
 
 import sys
 from pathlib import Path

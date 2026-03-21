@@ -2,7 +2,7 @@
 name: sprint-transition-agent
 description: Execute batch sprint issue moves (incomplete → next sprint or backlog) and sprint state transitions for close-sprint skill. Returns structured result {moved, failed, skipped}.
 model: haiku
-tools: mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_jira-cache-server__cache_invalidate, mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue
+tools: mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_jira-cache__cache_invalidate, mcp__plugin_atlassian-pm_jira-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 20
 ---

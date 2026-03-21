@@ -31,6 +31,7 @@ import logging
 import re
 import sys
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +41,7 @@ from mcp.types import TextContent, Tool
 
 # Add scripts/lib to path for JiraAPI + auth reuse
 # Plugin mode: PYTHONPATH set via .mcp.json env (${CLAUDE_PLUGIN_ROOT}/scripts)
-# Fallback for standalone testing: resolve relative to this file (mcp-servers/jira-cache-server/ -> root -> scripts/)
+# Fallback for standalone testing: resolve relative to this file (mcp-servers/jira-cache/ -> root -> scripts/)
 _scripts_dir = Path(__file__).resolve().parent.parent.parent / "scripts"
 if str(_scripts_dir) not in sys.path:
     sys.path.insert(0, str(_scripts_dir))
@@ -56,7 +57,7 @@ logging.basicConfig(
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     stream=sys.stderr,
 )
-logger = logging.getLogger("jira-cache-server")
+logger = logging.getLogger("jira-cache")
 
 # Claude Code MCP token limit is ~30K chars; keep well under
 MAX_RESPONSE_CHARS = 25_000
@@ -318,6 +319,22 @@ def _init() -> None:
     except Exception as e:
         logger.error("Failed to init upstream API (cache-only mode): %s", e)
         jira_api = None
+
+
+@asynccontextmanager
+async def _lifespan(server: Server):  # noqa: ARG001
+    """MCP best practice: manage resource lifecycle via lifespan context.
+
+    Ensures the SQLite connection is properly closed (stats flushed, WAL
+    checkpointed) when the server shuts down, even on SIGTERM.
+    """
+    _init()
+    try:
+        yield
+    finally:
+        if cache is not None:
+            cache.close()
+            logger.info("jira-cache: DB connection closed")
 
 
 def _extract_core_fields(issue: dict) -> dict:
@@ -980,9 +997,7 @@ HANDLERS = {
 
 async def main() -> None:  # pragma: no cover
     """Run MCP server over stdio."""
-    _init()
-
-    server = Server("jira-cache-server")
+    server = Server("jira-cache", lifespan=_lifespan)
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
@@ -1022,7 +1037,7 @@ async def main() -> None:  # pragma: no cover
             safe_msg = f"{type(e).__name__}: {str(e)[:200]}"
             return [TextContent(type="text", text=json.dumps({"error": safe_msg}))]
 
-    logger.info("Starting jira-cache-server (stdio)")
+    logger.info("Starting jira-cache (stdio)")
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 

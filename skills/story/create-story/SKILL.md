@@ -2,7 +2,7 @@
 name: create-story
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache-server, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 10-phase workflow
 

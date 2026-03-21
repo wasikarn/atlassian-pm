@@ -39,7 +39,7 @@ if not CACHE_DB.exists():
     warnings.append(
         f"⚠️  Jira cache DB not found: {CACHE_DB}\n"
         "   HR10 subtask detection (cross-session) and cache-prefer hook degraded.\n"
-        "   Start jira-cache-server MCP to initialize: see jira-cache-server/SKILL.md"
+        "   Start jira-cache MCP to initialize: see jira-cache/SKILL.md"
     )
 
 # Check state dir writable

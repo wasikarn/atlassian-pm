@@ -2,7 +2,7 @@
 name: team-pattern-advisor
 description: Analyze patterns across multiple sprints for strategic team advice. Identifies recurring bottlenecks, estimation blind spots, QA failure patterns, and carry-over culprits from historical data.
 model: sonnet
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache-server__cache_sprint_issues, mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue
+tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache__cache_sprint_issues, mcp__plugin_atlassian-pm_jira-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 15
 ---

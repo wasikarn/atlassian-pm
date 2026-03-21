@@ -2,7 +2,7 @@
 name: spec-to-stories
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache-server, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Convert a Confluence spec/requirements page into Jira User Stories.
   Extracts personas, requirements, and AC hints via spec-parser-agent. Deduplicates against existing issues.

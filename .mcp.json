@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "jira-cache-server": {
+    "jira-cache": {
       "command": "uv",
       "args": [
         "run",
-        "--project", "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server",
-        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache-server/server.py"
+        "--project", "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache",
+        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/jira-cache/server.py"
       ],
       "env": {
         "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts",

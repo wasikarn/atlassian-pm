@@ -336,7 +336,7 @@ Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/
 
 ```bash
 UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/venv" \
-  uv sync --project mcp-servers/jira-cache-server --extra embeddings
+  uv sync --project mcp-servers/jira-cache --extra embeddings
 ```
 
 Reduces token consumption 80–90% for repeated lookups via local SQLite + FTS5. Omit `--extra embeddings` to skip semantic search (~640MB PyTorch/sentence-transformers).
@@ -368,7 +368,7 @@ Claude Code ──skills──► acli (ADF JSON) ──────────
     │                                                                  ▲
     ├── MCP ──► mcp-atlassian ──────────────────────────────────────── ┤
     │                                                                  │
-    ├── MCP ──► jira-cache-server ── SQLite + FTS5 ──► Jira REST API v3
+    ├── MCP ──► jira-cache ── SQLite + FTS5 ──► Jira REST API v3
     │                └─ (~/.claude/plugins/data/atlassian-pm-atlassian-pm/jira.db)
     │
     ├── MCP ──► Confluence, Figma, GitHub
@@ -486,7 +486,7 @@ hooks/                         ← 44 Python hook scripts
 │   └── session/               ← Session management, compaction, token filtering (12 hooks)
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (7 hooks)
 
-mcp-servers/jira-cache-server/ ← Local Jira cache (SQLite + FTS5 + embeddings)
+mcp-servers/jira-cache/ ← Local Jira cache (SQLite + FTS5 + embeddings)
 ```
 
 ---

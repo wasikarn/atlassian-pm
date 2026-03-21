@@ -22,7 +22,7 @@ paths:
 | Issue Links | MCP `jira_create_issue_link` | Blocks/Relates · `jira_create_remote_issue_link` (web) |
 | Sprint | Agile REST via `JiraAPI._request()` | MCP can't move to backlog |
 | Sprint batch | `scripts/sprint/` | `clear_sprint_dates.py`, `sprint_set_fields.py`, `sprint_rank_by_date.py`, `sprint_subtask_alignment.py`, `update_sprint_goals.py` |
-| Cache | MCP `jira-cache-server` (8 tools) | `force_refresh=true` after web edits or "ล่าสุด/refresh/stale" |
+| Cache | MCP `jira-cache` (8 tools) | `force_refresh=true` after web edits or "ล่าสุด/refresh/stale" |
 
 ### Field & ADF Quick Reference
 

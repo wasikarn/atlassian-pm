@@ -84,7 +84,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Constraint:** After any MCP write to Jira → immediately run `cache_invalidate(issue_key)`.
 
-**Why:** The jira-cache-server caches issue data in SQLite. Stale cache causes wrong data in `/verify-issue`, cascade updates, and sprint planning. Reading from stale cache after a write is silent data corruption.
+**Why:** The jira-cache caches issue data in SQLite. Stale cache causes wrong data in `/verify-issue`, cascade updates, and sprint planning. Reading from stale cache after a write is silent data corruption.
 
 **Enforcement:** `post_hr6_queue_invalidation.py` (queues keys after MCP writes), `pre_hr6_stale_read_guard.py` (blocks cache reads for pending keys), `stop_hr6_unflushed_check.py` (blocks session exit if pending)
 

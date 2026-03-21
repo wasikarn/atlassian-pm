@@ -2,7 +2,7 @@
 name: issue-bootstrap
 description: Pre-gather Jira issue context (issue + parent + children + linked issues) in one fast pass before spawning processing agents. Use at the start of create-story, analyze-story, sync-artifacts, update-story workflows to reduce redundant MCP calls.
 model: haiku
-tools: mcp__jira-cache-server__cache_get_issue, mcp__jira-cache-server__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
+tools: mcp__jira-cache__cache_get_issue, mcp__jira-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 8
 ---

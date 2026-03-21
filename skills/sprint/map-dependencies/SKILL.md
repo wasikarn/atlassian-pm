@@ -2,8 +2,8 @@
 name: map-dependencies
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache-server, mcp-atlassian]
-allowed-tools: Read, Glob, Grep, Bash, Agent, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue, mcp__plugin_atlassian-pm_jira-cache-server__cache_sprint_issues, mcp__plugin_atlassian-pm_jira-cache-server__cache_search
+x-compatibility: [jira-cache, mcp-atlassian]
+allowed-tools: Read, Glob, Grep, Bash, Agent, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache__cache_get_issue, mcp__plugin_atlassian-pm_jira-cache__cache_sprint_issues, mcp__plugin_atlassian-pm_jira-cache__cache_search
 description: |
   Sprint dependency analysis: build dependency graphs, identify critical paths, generate parallel
   execution plans (swim lanes) per team member, and suggest decoupling strategies.

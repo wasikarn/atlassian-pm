@@ -2,8 +2,8 @@
 name: verify-issue
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache-server, mcp-atlassian, acli]
-allowed-tools: Read, Glob, Grep, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page
+x-compatibility: [jira-cache, mcp-atlassian, acli]
+allowed-tools: Read, Glob, Grep, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_jira-cache__cache_get_issue, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page
 description: |
   Verify and improve issue quality (ADF format, INVEST, language, hierarchy alignment) with a 6-phase workflow
 

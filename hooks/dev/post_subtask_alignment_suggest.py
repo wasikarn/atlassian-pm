@@ -22,7 +22,7 @@ tool_input = data.get("tool_input", {})
 session_id = data.get("session_id", "")
 
 SPRINT_TOOLS = {
-    "mcp__plugin_atlassian-pm_jira-cache-server__cache_sprint_issues",
+    "mcp__plugin_atlassian-pm_jira-cache__cache_sprint_issues",
     "mcp__mcp-atlassian__jira_get_sprint_issues",
 }
 

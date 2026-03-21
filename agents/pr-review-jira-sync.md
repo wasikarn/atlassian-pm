@@ -2,7 +2,7 @@
 name: pr-review-jira-sync
 description: Sync Jira after PR merge. Extracts issue key from branch/title, transitions subtask to Done, posts PR link as comment, checks if all sibling subtasks are done and offers to close parent story. Enforces HR6 cache invalidation after every write.
 model: haiku
-tools: Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__jira_search, mcp__jira-cache-server__cache_get_issue, mcp__jira-cache-server__cache_invalidate
+tools: Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__jira_search, mcp__jira-cache__cache_get_issue, mcp__jira-cache__cache_invalidate
 permissionMode: dontAsk
 maxTurns: 15
 ---

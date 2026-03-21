@@ -2,7 +2,7 @@
 name: retrospective-analyst
 description: Generate data-driven sprint retrospective. Fetches completed sprint data, analyzes issue changelogs for time-in-status and transitions, calculates velocity metrics, synthesizes what went well/didn't, produces Confluence retrospective page draft and action item Jira tasks.
 model: sonnet
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__jira-cache-server__cache_sprint_issues, mcp__jira-cache-server__cache_get_issue
+tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__jira-cache__cache_sprint_issues, mcp__jira-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 20
 skills:

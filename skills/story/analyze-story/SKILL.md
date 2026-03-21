@@ -2,7 +2,7 @@
 name: analyze-story
 disable-model-invocation: true
 context: fork
-x-compatibility: [jira-cache-server, mcp-atlassian, mcp-confluence, acli]
+x-compatibility: [jira-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Analyze User Story and create Sub-tasks + Technical Note with a 7-phase TA workflow
   MANDATORY: Must explore codebase before creating Sub-tasks

@@ -9,7 +9,7 @@ All 4 skills follow this 6-phase skeleton: Fetch → Identify Changes → Preser
 
 ```yaml
 disable-model-invocation: true
-x-compatibility: [jira-cache-server, mcp-atlassian, acli]
+x-compatibility: [jira-cache, mcp-atlassian, acli]
 argument-hint: "[issue-key] [changes]"
 ```
 

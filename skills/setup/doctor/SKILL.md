@@ -3,7 +3,7 @@ name: doctor
 description: |
   Health check for atlassian-pm environment — runs 10 checks and reports status.
 
-  Checks: acli install, acli auth, uv install, jira-cache-server venv, mcp-atlassian config,
+  Checks: acli install, acli auth, uv install, jira-cache venv, mcp-atlassian config,
   project-config valid, board_id non-zero, git filters, CLAUDE.md block, team-detail config.
 
   Never stops on failure — shows complete picture. Run after setup or after updates.
@@ -73,39 +73,39 @@ else
   FAIL=$((FAIL+1))
 fi
 
-# Check 4: jira-cache-server venv
+# Check 4: jira-cache venv
 # Data dir name is always "{plugin_name}-{marketplace_name}" = "atlassian-pm-atlassian-pm"
 DATA_DIR="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
 VENV_PYTHON="$DATA_DIR/venv/bin/python"
 if [ -f "$VENV_PYTHON" ]; then
-  echo "  ✓  jira-cache-server venv ready"
+  echo "  ✓  jira-cache venv ready"
   PASS=$((PASS+1))
 elif command -v uv &>/dev/null && [ -n "$PLUGIN_ROOT" ]; then
-  echo "  ~  jira-cache-server venv missing — recreating..."
+  echo "  ~  jira-cache venv missing — recreating..."
   mkdir -p "$DATA_DIR"
   if uv venv "$DATA_DIR/venv" --quiet 2>/dev/null && \
      uv pip install --python "$DATA_DIR/venv/bin/python" \
-       "$PLUGIN_ROOT/mcp-servers/jira-cache-server" --quiet 2>/dev/null; then
-    echo "  ✓  jira-cache-server venv recreated"
+       "$PLUGIN_ROOT/mcp-servers/jira-cache" --quiet 2>/dev/null; then
+    echo "  ✓  jira-cache venv recreated"
     PASS=$((PASS+1))
   else
-    echo "  ✗  jira-cache-server venv recreation failed"
+    echo "  ✗  jira-cache venv recreation failed"
     echo "     → Run: /atlassian-pm:setup"
     FAIL=$((FAIL+1))
   fi
 else
-  echo "  !  jira-cache-server venv missing (cache features degraded)"
+  echo "  !  jira-cache venv missing (cache features degraded)"
   echo "     → Run: /atlassian-pm:setup"
   WARN=$((WARN+1))
 fi
 
-# Check 4b: jira-cache-server in .mcp.json
+# Check 4b: jira-cache in .mcp.json
 MCP_JSON="${PLUGIN_ROOT}/.mcp.json"
-if [ -f "$MCP_JSON" ] && python3 -c "import json; d=json.load(open('$MCP_JSON')); exit(0 if 'jira-cache-server' in d.get('mcpServers', {}) else 1)" 2>/dev/null; then
-  echo "  ✓  jira-cache-server configured in .mcp.json"
+if [ -f "$MCP_JSON" ] && python3 -c "import json; d=json.load(open('$MCP_JSON')); exit(0 if 'jira-cache' in d.get('mcpServers', {}) else 1)" 2>/dev/null; then
+  echo "  ✓  jira-cache configured in .mcp.json"
   PASS=$((PASS+1))
 else
-  echo "  !  jira-cache-server missing from .mcp.json (cache tools unavailable)"
+  echo "  !  jira-cache missing from .mcp.json (cache tools unavailable)"
   echo "     → Plugin may be outdated — reinstall: /plugin install atlassian-pm@atlassian-pm"
   WARN=$((WARN+1))
 fi

@@ -1,5 +1,5 @@
 [project]
-name = "jira-cache-server"
+name = "jira-cache"
 version = "0.2.0"
 description = "Local Jira cache MCP server with SQLite + FTS5"
 requires-python = ">=3.11"
