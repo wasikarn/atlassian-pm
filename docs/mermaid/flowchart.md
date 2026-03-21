@@ -1,7 +1,3 @@
----
-title: Flowcharts Syntax
----
-
 # Flowcharts - Basic Syntax
 
 Flowcharts are composed of **nodes** (geometric shapes) and **edges** (arrows or lines). The Mermaid code defines how nodes and edges are made and accommodates different arrow types, multi-directional arrows, and any linking to and from subgraphs.
@@ -33,7 +29,7 @@ one previously defined will be used when rendering the box.
 title: Node with text
 ---
 flowchart LR
-    id1[This is the text in the box]
+    id1[label]
 ```
 
 #### Unicode text
@@ -64,8 +60,6 @@ flowchart LR
 
 ### Direction
 
-This statement declares the direction of the Flowchart.
-
 This declares the flowchart is oriented from top to bottom (`TD` or `TB`).
 
 ```mermaid
@@ -94,21 +88,21 @@ Possible FlowChart orientations are:
 
 ```mermaid
 flowchart LR
-    id1(This is the text in the box)
+    id1(label)
 ```
 
 ### A stadium-shaped node
 
 ```mermaid
 flowchart LR
-    id1([This is the text in the box])
+    id1([label])
 ```
 
 ### A node in a subroutine shape
 
 ```mermaid
 flowchart LR
-    id1[[This is the text in the box]]
+    id1[[label]]
 ```
 
 ### A node in a cylindrical shape
@@ -122,14 +116,14 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    id1((This is the text in the circle))
+    id1((label))
 ```
 
 ### A node in an asymmetric shape
 
 ```mermaid
 flowchart LR
-    id1>This is the text in the box]
+    id1>label]
 ```
 
 Currently only the shape above is possible and not its mirror. _This might change with future releases._
@@ -138,28 +132,28 @@ Currently only the shape above is possible and not its mirror. _This might chang
 
 ```mermaid
 flowchart LR
-    id1{This is the text in the box}
+    id1{label}
 ```
 
 ### A hexagon node
 
 ```mermaid
 flowchart LR
-    id1{{This is the text in the box}}
+    id1{{label}}
 ```
 
 ### Parallelogram
 
 ```mermaid
 flowchart TD
-    id1[/This is the text in the box/]
+    id1[/label/]
 ```
 
 ### Parallelogram alt
 
 ```mermaid
 flowchart TD
-    id1[\This is the text in the box\]
+    id1[\label\]
 ```
 
 ### Trapezoid
@@ -180,7 +174,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    id1(((This is the text in the circle)))
+    id1(((label)))
 ```
 
 ## Expanded Node Shapes in Mermaid Flowcharts (v11.3.0+)
@@ -199,53 +193,53 @@ This syntax creates a node A as a rectangle. It renders in the same way as `A["A
 
 ### Complete List of New Shapes
 
-| Shape Name | Short Name / Syntax | Description |
-| --- | --- | --- |
-| Process | `rect` | Rectangle |
-| Event | `rounded` | Rounded rectangle |
-| Terminal Point (Stadium) | `stadium` | Stadium shape |
-| Subprocess | `subproc` | Double-bordered rectangle |
-| Database (Cylinder) | `cyl` | Cylinder |
-| Start (Circle) | `circle` | Circle |
-| Odd | `odd` | Odd shape |
-| Decision (Diamond) | `diamond` | Diamond |
-| Prepare Conditional (Hexagon) | `hex` | Hexagon |
-| Data Input/Output (Lean Right) | `lean-r` | Parallelogram leaning right |
-| Data Input/Output (Lean Left) | `lean-l` | Parallelogram leaning left |
-| Priority Action (Trapezoid Base Bottom) | `trap-b` | Trapezoid (base bottom) |
-| Manual Operation (Trapezoid Base Top) | `trap-t` | Trapezoid (base top) |
-| Stop (Double Circle) | `dbl-circ` | Double circle |
-| Text Block | `text` | Text block |
-| Card (Notched Rectangle) | `notch-rect` | Notched rectangle |
-| Lined/Shaded Process | `lin-rect` | Lined rectangle |
-| Start (Small Circle) | `sm-circ` | Small filled circle |
-| Stop (Framed Circle) | `framed-circle` | Framed circle |
-| Fork/Join (Long Rectangle) | `fork` | Long thin rectangle |
-| Collate (Hourglass) | `hourglass` | Hourglass |
-| Comment (Curly Brace) | `comment` | Curly brace left |
-| Comment Right (Curly Brace Right) | `brace-r` | Curly brace right |
-| Comment Both Sides | `braces` | Curly braces both sides |
-| Com Link (Lightning Bolt) | `bolt` | Lightning bolt |
-| Document | `doc` | Document shape |
-| Delay (Half-Rounded Rectangle) | `delay` | Half-rounded rectangle |
-| Direct Access Storage (Horizontal Cylinder) | `das` | Horizontal cylinder |
-| Disk Storage (Lined Cylinder) | `lin-cyl` | Lined cylinder |
-| Display (Curved Trapezoid) | `curv-trap` | Curved trapezoid |
-| Divided Process (Divided Rectangle) | `div-rect` | Divided rectangle |
-| Extract (Small Triangle) | `tri` | Triangle |
-| Internal Storage (Window Pane) | `win-pane` | Window pane |
-| Junction (Filled Circle) | `f-circ` | Filled circle |
-| Lined Document | `lin-doc` | Lined document |
-| Loop Limit (Notched Pentagon) | `notch-pent` | Notched pentagon |
-| Manual File (Flipped Triangle) | `flip-tri` | Flipped triangle |
-| Manual Input (Sloped Rectangle) | `sl-rect` | Sloped rectangle |
-| Multi-Document (Stacked Document) | `docs` | Stacked documents |
-| Multi-Process (Stacked Rectangle) | `processes` | Stacked rectangles |
-| Paper Tape (Flag) | `flag` | Flag/paper tape |
-| Stored Data (Bow Tie Rectangle) | `bow-rect` | Bow tie rectangle |
-| Summary (Crossed Circle) | `cross-circ` | Crossed circle |
-| Tagged Document | `tag-doc` | Tagged document |
-| Tagged Process (Tagged Rectangle) | `tag-rect` | Tagged rectangle |
+| Shape Name | Short Name / Syntax |
+| --- | --- |
+| Process | `rect` |
+| Event | `rounded` |
+| Terminal Point (Stadium) | `stadium` |
+| Subprocess | `subproc` |
+| Database (Cylinder) | `cyl` |
+| Start (Circle) | `circle` |
+| Odd | `odd` |
+| Decision (Diamond) | `diamond` |
+| Prepare Conditional (Hexagon) | `hex` |
+| Data Input/Output (Lean Right) | `lean-r` |
+| Data Input/Output (Lean Left) | `lean-l` |
+| Priority Action (Trapezoid Base Bottom) | `trap-b` |
+| Manual Operation (Trapezoid Base Top) | `trap-t` |
+| Stop (Double Circle) | `dbl-circ` |
+| Text Block | `text` |
+| Card (Notched Rectangle) | `notch-rect` |
+| Lined/Shaded Process | `lin-rect` |
+| Start (Small Circle) | `sm-circ` |
+| Stop (Framed Circle) | `framed-circle` |
+| Fork/Join (Long Rectangle) | `fork` |
+| Collate (Hourglass) | `hourglass` |
+| Comment (Curly Brace) | `comment` |
+| Comment Right (Curly Brace Right) | `brace-r` |
+| Comment Both Sides | `braces` |
+| Com Link (Lightning Bolt) | `bolt` |
+| Document | `doc` |
+| Delay (Half-Rounded Rectangle) | `delay` |
+| Direct Access Storage (Horizontal Cylinder) | `das` |
+| Disk Storage (Lined Cylinder) | `lin-cyl` |
+| Display (Curved Trapezoid) | `curv-trap` |
+| Divided Process (Divided Rectangle) | `div-rect` |
+| Extract (Small Triangle) | `tri` |
+| Internal Storage (Window Pane) | `win-pane` |
+| Junction (Filled Circle) | `f-circ` |
+| Lined Document | `lin-doc` |
+| Loop Limit (Notched Pentagon) | `notch-pent` |
+| Manual File (Flipped Triangle) | `flip-tri` |
+| Manual Input (Sloped Rectangle) | `sl-rect` |
+| Multi-Document (Stacked Document) | `docs` |
+| Multi-Process (Stacked Rectangle) | `processes` |
+| Paper Tape (Flag) | `flag` |
+| Stored Data (Bow Tie Rectangle) | `bow-rect` |
+| Summary (Crossed Circle) | `cross-circ` |
+| Tagged Document | `tag-doc` |
+| Tagged Process (Tagged Rectangle) | `tag-rect` |
 
 ### Example Flowchart with New Shapes
 
@@ -419,11 +413,6 @@ You can then describe dependencies in a very expressive way. Like the one-liner 
 flowchart TB
     A & B--> C & D
 ```
-
-If you describe the same diagram using the basic syntax, it will take four lines. A
-word of warning, one could go overboard with this making the flowchart harder to read in
-markdown form. The Swedish word `lagom` comes to mind. It means, not too much and not too little.
-This goes for expressive syntaxes as well.
 
 ```mermaid
 flowchart TB
@@ -784,36 +773,6 @@ flowchart LR
     click D href "https://www.github.com" "Open this in a new tab" _blank
 ```
 
-Beginner's tip—a full example using interactive links in a html context:
-
-```html
-<body>
-  <pre class="mermaid">
-    flowchart LR
-        A-->B
-        B-->C
-        C-->D
-        click A callback "Tooltip"
-        click B "https://www.github.com" "This is a link"
-        click C call callback() "Tooltip"
-        click D href "https://www.github.com" "This is a link"
-  </pre>
-
-  <script>
-    window.callback = function () {
-      alert('A callback was triggered');
-    };
-    const config = {
-      startOnLoad: true,
-      htmlLabels: true,
-      flowchart: { useMaxWidth: true, curve: 'cardinal' },
-      securityLevel: 'loose',
-    };
-    mermaid.initialize(config);
-  </script>
-</body>
-```
-
 ### Comments
 
 Comments can be entered within a flow diagram, which will be ignored by the parser. Comments need to be on their own line, and must be prefaced with `%%` (double percent signs). Any text after the start of the comment to the next newline will be treated as a comment, including any flow syntax
@@ -1000,22 +959,6 @@ Supported prefixes: `fa`, `fab`, `fas`, `far`, `fal`, `fad`.
 
 > Note that it will fall back to FontAwesome CSS if FontAwesome packs are not registered.
 
-### Register FontAwesome CSS
-
-Mermaid supports Font Awesome if the CSS is included on the website.
-Mermaid does not have any restriction on the version of Font Awesome that can be used.
-
-Please refer the [Official Font Awesome Documentation](https://fontawesome.com/start) on how to include it in your website.
-
-Adding this snippet in the `<head>` would add support for Font Awesome v6.5.1
-
-```html
-<link
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  rel="stylesheet"
-/>
-```
-
 ### Custom icons
 
 It is possible to use custom icons served from Font Awesome as long as the website imports the corresponding kit.
@@ -1038,22 +981,6 @@ And trying to render it
 flowchart TD
     B["fa:fa-twitter for peace"]
     B-->C["fab:fa-truck-bold a custom icon"]
-```
-
-## Graph declarations with spaces between vertices and link and without semicolon
-
-- In graph declarations, the statements also can now end without a semicolon. After release 0.2.16, ending a graph statement with semicolon is just optional. So the below graph declaration is also valid along with the old declarations of the graph.
-
-- A single space is allowed between vertices and the link. However there should not be any space between a vertex and its text and a link and its text. The old syntax of graph declaration will also work and hence this new feature is optional and is introduced to improve readability.
-
-Below is the new declaration of the graph edges which is also valid along with the old declaration of the graph edges.
-
-```mermaid
-flowchart LR
-    A[Hard edge] -->|Link text| B(Round edge)
-    B --> C{Decision}
-    C -->|One| D[Result one]
-    C -->|Two| E[Result two]
 ```
 
 ## Configuration
@@ -1080,7 +1007,6 @@ config:
 It is possible to adjust the width of the rendered flowchart.
 
 This is done by defining **mermaid.flowchartConfig** or by the CLI to use a JSON file with the configuration. How to use the CLI is described in the mermaidCLI page.
-mermaid.flowchartConfig can be set to a JSON string with config parameters or the corresponding object.
 
 ```javascript
 mermaid.flowchartConfig = {

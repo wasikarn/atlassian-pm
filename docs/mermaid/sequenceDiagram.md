@@ -42,33 +42,20 @@ sequenceDiagram
     Bob->>Alice: Hi Alice
 ```
 
-### Boundary
+### Participant Types
 
-If you want to use the boundary symbol for a participant, use the JSON configuration syntax as shown below.
+Use the `type` field to set the UML symbol for a participant:
 
-```mermaid
-sequenceDiagram
-    participant Alice@{ "type" : "boundary" }
-    participant Bob
-    Alice->>Bob: Request from boundary
-    Bob->>Alice: Response to boundary
-```
+| Type value | Symbol |
+|---|---|
+| `boundary` | Boundary |
+| `control` | Control |
+| `entity` | Entity |
+| `database` | Database |
+| `collections` | Collections |
+| `queue` | Queue |
 
-### Control
-
-If you want to use the control symbol for a participant, use the JSON configuration syntax as shown below.
-
-```mermaid
-sequenceDiagram
-    participant Alice@{ "type" : "control" }
-    participant Bob
-    Alice->>Bob: Control request
-    Bob->>Alice: Control response
-```
-
-### Entity
-
-If you want to use the entity symbol for a participant, use the JSON configuration syntax as shown below.
+Example:
 
 ```mermaid
 sequenceDiagram
@@ -76,42 +63,6 @@ sequenceDiagram
     participant Bob
     Alice->>Bob: Entity request
     Bob->>Alice: Entity response
-```
-
-### Database
-
-If you want to use the database symbol for a participant, use the JSON configuration syntax as shown below.
-
-```mermaid
-sequenceDiagram
-    participant Alice@{ "type" : "database" }
-    participant Bob
-    Alice->>Bob: DB query
-    Bob->>Alice: DB result
-```
-
-### Collections
-
-If you want to use the collections symbol for a participant, use the JSON configuration syntax as shown below.
-
-```mermaid
-sequenceDiagram
-    participant Alice@{ "type" : "collections" }
-    participant Bob
-    Alice->>Bob: Collections request
-    Bob->>Alice: Collections response
-```
-
-### Queue
-
-If you want to use the queue symbol for a participant, use the JSON configuration syntax as shown below.
-
-```mermaid
-sequenceDiagram
-    participant Alice@{ "type" : "queue" }
-    participant Bob
-    Alice->>Bob: Queue message
-    Bob->>Alice: Queue response
 ```
 
 ### Aliases
@@ -169,8 +120,6 @@ sequenceDiagram
     API->>DB: Query
     DB-->>API: Result
 ```
-
-In the example above, "External Name" and "External DB" will be displayed, not "Internal Name" and "Internal DB".
 
 ### Actor Creation and Destruction (v10.3.0+)
 
@@ -271,26 +220,14 @@ Lines can be solid or dotted, and can end with various types of arrowheads, cros
 
 **Half-Arrows**
 
-Both solid and dotted variants are available by increasing the number of dashes (`-` → `--`).
+Half-arrows use suffix `\` (top half) or `/` (bottom half) on filled variants, or `-\\`/`-//` for stick variants. Combine with `-` (solid) or `--` (dotted).
 
-| Type    | Description                                          |
-| ------- | ---------------------------------------------------- |
-| `-\|\`  | Solid line with top half arrowhead                   |
-| `--\|\` | Dotted line with top half arrowhead                  |
-| `-\|/`  | Solid line with bottom half arrowhead                |
-| `--\|/` | Dotted line with bottom half arrowhead               |
-| `/\|-`  | Solid line with reverse top half arrowhead           |
-| `/\|--` | Dotted line with reverse top half arrowhead          |
-| `\\-`   | Solid line with reverse bottom half arrowhead        |
-| `\\--`  | Dotted line with reverse bottom half arrowhead       |
-| `-\\`   | Solid line with top stick half arrowhead             |
-| `--\\`  | Dotted line with top stick half arrowhead            |
-| `-//`   | Solid line with bottom stick half arrowhead          |
-| `--//`  | Dotted line with bottom stick half arrowhead         |
-| `//-`   | Solid line with reverse top stick half arrowhead     |
-| `//--`  | Dotted line with reverse top stick half arrowhead    |
-| `\\-`   | Solid line with reverse bottom stick half arrowhead  |
-| `\\--`  | Dotted line with reverse bottom stick half arrowhead |
+| Type    | Description                       |
+| ------- | --------------------------------- |
+| `-\|\`  | Solid, top half arrowhead         |
+| `--\|\` | Dotted, top half arrowhead        |
+| `-\|/`  | Solid, bottom half arrowhead      |
+| `--\|/` | Dotted, bottom half arrowhead     |
 
 ## Central Connections
 
@@ -591,28 +528,11 @@ sequenceDiagram
 
 ## Comments
 
-Comments can be entered within a sequence diagram, which will be ignored by the parser. Comments need to be on their own line, and must be prefaced with `%%` (double percent signs). Any text after the start of the comment to the next newline will be treated as a comment, including any diagram syntax
-
-```mermaid
-sequenceDiagram
-    Alice->>John: Hello John, how are you?
-    %% this is a comment
-    John-->>Alice: Great!
-```
+Use `%%` to add comments (same syntax as all Mermaid diagrams). See [flowchart.md](flowchart.md#comments).
 
 ## Entity codes to escape characters
 
-It is possible to escape characters using the syntax exemplified here.
-
-```mermaid
-sequenceDiagram
-    A->>B: I #9829; you!
-    B->>A: I #9829; you #infin; times more!
-```
-
-Numbers given are base 10, so `#` can be encoded as `#35;`. It is also supported to use HTML character names.
-
-Because semicolons can be used instead of line breaks to define the markup, you need to use `#59;` to include a semicolon in message text.
+> Entity escaping: same as flowchart syntax. See [flowchart.md](flowchart.md#entity-codes).
 
 ## sequenceNumbers
 
@@ -641,7 +561,7 @@ sequenceDiagram
 
 ## Actor Menus
 
-Actors can have popup-menus containing individualized links to external pages. For example, if an actor represented a web service, useful links might include a link to the service health dashboard, repo containing the code for the service, or a wiki page describing the service.
+Actors can have popup links to external pages.
 
 This can be configured by adding one or more link lines with the format:
 
@@ -664,15 +584,13 @@ sequenceDiagram
 
 #### Advanced Menu Syntax
 
-There is an advanced syntax that relies on JSON formatting. If you are comfortable with JSON format, then this exists as well.
+There is an advanced syntax that relies on JSON formatting.
 
 This can be configured by adding the links lines with the format:
 
 ```
 links <actor>: <json-formatted link-name link-url pairs>
 ```
-
-An example is below:
 
 ```mermaid
 sequenceDiagram
@@ -687,10 +605,7 @@ sequenceDiagram
 
 ## Configuration
 
-It is possible to adjust the margins for rendering the sequence diagram.
-
-This is done by defining `mermaid.sequenceConfig` or by the CLI to use a json file with the configuration.
-`mermaid.sequenceConfig` can be set to a JSON string with config parameters or the corresponding object.
+Adjust margins by defining `mermaid.sequenceConfig` (JSON string or object) or via CLI with a JSON config file.
 
 ```javascript
 mermaid.sequenceConfig = {

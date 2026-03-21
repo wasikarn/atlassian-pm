@@ -48,14 +48,14 @@ stateDiagram-v2
     stateId
 ```
 
-Another way is by using the state keyword with a description as per below:
+Or use:
 
 ```mermaid
 stateDiagram-v2
     state "This is a state description" as s2
 ```
 
-Another way to define a state with a description is to define the state id followed by a colon and the description:
+Or use:
 
 ```mermaid
 stateDiagram-v2
@@ -94,11 +94,7 @@ stateDiagram-v2
 
 ## Composite states
 
-In a real world use of state diagrams you often end up with diagrams that are multidimensional as one state can
-have several internal states. These are called composite states in this terminology.
-
-In order to define a composite state you need to use the state keyword followed by an id and the body of the composite
-state between \{\}. You can name a composite state on a separate line just like a simple state. See the example below:
+Use `state id { ... }` for composite states.
 
 ```mermaid
 stateDiagram-v2
@@ -253,20 +249,7 @@ stateDiagram
 
 ## Comments
 
-Comments can be entered within a state diagram chart, which will be ignored by the parser. Comments need to be on their
-own line, and must be prefaced with `%%` (double percent signs). Any text after the start of the comment to the next
-newline will be treated as a comment, including any diagram syntax
-
-```mermaid
-stateDiagram-v2
-    [*] --> Still
-    Still --> [*]
-%% this is a comment
-    Still --> Moving
-    Moving --> Still %% another comment
-    Moving --> Crash
-    Crash --> [*]
-```
+Use `%%` for comments (same as all Mermaid diagrams). See [flowchart.md](flowchart.md#comments).
 
 ## Styling with classDefs
 
@@ -292,27 +275,11 @@ Here is an example of a classDef with just one property-value pair:
 classDef movement font-style:italic;
 ```
 
-where
-
-- the _name_ of the style is `movement`
-- the only _property_ is `font-style` and its _value_ is `italic`
-
-If you want to have more than one _property-value pair_ then you put a comma (`,`) between each _property-value pair._
-
-Here is an example with three property-value pairs:
+Separate multiple property-value pairs with commas:
 
 ```txt
 classDef badBadEvent fill:#f00,color:white,font-weight:bold,stroke-width:2px,stroke:yellow
 ```
-
-where
-
-- the _name_ of the style is `badBadEvent`
-- the first _property_ is `fill` and its _value_ is `#f00`
-- the second _property_ is `color` and its _value_ is `white`
-- the third _property_ is `font-weight` and its _value_ is `bold`
-- the fourth _property_ is `stroke-width` and its _value_ is `2px`
-- the fifth _property_ is `stroke` and its _value_ is `yellow`
 
 ### Apply classDef styles to states
 

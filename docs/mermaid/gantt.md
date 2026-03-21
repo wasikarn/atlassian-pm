@@ -49,11 +49,6 @@ gantt
     Describe gantt syntax               :active, a1, after des1, 3d
     Add gantt diagram to demo page      :after a1  , 20h
     Add another diagram to demo page    :doc1, after a1  , 48h
-
-    section Last section
-    Describe gantt syntax               :after doc1, 3d
-    Add gantt diagram to demo page      :20h
-    Add another diagram to demo page    :48h
 ```
 
 Tasks are by default sequential. A task start date defaults to the end date of the preceding task.
@@ -68,21 +63,23 @@ After processing the tags, the remaining metadata items are interpreted as follo
 
 ### Task Metadata Reference
 
+> *All date values are interpreted using `dateformat`.*
+
 | Metadata syntax                                      | Start date                                          | End date                                              | ID       |
 | ---------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------- | -------- |
-| `<taskID>, <startDate>, <endDate>`                   | `startdate` as interpreted using `dateformat`       | `endDate` as interpreted using `dateformat`           | `taskID` |
-| `<taskID>, <startDate>, <length>`                    | `startdate` as interpreted using `dateformat`       | Start date + `length`                                 | `taskID` |
-| `<taskID>, after <otherTaskId>, <endDate>`           | End date of previously specified task `otherTaskID` | `endDate` as interpreted using `dateformat`           | `taskID` |
+| `<taskID>, <startDate>, <endDate>`                   | *startdate*                                         | *endDate*                                             | `taskID` |
+| `<taskID>, <startDate>, <length>`                    | *startdate*                                         | Start date + `length`                                 | `taskID` |
+| `<taskID>, after <otherTaskId>, <endDate>`           | End date of previously specified task `otherTaskID` | *endDate*                                             | `taskID` |
 | `<taskID>, after <otherTaskId>, <length>`            | End date of previously specified task `otherTaskID` | Start date + `length`                                 | `taskID` |
-| `<taskID>, <startDate>, until <otherTaskId>`         | `startdate` as interpreted using `dateformat`       | Start date of previously specified task `otherTaskID` | `taskID` |
+| `<taskID>, <startDate>, until <otherTaskId>`         | *startdate*                                         | Start date of previously specified task `otherTaskID` | `taskID` |
 | `<taskID>, after <otherTaskId>, until <otherTaskId>` | End date of previously specified task `otherTaskID` | Start date of previously specified task `otherTaskID` | `taskID` |
-| `<startDate>, <endDate>`                             | `startdate` as interpreted using `dateformat`       | `enddate` as interpreted using `dateformat`           | n/a      |
-| `<startDate>, <length>`                              | `startdate` as interpreted using `dateformat`       | Start date + `length`                                 | n/a      |
-| `after <otherTaskID>, <endDate>`                     | End date of previously specified task `otherTaskID` | `enddate` as interpreted using `dateformat`           | n/a      |
+| `<startDate>, <endDate>`                             | *startdate*                                         | *enddate*                                             | n/a      |
+| `<startDate>, <length>`                              | *startdate*                                         | Start date + `length`                                 | n/a      |
+| `after <otherTaskID>, <endDate>`                     | End date of previously specified task `otherTaskID` | *enddate*                                             | n/a      |
 | `after <otherTaskID>, <length>`                      | End date of previously specified task `otherTaskID` | Start date + `length`                                 | n/a      |
-| `<startDate>, until <otherTaskId>`                   | `startdate` as interpreted using `dateformat`       | Start date of previously specified task `otherTaskID` | n/a      |
+| `<startDate>, until <otherTaskId>`                   | *startdate*                                         | Start date of previously specified task `otherTaskID` | n/a      |
 | `after <otherTaskId>, until <otherTaskId>`           | End date of previously specified task `otherTaskID` | Start date of previously specified task `otherTaskID` | n/a      |
-| `<endDate>`                                          | End date of preceding task                          | `enddate` as interpreted using `dateformat`           | n/a      |
+| `<endDate>`                                          | End date of preceding task                          | *enddate*                                             | n/a      |
 | `<length>`                                           | End date of preceding task                          | Start date + `length`                                 | n/a      |
 | `until <otherTaskId>`                                | End date of preceding task                          | Start date of previously specified task `otherTaskID` | n/a      |
 
@@ -90,11 +87,11 @@ After processing the tags, the remaining metadata items are interpreted as follo
 
 ### Title
 
-The `title` is an _optional_ string to be displayed at the top of the Gantt chart.
+The `title` is an *optional* string to be displayed at the top of the Gantt chart.
 
 ### Excludes
 
-The `excludes` is an _optional_ attribute that accepts specific dates in YYYY-MM-DD format, days of the week ("sunday") or "weekends", but not the word "weekdays". These dates will be marked on the graph and excluded from duration calculation.
+The `excludes` is an *optional* attribute that accepts specific dates in YYYY-MM-DD format, days of the week ("sunday") or "weekends", but not the word "weekdays". These dates will be marked on the graph and excluded from duration calculation.
 
 #### Weekend (v11.0.0+)
 
@@ -117,7 +114,7 @@ Divide the chart into sections with the `section` keyword followed by a name (re
 
 ### Milestones
 
-Milestones represent a single instant in time. Use the `milestone` tag. Location = _initial date_ + _duration_/2.
+Milestones represent a single instant in time. Use the `milestone` tag. Location = *initial date* + *duration*/2.
 
 ```mermaid
 gantt
@@ -149,62 +146,31 @@ gantt
 
 The default input date format is `YYYY-MM-DD`. You can define your custom `dateFormat`.
 
-| Input      | Example        | Description                                            |
-| ---------- | -------------- | ------------------------------------------------------ |
-| `YYYY`     | 2014           | 4 digit year                                           |
-| `YY`       | 14             | 2 digit year                                           |
-| `Q`        | 1..4           | Quarter of year. Sets month to first month in quarter. |
-| `M MM`     | 1..12          | Month number                                           |
-| `MMM MMMM` | January..Dec   | Month name in locale set by `dayjs.locale()`           |
-| `D DD`     | 1..31          | Day of month                                           |
-| `Do`       | 1st..31st      | Day of month with ordinal                              |
-| `DDD DDDD` | 1..365         | Day of year                                            |
-| `X`        | 1410715640.579 | Unix timestamp                                         |
-| `x`        | 1410715640579  | Unix ms timestamp                                      |
-| `H HH`     | 0..23          | 24 hour time                                           |
-| `h hh`     | 1..12          | 12 hour time used with `a A`.                          |
-| `a A`      | am pm          | Post or ante meridiem                                  |
-| `m mm`     | 0..59          | Minutes                                                |
-| `s ss`     | 0..59          | Seconds                                                |
-| `S`        | 0..9           | Tenths of a second                                     |
-| `SS`       | 0..99          | Hundreds of a second                                   |
-| `SSS`      | 0..999         | Thousandths of a second                                |
-| `Z ZZ`     | +12:00         | Offset from UTC as +-HH:mm, +-HHmm, or Z              |
+Uses [day.js format tokens](https://day.js.org/docs/en/parse/string-format). Common tokens:
 
-More info: <https://day.js.org/docs/en/parse/string-format/>
+| Token | Example | Description |
+| --- | --- | --- |
+| `YYYY` | 2014 | 4-digit year |
+| `MM` | 01-12 | Month |
+| `DD` | 01-31 | Day |
+| `HH:mm` | 23:59 | Hour:Minute |
+
+Full reference: [day.js format docs](https://day.js.org/docs/en/parse/string-format)
 
 ### Output Date Format on the Axis
 
 The default output date format is `YYYY-MM-DD`. You can define your custom `axisFormat`.
 
-| Format | Definition                                                                                |
-| ------ | ----------------------------------------------------------------------------------------- |
-| %a     | abbreviated weekday name                                                                  |
-| %A     | full weekday name                                                                         |
-| %b     | abbreviated month name                                                                    |
-| %B     | full month name                                                                           |
-| %c     | date and time, as "%a %b %e %H:%M:%S %Y"                                                 |
-| %d     | zero-padded day of the month as a decimal number [01,31]                                  |
-| %e     | space-padded day of the month as a decimal number [ 1,31]                                 |
-| %H     | hour (24-hour clock) as a decimal number [00,23]                                          |
-| %I     | hour (12-hour clock) as a decimal number [01,12]                                          |
-| %j     | day of the year as a decimal number [001,366]                                             |
-| %m     | month as a decimal number [01,12]                                                         |
-| %M     | minute as a decimal number [00,59]                                                        |
-| %L     | milliseconds as a decimal number [000, 999]                                               |
-| %p     | either AM or PM                                                                           |
-| %S     | second as a decimal number [00,61]                                                        |
-| %U     | week number of the year (Sunday as the first day of the week) as a decimal number [00,53] |
-| %w     | weekday as a decimal number [0(Sunday),6]                                                 |
-| %W     | week number of the year (Monday as the first day of the week) as a decimal number [00,53] |
-| %x     | date, as "%m/%d/%Y"                                                                       |
-| %X     | time, as "%H:%M:%S"                                                                       |
-| %y     | year without century as a decimal number [00,99]                                          |
-| %Y     | year with century as a decimal number                                                     |
-| %Z     | time zone offset, such as "-0700"                                                         |
-| %%     | a literal "%" character                                                                   |
+Uses [d3-time-format tokens](https://github.com/d3/d3-time-format). Common tokens:
 
-More info: <https://github.com/d3/d3-time-format/tree/v4.0.0#locale_format>
+| Token | Description |
+| --- | --- |
+| `%Y` | 4-digit year |
+| `%m` | Month (01-12) |
+| `%d` | Day (01-31) |
+| `%H:%M` | Hour:Minute (24h) |
+
+Full reference: [d3-time-format docs](https://github.com/d3/d3-time-format)
 
 ### Axis Ticks (v10.3.0+)
 
