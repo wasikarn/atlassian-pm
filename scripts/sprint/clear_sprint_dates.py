@@ -12,6 +12,7 @@ Usage:
 import argparse
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
@@ -51,6 +52,15 @@ def has_dates(issue: dict, fields: list[str]) -> bool:
     """Check if issue has any non-null date fields."""
     f = issue.get("fields", {})
     return any(f.get(field) is not None for field in fields)
+
+
+def _update_issue(api: "JiraAPI", key: str, fields: dict) -> tuple[str, bool, int | None, str | None]:
+    """Update a single issue's fields. Returns (key, success, status, error_msg)."""
+    try:
+        status = api.update_fields(key, fields)
+        return key, True, status, None
+    except Exception as e:
+        return key, False, None, str(e)
 
 
 def main():
@@ -104,20 +114,22 @@ def main():
     success = 0
     failed = []
     null_fields = {f: None for f in fields}
+    keys = [t["key"] for t in tickets_with_dates]
 
-    for t in tickets_with_dates:
-        key = t["key"]
-        try:
-            status = api.update_fields(key, null_fields)
-            if status == 204:
-                print(f"  ✓ {key}")
-                success += 1
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_update_issue, api, key, null_fields): key for key in keys}
+        for future in as_completed(futures):
+            key, ok, status, error = future.result()
+            if ok:
+                if status == 204:
+                    print(f"  ✓ {key}")
+                    success += 1
+                else:
+                    print(f"  ⚠ {key} — HTTP {status}")
+                    failed.append(key)
             else:
-                print(f"  ⚠ {key} — HTTP {status}")
+                print(f"  ✗ {key} — {error}")
                 failed.append(key)
-        except Exception as e:
-            print(f"  ✗ {key} — {e}")
-            failed.append(key)
 
     print(f"\nDone: {success}/{len(tickets_with_dates)} cleared")
     if failed:

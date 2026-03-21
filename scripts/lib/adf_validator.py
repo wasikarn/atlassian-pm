@@ -25,6 +25,28 @@ VALID_ISSUE_TYPES = frozenset({"story", "subtask", "epic", "qa", "task"})
 SUBTASK_TAGS = ("[BE]", "[FE-Admin]", "[FE-Web]", "[QA]")
 QG_THRESHOLD = 90.0
 
+_ALL_SECTION_KEYS: frozenset[str] = frozenset({
+    "acceptance criteria",
+    "user story",
+    "narrative",
+    "scope",
+    "objective",
+    "epic overview",
+    "overview",
+    "rice",
+    "user stories",
+    "stories",
+    "ac coverage",
+    "coverage",
+    "test cases",
+    "test",
+    "context",
+    "bug description",
+    "done criteria",
+    "fix criteria",
+    "reference",
+})
+
 # Regex patterns
 FILE_PATH_RE = re.compile(r"(?:[\w@.-]+/){1,}[\w@.-]+\.\w{1,6}")
 API_ROUTE_RE = re.compile(r"/api/[\w/.-]+")
@@ -226,6 +248,10 @@ class AdfValidator:
         Task:    T1-T5 (technical) + TK1-TK4 (quality) = 9 checks
     """
 
+    def _extract_sections(self, adf: dict) -> dict[str, list[dict]]:
+        """Pre-extract all known sections in one pass. Returns {heading_pattern: content_nodes}."""
+        return {key: get_section_content(adf, key) for key in _ALL_SECTION_KEYS}
+
     def validate(
         self,
         adf: dict,
@@ -234,48 +260,49 @@ class AdfValidator:
     ) -> ValidationReport:
         """Run all applicable checks for the issue type."""
         report = ValidationReport(issue_type=issue_type)
+        _secs = self._extract_sections(adf)
 
         # Technical checks (all types)
         report.checks.append(self._check_t1_adf_format(adf))
         report.checks.append(self._check_t2_panels(adf))
         report.checks.append(self._check_t3_inline_code(adf))
-        report.checks.append(self._check_t4_links(adf, issue_type))
+        report.checks.append(self._check_t4_links(adf, issue_type, _secs))
         report.checks.append(self._check_t5_required_fields(adf, issue_type, wrapper))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
             "story": [
-                lambda: self._check_s1_invest(adf),
-                lambda: self._check_s2_narrative(adf),
-                lambda: self._check_s3_anti_patterns(adf),
-                lambda: self._check_s4_acceptance_criteria(adf),
-                lambda: self._check_s5_scope(adf),
+                lambda: self._check_s1_invest(_secs),
+                lambda: self._check_s2_narrative(_secs, adf),
+                lambda: self._check_s3_anti_patterns(_secs),
+                lambda: self._check_s4_acceptance_criteria(_secs),
+                lambda: self._check_s5_scope(adf, _secs),
                 lambda: self._check_s6_language(adf),
             ],
             "subtask": [
-                lambda: self._check_st1_objective(adf),
-                lambda: self._check_st2_scope_files(adf),
-                lambda: self._check_st3_acceptance_criteria(adf),
+                lambda: self._check_st1_objective(_secs),
+                lambda: self._check_st2_scope_files(_secs),
+                lambda: self._check_st3_acceptance_criteria(_secs),
                 lambda: self._check_st4_tag_summary(adf, wrapper),
                 lambda: self._check_st5_language(adf),
             ],
             "epic": [
-                lambda: self._check_e1_vision(adf),
-                lambda: self._check_e2_rice(adf),
-                lambda: self._check_e3_scope(adf),
-                lambda: self._check_e4_stories(adf),
+                lambda: self._check_e1_vision(_secs),
+                lambda: self._check_e2_rice(_secs),
+                lambda: self._check_e3_scope(_secs),
+                lambda: self._check_e4_stories(_secs),
             ],
             "qa": [
-                lambda: self._check_qa1_coverage(adf),
-                lambda: self._check_qa2_test_format(adf),
-                lambda: self._check_qa3_scenarios(adf),
+                lambda: self._check_qa1_coverage(_secs),
+                lambda: self._check_qa2_test_format(_secs),
+                lambda: self._check_qa3_scenarios(_secs),
                 lambda: self._check_qa4_test_data(adf),
                 lambda: self._check_qa5_language(adf),
             ],
             "task": [
-                lambda: self._check_tk1_context(adf),
+                lambda: self._check_tk1_context(_secs),
                 lambda: self._check_tk2_actionable(adf),
-                lambda: self._check_tk3_acceptance(adf),
+                lambda: self._check_tk3_acceptance(_secs),
                 lambda: self._check_tk4_language(adf),
             ],
         }
@@ -383,14 +410,14 @@ class AdfValidator:
             auto_fixable=True,
         )
 
-    def _check_t4_links(self, adf: dict, issue_type: str) -> CheckResult:
+    def _check_t4_links(self, adf: dict, issue_type: str, _secs: dict) -> CheckResult:
         """T4: Links — reference section exists with links."""
         # Find link marks or inlineCard nodes
         links = find_adf_nodes(
             adf,
             lambda n: n.get("type") == "inlineCard" or (n.get("type") == "text" and has_link_mark(n)),
         )
-        ref_section = get_section_content(adf, "reference")
+        ref_section = _secs.get("reference", [])
 
         if issue_type in ("subtask", "story") and not ref_section and not links:
             return CheckResult(
@@ -443,9 +470,9 @@ class AdfValidator:
     # Story Quality Checks (S1–S6)
     # ───────────────────────────────────────────────────────
 
-    def _check_s1_invest(self, adf: dict) -> CheckResult:
+    def _check_s1_invest(self, _secs: dict) -> CheckResult:
         """S1: INVEST — Small (<=5 AC panels), Testable (GWT in ACs)."""
-        ac_section = get_section_content(adf, "acceptance criteria")
+        ac_section = _secs.get("acceptance criteria", [])
         ac_panels = [n for n in ac_section if n.get("type") == "panel"]
 
         if not ac_panels:
@@ -476,11 +503,9 @@ class AdfValidator:
             )
         return CheckResult("S1", CheckStatus.PASS, f"INVEST OK ({len(ac_panels)} ACs, all testable)")
 
-    def _check_s2_narrative(self, adf: dict) -> CheckResult:
+    def _check_s2_narrative(self, _secs: dict, adf: dict) -> CheckResult:
         """S2: User Story narrative — As a / I want / So that."""
-        story_section = get_section_content(adf, "user story")
-        if not story_section:
-            story_section = get_section_content(adf, "narrative")
+        story_section = _secs.get("user story") or _secs.get("narrative")
         if not story_section:
             # Try first info panel as fallback
             panels = find_adf_nodes(
@@ -511,11 +536,9 @@ class AdfValidator:
             return CheckResult("S2", CheckStatus.WARN, f"Narrative missing: {missing[0]}")
         return CheckResult("S2", CheckStatus.FAIL, f"Narrative missing: {', '.join(missing)}")
 
-    def _check_s3_anti_patterns(self, adf: dict) -> CheckResult:
+    def _check_s3_anti_patterns(self, _secs: dict) -> CheckResult:
         """S3: Narrative anti-patterns — generic persona, solution masking, missing why."""
-        story_section = get_section_content(adf, "user story")
-        if not story_section:
-            story_section = get_section_content(adf, "narrative")
+        story_section = _secs.get("user story") or _secs.get("narrative")
         text = extract_text(story_section) if story_section else ""
 
         if not text:
@@ -541,9 +564,9 @@ class AdfValidator:
             return CheckResult("S3", CheckStatus.WARN, issues[0])
         return CheckResult("S3", CheckStatus.FAIL, f"{len(issues)} anti-patterns: {'; '.join(issues)}")
 
-    def _check_s4_acceptance_criteria(self, adf: dict) -> CheckResult:
+    def _check_s4_acceptance_criteria(self, _secs: dict) -> CheckResult:
         """S4: AC format — panels with Given/When/Then, correct panel types."""
-        ac_section = get_section_content(adf, "acceptance criteria")
+        ac_section = _secs.get("acceptance criteria", [])
         panels = [n for n in ac_section if n.get("type") == "panel"]
 
         if not panels:
@@ -571,9 +594,9 @@ class AdfValidator:
             return CheckResult("S4", CheckStatus.FAIL, "; ".join(issues))
         return CheckResult("S4", CheckStatus.WARN, "; ".join(issues))
 
-    def _check_s5_scope(self, adf: dict) -> CheckResult:
+    def _check_s5_scope(self, adf: dict, _secs: dict) -> CheckResult:
         """S5: Scope definition — services impacted, in/out scope."""
-        scope_section = get_section_content(adf, "scope")
+        scope_section = _secs.get("scope", [])
         text = extract_text(scope_section) if scope_section else ""
 
         if not scope_section:
@@ -595,9 +618,9 @@ class AdfValidator:
     # Subtask Quality Checks (ST1–ST5)
     # ───────────────────────────────────────────────────────
 
-    def _check_st1_objective(self, adf: dict) -> CheckResult:
+    def _check_st1_objective(self, _secs: dict) -> CheckResult:
         """ST1: Clear 1-2 sentence objective."""
-        obj_section = get_section_content(adf, "objective")
+        obj_section = _secs.get("objective", [])
         if not obj_section:
             return CheckResult("ST1", CheckStatus.FAIL, "No Objective section found")
 
@@ -609,9 +632,9 @@ class AdfValidator:
             return CheckResult("ST1", CheckStatus.WARN, "Objective too long (>3 sentences)")
         return CheckResult("ST1", CheckStatus.PASS, "Objective OK")
 
-    def _check_st2_scope_files(self, adf: dict) -> CheckResult:
+    def _check_st2_scope_files(self, _secs: dict) -> CheckResult:
         """ST2: Scope & Files — tables with real file paths."""
-        scope_section = get_section_content(adf, "scope")
+        scope_section = _secs.get("scope", [])
         if not scope_section:
             return CheckResult("ST2", CheckStatus.FAIL, "No Scope section found")
 
@@ -635,9 +658,9 @@ class AdfValidator:
             )
         return CheckResult("ST2", CheckStatus.PASS, f"{len(paths)} file paths OK")
 
-    def _check_st3_acceptance_criteria(self, adf: dict) -> CheckResult:
+    def _check_st3_acceptance_criteria(self, _secs: dict) -> CheckResult:
         """ST3: AC format — Given/When/Then in panels."""
-        ac_section = get_section_content(adf, "acceptance criteria")
+        ac_section = _secs.get("acceptance criteria", [])
         panels = [n for n in ac_section if n.get("type") == "panel"]
 
         if not panels:
@@ -689,11 +712,9 @@ class AdfValidator:
     # Epic Quality Checks (E1–E4)
     # ───────────────────────────────────────────────────────
 
-    def _check_e1_vision(self, adf: dict) -> CheckResult:
+    def _check_e1_vision(self, _secs: dict) -> CheckResult:
         """E1: Vision — Epic Overview section with clear problem statement."""
-        overview = get_section_content(adf, "epic overview")
-        if not overview:
-            overview = get_section_content(adf, "overview")
+        overview = _secs.get("epic overview") or _secs.get("overview")
         if not overview:
             return CheckResult("E1", CheckStatus.FAIL, "No Epic Overview section found")
 
@@ -702,9 +723,9 @@ class AdfValidator:
             return CheckResult("E1", CheckStatus.WARN, "Epic Overview too brief")
         return CheckResult("E1", CheckStatus.PASS, "Epic Overview present")
 
-    def _check_e2_rice(self, adf: dict) -> CheckResult:
+    def _check_e2_rice(self, _secs: dict) -> CheckResult:
         """E2: RICE Score — table with Reach/Impact/Confidence/Effort."""
-        rice_section = get_section_content(adf, "rice")
+        rice_section = _secs.get("rice", [])
         if not rice_section:
             # RICE is optional per template (⚡ skip if priority is clear)
             return CheckResult("E2", CheckStatus.PASS, "RICE section skipped (optional)")
@@ -721,9 +742,9 @@ class AdfValidator:
             return CheckResult("E2", CheckStatus.WARN, f"RICE missing factors: {missing}")
         return CheckResult("E2", CheckStatus.PASS, "RICE score complete")
 
-    def _check_e3_scope(self, adf: dict) -> CheckResult:
+    def _check_e3_scope(self, _secs: dict) -> CheckResult:
         """E3: Scope — features listed with must-have/should-have."""
-        scope_section = get_section_content(adf, "scope")
+        scope_section = _secs.get("scope", [])
         if not scope_section:
             return CheckResult("E3", CheckStatus.FAIL, "No Scope section found")
 
@@ -732,11 +753,9 @@ class AdfValidator:
             return CheckResult("E3", CheckStatus.WARN, "Scope section too brief")
         return CheckResult("E3", CheckStatus.PASS, "Scope section present")
 
-    def _check_e4_stories(self, adf: dict) -> CheckResult:
+    def _check_e4_stories(self, _secs: dict) -> CheckResult:
         """E4: User Stories — draft stories identified."""
-        stories_section = get_section_content(adf, "user stories")
-        if not stories_section:
-            stories_section = get_section_content(adf, "stories")
+        stories_section = _secs.get("user stories") or _secs.get("stories")
         if not stories_section:
             return CheckResult("E4", CheckStatus.WARN, "No User Stories section found")
 
@@ -751,11 +770,9 @@ class AdfValidator:
     # QA Quality Checks (QA1–QA5)
     # ───────────────────────────────────────────────────────
 
-    def _check_qa1_coverage(self, adf: dict) -> CheckResult:
+    def _check_qa1_coverage(self, _secs: dict) -> CheckResult:
         """QA1: Coverage — AC Coverage table exists."""
-        coverage = get_section_content(adf, "ac coverage")
-        if not coverage:
-            coverage = get_section_content(adf, "coverage")
+        coverage = _secs.get("ac coverage") or _secs.get("coverage")
         if not coverage:
             return CheckResult("QA1", CheckStatus.FAIL, "No AC Coverage section found")
 
@@ -764,11 +781,9 @@ class AdfValidator:
             return CheckResult("QA1", CheckStatus.WARN, "AC Coverage has no table")
         return CheckResult("QA1", CheckStatus.PASS, "AC Coverage table present")
 
-    def _check_qa2_test_format(self, adf: dict) -> CheckResult:
+    def _check_qa2_test_format(self, _secs: dict) -> CheckResult:
         """QA2: Test format — test cases have Given/When/Then."""
-        tc_section = get_section_content(adf, "test cases")
-        if not tc_section:
-            tc_section = get_section_content(adf, "test")
+        tc_section = _secs.get("test cases") or _secs.get("test")
         panels = find_adf_nodes(tc_section, lambda n: n.get("type") == "panel") if tc_section else []
 
         if not panels:
@@ -790,9 +805,9 @@ class AdfValidator:
             )
         return CheckResult("QA2", CheckStatus.PASS, f"{len(panels)} TCs formatted correctly")
 
-    def _check_qa3_scenarios(self, adf: dict) -> CheckResult:
+    def _check_qa3_scenarios(self, _secs: dict) -> CheckResult:
         """QA3: Scenarios — grouped by type with correct panel colors."""
-        tc_section = get_section_content(adf, "test cases")
+        tc_section = _secs.get("test cases", [])
         panels = find_adf_nodes(tc_section, lambda n: n.get("type") == "panel") if tc_section else []
 
         if not panels:
@@ -837,13 +852,9 @@ class AdfValidator:
     # Task Quality Checks (TK1–TK4)
     # ───────────────────────────────────────────────────────
 
-    def _check_tk1_context(self, adf: dict) -> CheckResult:
+    def _check_tk1_context(self, _secs: dict) -> CheckResult:
         """TK1: Context — problem/reason section explaining why this task exists."""
-        context_section = get_section_content(adf, "context")
-        if not context_section:
-            context_section = get_section_content(adf, "objective")
-        if not context_section:
-            context_section = get_section_content(adf, "bug description")
+        context_section = _secs.get("context") or _secs.get("objective") or _secs.get("bug description")
         if not context_section:
             return CheckResult("TK1", CheckStatus.FAIL, "No Context/Objective section found")
 
@@ -886,13 +897,9 @@ class AdfValidator:
             return CheckResult("TK2", CheckStatus.WARN, "No action verbs found in content")
         return CheckResult("TK2", CheckStatus.PASS, f"Actionable content ({len(panels)} panels, {len(lists)} lists)")
 
-    def _check_tk3_acceptance(self, adf: dict) -> CheckResult:
+    def _check_tk3_acceptance(self, _secs: dict) -> CheckResult:
         """TK3: Acceptance criteria — table or list of done criteria."""
-        ac_section = get_section_content(adf, "acceptance criteria")
-        if not ac_section:
-            ac_section = get_section_content(adf, "done criteria")
-        if not ac_section:
-            ac_section = get_section_content(adf, "fix criteria")
+        ac_section = _secs.get("acceptance criteria") or _secs.get("done criteria") or _secs.get("fix criteria")
 
         if not ac_section:
             return CheckResult("TK3", CheckStatus.WARN, "No Acceptance Criteria section found")
