@@ -221,6 +221,33 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/create-task tech-debt "Fix N+1 query in video list endpoint — flagged in PR #214"
+/create-task bug "Upload button unresponsive after file validation error"
+/create-task chore "Upgrade Node 20 → 24 across all services"
+/create-task spike "Evaluate tRPC vs REST for admin API layer — output: ADR doc"
+```
+
+### ❌ Bad
+
+```text
+/create-task                              # missing type and description — agent must ask twice
+/create-task bug "Login broken"           # full triage with severity scoring needed — use /bug-triage instead
+/create-task spike "Investigate caching"  # no research question defined; spike requires clear investigation areas
+/create-task "Refactor auth module"       # missing type — ambiguous between tech-debt and chore
+```
+
+**Common mistakes:**
+
+- Using `bug` type when the bug needs P1/P2/P3 severity scoring, duplicate check, and assignee recommendation — use `/bug-triage` for that
+- Creating a `tech-debt` task without referencing the PR number or commit that surfaced the issue (breaks traceability)
+- Using `/create-task` for a User Story (feature with AC) — use `/create-story` instead
+- Defining a `spike` without stating the research question and what deliverable (ADR, POC, benchmark) is expected at the end
+
 ## References
 
 - [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling

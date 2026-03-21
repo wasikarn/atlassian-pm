@@ -54,13 +54,13 @@ If any check fails, the doctor output will tell you exactly what to fix.
 |-------|-------------|
 | `/atlassian-pm:setup` | First-time setup — installs deps, configures Jira, registers MCP |
 | `/atlassian-pm:doctor` | Health check — 10 checks, shows what's broken |
-| `/atlassian-pm:story-full` | Create a User Story with subtasks (main PM workflow) |
+| `/atlassian-pm:create-story` | Create a User Story with subtasks (main PM workflow) |
 | `/atlassian-pm:create-epic` | Create Epic + Confluence epic doc from product vision |
 | `/atlassian-pm:analyze-story` | Analyze an existing story, create implementation subtasks |
 | `/atlassian-pm:plan-sprint` | Sprint planning — capacity, carry-over, assignments |
-| `/atlassian-pm:feature-blueprint` | Multi-agent feature design (5 domain experts + debate) |
+| `/atlassian-pm:blueprint` | Multi-agent feature design (5 domain experts + debate) |
 | `/atlassian-pm:verify-issue` | Verify issue quality + alignment (A1-A6 checks) |
-| `/atlassian-pm:sync-alignment` | Sync story-subtask descriptions + dates |
+| `/atlassian-pm:sync-artifacts` | Sync story-subtask descriptions + dates |
 | `/atlassian-pm:update-story` | Update an existing User Story |
 | `/atlassian-pm:update-subtask` | Update an existing Sub-task |
 | `/atlassian-pm:update-epic` | Update an existing Epic |
@@ -69,10 +69,10 @@ If any check fails, the doctor output will tell you exactly what to fix.
 | `/atlassian-pm:create-doc` | Create Confluence page from template |
 | `/atlassian-pm:update-doc` | Update an existing Confluence page |
 | `/atlassian-pm:search-issues` | Search Jira issues with natural language |
-| `/atlassian-pm:dependency-chain` | Map issue dependency chains |
+| `/atlassian-pm:map-dependencies` | Map issue dependency chains |
 | `/atlassian-pm:activity-report` | Sprint activity summary report |
-| `/atlassian-pm:refine-feature` | Refine a feature with structured backlog |
-| `/atlassian-pm:assign` | Quick-assign issue to team member (bypasses MCP bug) |
+| `/atlassian-pm:refine-epic` | Refine a feature with structured backlog |
+| `/atlassian-pm:assign-issue` | Quick-assign issue to team member (bypasses MCP bug) |
 | `/atlassian-pm:atlassian-scripts` | Python scripts for complex Jira/Confluence ops |
 
 ---
@@ -83,7 +83,7 @@ If any check fails, the doctor output will tell you exactly what to fix.
 
 ```
 1. /atlassian-pm:create-epic     → creates Epic + Confluence epic page
-2. /atlassian-pm:story-full      → creates User Stories with subtasks under the epic
+2. /atlassian-pm:create-story    → creates User Stories with subtasks under the epic
 3. /atlassian-pm:plan-sprint     → assigns stories to sprint with capacity check
 ```
 

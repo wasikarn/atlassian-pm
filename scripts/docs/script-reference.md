@@ -389,7 +389,7 @@ Track workflow phases and enforce prerequisites across multi-step skill workflow
 ```bash
 # Start workflow
 python3 .claude/scripts/api/workflow_checkpoint.py \
-  start story-full ABC-1200
+  start create-story ABC-1200
 
 # Record quality gate pass
 python3 .claude/scripts/api/workflow_checkpoint.py \
@@ -417,7 +417,7 @@ python3 .claude/scripts/api/workflow_checkpoint.py cleanup
 
 | Command | Description |
 | --- | --- |
-| `start <workflow> <context>` | Start new workflow (e.g., `story-full ABC-1200`) |
+| `start <workflow> <context>` | Start new workflow (e.g., `create-story ABC-1200`) |
 | `pass-gate <gate> <score>` | Record gate pass with score |
 | `advance <phase>` | Mark phase as completed, advance to next |
 | `check <gate>` | Check if prerequisite met (exit code) |

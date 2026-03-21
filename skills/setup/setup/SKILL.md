@@ -506,7 +506,7 @@ If **Skip for now**:
   ✓  project-config    <KEY> @ <SITE>
 
 → /atlassian-pm:doctor    verify health at any time
-→ /atlassian-pm:story-full    create your first story
+→ /atlassian-pm:create-story  create your first story
 → /atlassian-pm:plan-sprint   sprint planning
 ```
 
@@ -533,6 +533,32 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 ```
 
 ---
+
+## Examples
+
+### ✅ Good
+
+```text
+/setup                                # first-time setup on a fresh machine — installs all deps
+/setup                                # safe to re-run after plugin reinstall (idempotent, skips done steps)
+/setup                                # run when doctor reports acli not authenticated or mcp-atlassian missing
+```
+
+### ❌ Bad
+
+```text
+/setup                                # don't run mid-session while a sprint planning skill is active — MCP restart will kill context
+/setup --skip-acli                    # no flags exist — setup runs all phases and skips what's already done automatically
+/setup                                # don't run just to fix board_id=0 — doctor → Phase 5b handles that without full re-setup
+/setup                                # don't run to update a single team member — edit project-config.json directly
+```
+
+**Common mistakes:**
+
+- Not restarting Claude Code after setup completes — MCP servers registered during setup are inactive until restart, causing "tool not found" errors in all Jira skills.
+- Providing Jira site URL with `https://` prefix — setup strips it, but double-check the stored config has bare hostname format (`your-company.atlassian.net`).
+- Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup phases 4a+4b.
+- Re-running full setup to change only one thing (e.g., project key) — edit `project-config.json` directly and re-run `/doctor` to validate.
 
 ## Error Handling Reference
 

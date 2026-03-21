@@ -99,6 +99,33 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
+## Examples
+
+### ✅ Good
+
+```text
+/update-subtask BEP-112                        # agent reads current state + parent dates, then asks what to change
+/update-subtask BEP-112 migrate                # convert Wiki markup → ADF format
+/update-subtask BEP-112 "add file paths"       # agent runs Task(Explore) to discover actual paths, then updates
+/update-subtask BEP-112 "fix language Thai"    # translate description to Thai with English transliteration
+```
+
+### ❌ Bad
+
+```text
+/update-subtask                                # missing issue key — cannot fetch current state
+/update-subtask BEP-101                        # BEP-101 is a User Story — use /update-story instead
+/update-subtask BEP-112 "set start 2025-01-01 due 2025-03-01"  # dates outside parent range → HR8 violation
+/update-subtask BEP-112 "add to sprint 42"    # HR10: subtask sprint is inherited from parent — never set directly
+```
+
+**Common mistakes:**
+
+- Passing a Story key — the skill updates it without the story-specific AC impact analysis that `/update-story` provides
+- Setting subtask dates that fall outside the parent story's `start_date`/`due_date` range — this violates HR8 and corrupts sprint burndown
+- Attempting to set `{{SPRINT_FIELD}}` (sprint) on a subtask — HR10 explicitly forbids this; sprint is always inherited from the parent
+- Removing existing ACs during an update — Phase 3 preservation rules block this, but explicitly asking to "remove AC" bypasses the intent check
+
 ## References
 
 - [Update Workflow Patterns](../../../references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure

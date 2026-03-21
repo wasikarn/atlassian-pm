@@ -7,30 +7,30 @@
 
 | Intent | Skill Chain | Gate |
 | --- | --- | --- |
-| Feature blueprint | `/feature-blueprint` → `/create-epic` → `/story-full` → verify | ≥ 90% (Confluence) |
-| Refine feature | `/search-issues` → `/refine-feature` → `/story-full` → verify | N/A (pre-creation) |
+| Feature blueprint | `/blueprint` → `/create-epic` → `/create-story` → verify | ≥ 90% (Confluence) |
+| Refine feature | `/search-issues` → `/refine-epic` → `/create-story` → verify | N/A (pre-creation) |
 | Create epic | `/search-issues` → `/create-epic` → verify | ≥ 90% |
-| Create story | `/search-issues` → `/story-full` → verify | ≥ 90% |
+| Create story | `/search-issues` → `/create-story` → verify | ≥ 90% |
 | Create task | `/search-issues` → `/create-task` → verify | ≥ 90% |
 | Analyze story | `/analyze-story` → verify `--with-subtasks` | ≥ 90% |
 | Test plan | `/create-testplan` → verify | ≥ 90% |
 | Update single | `/update-{epic,story,task,subtask}` → verify | ≥ 90% |
-| Update cascade | `/sync-alignment` → verify `--with-subtasks` | ≥ 90% |
-| Plan sprint | `/plan-sprint` → `/dependency-chain` | N/A |
-| Close sprint | `/sprint-closer` → `/retrospective-analyst` | N/A |
-| Daily standup | `/standup-digest` | N/A |
-| Release planning | `/release-planner` → `/plan-sprint` | N/A |
-| Bulk reschedule | `/bulk-reschedule` | N/A |
-| Import spec | `/spec-to-stories` → `/story-full` (per story) | ≥ 90% |
-| Tech debt audit | `/tech-debt-radar` → `/create-task` (prioritized) | N/A |
+| Update cascade | `/sync-artifacts` → verify `--with-subtasks` | ≥ 90% |
+| Plan sprint | `/plan-sprint` → `/map-dependencies` | N/A |
+| Close sprint | `/close-sprint` → `/retrospective-analyst` | N/A |
+| Daily standup | `/standup-report` | N/A |
+| Release planning | `/plan-release` → `/plan-sprint` | N/A |
+| Bulk reschedule | `/reschedule-sprint` | N/A |
+| Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
+| Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
 | Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
-| Release notes | `/release-planner` → `/sprint-closer` → `/create-release-notes` | N/A |
+| Release notes | `/plan-release` → `/close-sprint` → `/release-notes` | N/A |
 
 **Rules:**
 
 - Always `/search-issues` before creating (dedup)
 - Always `/verify-issue` after creating/editing
-- Use `/story-full` for new stories (combines PO + TA). Use `/analyze-story` only for existing stories needing subtasks
+- Use `/create-story` for new stories (combines PO + TA). Use `/analyze-story` only for existing stories needing subtasks
 
 ## HARD RULES
 
@@ -80,30 +80,30 @@ flowchart TD
     A -->|"No — Edit existing"| C{Single or Cascade?}
 
     B --> D{Duplicate found?}
-    D -->|Yes| E["/update-* or /sync-alignment"]
+    D -->|Yes| E["/update-* or /sync-artifacts"]
     D -->|No| F{Scope?}
 
-    F -->|"Greenfield / Architecture\nNew domain"| G["/feature-blueprint\n→ /create-epic → /story-full"]
-    F -->|"Unclear scope\nMulti-service / High-risk"| H["/refine-feature\n→ /story-full"]
-    F -->|"Clear scope\nSingle service"| I["/story-full ⭐ preferred"]
+    F -->|"Greenfield / Architecture\nNew domain"| G["/blueprint\n→ /create-epic → /create-story"]
+    F -->|"Unclear scope\nMulti-service / High-risk"| H["/refine-epic\n→ /create-story"]
+    F -->|"Clear scope\nSingle service"| I["/create-story ⭐ preferred"]
     F -->|"Bug / Tech-debt\nChore / Spike"| J["/create-task"]
 
     C -->|Single issue| K["/update-{type}"]
     C -->|"Story needs new Sub-tasks"| L["/analyze-story"]
-    C -->|"Story + Sub-tasks sync"| M["/sync-alignment"]
+    C -->|"Story + Sub-tasks sync"| M["/sync-artifacts"]
 
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     class E,G,H,I,J,K,L,M skill
 ```
 
-### story-full vs analyze-story?
+### create-story vs analyze-story?
 
 ```mermaid
 flowchart LR
     A{Story exists in Jira?} -->|"No\nCreate from scratch"| B
     A -->|"Yes\nNeed subtasks only"| C
 
-    B["/story-full ⭐ default\nPhases 1–10\nPO + TA combined\nOutput: Story + Sub-tasks"]
+    B["/create-story ⭐ default\nPhases 1–10\nPO + TA combined\nOutput: Story + Sub-tasks"]
     C["/analyze-story\nPhases 5–10\nSkips story creation\nStarts from impact analysis"]
 
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
@@ -114,23 +114,23 @@ flowchart LR
 
 | Skill | Pre-condition | Post-condition |
 | --- | --- | --- |
-| `/feature-blueprint` | Feature idea / concept | Confluence page + backlog map → `/create-epic` → `/story-full` |
-| `/refine-feature` | `/search-issues` | Refined stories → `/story-full` |
+| `/blueprint` | Feature idea / concept | Confluence page + backlog map → `/create-epic` → `/create-story` |
+| `/refine-epic` | `/search-issues` | Refined stories → `/create-story` |
 | `/create-epic` | `/search-issues` | `/verify-issue` >= 90% |
-| `/story-full` | `/search-issues` | `/verify-issue --with-subtasks` >= 90% |
+| `/create-story` | `/search-issues` | `/verify-issue --with-subtasks` >= 90% |
 | `/analyze-story` | Story exists | `/verify-issue --with-subtasks` >= 90% |
 | `/create-testplan` | Story exists | `/verify-issue` >= 90% |
 | `/create-task` | `/search-issues` | `/verify-issue` >= 90% |
 | `/update-{type}` | Issue exists | `/verify-issue` >= 90% |
-| `/sync-alignment` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
+| `/sync-artifacts` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
 | `/plan-sprint` | Sprint exists | — |
-| `/dependency-chain` | Sprint planned | — |
-| `/sprint-closer` | Active sprint with issues | Closed sprint + Confluence review page |
-| `/standup-digest` | Active sprint | Digest output (optional Confluence post) |
-| `/release-planner` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
-| `/bulk-reschedule` | Issues with dates | Updated dates + HR8 alignment |
+| `/map-dependencies` | Sprint planned | — |
+| `/close-sprint` | Active sprint with issues | Closed sprint + Confluence review page |
+| `/standup-report` | Active sprint | Digest output (optional Confluence post) |
+| `/plan-release` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
+| `/reschedule-sprint` | Issues with dates | Updated dates + HR8 alignment |
 | `/spec-to-stories` | Confluence page + epic | Jira User Stories linked to epic |
-| `/tech-debt-radar` | Project with tech-debt issues | Confluence priority matrix page |
+| `/scan-tech-debt` | Project with tech-debt issues | Confluence priority matrix page |
 
 ## Repomix Context Packs
 

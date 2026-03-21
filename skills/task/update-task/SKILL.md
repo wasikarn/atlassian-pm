@@ -160,6 +160,33 @@ acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 > See [references/task-type-detection.md](references/task-type-detection.md) for auto-detection patterns by content.
 
+## Examples
+
+### ✅ Good
+
+```text
+/update-task BEP-88                       # agent reads current state, then asks what to change
+/update-task BEP-88 migrate               # migrate Wiki markup → ADF format
+/update-task BEP-88 add-details           # add missing ACs or reference links to existing task
+/update-task BEP-88 change-type chore     # switch template from tech-debt → chore
+```
+
+### ❌ Bad
+
+```text
+/update-task                              # missing issue key — agent cannot fetch current state
+/update-task BEP-55                       # BEP-55 is a User Story — use /update-story instead
+/update-task BEP-88 "change to story"     # cannot change issue type Task→Story via this skill — use Jira UI directly
+/update-task BEP-88 "rewrite everything"  # scope too vague; agent must infer change type — be explicit
+```
+
+**Common mistakes:**
+
+- Passing a Story key ({{PROJECT_KEY}}-XXX where type=Story) — the skill will update it as if it's a Task, bypassing story-specific AC impact analysis; use `/update-story` instead
+- Not specifying what to update when calling the skill — forces agent to guess the change type in Phase 2, risking wrong template selection
+- Expecting the skill to change the Jira issue type (Task → Story) — issue type changes must be done in Jira UI directly
+- Forgetting to run `/verify-issue {{PROJECT_KEY}}-XXX` after update to confirm QG score is still valid
+
 ## References
 
 - [Update Workflow Patterns](../../../references/update-workflow.md) — common Phase 5 QG, Phase 6 apply, gate phrases, preserve intent structure

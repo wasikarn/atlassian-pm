@@ -24,9 +24,9 @@
 | `/create-epic`, `/update-epic` | core + epic |
 | `/update-story` | core + story |
 | `/analyze-story`, `/update-subtask` | core + subtask |
-| `/story-full`, `/sync-alignment` | core + story + subtask |
+| `/create-story`, `/sync-artifacts` | core + story + subtask |
 | `/create-testplan` | core + subtask (QA section) |
 | `/create-task`, `/update-task` | core + task |
 | `/create-doc` | core + technote |
-| `/feature-blueprint` | (uses inline template in SKILL.md) |
+| `/blueprint` | (uses inline template in SKILL.md) |
 | `/verify-issue` | core only |

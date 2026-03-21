@@ -15,7 +15,7 @@
 | After Command | Verify With |
 | --- | --- |
 | `/analyze-story` | `/verify-issue ABC-XXX --with-subtasks` |
-| `/story-full` | `/verify-issue ABC-XXX --with-subtasks` |
+| `/create-story` | `/verify-issue ABC-XXX --with-subtasks` |
 | `/improve-issue` (legacy) | → Use `/verify-issue ABC-XXX --with-subtasks --fix` instead |
 
 ## Example

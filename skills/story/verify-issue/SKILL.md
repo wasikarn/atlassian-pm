@@ -171,6 +171,35 @@ Quality: wiki → ADF, EN → Thai
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/verify-issue BEP-123                            # quick quality check on a story — reports ADF, INVEST, language issues
+/verify-issue BEP-123 --with-subtasks            # full hierarchy check — includes A1-A6 alignment checks across story + all subtasks
+/verify-issue BEP-123 --with-subtasks --fix      # review alignment report first, then apply all auto-fixes in one pass
+/verify-issue BEP-456 --fix                      # targeted fix on a single subtask with known ADF/language issues
+```
+
+### ❌ Bad
+
+```text
+/verify-issue                                    # no issue key → Phase 1 cannot fetch anything; skill cannot proceed
+/verify-issue BEP-123                            # story has subtasks but --with-subtasks omitted → A1-A6 alignment checks never run, gaps missed
+/verify-issue BEP-234 --fix                      # using --fix without first reading the report — changes applied without understanding what is being altered
+/verify-issue BEP-10                             # passing an Epic key when you meant the child Story — Epic-level INVEST and AC checks don't apply
+```
+
+**Common mistakes:**
+
+- Omitting `--with-subtasks` when the story has subtasks — alignment checks A1-A6 (AC coverage, service tag match, scope consistency) are completely skipped, leaving the most important issues undetected.
+- Using `--fix` as the first invocation instead of running a read-only check first — always verify the report output before applying fixes so you understand exactly what will change.
+- Manually crafting JQL with `ORDER BY` inside the `parent =` clause — this causes a JQL parse error (HR2); the skill already handles search correctly, do not override it.
+- Running on a subtask key when the goal is to check the whole story hierarchy — pass the parent Story key with `--with-subtasks` instead.
+
+---
+
 ## References
 
 - [Verification Checklist](../../../references/verification-checklist.md)

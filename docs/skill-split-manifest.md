@@ -7,26 +7,26 @@ Spec: docs/superpowers/specs/2026-03-21-skill-split-design.md
 
 ## GLOBAL: SSOT — shared-references/subtask-design-patterns.md
 
-Content to move FROM analyze-story AND story-full INTO this new file:
+Content to move FROM analyze-story AND create-story INTO this new file:
 
 | Content block | Located under heading |
 |---|---|
-| "What each agent MUST discover" table | `### 3. Codebase Exploration` (analyze-story) / `### 6. Codebase Exploration` (story-full) |
+| "What each agent MUST discover" table | `### 3. Codebase Exploration` (analyze-story) / `### 6. Codebase Exploration` (create-story) |
 | "Critical validation:" subsection | Under "Critical validation:" in Codebase Exploration |
-| "Scope table format per subtask" section | Under Phase 4 (analyze-story) / Phase 7 (story-full) |
+| "Scope table format per subtask" section | Under Phase 4 (analyze-story) / Phase 7 (create-story) |
 | "AC specificity requirements (Tech Lead level):" | Under Phase 4 / Phase 7 |
 | "Config/enum awareness:" | Under Phase 4 / Phase 7 |
-| Alignment Check checklist | `### 5. Alignment Check` (analyze-story) / `### 8. Alignment Check` (story-full) |
-| QG Subtasks delegation workflow | `### 5b. Quality Gate — Subtasks` (analyze-story) / `### 9. Quality Gate — Subtasks` (story-full) |
+| Alignment Check checklist | `### 5. Alignment Check` (analyze-story) / `### 8. Alignment Check` (create-story) |
+| QG Subtasks delegation workflow | `### 5b. Quality Gate — Subtasks` (analyze-story) / `### 9. Quality Gate — Subtasks` (create-story) |
 
 Both skills: replace each extracted section with:
 `> See [shared-references/subtask-design-patterns.md](../shared-references/subtask-design-patterns.md) for [description].`
 
-**Est. savings:** ~560 tokens total (analyze-story ~550 tokens, story-full ~525 tokens)
+**Est. savings:** ~560 tokens total (analyze-story ~550 tokens, create-story ~525 tokens)
 
 ---
 
-## feature-blueprint (~2,475 tokens → est. ~1,511 tokens)
+## blueprint (~2,475 tokens → est. ~1,511 tokens)
 
 ### Remove from SKILL.md
 
@@ -36,7 +36,7 @@ Both skills: replace each extracted section with:
 
 | Section heading (exact) | To file | Trigger line to add |
 |---|---|---|
-| `## When to Use vs Skip` (includes the `### \`/feature-blueprint\` vs \`/refine-feature\`` comparison table and `**Token budget:**` line) | `references/decision-guide.md` | `> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives and comparison with /refine-feature.` |
+| `## When to Use vs Skip` (includes the `### \`/blueprint\` vs \`/refine-epic\`` comparison table and `**Token budget:**` line) | `references/decision-guide.md` | `> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives and comparison with /refine-epic.` |
 | `## S-tier Shortcut` | `references/s-tier-shortcut.md` | `> See [references/s-tier-shortcut.md](references/s-tier-shortcut.md) for S-tier single-pass generation steps.` |
 | `## Example` | `references/examples.md` | `> See [references/examples.md](references/examples.md) for a full input/output example with Round 1 and Round 2 highlights.` |
 
@@ -66,7 +66,7 @@ Both skills: replace each extracted section with:
 
 ---
 
-## story-full (~2,975 tokens → est. ~2,174 tokens)
+## create-story (~2,975 tokens → est. ~2,174 tokens)
 
 ### Remove from SKILL.md
 
@@ -76,7 +76,7 @@ Both skills: replace each extracted section with:
 
 | Section heading (exact) | To file | Trigger line to add |
 |---|---|---|
-| `## Benefits vs Separate Workflow` | `references/decision-guide.md` | `> See [references/decision-guide.md](references/decision-guide.md) for when to use /story-full vs /analyze-story.` |
+| `## Benefits vs Separate Workflow` | `references/decision-guide.md` | `> See [references/decision-guide.md](references/decision-guide.md) for when to use /create-story vs /analyze-story.` |
 | `## Example` | `references/examples.md` | `> See [references/examples.md](references/examples.md) for a full input/output example.` |
 | SSOT content: 7 blocks per GLOBAL section above | `../shared-references/subtask-design-patterns.md` | `> See [shared-references/subtask-design-patterns.md](../shared-references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.` |
 
@@ -140,7 +140,7 @@ Both skills: replace each extracted section with:
 
 ---
 
-## refine-feature (~2,000 tokens → est. ~1,251 tokens)
+## refine-epic (~2,000 tokens → est. ~1,251 tokens)
 
 ### Remove from SKILL.md
 
@@ -163,7 +163,7 @@ Both skills: replace each extracted section with:
 
 ---
 
-## sync-alignment (~1,850 tokens → est. ~1,581 tokens)
+## sync-artifacts (~1,850 tokens → est. ~1,581 tokens)
 
 ### Remove from SKILL.md
 
@@ -373,7 +373,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## dependency-chain (~1,275 tokens → est. ~1,275 tokens)
+## map-dependencies (~1,275 tokens → est. ~1,275 tokens)
 
 > No extraction needed — already lean (~1,275 tokens). All sections are execution-critical phase steps with decision tables and flag reference.
 
@@ -385,7 +385,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## sprint-closer (~800 tokens → est. ~800 tokens)
+## close-sprint (~800 tokens → est. ~800 tokens)
 
 > No extraction needed — already lean (~800 tokens). No decorative or reference-only sections.
 
@@ -397,7 +397,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## standup-digest (~530 tokens → est. ~530 tokens)
+## standup-report (~530 tokens → est. ~530 tokens)
 
 > No extraction needed — already lean (~530 tokens).
 
@@ -409,7 +409,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## bulk-reschedule (~560 tokens → est. ~560 tokens)
+## reschedule-sprint (~560 tokens → est. ~560 tokens)
 
 > No extraction needed — already lean (~560 tokens).
 
@@ -432,7 +432,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## release-planner (~925 tokens → est. ~925 tokens)
+## plan-release (~925 tokens → est. ~925 tokens)
 
 > No extraction needed — already lean (~925 tokens).
 
@@ -445,7 +445,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## tech-debt-radar (~825 tokens → est. ~825 tokens)
+## scan-tech-debt (~825 tokens → est. ~825 tokens)
 
 > No extraction needed — already lean (~825 tokens). Impact scoring tables and quadrant rules are execution-critical decision tables.
 
@@ -458,7 +458,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## create-release-notes (~1,250 tokens → est. ~1,175 tokens)
+## release-notes (~1,250 tokens → est. ~1,175 tokens)
 
 ### Extract to references/
 
@@ -534,7 +534,7 @@ Note: `templates-epic.md` is an existing shared-references file and must NOT be 
 
 ---
 
-## assign (~275 tokens → est. ~275 tokens)
+## assign-issue (~275 tokens → est. ~275 tokens)
 
 > No extraction needed — already lean (~275 tokens). Entire file is execution steps.
 

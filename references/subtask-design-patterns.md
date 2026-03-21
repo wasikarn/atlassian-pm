@@ -1,6 +1,6 @@
 # Subtask Design Patterns
 
-Shared reference for `/analyze-story` and `/story-full`. Load when designing sub-tasks.
+Shared reference for `/analyze-story` and `/create-story`. Load when designing sub-tasks.
 
 ## What Each Agent Must Discover
 

@@ -30,7 +30,7 @@ argument-hint: "[epic-title]"
 
 ## Blueprint Handoff Check
 
-> **Check first:** ดู conversation history ว่ามี `/feature-blueprint` output หรือไม่
+> **Check first:** ดู conversation history ว่ามี `/blueprint` output หรือไม่
 
 **If `blueprint_backlog_map` is present in history:**
 
@@ -118,7 +118,7 @@ Skip interview questions in Phase 1 for information already documented.
 ## Epic Created: [Title] ({{PROJECT_KEY}}-XXX)
 RICE Score: X | Stories: N planned
 Epic Doc: [link] | Epic: [link]
-→ Use /story-full to continue
+→ Use /create-story to continue
 ```
 
 ---
@@ -128,6 +128,33 @@ Epic Doc: [link] | Epic: [link]
 > See [references/epic-adf-structure.md](references/epic-adf-structure.md) for the full Epic ADF section layout and panel type reference.
 
 ---
+
+## Examples
+
+### ✅ Good
+
+```text
+/create-epic "Video Playback Quality Improvements"   # clear title seeds discovery with focused problem scope
+/create-epic BEP-45                                  # existing epic key → reads current state, prompts for update scope
+/create-epic "Multi-language subtitle support"       # after running /blueprint — picks up blueprint_backlog_map automatically
+/create-epic "Offline Download Feature"              # triggers full 5-phase workflow: discovery → RICE → scope → QG → create
+```
+
+### ❌ Bad
+
+```text
+/create-epic                                         # no title → discovery phase asks generic questions, output is shallow
+/create-epic "improve performance"                   # vague — no clear problem narrative, RICE scoring will be guesswork
+/create-epic "Add dark mode toggle"                  # single-screen UI change → use /create-story directly, epic is overkill
+/create-epic "BEP-50 fix scope"                     # updating an existing epic → use /update-epic BEP-50 instead
+```
+
+**Common mistakes:**
+
+- Creating an epic for work that fits in 1-2 stories — epics represent multi-sprint initiatives; use `/create-story` for smaller scope.
+- Skipping the RICE prioritization step by providing arbitrary scores — RICE requires stakeholder input on Reach and Confidence; guessing produces meaningless priority rankings.
+- Creating an epic before running `/blueprint` for complex multi-service features — blueprint generates the VS plan and story breakdown that create-epic needs for Phase 3.
+- Approving Phase 1 without confirming the narrative arc — vague problem statements propagate into the Epic Doc and make scope decisions in Phase 3 ambiguous.
 
 ## Example
 

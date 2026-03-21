@@ -51,6 +51,50 @@ CONFLUENCE_API_TOKEN=your-api-token
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+uv run scripts/api/fix_confluence_code_blocks.py --page-id 123456789
+# Fix broken code block rendering after MCP create/update (mandatory post-step for pages with code)
+
+uv run scripts/api/update_page_storage.py --page-id 123456789 --add-toc
+# Add Table of Contents macro — MCP cannot render macros (HR4)
+
+uv run scripts/api/jira_set_parent.py --issues BEP-55 --parent BEP-10
+# Set epic parent on existing issue — MCP and acli silently fail for this operation
+
+uv run scripts/api/jira_write.py --subtask --parent BEP-42 --summary "[BE] Add endpoint"
+# Create subtask with full HR1/HR3/HR5/HR6 compliance built in
+```
+
+### ❌ Bad
+
+```text
+uv run scripts/api/fix_confluence_code_blocks.py
+# Missing --page-id — script has no default; will error immediately
+
+confluence_update_page(page_id=..., content="... {toc} ...")
+# Using MCP to add a ToC macro — HR4: MCP HTML-escapes it to raw XML; use update_page_storage.py
+
+uv run scripts/api/update_page_storage.py --page-id 123456789
+# Calling update_page_storage.py when MCP works fine — unnecessary complexity;
+# only use scripts when MCP has a known limitation (macros, code blocks, parent fields)
+
+uv run scripts/api/fix_confluence_code_blocks.py --page-id 123456789
+# Running without ~/.config/atlassian/.env configured — all scripts require API credentials
+```
+
+**Common mistakes:**
+
+- Calling `fix_confluence_code_blocks.py` without `--page-id` — the script does not auto-detect the page; always pass the Confluence page ID returned from the create/update step
+- Using these scripts when MCP works correctly — scripts are the fallback for MCP limitations (macro rendering, parent fields, code block formatting); default to MCP first
+- Running any script without `~/.config/atlassian/.env` set up with `CONFLUENCE_URL`, `CONFLUENCE_USERNAME`, and `CONFLUENCE_API_TOKEN` — all scripts will fail with an authentication error
+- Using `jira_write.py` for non-subtask issues — this script is purpose-built for subtask creation with HR compliance; use MCP `jira_create_issue` for epics and stories
+
+---
+
 ## References
 
 > See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full docs, decision tree, and known issues.

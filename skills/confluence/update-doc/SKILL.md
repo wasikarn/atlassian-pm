@@ -248,6 +248,37 @@ Update type?
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/update-doc 123456789                                   # page ID — unambiguous, always preferred
+/update-doc 123456789 --section "API Design"            # update a specific section only
+/update-doc 123456789 --status published                # promote draft to published
+/update-doc 123456789 --move 987654321                  # move page under a new parent by ID
+```
+
+### ❌ Bad
+
+```text
+/update-doc "Video Upload API"          # ambiguous title — may match wrong page if duplicates exist
+/update-doc                             # no page identified — triggers slow interactive search
+/update-doc 123456789                   # updating a page with ToC/Children macros via MCP —
+                                        # HR4: use update_page_storage.py instead or macros render as raw XML
+/update-doc 123456789 "new content"     # updating without reading current content first —
+                                        # risks overwriting important sections not in scope
+```
+
+**Common mistakes:**
+
+- Passing a page title instead of a page ID when the title is not unique — Confluence search can return the wrong page and you will overwrite it silently
+- Attempting to add a Table of Contents or Children macro via MCP `confluence_update_page` — MCP HTML-escapes macros; use `update_page_storage.py` for any page that needs Confluence macros (HR4)
+- Skipping Phase 2 (Fetch Current) and generating new content blind — sections not in the user's request get dropped
+- Forgetting to run `fix_confluence_code_blocks.py` after a content update that includes code blocks — same HR4 rendering bug as creation
+
+---
+
 ## References
 
 - Space: `BEP`

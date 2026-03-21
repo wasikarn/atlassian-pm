@@ -117,4 +117,32 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
   Password Reset → BEP-203
   ```
 
-- Next: run `/atlassian-pm:story-full {{PROJECT_KEY}}-XXX` per story to add subtasks
+- Next: run `/atlassian-pm:create-story {{PROJECT_KEY}}-XXX` per story to add subtasks
+
+---
+
+## Examples
+
+### ✅ Good
+
+```text
+/spec-to-stories 98765432 --dry-run                     # preview extracted stories + QG scores before creating anything in Jira
+/spec-to-stories 98765432 --epic BEP-10                 # link all generated stories to epic BEP-10; parent verified per HR5
+/spec-to-stories 98765432 --epic BEP-10 --dry-run       # safest first run: validate story output + dedup flags before committing to Jira
+```
+
+### ❌ Bad
+
+```text
+/spec-to-stories                                         # no page ID → Phase 1 cannot fetch spec; skill cannot proceed
+/spec-to-stories "User Authentication Spec"             # page title instead of page ID → confluence_get_page requires numeric ID, not title
+/spec-to-stories 98765432                               # creating directly without --dry-run first — dedup flags and QG scores not reviewed before Jira write
+/spec-to-stories 98765432 --epic BEP-10                 # page has no structured spec (e.g. meeting notes) → spec-parser-agent produces low-quality requirements; run /blueprint first to create a proper spec page
+```
+
+**Common mistakes:**
+
+- Skipping `--dry-run` on the first run — always preview story output and check dedup flags (similarity > 0.8) before creating in Jira; retrofitting is much harder than preventing duplicates upfront.
+- Passing a Confluence page title instead of its numeric page ID — `confluence_get_page` requires the ID; use the page URL or Confluence API to find it.
+- Omitting `--epic` when stories should belong to an epic — stories will be created without a parent, requiring a separate `jira_set_parent.py` call to fix hierarchy.
+- Running on an unstructured page (meeting notes, brainstorming docs) — `spec-parser-agent` needs clear sections with personas and requirements; use `/blueprint` to produce a proper spec page first.

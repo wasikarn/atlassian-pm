@@ -204,6 +204,31 @@ echo "${PASS}/${REQUIRED} checks passed  ·  ${FAIL} failed  ·  ${WARN} warning
 echo "✓ pass  ✗ fail  ! warning  - optional"
 ```
 
+## Examples
+
+### ✅ Good
+
+```text
+/doctor                               # run after initial setup to confirm everything is green
+/doctor                               # run after plugin update to catch regressions
+/doctor                               # run when Jira MCP tools suddenly return "not found"
+```
+
+### ❌ Bad
+
+```text
+/doctor --fix                         # no flags exist — doctor is read-only, it never fixes anything
+/doctor                               # running after every single code change is unnecessary overhead
+/doctor BEP-123                       # takes no arguments — issue keys are ignored
+```
+
+**Common mistakes:**
+
+- Expecting `/doctor` to fix broken items — it only reports status. Use `/setup` to fix failures.
+- Running it to diagnose a Jira API error mid-session — doctor checks environment (tools, venv, config), not live Jira connectivity.
+- Treating `! warning` as a blocker — warnings (e.g., missing team-detail) are optional; only `✗ fail` items block core functionality.
+- Not restarting Claude Code after `/setup` installs MCP — doctor will show mcp-atlassian as configured but tools remain inactive until restart.
+
 ## Error Handling
 
 If any bash command fails entirely (e.g., `python3` not found), print `!  check skipped (python3 unavailable)` and increment WARN. Never `exit 1` — always complete all checks.

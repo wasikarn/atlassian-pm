@@ -1,13 +1,13 @@
 ---
 name: sprint-transition-agent
-description: Execute batch sprint issue moves (incomplete → next sprint or backlog) and sprint state transitions for sprint-closer skill. Returns structured result {moved, failed, skipped}.
+description: Execute batch sprint issue moves (incomplete → next sprint or backlog) and sprint state transitions for close-sprint skill. Returns structured result {moved, failed, skipped}.
 model: haiku
 tools: mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_jira-cache-server__cache_invalidate, mcp__plugin_atlassian-pm_jira-cache-server__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 20
 ---
 
-Execute batch sprint issue moves for sprint-closer Phase 4.
+Execute batch sprint issue moves for close-sprint Phase 4.
 
 ## Input
 
@@ -27,18 +27,18 @@ For each item in move_plan:
 2. **Move to next sprint** (destination = "next_sprint"):
 
    ```
-   jira_update_issue(issue_key, additional_fields: {customfield_10020: {id: next_sprint_id}})
+   jira_update_issue(issue_key, additional_fields: {{{SPRINT_FIELD}}: {id: next_sprint_id}})
    ```
 
 3. **Move to backlog** (destination = "backlog"):
 
    ```
-   jira_update_issue(issue_key, additional_fields: {customfield_10020: null})
+   jira_update_issue(issue_key, additional_fields: {{{SPRINT_FIELD}}: null})
    ```
 
-4. **Verify** each move via `jira_get_issue(key, fields="customfield_10020,status")`:
-   - next_sprint: confirm `customfield_10020.id == next_sprint_id`
-   - backlog: confirm `customfield_10020` is null
+4. **Verify** each move via `jira_get_issue(key, fields="{{SPRINT_FIELD}},status")`:
+   - next_sprint: confirm `{{SPRINT_FIELD}}.id == next_sprint_id`
+   - backlog: confirm `{{SPRINT_FIELD}}` is null
    - On verify fail: add to `failed[]`, continue
 
 5. **HR6 invalidate**: `cache_invalidate(issue_key)` for every successfully moved issue

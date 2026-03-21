@@ -77,7 +77,7 @@
 
 ## Blueprint Quality (B1-B8)
 
-Canonical criteria in `feature-blueprint/SKILL.md` — "Blueprint Quality Gate" section.
+Canonical criteria in `blueprint/SKILL.md` — "Blueprint Quality Gate" section.
 
 ---
 
@@ -136,4 +136,4 @@ Canonical criteria in `feature-blueprint/SKILL.md` — "Blueprint Quality Gate" 
 
 **Verify and Auto-Fix:** `/verify-issue ABC-XXX --fix`
 
-**After Full Workflow:** `/story-full → /verify-issue ABC-XXX --with-subtasks`
+**After Full Workflow:** `/create-story → /verify-issue ABC-XXX --with-subtasks`

@@ -117,6 +117,40 @@ Coverage: X ACs → Y test scenarios (100%)
 
 > See [references/examples.md](references/examples.md) for input/output examples.
 
+## Examples
+
+### ✅ Good
+
+```text
+/create-testplan BEP-101                # create [QA] sub-task for story BEP-101; agent reads all ACs first
+/create-testplan BEP-101                # after bug fix: creates verification sub-task with regression cases
+/create-testplan BEP-215                # story with 5 ACs → agent maps 100% coverage before designing test cases
+```
+
+### ❌ Bad
+
+```text
+/create-testplan                        # missing story key — skill cannot fetch ACs without it
+/create-testplan BEP-112               # BEP-112 is a Sub-task, not a Story — test plan must target the parent story (1 Story = 1 [QA] Sub-task)
+/create-testplan BEP-101               # run before ACs are finalized — test cases will be incomplete and need full rework
+/create-testplan BEP-101               # calling a second time on a story that already has a [QA] sub-task — creates a duplicate; check first
+```
+
+### ❌ Bad (correct key, wrong approach)
+
+```text
+# Writing test cases from memory without reading story ACs first → results in generic TC-01/TC-02 cases
+# Skipping Phase 2 AC coverage matrix → some ACs left uncovered (100% coverage is mandatory)
+# Asking to assign the [QA] sub-task via MCP → HR3: use acli assign only
+```
+
+**Common mistakes:**
+
+- Running before the story's ACs are finalized — any AC added or modified after test plan creation requires reworking all affected test cases
+- Not achieving 100% AC coverage in Phase 2 — every AC must map to at least one test scenario before Phase 3 proceeds
+- Creating a test plan against a Sub-task key instead of the parent Story key — 1 Story = 1 [QA] Sub-task is the enforced principle
+- Calling the skill a second time on a story that already has a `[QA]` sub-task — search for existing QA subtask in Phase 1 discovery before creating a new one
+
 ## References
 
 - [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling

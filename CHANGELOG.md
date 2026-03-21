@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `team-pattern-advisor`: multi-sprint strategic pattern analysis across 5 dimensions (bottlenecks, estimation accuracy, QA rejections, carry-over culprits, velocity seasonality); only reports patterns with ≥3 data points
 
 - **Skill wiring for new agents:**
-  - `story-full` Phase 7b: estimation-calibrator invoked after subtask design before ITERATE gate
+  - `create-story` Phase 7b: estimation-calibrator invoked after subtask design before ITERATE gate
   - `plan-sprint` Phase 6b: risk-forecaster invoked after sprint-planner returns with REVIEW gate and mitigation acceptance flow
   - `verify-issue` Phase 6: adf-surgeon invoked before acli write when auto-fixable structural issues found
 
@@ -94,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial release as `atlassian-pm` plugin
-- 21 skills: story-full, plan-sprint, verify-issue, analyze-story, update-story, sync-alignment, and more
+- 21 skills: create-story, plan-sprint, verify-issue, analyze-story, update-story, sync-artifacts, and more
 - 8 subagents: story-writer, sprint-planner, quality-gate, alignment-checker, and more
 - Hook system: 37 hooks enforcing HR1–HR10 guardrails
 - jira-cache-server MCP: SQLite-backed Jira issue cache with semantic search

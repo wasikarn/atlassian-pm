@@ -27,7 +27,7 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 ## How It Works
 
 ```text
-You  →  /atlassian-pm:story-full  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
+You  →  /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
 ```
 
 1. Describe what you need in natural language
@@ -46,16 +46,16 @@ flowchart TD
 
     D -->|Single issue| E["/update-{epic,story,task,subtask}"]
     D -->|Need new Sub-tasks| AS["/analyze-story"]
-    D -->|Story + Sub-tasks sync| F["/sync-alignment"]
+    D -->|Story + Sub-tasks sync| F["/sync-artifacts"]
 
     E --> V["/verify-issue"]
     AS --> V
     F --> V
 
     C --> G{Scope?}
-    G -->|"Greenfield / Architecture"| H["/feature-blueprint\nConfluence + backlog map"]
-    G -->|"Unclear / High-risk"| I["/refine-feature\n4-role debate"]
-    G -->|"Clear scope"| K["/story-full"]
+    G -->|"Greenfield / Architecture"| H["/blueprint\nConfluence + backlog map"]
+    G -->|"Unclear / High-risk"| I["/refine-epic\n4-role debate"]
+    G -->|"Clear scope"| K["/create-story"]
     G -->|"Bug / Task / Spike"| T["/create-task"]
 
     H --> J["/create-epic"] --> K
@@ -67,7 +67,7 @@ flowchart TD
 
     subgraph sprint["Sprint Planning"]
         direction LR
-        N["/plan-sprint"] --> O["/dependency-chain"]
+        N["/plan-sprint"] --> O["/map-dependencies"]
     end
     M -.->|"After backlog ready"| sprint
 
@@ -89,14 +89,14 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 | Command | Description |
 | --- | --- |
-| `/atlassian-pm:feature-blueprint` | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
-| `/atlassian-pm:refine-feature` | 4-role debate for unclear or high-risk requirements |
+| `/atlassian-pm:blueprint` | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
+| `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
 
 ### Issue Creation
 
 | Command | Description |
 | --- | --- |
-| `/atlassian-pm:story-full` | **Recommended** — Story + Sub-tasks in one workflow |
+| `/atlassian-pm:create-story` | **Recommended** — Story + Sub-tasks in one workflow |
 | `/atlassian-pm:create-epic` | Epic + Confluence doc with RICE scoring |
 | `/atlassian-pm:create-task` | Task: `tech-debt`, `bug`, `chore`, or `spike` |
 | `/atlassian-pm:analyze-story ABC-123` | Explore codebase → create Sub-tasks for existing Story |
@@ -110,7 +110,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | `/atlassian-pm:update-epic ABC-123` | Edit Epic — scope, RICE, metrics |
 | `/atlassian-pm:update-task ABC-123` | Edit Task — format, details |
 | `/atlassian-pm:update-subtask ABC-123` | Edit Sub-task — format, content |
-| `/atlassian-pm:sync-alignment ABC-123` | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
+| `/atlassian-pm:sync-artifacts ABC-123` | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
 
 ### Search & Quality
 
@@ -118,14 +118,14 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | --- | --- | --- |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
 | `/atlassian-pm:verify-issue ABC-123` | `--with-subtasks` `--fix` `--dry-run` | ADF format + INVEST criteria check |
-| `/atlassian-pm:assign ABC-123 [name]` | | Assign issue (bypasses MCP silent failure) |
+| `/atlassian-pm:assign-issue ABC-123 [name]` | | Assign issue (bypasses MCP silent failure) |
 
 ### Sprint Planning
 
 | Command | Flags | Description |
 | --- | --- | --- |
 | `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | 8-phase planning: capacity + carry-over + assign |
-| `/atlassian-pm:dependency-chain` | | Critical path + swim lane analysis |
+| `/atlassian-pm:map-dependencies` | | Critical path + swim lane analysis |
 | `/atlassian-pm:activity-report` | | Work activity report from session history |
 
 ### Confluence
@@ -143,7 +143,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ```bash
 # 1. Design (multi-role debate → Confluence + backlog map)
-/atlassian-pm:feature-blueprint
+/atlassian-pm:blueprint
 → "Build a real-time notification system"
 
 # 2. Dedup check
@@ -153,7 +153,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 /atlassian-pm:create-epic
 
 # 4. Story + Sub-tasks (explores codebase automatically)
-/atlassian-pm:story-full
+/atlassian-pm:create-story
 
 # 5. QA sub-tasks (optional)
 /atlassian-pm:create-testplan ABC-123
@@ -166,9 +166,9 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ```text
 # 4-role debate before writing Jira artifacts
-/atlassian-pm:refine-feature
+/atlassian-pm:refine-epic
 → Roles: PO × Tech Lead × Engineer × QA
-→ Output: revised story + refined ACs → ready for /story-full
+→ Output: revised story + refined ACs → ready for /create-story
 ```
 
 ### Sprint Planning Example
@@ -186,7 +186,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 /atlassian-pm:update-story ABC-123
 
 # Story + Sub-tasks + Confluence (all in sync)
-/atlassian-pm:sync-alignment ABC-123
+/atlassian-pm:sync-artifacts ABC-123
 ```
 
 ---
@@ -428,12 +428,12 @@ config/project-config.json.template     ← Template with placeholders (tracked)
 
 skills/                        ← slash-command skills only (7 categories)
 ├── setup/                     ← setup, doctor
-├── epic/                      ← feature-blueprint, refine-feature, create-epic, update-epic, release-planner
-├── story/                     ← story-full, analyze-story, spec-to-stories, verify-issue, sync-alignment
-├── task/                      ← create-task, create-testplan, bug-triage, assign, update-story, update-subtask, update-task
-├── sprint/                    ← plan-sprint, dependency-chain, sprint-closer, standup-digest, bulk-reschedule
+├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release
+├── story/                     ← create-story, analyze-story, spec-to-stories, verify-issue, sync-artifacts
+├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-story, update-subtask, update-task
+├── sprint/                    ← plan-sprint, map-dependencies, close-sprint, standup-report, reschedule-sprint
 ├── confluence/                ← create-doc, update-doc
-└── utilities/                 ← search-issues, activity-report, tech-debt-radar, create-release-notes, atlassian-scripts
+└── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts
 
 references/                    ← Docs loaded by skills on-demand (24 files)
 ├── templates.md               ← ADF templates (Epic, Story, Sub-task, Task)

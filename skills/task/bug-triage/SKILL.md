@@ -220,6 +220,33 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/bug-triage                                                        # start interactive intake from scratch
+/bug-triage "Upload fails silently after selecting a file > 10MB"  # pre-fills summary, agent collects remaining fields
+/bug-triage "Payment confirmation email not sent in production"     # clear, actionable summary for P1 candidate
+/bug-triage "Admin user list shows wrong pagination count"          # scoped description → fast severity scoring
+```
+
+### ❌ Bad
+
+```text
+/create-task bug "Upload broken"           # skips severity scoring, duplicate check, and assignee recommendation — use /bug-triage
+/bug-triage "It's broken"                  # intake too vague; agent cannot score severity without repro steps and environment
+/bug-triage "BEP-99"                       # passing an issue key makes no sense here — triage creates a new ticket
+/bug-triage "CSS misaligned on mobile"     # cosmetic P3 does not need full triage workflow — /create-task bug is sufficient
+```
+
+**Common mistakes:**
+
+- Using `/create-task bug` when the bug needs severity scoring (P1/P2/P3), duplicate check, and smart assignee recommendation — those phases only exist in `/bug-triage`
+- Skipping Phase 1 confirmation before proceeding to scoring — all intake fields (repro steps, environment, frequency, affected users) must be complete; incomplete intake produces wrong severity
+- Assigning a P1 Critical bug directly to a junior developer without flagging for senior review — Phase 4 recommendation logic accounts for skill level
+- Not checking for duplicates (Phase 3 is mandatory before creation) — creating duplicate tickets wastes sprint capacity and splits the fix effort
+
 ## References
 
 - [ADF Core Rules](../../../references/templates-core.md)

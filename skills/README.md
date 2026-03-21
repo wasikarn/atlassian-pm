@@ -19,17 +19,17 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| feature-blueprint | `/atlassian-pm:feature-blueprint` | 10 | jira-cache-server, mcp-atlassian | Multi-perspective blueprint via 5-role debate (PO, Domain Expert, Tech Lead, Engineer, QA). Outputs Confluence page (8 sections) + backlog map for downstream skills. Supports S/M/L tiers. |
-| refine-feature | `/atlassian-pm:refine-feature` | 5 | jira-cache-server, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/story-full`. |
+| blueprint | `/atlassian-pm:blueprint` | 10 | jira-cache-server, mcp-atlassian | Multi-perspective blueprint via 5-role debate (PO, Domain Expert, Tech Lead, Engineer, QA). Outputs Confluence page (8 sections) + backlog map for downstream skills. Supports S/M/L tiers. |
+| refine-epic | `/atlassian-pm:refine-epic` | 5 | jira-cache-server, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/create-story`. |
 | create-epic | `/atlassian-pm:create-epic` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
 | update-epic | `/atlassian-pm:update-epic` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
-| release-planner | `/atlassian-pm:release-planner` | 9 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
+| plan-release | `/atlassian-pm:plan-release` | 9 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
 
 ### Story & Subtask
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| story-full | `/atlassian-pm:story-full` | 11 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow: creates User Story + Sub-tasks in one session. Includes codebase exploration, INVEST validation, QG, and blueprint handoff. |
+| create-story | `/atlassian-pm:create-story` | 11 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow: creates User Story + Sub-tasks in one session. Includes codebase exploration, INVEST validation, QG, and blueprint handoff. |
 | analyze-story | `/atlassian-pm:analyze-story` | 7 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
 | create-task | `/atlassian-pm:create-task` | 6 | jira-cache-server, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
 | create-testplan | `/atlassian-pm:create-testplan` | 6 | jira-cache-server, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
@@ -37,9 +37,9 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | update-story | `/atlassian-pm:update-story` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
 | update-subtask | `/atlassian-pm:update-subtask` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |
 | update-task | `/atlassian-pm:update-task` | 6 | jira-cache-server, mcp-atlassian, acli | Update an existing Jira Task (migrate Wiki→ADF, add details, change type template). |
-| assign | `/atlassian-pm:assign` | 1 | acli | Quick assign a Jira issue to a team member. Uses acli (HR3-safe). Supports unassign. |
+| assign-issue | `/atlassian-pm:assign-issue` | 1 | acli | Quick assign a Jira issue to a team member. Uses acli (HR3-safe). Supports unassign. |
 | verify-issue | `/atlassian-pm:verify-issue` | 6 | jira-cache-server, mcp-atlassian, acli | Verify and improve issue quality: ADF format, INVEST, language, hierarchy alignment (A1–A6). Flags: `--with-subtasks`, `--fix`. |
-| sync-alignment | `/atlassian-pm:sync-alignment` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
+| sync-artifacts | `/atlassian-pm:sync-artifacts` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
 | spec-to-stories | `/atlassian-pm:spec-to-stories` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Convert Confluence spec page to Jira User Stories via spec-parser-agent. Dedup check, QG, batch create with HR5 verification. --dry-run supported. |
 
 ### Sprint Planning
@@ -47,10 +47,10 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
 | plan-sprint | `/atlassian-pm:plan-sprint` | 8 | jira-cache-server, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
-| dependency-chain | `/atlassian-pm:dependency-chain` | 5 | jira-cache-server, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
-| sprint-closer | `/atlassian-pm:sprint-closer` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
-| standup-digest | `/atlassian-pm:standup-digest` | 4 | jira-cache-server, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
-| bulk-reschedule | `/atlassian-pm:bulk-reschedule` | 5 | jira-cache-server, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
+| map-dependencies | `/atlassian-pm:map-dependencies` | 5 | jira-cache-server, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
+| close-sprint | `/atlassian-pm:close-sprint` | 8 | jira-cache-server, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
+| standup-report | `/atlassian-pm:standup-report` | 4 | jira-cache-server, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
+| reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | jira-cache-server, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 
 ### Confluence
 
@@ -65,8 +65,8 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | --- | --- | --- | --- | --- |
 | search-issues | `/atlassian-pm:search-issues` | 3 | jira-cache-server, mcp-atlassian | Search Jira via JQL + semantic similarity (cosine distance). Flags likely duplicates before creation. Runs on Haiku. |
 | activity-report | `/atlassian-pm:activity-report` | 3 | claude-mem | **Plugin-internal meta-tool.** Tracks Claude Code session history via claude-mem. Not a PM workflow tool — use for plugin debugging/auditing only. |
-| tech-debt-radar | `/atlassian-pm:tech-debt-radar` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
-| create-release-notes | `/atlassian-pm:create-release-notes` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
+| scan-tech-debt | `/atlassian-pm:scan-tech-debt` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
+| release-notes | `/atlassian-pm:release-notes` | 6 | jira-cache-server, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
 | atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
 
 ---
@@ -119,8 +119,8 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 ## Quick Reference — Argument Patterns
 
 ```
-/atlassian-pm:story-full                              # interactive, no args
-/atlassian-pm:story-full "admin monthly report"       # description as seed
+/atlassian-pm:create-story                            # interactive, no args
+/atlassian-pm:create-story "admin monthly report"     # description as seed
 
 /atlassian-pm:analyze-story BEP-123                   # issue key
 /atlassian-pm:create-testplan BEP-123                 # issue key
@@ -133,46 +133,46 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:plan-sprint --sprint 456                # specific sprint ID
 /atlassian-pm:plan-sprint --carry-over-only           # carry-over analysis only
 
-/atlassian-pm:dependency-chain                        # current sprint
-/atlassian-pm:dependency-chain --keys BEP-10,BEP-11  # specific issues
+/atlassian-pm:map-dependencies                        # current sprint
+/atlassian-pm:map-dependencies --keys BEP-10,BEP-11  # specific issues
 
 /atlassian-pm:search-issues "credit top-up"           # keyword search
 /atlassian-pm:search-issues BEP-123 --children        # list subtasks
 /atlassian-pm:search-issues --sprint current --assignee me
 
-/atlassian-pm:assign BEP-123 Kobi                     # assign by name
-/atlassian-pm:assign BEP-123 unassign                 # remove assignee
+/atlassian-pm:assign-issue BEP-123 Kobi               # assign by name
+/atlassian-pm:assign-issue BEP-123 unassign           # remove assignee
 
 /atlassian-pm:activity-report                         # today
 /atlassian-pm:activity-report --hours 48 --project tathep-platform-api
 
-/atlassian-pm:feature-blueprint "real-time notifications"  # description
-/atlassian-pm:feature-blueprint BEP-456               # from Jira epic
+/atlassian-pm:blueprint "real-time notifications"     # description
+/atlassian-pm:blueprint BEP-456                       # from Jira epic
 
-/atlassian-pm:sprint-closer                           # close active sprint
-/atlassian-pm:sprint-closer --sprint 456              # specific sprint ID
+/atlassian-pm:close-sprint                            # close active sprint
+/atlassian-pm:close-sprint --sprint 456               # specific sprint ID
 
-/atlassian-pm:standup-digest                          # today's active sprint
-/atlassian-pm:standup-digest --post                   # post to Confluence
+/atlassian-pm:standup-report                          # today's active sprint
+/atlassian-pm:standup-report --post                   # post to Confluence
 
-/atlassian-pm:release-planner --name v2.3.0 --epics BEP-50,BEP-51  # with args
-/atlassian-pm:release-planner                         # interactive
+/atlassian-pm:plan-release --name v2.3.0 --epics BEP-50,BEP-51  # with args
+/atlassian-pm:plan-release                            # interactive
 
-/atlassian-pm:bulk-reschedule --sprint 456 --shift +7           # shift sprint 7 days
-/atlassian-pm:bulk-reschedule --issues BEP-123,BEP-124 --shift -3
+/atlassian-pm:reschedule-sprint --sprint 456 --shift +7         # shift sprint 7 days
+/atlassian-pm:reschedule-sprint --issues BEP-123,BEP-124 --shift -3
 
 /atlassian-pm:spec-to-stories 12345 --epic BEP-10     # page-id + epic
 /atlassian-pm:spec-to-stories 12345 --dry-run         # preview only
 
-/atlassian-pm:tech-debt-radar                         # create new radar
-/atlassian-pm:tech-debt-radar --update                # refresh existing page
+/atlassian-pm:scan-tech-debt                          # create new radar
+/atlassian-pm:scan-tech-debt --update                 # refresh existing page
 
 /atlassian-pm:bug-triage                              # interactive full intake
 /atlassian-pm:bug-triage "video upload fails iOS 17"  # summary pre-filled
 
-/atlassian-pm:create-release-notes --version v2.3.0      # specific version
-/atlassian-pm:create-release-notes --version v2.3.0 --dry-run  # preview
-/atlassian-pm:create-release-notes                       # pick version interactively
+/atlassian-pm:release-notes --version v2.3.0             # specific version
+/atlassian-pm:release-notes --version v2.3.0 --dry-run  # preview
+/atlassian-pm:release-notes                              # pick version interactively
 ```
 
 ---

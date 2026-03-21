@@ -109,12 +109,39 @@ Bash: python3 scripts/sprint/sprint_subtask_alignment.py --sprint <id>
 Changes: [list]
 Subtask alignment: [X subtasks checked, Y adjusted]
 → May need: /update-subtask ABC-YYY
-→ May need: /sync-alignment {{PROJECT_KEY}}-XXX (for auto cascade)
+→ May need: /sync-artifacts {{PROJECT_KEY}}-XXX (for auto cascade)
 ```
 
 ---
 
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
+
+## Examples
+
+### ✅ Good
+
+```text
+/update-story BEP-101                          # agent reads current story + subtasks, then asks what to change
+/update-story BEP-101 "add AC for error state" # adds missing AC; agent runs subtask impact analysis automatically
+/update-story BEP-101 "remove AC-3 (descoped)" # removes AC; agent flags any subtask that only covers AC-3
+/update-story BEP-101 migrate                  # migrate Wiki narrative → ADF format only (no AC changes)
+```
+
+### ❌ Bad
+
+```text
+/update-story                                  # missing issue key — cannot fetch current state
+/update-story BEP-105                          # BEP-105 is a Sub-task — use /update-subtask instead
+/update-story BEP-101 "rewrite all ACs"        # full redesign with cascading subtask changes → use /sync-artifacts BEP-101 instead
+/update-story BEP-101 "change dates"           # changing parent dates requires checking all subtask date ranges (HR8); confirm alignment is reviewed
+```
+
+**Common mistakes:**
+
+- Passing a Sub-task key — the skill reads it as a story and skips the AC impact analysis that `/update-subtask` performs; always verify the issue type before calling
+- Making scope changes (add/remove ACs) without reviewing the subtask impact shown in Phase 2 — can leave subtasks covering descoped ACs or missing new ACs entirely
+- Using this skill when the story needs a full structural redesign — use `/sync-artifacts {{PROJECT_KEY}}-XXX` to cascade changes to all subtasks automatically
+- Changing parent `start_date` or `due_date` without checking that existing subtask dates still fall within the new range (HR8 violation)
 
 ## References
 

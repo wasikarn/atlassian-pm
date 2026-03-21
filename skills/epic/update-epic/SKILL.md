@@ -94,6 +94,32 @@ Changes: [list]
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/update-epic BEP-50                              # reads current state first, then asks what to change
+/update-epic BEP-50 "add success metrics"        # targeted change — updates metrics section without touching scope
+/update-epic BEP-50 "remove payment gateway scope, out of v2"   # scope reduction with rationale — triggers subtask impact check
+/update-epic BEP-50 "update RICE: confidence 70% → 85%"        # RICE-only update, no story impact
+```
+
+### ❌ Bad
+
+```text
+/update-epic                                     # no epic key → can't fetch current state, workflow stalls
+/update-epic "change epic title"                 # no issue key — must pass {{PROJECT_KEY}}-XXX as first argument
+/update-epic BEP-50 "rewrite everything"         # major rework without reading current ACs → risks overwriting intentional decisions
+/update-epic BEP-50 BEP-51                       # update-epic handles one epic at a time; batch updates not supported
+```
+
+**Common mistakes:**
+
+- Changing scope without checking child stories first — Phase 2 impact analysis exists for this reason; skipping it means removed scope stays in open stories creating BEP misalignment.
+- Passing changes as free-form text that covers multiple unrelated sections — break into separate update calls (RICE update + scope update) so each Phase 4 diff is reviewable.
+- Running update-epic to fix formatting only without checking whether child story ACs still align — use `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` after any scope change.
+
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 > See [references/epic-structure.md](references/epic-structure.md) for the Epic ADF section layout and panel type reference.
 

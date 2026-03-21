@@ -147,6 +147,36 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/create-doc tech-spec "Video Upload API v2"                          # template + clear title
+/create-doc adr "Switch from REST to GraphQL for mobile"             # ADR with decision context
+/create-doc parent "Backend Services" --parent 123456789             # category page under specific parent
+/create-doc tech-spec "Auth Refactor" --parent 987654321             # spec nested under existing section
+```
+
+### ❌ Bad
+
+```text
+/create-doc "Video Upload API"          # missing template type — forces interactive prompt
+/create-doc                             # no args — causes full interactive discovery flow
+/create-doc tech-spec "BEP-42 notes"   # wrong skill — Jira issue descriptions use /create-story or /create-task
+/create-doc adr "Cache Strategy"       # valid creation, but forgetting to run fix_confluence_code_blocks.py
+                                        # after if the ADR body contains code blocks (HR4 violation)
+```
+
+**Common mistakes:**
+
+- Omitting the template type forces a multi-step interactive prompt that wastes time — always specify `tech-spec`, `adr`, or `parent` upfront
+- Using `/create-doc` for Jira issue descriptions — this skill creates Confluence pages only; use `/create-story` or `/create-task` for Jira
+- Creating a `tech-spec` without linking it back to the related Jira epic/story via `jira_create_remote_issue_link`
+- Skipping `fix_confluence_code_blocks.py` after creation when the page contains code blocks — MCP renders them as `<pre class="highlight">` (broken), not the proper Confluence code macro
+
+---
+
 ## References
 
 - Space: `BEP`

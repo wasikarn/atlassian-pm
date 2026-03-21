@@ -40,5 +40,5 @@ What do you need to do?
     │     └─ jira_set_parent.py --issues ABC-3331,ABC-3332 --parent ABC-3197
     │
     └─ Track workflow state
-          └─ workflow_checkpoint.py start story-full ABC-1200
+          └─ workflow_checkpoint.py start create-story ABC-1200
 ```

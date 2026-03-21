@@ -143,6 +143,32 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/analyze-story BEP-123                   # existing story key → Phase 1 bootstraps from Jira, all 7 phases run correctly
+/analyze-story BEP-456                   # story with complex cross-service ACs → codebase exploration discovers real file paths per service
+/analyze-story BEP-789                   # story already has epic context → event flow table auto-populated in Phase 2
+```
+
+### ❌ Bad
+
+```text
+/analyze-story                           # no issue key → Phase 1 has nothing to bootstrap; skill cannot proceed
+/analyze-story BEP-10                    # passing an Epic key — analyze-story expects a Story, not an Epic; orphan subtasks will be created
+/analyze-story "add payment feature"     # free-text description instead of key — story doesn't exist yet; use /create-story instead
+/analyze-story BEP-123 --skip-explore   # skipping codebase exploration is not a valid flag and violates the MANDATORY explore phase
+```
+
+**Common mistakes:**
+
+- Passing an Epic key instead of a Story key — subtasks will be parented to the Epic directly, breaking hierarchy (HR5 will catch this but wastes a cycle).
+- Skipping or rushing through Phase 3 codebase exploration — generic file paths (e.g. `src/controllers/`) get rejected at QG; real module paths are required.
+- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` first to review existing coverage.
+- Using `/analyze-story` when the Story doesn't exist yet — run `/create-story` instead to go through the full PO+TA combined workflow.
+
 ## References
 
 - [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling

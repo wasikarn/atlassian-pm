@@ -108,6 +108,37 @@ If no semantic matches above threshold → omit the section entirely.
 
 ---
 
+## Examples
+
+### ✅ Good
+
+```text
+/search-issues "credit wallet"                          # keyword search + semantic similarity check
+/search-issues BEP-42 --children                        # list all subtasks of a parent issue
+/search-issues --sprint current --assignee me           # my open items in active sprint
+/search-issues --type Story --status "In Progress"      # filter by type + status
+/search-issues --jql "labels = tech-debt AND sprint IN openSprints()"   # custom JQL filter
+```
+
+### ❌ Bad
+
+```text
+/search-issues                                          # no query — produces empty or full-project dump
+/search-issues --jql "parent = BEP-42 ORDER BY created"    # HR2 violation: ORDER BY with parent= causes JQL parser error
+/search-issues "payment flow" --sprint current          # valid, but using this for sprint planning decisions —
+                                                        # use /plan-sprint instead; search-issues only surfaces issues
+/create-story "Add credit feature"                      # creating without running /search-issues first —
+                                                        # skips duplicate check; may create redundant issue
+```
+
+**Common mistakes:**
+
+- Using `ORDER BY` together with `parent =`, `parent in`, or `key in (...)` in a `--jql` query — this triggers a Jira JQL parser error (HR2); remove the `ORDER BY` clause
+- Treating search results as a sprint planning tool — `/search-issues` surfaces issues but does not evaluate capacity or priority; use `/plan-sprint` for planning decisions
+- Not running `/search-issues` before `/create-story` or `/create-task` — the semantic similarity check catches near-duplicates that exact JQL misses
+
+---
+
 ## References
 
 - [references/use-cases.md](references/use-cases.md) — example commands by use case
