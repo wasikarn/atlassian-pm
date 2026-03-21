@@ -661,21 +661,19 @@ async def handle_cache_get_issue(args: dict) -> str:
         if jira_api:
             stale_cached = c.get_issue_stale(issue_key)
             if stale_cached and "_cached_at" in stale_cached:
-                age_hours = (time.time() - stale_cached["_cached_at"]) / 3600
-                if age_hours > max_age:
-                    try:
-                        resp = await asyncio.to_thread(jira_api.get_issue, issue_key, fields="updated")
-                        upstream_updated = (resp.get("fields") or {}).get("updated", "")
-                        cached_at_iso = stale_cached.get("_cached_at_iso", "")
-                        if upstream_updated and cached_at_iso and upstream_updated <= cached_at_iso:
-                            # Issue unchanged upstream — serve stale data as cache hit
-                            logger.info("Cache LAZY-HIT: %s (upstream unchanged)", issue_key)
-                            _mark_returned(issue_key)
-                            issue_data = _compact_issue(stale_cached) if compact else stale_cached
-                            return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
-                        logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
-                    except Exception:
-                        pass  # On any error, fall through to full refresh
+                try:
+                    resp = await asyncio.to_thread(jira_api.get_issue, issue_key, fields="updated")
+                    upstream_updated = (resp.get("fields") or {}).get("updated", "")
+                    cached_at_iso = stale_cached.get("_cached_at_iso", "")
+                    if upstream_updated and cached_at_iso and upstream_updated <= cached_at_iso:
+                        # Issue unchanged upstream — serve stale data as cache hit
+                        logger.info("Cache LAZY-HIT: %s (upstream unchanged)", issue_key)
+                        _mark_returned(issue_key)
+                        issue_data = _compact_issue(stale_cached) if compact else stale_cached
+                        return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+                    logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
+                except Exception:
+                    pass  # On any error, fall through to full refresh
 
     # Cache miss or force_refresh — fetch upstream
     if not jira_api:
