@@ -83,6 +83,7 @@ def test_v4_confluence_tables_exist(conn):
     assert "confluence_links" in tables
     assert "confluence_searches" in tables
     assert "confluence_sections" in tables
+    assert "confluence_sprint_links" in tables
 
 
 def test_v4_confluence_sections_fk(conn):
@@ -94,4 +95,4 @@ def test_v4_confluence_sections_fk(conn):
             "INSERT INTO confluence_sections VALUES (?,?,?,?,?,?)",
             ("ghost::intro", "ghost-page-id", "Intro", "text", "hash123", "2026-01-01")
         )
-        conn.commit()
+    # No commit needed — the execute raised before any data was written
