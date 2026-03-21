@@ -1061,6 +1061,7 @@ async def handle_cache_refresh(args: dict) -> str:
 async def handle_cache_stats(args: dict) -> str:
     """Cache statistics."""
     stats = _require_cache().get_stats()
+    stats["embedding_available"] = bool(embeddings and embeddings.available)
     if embeddings:
         stats["embeddings_count"] = embeddings.count()
         stats["embeddings_available"] = embeddings.available

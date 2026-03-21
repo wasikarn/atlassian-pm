@@ -76,3 +76,13 @@ class TestInvalidate:
 
     def test_invalidate_nonexistent_is_noop(self, confluence_cache):
         confluence_cache.invalidate("ghost")  # should not raise
+
+
+class TestBodyTruncation:
+    def test_confluence_body_truncated_at_500kb(self, confluence_cache):
+        """put_page truncates body_md to 500KB to prevent DB bloat."""
+        large_body = "## Section\n\n" + "x" * 600_000
+        page = make_page(page_id="BIG", body_md=large_body)
+        confluence_cache.put_page(page)
+        result = confluence_cache.get_page("BIG", max_age_hours=24)
+        assert len(result["body_md"]) <= 512_000  # 500KB max

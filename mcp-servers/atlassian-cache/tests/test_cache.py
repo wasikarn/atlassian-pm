@@ -573,6 +573,11 @@ class TestStatistics:
         cache.put_issue("BEP-100", sample_issue)
         cache.vacuum()  # Should not crash
 
+    def test_cache_stats_includes_embedding_available(self, cache):
+        """cache.get_stats() must always return embedding_available field."""
+        stats = cache.get_stats()
+        assert "embedding_available" in stats
+
 
 # --- Adaptive TTL ---
 

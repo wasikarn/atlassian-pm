@@ -746,6 +746,7 @@ class JiraCache:
             "oldest_entry": oldest,
             "newest_entry": newest,
             "schema_version": self._get_schema_version(),
+            "embedding_available": False,  # server.py injects the real value
         }
 
     def vacuum(self) -> None:

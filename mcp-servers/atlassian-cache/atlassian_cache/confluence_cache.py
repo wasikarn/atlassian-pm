@@ -21,6 +21,8 @@ from .sections import SectionData, diff_sections
 
 logger = logging.getLogger(__name__)
 
+MAX_BODY_MD_BYTES = 512_000  # 500KB — prevent DB bloat from very large pages
+
 
 def _extract_page_fields(page: dict) -> dict:
     """Normalise a Confluence API page dict into storage fields."""
@@ -64,6 +66,12 @@ class ConfluenceCache:
     def put_page(self, page: dict) -> None:
         """Store or update a Confluence page."""
         fields = _extract_page_fields(page)
+        body_md = fields["body_md"]
+        if len(body_md.encode("utf-8")) > MAX_BODY_MD_BYTES:
+            truncated = body_md.encode("utf-8")[:MAX_BODY_MD_BYTES].decode("utf-8", errors="ignore")
+            last_boundary = truncated.rfind("\n## ")
+            fields["body_md"] = truncated[:last_boundary] if last_boundary > 0 else truncated
+            logger.debug("confluence: truncated body_md for page %s to ~500KB", fields["page_id"])
         now = time.time()
         with self._lock:
             self.conn.execute("""
