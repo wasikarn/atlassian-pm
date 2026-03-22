@@ -9,7 +9,9 @@ description: |
   Create a new Jira Task with a 6-phase workflow
   Supports 4 task types: tech-debt, bug, chore, spike
 
-  Triggers: "create task", "new task"
+  Triggers: "create task", "new task", "สร้าง task", "tech debt task", "add chore", "new spike"
+  Use when: creating a standalone task — tech-debt, bug, chore, or spike — that is not a User Story
+  Do NOT use for: User Stories (use create-story); epics (use create-epic)
 argument-hint: "[type] [description]"
 effort: medium
 ---

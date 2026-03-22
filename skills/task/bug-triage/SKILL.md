@@ -9,6 +9,8 @@ description: |
   Structured bug triage workflow for QA: intake → severity scoring → duplicate check → assign → create Jira Task.
   Distinct from /create-task bug (which is just ticket creation). This skill is a full triage workflow.
   Triggers: "bug triage", "triage bug", "report bug", "new bug", "bug found", "จัดการ bug", "รายงาน bug"
+  Use when: triaging an incoming bug report — severity scoring, dedup check, assignment, and Jira creation
+  Do NOT use for: creating a simple task (use create-task); creating a story (use create-story)
 argument-hint: "[description]"
 effort: medium
 ---

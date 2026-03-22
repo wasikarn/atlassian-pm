@@ -12,7 +12,9 @@ description: |
 
   Supports: format migration, add details, change type template
 
-  Triggers: "update task", "edit task", "adjust task"
+  Triggers: "update task", "edit task", "adjust task", "แก้ไข task", "fix task description"
+  Use when: editing a standalone Task's format, details, or type template
+  Do NOT use for: story updates (use update-story); subtask updates (use update-subtask)
 argument-hint: "{{PROJECT_KEY}}-XXX [changes]"
 effort: medium
 ---

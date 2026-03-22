@@ -5,7 +5,9 @@ x-compatibility: [acli]
 description: |
   Quick assign a Jira issue to a team member using acli (bypasses MCP silent failure)
 
-  Triggers: "assign", "assign issue", "assign to"
+  Triggers: "assign", "assign issue", "assign to", "มอบหมาย", "assign to someone", "set assignee"
+  Use when: assigning an issue to a team member via acli (bypasses MCP silent failure)
+  Do NOT use for: creating issues (use create-story or create-task)
 argument-hint: "ABC-XXX [name]"
 effort: low
 ---
