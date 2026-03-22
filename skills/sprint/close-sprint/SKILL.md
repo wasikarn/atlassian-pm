@@ -21,6 +21,7 @@ effort: high
 
 - **Today:** !`date +%Y-%m-%d`
 - **Team:** @.claude/project-config.json → `team.members[]`
+- **Board ID:** !`python3 -c "import json,os; d=json.load(open(os.path.join(os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()), '.claude/project-config.json'))); print(d['jira']['board_id'])"`
 
 ## Context Object
 

@@ -20,6 +20,7 @@ effort: medium
 ## Dynamic Context
 
 - **Today:** !`date +%Y-%m-%d`
+- **Project Key:** !`python3 -c "import json,os; d=json.load(open(os.path.join(os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()), '.claude/project-config.json'))); print(d['jira']['project_key'])"`
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md)
 
