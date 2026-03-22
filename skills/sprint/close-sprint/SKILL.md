@@ -116,6 +116,22 @@ Records velocity data for trend analysis. If velocity-tracker is not available (
 
 ## Phase 8 — Summary
 
+> **🟢 AUTO** — Record sprint health metrics to persistent history before displaying summary:
+>
+> ```bash
+> python scripts/sprint_health_record.py \
+>   --sprint-id SPRINT_ID \
+>   --sprint-name "SPRINT_NAME" \
+>   --planned-sp PLANNED_SP \
+>   --completed-sp COMPLETED_SP \
+>   --carry-over-count CARRY_OVER_COUNT \
+>   --carry-over-sp CARRY_OVER_SP \
+>   --total-issues TOTAL_ISSUES \
+>   --done-issues DONE_ISSUES
+> ```
+>
+> Fill values from Phase 2 Triage and Phase 4 execution results. This enables `/team-pattern-advisor` and `/plan-sprint` to read historical completion ratios and carry-over trends across sprints.
+
 🟡 REVIEW: Display:
 
 - Sprint [name] closed

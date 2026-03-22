@@ -71,6 +71,30 @@ From velocity history:
 - Identify if certain months/seasons show consistent dips
 - Simple: compare consecutive sprint pairs for patterns
 
+### Dimension 6: Spec Quality Trend (from qg-history.jsonl)
+
+Read `${CLAUDE_PLUGIN_DATA}/qg-history.jsonl` if it exists:
+
+```python
+# Pseudo-code for analysis
+records = read_jsonl("qg-history.jsonl")  # all records
+by_service = group_by(records, key="service")
+for service, recs in by_service:
+    avg_score = mean(r["score"] for r in recs)
+    fail_rate = count(r for r in recs if r["status"] == "FAIL") / len(recs)
+    top_failures = most_common(check for r in recs for check in r["checks_failed"])
+    trend = linear_trend([r["score"] for r in recs[-10:]])  # last 10 per service
+```
+
+Report:
+
+- Average QG score per service tag
+- Most frequently failing checks (top 3) — these indicate recurring spec weaknesses
+- Score trend over last 10 records per service (improving/stable/declining)
+- FAIL rate per service tag
+
+If `qg-history.jsonl` does not exist → note: "QG history not yet available. Runs after first `/create-story` or `/analyze-story` call that triggers the QG phase."
+
 1. **Synthesize findings** — only report patterns with evidence from ≥3 data points. Avoid conclusions from single anomalies.
 
 2. **Generate strategic recommendations** — each recommendation must be:

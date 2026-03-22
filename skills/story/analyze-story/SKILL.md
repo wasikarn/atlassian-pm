@@ -42,6 +42,18 @@ effort: high
 
 - `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
+
+**Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
+
+Search for domain documentation relevant to this story using its title + AC keywords:
+
+```text
+MCP: cache_search_confluence(query="[story_title_keywords]", space_key="{{SPACE_KEY}}", limit=3)
+```
+
+If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
+If no relevant pages found → skip silently.
+
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of story understanding.
 
 ### 2. Impact Analysis
@@ -105,6 +117,7 @@ effort: high
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> **🟢 AUTO** — After QG completes, record score: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS"`. Use parent story key (from Phase 1) as `--issue-key`.
 
 ### 6. Create Artifacts
 

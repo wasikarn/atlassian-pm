@@ -201,6 +201,34 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 > **🟡 REVIEW** — Run risk-forecaster with sprint-planner output. Present findings. Proceed unless user objects.
 
+**QG Quality Signal (🟢 AUTO — non-blocking):**
+
+Before dispatching risk-forecaster, check spec quality history:
+
+```bash
+python -c "
+import json, os
+from pathlib import Path
+data_dir = Path(os.environ.get('CLAUDE_PLUGIN_DATA', Path.home() / '.claude' / 'plugins' / 'data' / 'atlassian-pm-atlassian-pm'))
+qg_file = data_dir / 'qg-history.jsonl'
+if not qg_file.exists():
+    print('No QG history yet.')
+else:
+    records = [json.loads(l) for l in qg_file.read_text().splitlines() if l.strip()][-30:]
+    from collections import defaultdict
+    by_service = defaultdict(list)
+    for r in records:
+        if r.get('service'):
+            by_service[r['service']].append(r['score'])
+    for svc, scores in sorted(by_service.items()):
+        avg = sum(scores) / len(scores)
+        print(f'{svc}: avg={avg:.0f}% ({len(scores)} records)')
+"
+```
+
+If any service tag has avg QG score < 75% across last 30 records → add to risk flags: "Spec quality signal: `[SERVICE]` stories have low avg QG score (XX%) — subtasks in this sprint may need extra review before coding starts."
+If `qg-history.jsonl` does not exist → skip this step.
+
 ```text
 Agent(name: "risk-forecaster"):
   sprint_id: [sprint_id from lookup]

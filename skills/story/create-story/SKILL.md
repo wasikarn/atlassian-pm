@@ -101,6 +101,18 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
 - If Epic exists → `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` → receives epic context (narrative, scope, children stories). Avoids redundant MCP calls.
 - **VS Assignment:** Which vertical slice? (`vs1-skeleton`, `vs2-*`, `vs-enabler`)
+
+**Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
+
+After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
+
+```text
+MCP: cache_search_confluence(query="[story_keywords]", space_key="{{SPACE_KEY}}", limit=3)
+```
+
+If relevant pages found → extract key sections (business rules, API contracts, constraints) and store as `domain_context`. Inject into Phase 2 Write Story as reference.
+If no relevant pages found or MCP unavailable → skip silently, continue with epic context only.
+
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of requirements + VS assignment.
 
 ### 2. Write User Story
@@ -162,6 +174,7 @@ acli jira workitem create --from-json {{artifacts_dir}}/story.json
 Capture story key → ABC-XXX
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after create.
+> **🟢 AUTO** — Record QG score to history (uses `story_qg_score` from Phase 3b context). Run: `python scripts/qg_record.py --issue-key "ABC-XXX" --type Story --score STORY_QG_SCORE --status PASS --service "SERVICE_TAG"`. Replace ABC-XXX with actual story key, STORY_QG_SCORE with numeric score, SERVICE_TAG with service label (e.g. `[BE]`, `[FE-Admin]`, or empty if mixed). If QG failed and story was not created, record with `--status FAIL --checks-failed "FAILED_IDS"` for learning.
 
 **Set story estimation fields:**
 
@@ -276,6 +289,7 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask-fe.json --yes
 
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
+> **🟢 AUTO** — Record subtask QG scores to history (uses `qg_score` and `passed_qg` from Phase 9 context). For each service tag in the subtask batch: `python scripts/qg_record.py --issue-key "ABC-XXX" --type Subtask --score QG_SCORE --status PASS --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS_IF_ANY"`. Use parent story key as `--issue-key` if subtask key not yet assigned.
 
 ### 11. Summary
 
