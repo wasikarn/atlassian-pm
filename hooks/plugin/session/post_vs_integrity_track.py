@@ -15,7 +15,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import get_parent_key, get_tool_response, parse_stdin
 from hooks_state import vs_add_subtask, vs_get_coverage, vs_set_story_acs
 

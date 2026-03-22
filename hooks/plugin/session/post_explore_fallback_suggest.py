@@ -13,7 +13,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import get_tool_response
 
 raw = sys.stdin.read()
