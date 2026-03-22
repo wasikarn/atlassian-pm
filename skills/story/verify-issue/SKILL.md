@@ -14,7 +14,7 @@ description: |
 
   Triggers: "verify", "validate", "check quality", "improve", "migrate format", "QG score", "quality gate", "ตรวจสอบ issue"
   Use when: quality-checking ADF format, INVEST criteria, or hierarchy alignment of any issue before or after creation
-  Do NOT use for: creating issues (use create-story/create-epic/create-task); updating issue content (use update-story)
+  Do NOT use for: creating issues (use create-story/create-epic/create-task); deliberate scope or AC rewrites (use update-story/update-epic)
 argument-hint: "[issue-key] [--with-subtasks] [--fix]"
 effort: medium
 ---

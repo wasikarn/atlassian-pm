@@ -7,9 +7,9 @@ x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Multi-role debate for refining features and user stories — 4 perspectives challenge each other
   PO (scope/value) × Tech Lead (feasibility/risk) × Engineer (implementation/effort) × QA (edge cases/testability)
-  Triggers: "refine epic", "refine feature", "team debate", "4 roles review", "debate requirements", "unclear scope", "high-risk feature", "multi-role review", "ชัดเจน epic"
+  Triggers: "refine epic", "refine feature", "team debate", "4 roles review", "debate requirements", "clarify scope", "unclear scope", "high-risk feature", "multi-role review", "ชัดเจน epic"
   Use when: Epic or feature has unclear scope, high risk, or multi-service changes that need multi-role challenge before writing Jira artifacts
-  Do NOT use for: clear-scope Epics ready to write (use create-epic directly); story refinement (use create-story)
+  Do NOT use for: clear-scope Epics ready to write (use create-epic directly); creating individual stories directly without a scope debate (use create-story)
 argument-hint: "[feature-description or ABC-XXX]"
 effort: medium
 ---
