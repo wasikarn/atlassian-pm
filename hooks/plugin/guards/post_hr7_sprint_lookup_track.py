@@ -7,29 +7,26 @@ Records that a sprint lookup was done in this session.
 Exit codes: 0 (always — PostToolUse cannot block)
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event
+from hooks_lib import allow, log_event, parse_stdin
 from hooks_state import hr7_mark_lookup_done
 
 _HOOK = "hr7-sprint-lookup-tracker"
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     session_id = data.get("session_id", "")
     hr7_mark_lookup_done(session_id)
     log_event(_HOOK, "TRACKED", {"session_id": session_id})
-    print("{}")
+    allow()
 
 
 if __name__ == "__main__":

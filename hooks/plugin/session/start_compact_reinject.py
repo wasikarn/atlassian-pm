@@ -11,16 +11,10 @@ import json
 import sys
 from pathlib import Path
 
-try:
-    data = json.loads(sys.stdin.read())
-except Exception:
-    data = {}
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hooks_lib import parse_stdin
 
-session_id = data.get("session_id", "default")
-state_file = Path(f"/tmp/claude-hooks-state/{session_id}.json")
-
-# ── HR Reminders (always output) ──────────────────────
-reminders = """
+_REMINDERS = """
 === POST-COMPACTION CRITICAL REMINDERS ===
 
 HARD RULES (violating = data corruption):
@@ -38,53 +32,65 @@ TOOL RULES:
 - JQL with parent: NEVER add ORDER BY (parser error)
 """.strip()
 
-print(reminders)
 
-# ── Pending operations from hooks_state ───────────────
-if not state_file.exists():
-    sys.exit(0)
+def main() -> None:
+    data = parse_stdin() or {}
 
-try:
-    state = json.loads(state_file.read_text())
-except Exception:
-    sys.exit(0)
+    session_id = data.get("session_id", "default")
+    state_file = Path(f"/tmp/claude-hooks-state/{session_id}.json")
 
-pending = []
+    # ── HR Reminders (always output) ──────────────────────
+    print(_REMINDERS)
 
-# HR5: pending parent verifications
-hr5 = state.get("hr5_pending", [])
-if hr5:
-    items = ", ".join(f"{p['child']}->parent:{p['parent']}" for p in hr5)
-    pending.append(f"HR5 PENDING PARENT VERIFY: {items}")
+    # ── Pending operations from hooks_state ───────────────
+    if not state_file.exists():
+        sys.exit(0)
 
-# HR6: pending cache invalidations
-hr6 = state.get("hr6_pending", [])
-if hr6:
-    pending.append(f"HR6 PENDING CACHE INVALIDATE: {', '.join(hr6)}")
+    try:
+        state = json.loads(state_file.read_text())
+    except Exception:
+        sys.exit(0)
 
-# HR7: sprint lookup status
-if state.get("hr7_lookup_done"):
-    pending.append("HR7: Sprint lookup done this session (OK to use sprint IDs)")
-else:
-    pending.append("HR7: Sprint lookup NOT done yet — must lookup before setting sprint")
+    pending = []
 
-# Search status
-if state.get("search_done"):
-    pending.append("Search: Already searched this session")
+    # HR5: pending parent verifications
+    hr5 = state.get("hr5_pending", [])
+    if hr5:
+        items = ", ".join(f"{p['child']}->parent:{p['parent']}" for p in hr5)
+        pending.append(f"HR5 PENDING PARENT VERIFY: {items}")
 
-# Domain events catalog
-events = state.get("domain_events", {})
-if events:
-    for epic, evts in events.items():
-        pending.append(f"Domain events ({epic}): {', '.join(evts[:10])}")
+    # HR6: pending cache invalidations
+    hr6 = state.get("hr6_pending", [])
+    if hr6:
+        pending.append(f"HR6 PENDING CACHE INVALIDATE: {', '.join(hr6)}")
 
-# VS integrity tracking
-vs_acs = state.get("vs_story_acs", {})
-if vs_acs:
-    for story, acs in vs_acs.items():
-        pending.append(f"Story ACs ({story}): {', '.join(acs[:8])}")
+    # HR7: sprint lookup status
+    if state.get("hr7_lookup_done"):
+        pending.append("HR7: Sprint lookup done this session (OK to use sprint IDs)")
+    else:
+        pending.append("HR7: Sprint lookup NOT done yet — must lookup before setting sprint")
 
-if pending:
-    print("\n\n=== SESSION STATE (from hooks) ===")
-    for item in pending:
-        print(f"- {item}")
+    # Search status
+    if state.get("search_done"):
+        pending.append("Search: Already searched this session")
+
+    # Domain events catalog
+    events = state.get("domain_events", {})
+    if events:
+        for epic, evts in events.items():
+            pending.append(f"Domain events ({epic}): {', '.join(evts[:10])}")
+
+    # VS integrity tracking
+    vs_acs = state.get("vs_story_acs", {})
+    if vs_acs:
+        for story, acs in vs_acs.items():
+            pending.append(f"Story ACs ({story}): {', '.join(acs[:8])}")
+
+    if pending:
+        print("\n\n=== SESSION STATE (from hooks) ===")
+        for item in pending:
+            print(f"- {item}")
+
+
+if __name__ == "__main__":
+    main()

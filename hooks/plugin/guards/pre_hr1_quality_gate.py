@@ -19,7 +19,7 @@ from pathlib import Path
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type, log_event
+from hooks_lib import ACLI_FROM_JSON_RE, allow, block, detect_issue_type, log_event, parse_stdin
 
 _HOOK = "hr1-qg-before-write"
 
@@ -29,16 +29,14 @@ def _log(level: str, data: dict) -> None:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     # Only process Bash tool
     if data.get("tool_name") != "Bash":
-        print("{}")
+        allow()
         return
 
     cmd = data.get("tool_input", {}).get("command", "")
@@ -46,7 +44,7 @@ def main() -> None:
     # Check if this is an acli write command with --from-json
     match = ACLI_FROM_JSON_RE.search(cmd)
     if not match:
-        print("{}")
+        allow()
         return
 
     json_path = Path(match.group(1))
@@ -57,7 +55,7 @@ def main() -> None:
     if not json_path.exists():
         # File not found — let acli handle the error
         _log("SKIP", {"reason": "file_not_found", "file": str(json_path)})
-        print("{}")
+        allow()
         return
 
     # Load the ADF JSON file
@@ -66,7 +64,7 @@ def main() -> None:
             adf_data = json.load(f)
     except (json.JSONDecodeError, OSError) as e:
         _log("ERROR", {"reason": str(e), "file": str(json_path)})
-        print("{}")
+        allow()
         return
 
     # Import validator (lazy — only when we actually need it)
@@ -75,14 +73,14 @@ def main() -> None:
         from lib.adf_validator import AdfValidator, detect_format
     except ImportError as e:
         _log("ERROR", {"reason": f"import_failed: {e}"})
-        print("{}")
+        allow()
         return
 
     # Detect format and extract ADF
     fmt, adf = detect_format(adf_data)
     if not adf or not isinstance(adf, dict):
         _log("SKIP", {"reason": "no_adf", "format": fmt, "file": str(json_path)})
-        print("{}")
+        allow()
         return
 
     wrapper = adf_data if fmt in ("create", "edit") else None
@@ -103,7 +101,7 @@ def main() -> None:
 
     if report.passed:
         _log("ALLOWED", log_data)
-        print("{}")
+        allow()
     else:
         # Build failure details
         issues = [f"  {c.check_id}: {c.message}" for c in report.checks if c.status.value == "fail"]
@@ -115,8 +113,7 @@ def main() -> None:
             f"Fix the ADF JSON and re-validate before writing to Jira."
         )
         _log("BLOCKED", log_data)
-        print(reason, file=sys.stderr)
-        sys.exit(2)
+        block(reason)
 
 
 if __name__ == "__main__":

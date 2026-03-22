@@ -7,13 +7,12 @@ JQL parser errors when ORDER BY is combined with parent= or parent in (...).
 Exit codes: 0 = allow, 2 = deny
 """
 
-import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event
+from hooks_lib import allow, block, log_event, parse_stdin
 
 _HOOK = "hr2-jql-order-by-guard"
 
@@ -22,18 +21,19 @@ ORDER_BY_RE = re.compile(r"\bORDER\s+BY\b", re.I)
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     tool_input = data.get("tool_input", {})
     jql = tool_input.get("jql", "") or tool_input.get("query", "")
 
+    sid = data.get("session_id", "")
+
     if not jql:
-        print("{}")
+        log_event(_HOOK, "SKIP", {"reason": "no_jql", "session_id": sid})
+        allow()
         return
 
     has_parent = bool(PARENT_RE.search(jql))
@@ -45,11 +45,12 @@ def main() -> None:
             f"Remove ORDER BY when using parent= or parent in (...).\n"
             f"JQL: {jql[:200]}"
         )
-        log_event(_HOOK, "BLOCKED", {"jql": jql[:500], "session_id": data.get("session_id", "")})
-        print(reason, file=sys.stderr)
-        sys.exit(2)
+        log_event(_HOOK, "BLOCKED", {"jql": jql[:500], "session_id": sid})
+        block(reason)
+        return
 
-    print("{}")
+    log_event(_HOOK, "ALLOWED", {"session_id": sid})
+    allow()
 
 
 if __name__ == "__main__":

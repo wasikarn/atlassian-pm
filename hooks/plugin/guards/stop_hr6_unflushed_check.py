@@ -16,7 +16,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hooks_lib import log_event, parse_stdin
 from hooks_state import hr6_clear_all_pending, hr6_get_pending
+
+_HOOK = "hr6-stop-unflushed-check"
 
 
 def is_cache_server_running() -> bool:
@@ -33,10 +36,9 @@ def is_cache_server_running() -> bool:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
         print(json.dumps({"ok": True}))
         return
 
@@ -44,16 +46,19 @@ def main() -> None:
     pending = hr6_get_pending(session_id)
 
     if not pending:
+        log_event(_HOOK, "ALLOWED", {"reason": "no_pending", "session_id": session_id})
         print(json.dumps({"ok": True}))
         return
 
     # Pending exists — check if server is running before blocking
     if not is_cache_server_running():
         hr6_clear_all_pending(session_id)
+        log_event(_HOOK, "ALLOWED", {"reason": "cache_server_not_running", "session_id": session_id})
         print(json.dumps({"ok": True}))
         return
 
     keys = ", ".join(sorted(pending))
+    log_event(_HOOK, "BLOCKED", {"pending_keys": list(pending), "session_id": session_id})
     print(
         json.dumps(
             {

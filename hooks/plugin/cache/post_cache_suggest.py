@@ -8,20 +8,20 @@ subsequent reads of the same issue.
 Also auto-populates cache by suggesting cache_get_issue for warm-up.
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import get_issue_key, inject_context
+from hooks_lib import allow, get_issue_key, inject_context, log_event, parse_stdin
 from hooks_state import cache_is_checked, cache_mark_checked
+
+_HOOK = "cache-suggest"
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
         return
 
     tool_name = data.get("tool_name", "")
@@ -33,6 +33,7 @@ def main() -> None:
         issue_key = get_issue_key(tool_input)
         if issue_key and not cache_is_checked(session_id, issue_key):
             cache_mark_checked(session_id, issue_key)
+            log_event(_HOOK, "TRACKED", {"issue_key": issue_key, "session_id": session_id})
             inject_context(
                 f"Cache-first reminder: You used jira_get_issue directly for {issue_key}. "
                 f"Next time, try cache_get_issue first for faster reads."
@@ -44,6 +45,7 @@ def main() -> None:
         jql = tool_input.get("jql", "")
         # Only suggest for simple key-based or parent-based queries
         if any(kw in jql.lower() for kw in ("key =", "key in", "parent =", "parent in")):
+            log_event(_HOOK, "TRACKED", {"tool": tool_name, "session_id": session_id})
             inject_context(
                 "Cache-first reminder: For key/parent-based JQL, consider using "
                 "cache_search(jql=...) first for faster results."
@@ -51,7 +53,8 @@ def main() -> None:
             return
 
     # Default: no additional context
-    print("{}")
+    log_event(_HOOK, "SKIP", {"reason": "no_applicable_tool", "tool": tool_name, "session_id": session_id})
+    allow()
 
 
 if __name__ == "__main__":

@@ -15,13 +15,12 @@ Injected context:
 Exit 0 = always allow.
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from config_loader import load_project_config
-from hooks_lib import inject_context, log_event
+from hooks_lib import inject_context, log_event, parse_stdin
 from hooks_state import _load  # read-only access to session state
 
 _cfg = load_project_config()
@@ -40,9 +39,8 @@ HARD RULES (violating = data corruption / silent failure):
 
 
 def main() -> None:
-    try:
-        data = json.loads(sys.stdin.read())
-    except Exception:
+    data = parse_stdin()
+    if not data:
         sys.exit(0)
 
     session_id = data.get("session_id", "")

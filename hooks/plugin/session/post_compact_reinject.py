@@ -16,13 +16,18 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hooks_lib import log_event, parse_stdin
+
+_HOOK = "compact-reinject"
+
 STATE_DIR = Path("/tmp/claude-hooks-state")
 
 
 def main() -> None:
-    try:
-        data = json.loads(sys.stdin.read())
-    except Exception:
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
         return
 
     session_id     = data.get("session_id", "default")
@@ -30,6 +35,7 @@ def main() -> None:
     compact_summary = data.get("compact_summary", "")
 
     if not compact_summary:
+        log_event(_HOOK, "SKIP", {"reason": "no_compact_summary", "session_id": session_id})
         return
 
     state_file   = STATE_DIR / f"{session_id}.json"
@@ -54,6 +60,7 @@ def main() -> None:
     }
     state_file.write_text(json.dumps(state))
 
+    log_event(_HOOK, "TRACKED", {"trigger": trigger, "summary_len": len(compact_summary), "session_id": session_id})
     print(
         f"PostCompact: saved compact_summary ({len(compact_summary)} chars, trigger={trigger}) "
         f"→ {compact_file}",

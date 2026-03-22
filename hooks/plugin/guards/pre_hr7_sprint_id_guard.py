@@ -8,13 +8,12 @@ was done in this session, blocks the operation.
 Exit codes: 0 = allow, 2 = deny
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from config_loader import load_project_config
-from hooks_lib import log_event
+from hooks_lib import allow, block, log_event, parse_stdin
 from hooks_state import hr7_is_lookup_done
 
 _cfg = load_project_config()
@@ -36,23 +35,21 @@ def has_sprint_field(obj: object) -> bool:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     session_id = data.get("session_id", "")
     tool_input = data.get("tool_input", {})
 
     if not has_sprint_field(tool_input):
-        print("{}")
+        allow()
         return
 
     if hr7_is_lookup_done(session_id):
         log_event(_HOOK, "ALLOWED", {"session_id": session_id})
-        print("{}")
+        allow()
         return
 
     issue_key = tool_input.get("issue_key", "new")
@@ -62,8 +59,7 @@ def main() -> None:
         f"Run: jira_get_sprints_from_board(board_id={_BOARD_ID}, state='active') first.\n"
         f"HR7: Never hardcode sprint IDs — they change every sprint."
     )
-    print(reason, file=sys.stderr)
-    sys.exit(2)
+    block(reason)
 
 
 if __name__ == "__main__":

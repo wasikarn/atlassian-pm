@@ -7,25 +7,27 @@ Used by search-before-create to verify dedup was attempted.
 Exit codes: 0 (always — PostToolUse cannot block)
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hooks_lib import allow, log_event, parse_stdin
 from hooks_state import search_mark_done
+
+_HOOK = "search-track"
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
+        allow()
         return
 
     session_id = data.get("session_id", "")
     search_mark_done(session_id)
-    print("{}")
+    log_event(_HOOK, "TRACKED", {"session_id": session_id})
+    allow()
 
 
 if __name__ == "__main__":

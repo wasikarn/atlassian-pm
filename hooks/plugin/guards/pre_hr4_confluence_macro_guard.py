@@ -8,13 +8,12 @@ Macro content must use update_page_storage.py instead.
 Exit codes: 0 = allow, 2 = deny
 """
 
-import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event
+from hooks_lib import allow, block, log_event, parse_stdin
 
 _HOOK = "hr4-confluence-macro-guard"
 
@@ -33,11 +32,9 @@ def has_macros(content: str) -> bool:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     tool_input = data.get("tool_input", {})
@@ -54,11 +51,11 @@ def main() -> None:
                 f"MCP HTML-escapes macros → page renders raw XML.\n"
                 f"Use: python3 .claude/scripts/api/update_page_storage.py instead."
             )
-            print(reason, file=sys.stderr)
-            sys.exit(2)
+            block(reason)
+            return
 
     log_event(_HOOK, "ALLOWED", {"session_id": sid})
-    print("{}")
+    allow()
 
 
 if __name__ == "__main__":

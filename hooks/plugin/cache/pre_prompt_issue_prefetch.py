@@ -15,14 +15,13 @@ Falls back silently if cache DB missing or key not found.
 Exit 0 = always allow (never blocks user prompts).
 """
 
-import json
 import re
 import sqlite3
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context, log_event
+from hooks_lib import inject_context, log_event, parse_stdin
 from config_loader import load_project_config
 
 _HOOK       = "prompt-issue-prefetch"
@@ -43,9 +42,8 @@ def _shorten(text: str | None, n: int = MAX_DESC_LEN) -> str:
 
 
 def main() -> None:
-    try:
-        data = json.loads(sys.stdin.read())
-    except Exception:
+    data = parse_stdin()
+    if not data:
         sys.exit(0)
 
     prompt     = data.get("prompt", "")

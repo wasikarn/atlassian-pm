@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context, log_event
+from hooks_lib import allow, inject_context, log_event, parse_stdin
 from hooks_state import hr6_add_pending, jira_write_mark_occurred
 
 _HOOK = "hr6-cache-invalidate"
@@ -74,16 +74,14 @@ def extract_issue_keys(data: dict) -> list[str]:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     issue_keys = extract_issue_keys(data)
     if not issue_keys:
-        print("{}")
+        allow()
         return
 
     session_id = data.get("session_id", "")

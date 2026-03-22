@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context, log_event
+from hooks_lib import allow, inject_context, log_event, parse_stdin
 
 _HOOK = "auto-parse-large-output"
 PARSER_SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "parse_mcp_output.py"
@@ -69,11 +69,9 @@ def run_parser(file_path: str) -> str | None:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     # Get tool_response as string
@@ -85,14 +83,14 @@ def main() -> None:
 
     # Check for overflow pattern
     if "exceeds maximum allowed tokens" not in response:
-        print("{}")
+        allow()
         return
 
     # Extract file path
     file_path = extract_saved_file_path(response)
     if not file_path or not Path(file_path).exists():
         log_event(_HOOK, "WARN", {"reason": "file_path not found", "response": response[:200]})
-        print("{}")
+        allow()
         return
 
     # Run parser
@@ -101,7 +99,7 @@ def main() -> None:
 
     if not parsed:
         log_event(_HOOK, "WARN", {"reason": "parser failed", "file": file_path})
-        print("{}")
+        allow()
         return
 
     log_event(_HOOK, "PARSED", {"tool": tool_name, "file": file_path, "lines": parsed.count("\n") + 1})

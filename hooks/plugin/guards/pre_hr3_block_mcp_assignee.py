@@ -7,12 +7,11 @@ MCP assignee silently succeeds but does nothing. Always use acli.
 Exit codes: 0 = allow, 2 = deny
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event
+from hooks_lib import allow, block, log_event, parse_stdin
 
 _HOOK = "hr3-block-mcp-assignee"
 ASSIGNEE_KEYS = {"assignee", "assignee_id", "assignee_account_id"}
@@ -30,11 +29,9 @@ def has_assignee(obj: object) -> bool:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     tool_input = data.get("tool_input", {})
@@ -47,11 +44,11 @@ def main() -> None:
             f"HR3 BLOCKED: MCP assignee silently fails for {issue_key}. "
             'Use: acli jira workitem assign -k "KEY" -a "email" -y'
         )
-        print(reason, file=sys.stderr)
-        sys.exit(2)
+        block(reason)
+        return
 
     log_event(_HOOK, "ALLOWED", {"issue_key": issue_key, "session_id": sid})
-    print("{}")
+    allow()
 
 
 if __name__ == "__main__":

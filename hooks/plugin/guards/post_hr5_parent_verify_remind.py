@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import get_parent_key, inject_context, log_event
+from hooks_lib import allow, get_parent_key, inject_context, log_event, parse_stdin
 
 _HOOK = "hr5-verify-parent"
 CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"
@@ -34,11 +34,9 @@ def extract_issue_key(data: dict) -> str | None:
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        print("{}")
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
     tool_input = data.get("tool_input", {})
@@ -46,7 +44,7 @@ def main() -> None:
 
     # Only fire for subtask creation (has parent)
     if not parent_key:
-        print("{}")
+        allow()
         return
 
     issue_key = extract_issue_key(data)
@@ -55,7 +53,7 @@ def main() -> None:
     # If no key returned, creation failed — nothing to verify
     if not issue_key:
         log_event(_HOOK, "SKIP", {"reason": "no_issue_key_in_response", "parent_key": parent_key})
-        print("{}")
+        allow()
         return
 
     # Save to state for blocker + auto-clear hooks

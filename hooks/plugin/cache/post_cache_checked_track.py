@@ -6,20 +6,20 @@ in session state so that cache-prefer.py (PreToolUse) allows subsequent
 jira_get_issue calls for the same key (cache miss fallback).
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import get_issue_key
+from hooks_lib import allow, get_issue_key, log_event, parse_stdin
 from hooks_state import cache_mark_checked
+
+_HOOK = "cache-checked-track"
 
 
 def main() -> None:
-    raw = sys.stdin.read()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
         return
 
     session_id = data.get("session_id", "")
@@ -27,8 +27,11 @@ def main() -> None:
 
     if issue_key:
         cache_mark_checked(session_id, issue_key)
+        log_event(_HOOK, "TRACKED", {"issue_key": issue_key, "session_id": session_id})
+    else:
+        log_event(_HOOK, "SKIP", {"reason": "no_issue_key", "session_id": session_id})
 
-    print("{}")
+    allow()
 
 
 if __name__ == "__main__":

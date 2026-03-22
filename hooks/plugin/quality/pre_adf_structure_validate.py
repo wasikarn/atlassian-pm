@@ -16,7 +16,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type
+from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type, log_event, parse_stdin
+
+_HOOK = "adf-structure-validate"
 
 # Required headings by issue type (normalized lowercase, emoji-stripped)
 REQUIRED_HEADINGS = {
@@ -48,63 +50,79 @@ def has_panel(content: list) -> bool:
     return any(node.get("type") == "panel" for node in content)
 
 
-raw = sys.stdin.read()
-try:
-    data = json.loads(raw)
-except json.JSONDecodeError:
+def main() -> None:
+    data = parse_stdin()
+    if not data:
+        log_event(_HOOK, "SKIP", {})
+        sys.exit(0)
+
+    session_id = data.get("session_id", "")
+
+    if data.get("tool_name") != "Bash":
+        log_event(_HOOK, "SKIP", {"reason": "wrong_tool", "session_id": session_id})
+        sys.exit(0)
+
+    cmd = data.get("tool_input", {}).get("command", "")
+    match = ACLI_FROM_JSON_RE.search(cmd)
+    if not match:
+        log_event(_HOOK, "SKIP", {"reason": "no_acli_match", "session_id": session_id})
+        sys.exit(0)
+
+    json_path = Path(match.group(1))
+    if not json_path.is_absolute():
+        json_path = Path(data.get("cwd", ".")) / json_path
+
+    if not json_path.exists():
+        log_event(_HOOK, "SKIP", {"reason": "file_not_found", "file": str(json_path), "session_id": session_id})
+        sys.exit(0)
+
+    try:
+        adf_data = json.loads(json_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        log_event(_HOOK, "SKIP", {"reason": "file_parse_error", "session_id": session_id})
+        sys.exit(0)
+
+    desc = adf_data.get("description", {})
+    if not isinstance(desc, dict) or desc.get("type") != "doc":
+        log_event(_HOOK, "BLOCKED", {"reason": "invalid_desc_type", "session_id": session_id})
+        print(
+            'ADF STRUCTURE ERROR: description must be {"type": "doc", "version": 1, "content": [...]}',
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    content = desc.get("content", [])
+    if not content:
+        log_event(_HOOK, "BLOCKED", {"reason": "empty_content", "session_id": session_id})
+        print("ADF STRUCTURE ERROR: description.content is empty", file=sys.stderr)
+        sys.exit(2)
+
+    issue_type = detect_issue_type(adf_data, json_path)
+    headings = extract_headings(content)
+    heading_normalized = [normalize(h) for h in headings]
+
+    required = REQUIRED_HEADINGS.get(issue_type, [])
+    missing = [r for r in required if not any(r in h for h in heading_normalized)]
+
+    if missing:
+        log_event(_HOOK, "BLOCKED", {"issue_type": issue_type, "missing": missing, "session_id": session_id})
+        print(
+            f"ADF STRUCTURE ERROR ({issue_type}): Missing required headings: {', '.join(missing)}\n"
+            f"Found: {headings}\n"
+            f"Fix the ADF JSON template structure before writing.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    if issue_type != "task" and not has_panel(content):
+        # Warning only — print to stdout, exit 0
+        log_event(_HOOK, "WARN", {"issue_type": issue_type, "reason": "no_panel", "session_id": session_id})
+        print(f"⚠️ ADF structure ({issue_type}): No panel found. Templates require panels (info/success/warning/error).")
+    else:
+        log_event(_HOOK, "ALLOWED", {"issue_type": issue_type, "session_id": session_id})
+
     sys.exit(0)
 
-if data.get("tool_name") != "Bash":
-    sys.exit(0)
 
-cmd = data.get("tool_input", {}).get("command", "")
-match = ACLI_FROM_JSON_RE.search(cmd)
-if not match:
-    sys.exit(0)
-
-json_path = Path(match.group(1))
-if not json_path.is_absolute():
-    json_path = Path(data.get("cwd", ".")) / json_path
-
-if not json_path.exists():
-    sys.exit(0)
-
-try:
-    adf_data = json.loads(json_path.read_text())
-except (json.JSONDecodeError, OSError):
-    sys.exit(0)
-
-desc = adf_data.get("description", {})
-if not isinstance(desc, dict) or desc.get("type") != "doc":
-    print(
-        'ADF STRUCTURE ERROR: description must be {"type": "doc", "version": 1, "content": [...]}',
-        file=sys.stderr,
-    )
-    sys.exit(2)
-
-content = desc.get("content", [])
-if not content:
-    print("ADF STRUCTURE ERROR: description.content is empty", file=sys.stderr)
-    sys.exit(2)
-
-issue_type = detect_issue_type(adf_data, json_path)
-headings = extract_headings(content)
-heading_normalized = [normalize(h) for h in headings]
-
-required = REQUIRED_HEADINGS.get(issue_type, [])
-missing = [r for r in required if not any(r in h for h in heading_normalized)]
-
-if missing:
-    print(
-        f"ADF STRUCTURE ERROR ({issue_type}): Missing required headings: {', '.join(missing)}\n"
-        f"Found: {headings}\n"
-        f"Fix the ADF JSON template structure before writing.",
-        file=sys.stderr,
-    )
-    sys.exit(2)
-
-if issue_type != "task" and not has_panel(content):
-    # Warning only — print to stdout, exit 0
-    print(f"⚠️ ADF structure ({issue_type}): No panel found. Templates require panels (info/success/warning/error).")
-
-sys.exit(0)
+if __name__ == "__main__":
+    main()
