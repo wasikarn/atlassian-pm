@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def make_issue(
-    key: str = "BEP-100",
+    key: str = "TEST-100",
     summary: str = "Test issue",
     status: str = "To Do",
     assignee: str = "Test User",
@@ -87,7 +87,7 @@ def sample_issue():
 def sample_issue_with_noise():
     """Return an issue with many noise fields."""
     return make_issue(
-        key="BEP-200",
+        key="TEST-200",
         summary="Noisy issue",
         description={
             "type": "doc",
@@ -100,13 +100,13 @@ def sample_issue_with_noise():
 @pytest.fixture
 def multiple_issues():
     """Return a list of issues for batch testing."""
-    return [make_issue(key=f"BEP-{i}", summary=f"Issue {i}", status="To Do") for i in range(1, 6)]
+    return [make_issue(key=f"TEST-{i}", summary=f"Issue {i}", status="To Do") for i in range(1, 6)]
 
 
 def make_page(
     page_id: str = "12345",
     title: str = "Test Page",
-    space_key: str = "BEP",
+    space_key: str = "TEST",
     body_md: str = "## Overview\n\nPage content.",
     version_num: int = 1,
     labels: list | None = None,

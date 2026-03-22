@@ -144,7 +144,7 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:assign-issue {{PROJECT_KEY}}-123 unassign           # remove assignee
 
 /atlassian-pm:activity-report                         # today
-/atlassian-pm:activity-report --hours 48 --project tathep-platform-api
+/atlassian-pm:activity-report --hours 48 --project {{COMPANY_LOWER}}-platform-api
 
 /atlassian-pm:blueprint "real-time notifications"     # description
 /atlassian-pm:blueprint {{PROJECT_KEY}}-456                       # from Jira epic

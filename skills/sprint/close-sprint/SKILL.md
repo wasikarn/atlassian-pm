@@ -130,7 +130,7 @@ Records velocity data for trend analysis. If velocity-tracker is not available (
 
 ```text
 /close-sprint                         # interactive — resolves active sprint via jira_get_sprints_from_board automatically
-/close-sprint --sprint 45             # sprint ID obtained from jira_get_sprints_from_board(board_id=2, state="active")
+/close-sprint --sprint 45             # sprint ID obtained from jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="active")
 ```
 
 ### Bad

@@ -73,7 +73,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Enforcement:** `pre_hr7_sprint_id_guard.py` (blocks sprint field if no lookup in session), `post_hr7_sprint_lookup_track.py` (tracks that lookup was done)
 
-- ✅ `jira_get_sprints_from_board(board_id=2, state="active")` → use returned id
+- ✅ `jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="active")` → use returned id
 - ❌ `jira_update_issue(additional_fields={"{{SPRINT_FIELD}}": {"id": 607}})`
 
 ## HR8. Subtask Size + Dates Must Align with Parent

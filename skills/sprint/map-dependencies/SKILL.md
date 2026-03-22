@@ -200,7 +200,7 @@ Priority 2: [Action] — reduces delay impact by [N] days
 
 ```text
 /map-dependencies                               # defaults to current active sprint — resolves via jira_get_sprints_from_board
-/map-dependencies --sprint 47                   # sprint ID obtained from jira_get_sprints_from_board(board_id=2, state="active")
+/map-dependencies --sprint 47                   # sprint ID obtained from jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="active")
 /map-dependencies --keys {{PROJECT_KEY}}-210,{{PROJECT_KEY}}-211,{{PROJECT_KEY}}-212  # analyze a specific subset of issues instead of the full sprint
 /map-dependencies --sprint 47 --mermaid-only    # output only the dependency graph, skip swim lane and CPM tables
 ```

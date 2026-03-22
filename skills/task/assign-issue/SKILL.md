@@ -66,7 +66,7 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 **Common mistakes:**
 
 - Using MCP `jira_update_issue` with an `assignee` field instead of this skill — HR3: MCP assignee silently fails with no error, leaving the issue unassigned
-- Passing a display name that doesn't match the `name` field in `project-config.json` — always use the config `name` value (e.g., `{{SLOT_3}}`, not `Joakim Svensson`)
+- Passing a display name that doesn't match the `name` field in `project-config.json` — always use the config `name` value (e.g., `{{SLOT_3}}`, not the full display name)
 - Not confirming the resolved email before assigning — especially important for members whose Jira display name differs from their config name (e.g., {{SLOT_5}})
 
 ## 🎓 Domain Expert Notes

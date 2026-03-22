@@ -38,6 +38,7 @@ def load_values():
         "CONFLUENCE_SITE": c["confluence"]["site"],
         "START_DATE_FIELD": c["jira"]["custom_fields"]["start_date"],
         "SPRINT_FIELD": c["jira"]["custom_fields"]["sprint"],
+        "BOARD_ID": c["jira"]["board_id"],
         "COMPANY": c.get("company", "Tathep"),
         "COMPANY_LOWER": c.get("company_lower", "tathep"),
         "MEMBER_SLOTS": member_slots,
@@ -65,6 +66,9 @@ def smudge(content, v):
     # Custom fields
     content = re.sub(r"\{\{START_DATE_FIELD\}\}", v["START_DATE_FIELD"], content)
     content = re.sub(r"\{\{SPRINT_FIELD\}\}", v["SPRINT_FIELD"], content)
+
+    # BOARD_ID
+    content = re.sub(r"board_id=\{\{BOARD_ID\}\}", f'board_id={v["BOARD_ID"]}', content)
 
     # COMPANY
     content = re.sub(r"\{\{COMPANY\}\} Platform", f"{v['COMPANY']} Platform", content)
@@ -120,6 +124,9 @@ def clean(content, v):
     # Custom fields
     content = re.sub(re.escape(v["START_DATE_FIELD"]), "{{START_DATE_FIELD}}", content)
     content = re.sub(re.escape(v["SPRINT_FIELD"]), "{{SPRINT_FIELD}}", content)
+
+    # BOARD_ID
+    content = re.sub(rf'board_id={re.escape(str(v["BOARD_ID"]))}', "board_id={{BOARD_ID}}", content)
 
     # COMPANY
     co = re.escape(v["COMPANY"])

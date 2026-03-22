@@ -58,9 +58,9 @@ What do you need?
 | **Set size** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"customfield_10107": {"value": "M"}})` |
 | **Set original estimate** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"timetracking": {"originalEstimate": "4h"}})` |
 | **Move to sprint** | MCP | `jira_update_issue(issue_key: "ABC-XXX", additional_fields: {"{{SPRINT_FIELD}}": 123})` |
-| **Get sprints** | MCP | `jira_get_sprints_from_board(board_id: "2", state: "future")` |
+| **Get sprints** | MCP | `jira_get_sprints_from_board(board_id: {{BOARD_ID}}, state: "future")` |
 
-> **{{PROJECT_KEY}} Board/Sprint Info:** Board ID `2` · Use `jira_get_sprints_from_board` to get current Sprint IDs
+> **{{PROJECT_KEY}} Board/Sprint Info:** Board ID `{{BOARD_ID}}` · Use `jira_get_sprints_from_board` to get current Sprint IDs
 > Date fields: `{{START_DATE_FIELD}}` (Start), `duedate` (Due) · Sprint field: `{{SPRINT_FIELD}}` (plain number)
 > Estimation fields: `customfield_10016` (Story Points, numeric), `customfield_10107` (Size, select: XS/S/M/L/XL), `timetracking` (Original Estimate, format: "1d"/"4h"/"30m")
 >

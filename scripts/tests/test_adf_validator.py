@@ -102,7 +102,7 @@ def _story_adf(num_acs=2, thai=True, narrative=True, scope=True) -> dict:
     content.append(
         _paragraph(
             _text("Parent: "),
-            _text("BEP-1200", marks=[{"type": "link", "attrs": {"href": "https://jira/BEP-1200"}}]),
+            _text("TEST-1200", marks=[{"type": "link", "attrs": {"href": "https://jira/TEST-1200"}}]),
         )
     )
 
@@ -131,7 +131,7 @@ def _subtask_adf(tag="[BE]", thai=True) -> dict:
         _heading("Reference"),
         _paragraph(
             _text("Parent: "),
-            _text("BEP-1200", marks=[{"type": "link", "attrs": {"href": "#"}}]),
+            _text("TEST-1200", marks=[{"type": "link", "attrs": {"href": "#"}}]),
         ),
     ]
     if thai:
@@ -367,7 +367,7 @@ class TestDetectFormat:
 
     def test_create_format(self):
         wrapper = {
-            "projectKey": "BEP",
+            "projectKey": "TEST",
             "type": "Story",
             "summary": "Test",
             "description": _doc(_paragraph(_text("desc"))),
@@ -378,7 +378,7 @@ class TestDetectFormat:
 
     def test_edit_format(self):
         wrapper = {
-            "issues": ["BEP-1234"],
+            "issues": ["TEST-1234"],
             "description": _doc(_paragraph(_text("desc"))),
         }
         fmt, adf = detect_format(wrapper)
@@ -476,7 +476,7 @@ class TestT5RequiredFields:
 
     def test_create_all_fields(self):
         wrapper = {
-            "projectKey": "BEP",
+            "projectKey": "TEST",
             "type": "Story",
             "summary": "Test",
             "description": _doc(_paragraph(_text("x"))),
@@ -485,18 +485,18 @@ class TestT5RequiredFields:
         assert r.status == CheckStatus.PASS
 
     def test_create_missing_summary(self):
-        wrapper = {"projectKey": "BEP", "type": "Story", "description": _doc()}
+        wrapper = {"projectKey": "TEST", "type": "Story", "description": _doc()}
         r = self.v._check_t5_required_fields(_doc(), "story", wrapper)
         assert r.status == CheckStatus.FAIL
         assert "summary" in r.message
 
     def test_edit_valid(self):
-        wrapper = {"issues": ["BEP-1234"], "description": _doc(_paragraph(_text("x")))}
+        wrapper = {"issues": ["TEST-1234"], "description": _doc(_paragraph(_text("x")))}
         r = self.v._check_t5_required_fields(_doc(), "subtask", wrapper)
         assert r.status == CheckStatus.PASS
 
     def test_edit_forbidden_fields(self):
-        wrapper = {"issues": ["BEP-1234"], "description": _doc(), "summary": "oops"}
+        wrapper = {"issues": ["TEST-1234"], "description": _doc(), "summary": "oops"}
         r = self.v._check_t5_required_fields(_doc(), "subtask", wrapper)
         assert r.status == CheckStatus.FAIL
         assert "forbidden" in r.message
@@ -557,18 +557,18 @@ class TestST4TagSummary:
         self.v = AdfValidator()
 
     def test_valid_tag(self):
-        wrapper = {"projectKey": "BEP", "type": "Sub-task", "summary": "[BE] Create coupon API"}
+        wrapper = {"projectKey": "TEST", "type": "Sub-task", "summary": "[BE] Create coupon API"}
         r = self.v._check_st4_tag_summary(_subtask_adf(), wrapper)
         assert r.status == CheckStatus.PASS
 
     def test_missing_tag(self):
-        wrapper = {"projectKey": "BEP", "type": "Sub-task", "summary": "Create coupon API"}
+        wrapper = {"projectKey": "TEST", "type": "Sub-task", "summary": "Create coupon API"}
         r = self.v._check_st4_tag_summary(_subtask_adf(), wrapper)
         assert r.status == CheckStatus.FAIL
 
     def test_edit_format_ok(self):
         """EDIT format has no summary — should PASS (set at creation time)."""
-        wrapper = {"issues": ["BEP-1234"], "description": _subtask_adf()}
+        wrapper = {"issues": ["TEST-1234"], "description": _subtask_adf()}
         r = self.v._check_st4_tag_summary(_subtask_adf(), wrapper)
         assert r.status == CheckStatus.PASS
 
@@ -640,7 +640,7 @@ class TestFullValidation:
     def test_valid_subtask_passes(self):
         adf = _subtask_adf()
         wrapper = {
-            "projectKey": "BEP",
+            "projectKey": "TEST",
             "type": "Sub-task",
             "summary": "[BE] Create coupon API",
             "description": adf,

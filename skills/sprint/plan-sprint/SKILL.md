@@ -336,7 +336,7 @@ Subtask alignment: [X checked, Y fixed]
 
 ```text
 /plan-sprint                                  # interactive — resolves next future sprint via jira_get_sprints_from_board
-/plan-sprint --sprint 47                      # sprint ID from jira_get_sprints_from_board(board_id=2, state="future")
+/plan-sprint --sprint 47                      # sprint ID from jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="future")
 /plan-sprint --carry-over-only                # analysis-only — review carry-over candidates without assigning or moving
 /plan-sprint --sprint 47 --carry-over-only    # carry-over analysis for a specific future sprint
 ```
@@ -353,7 +353,7 @@ Subtask alignment: [X checked, Y fixed]
 **Common mistakes:**
 
 - Skipping capacity calculation (Phase 2) and jumping straight to assignments — leads to over-committed sprints and ignored skill fit
-- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id=2, state="future")` (HR7 violation)
+- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="future")` (HR7 violation)
 - Setting the sprint field (`{{SPRINT_FIELD}}`) on subtasks during Phase 8 — subtasks inherit sprint from parent (HR10)
 - Using `acli` or MCP assignee field directly instead of `acli jira workitem assign -k KEY -a email -y` (HR3 — MCP assignee silently fails)
 - Not running `sprint_subtask_alignment.py` after execution — skipping the mandatory HR8 post-assignment check

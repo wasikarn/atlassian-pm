@@ -79,7 +79,7 @@ Flag these patterns:
 
 ```text
 /standup-report                       # resolves active sprint automatically via jira_get_sprints_from_board
-/standup-report --sprint 46           # sprint ID obtained from jira_get_sprints_from_board(board_id=2, state="active")
+/standup-report --sprint 46           # sprint ID obtained from jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="active")
 /standup-report --post                # generate digest and post it as a Confluence comment (review before using --post)
 /standup-report --sprint 46 --post    # specific sprint + auto-post
 ```
@@ -98,7 +98,7 @@ Flag these patterns:
 - Running with `--post` without first reviewing the digest — anomaly flags may contain stale or incorrect data that should not be posted publicly
 - Using the standup digest to make sprint planning decisions — this is a daily status snapshot, not a planning tool; use `/plan-sprint` for assignments
 - Running multiple times a day expecting different results — Jira issue statuses are updated by the team, not by this skill
-- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id=2, state="active")` first (HR7)
+- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="active")` first (HR7)
 
 ## 🎓 Domain Expert Notes
 

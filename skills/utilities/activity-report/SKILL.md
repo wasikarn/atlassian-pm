@@ -82,7 +82,7 @@ python .claude/skills/utilities/activity-report/generate_report.py --output repo
 ### ❌ Bad
 
 ```text
-/activity-report --project tathep-platform-api          # valid syntax, but wrong use case —
+/activity-report --project {{COMPANY_LOWER}}-platform-api          # valid syntax, but wrong use case —
                                                         # this is a plugin meta-tool, not a PM workflow tool
 /activity-report                                        # running without claude-mem installed —
                                                         # generate_report.py will fail; claude-mem is required

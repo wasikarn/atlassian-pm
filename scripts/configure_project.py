@@ -32,6 +32,7 @@ PLACEHOLDERS = {
     "SPACE_KEY": "BEP",
     "START_DATE_FIELD": "{{START_DATE_FIELD}}",
     "SPRINT_FIELD": "{{SPRINT_FIELD}}",
+    "BOARD_ID": 2,
     "COMPANY": "Tathep",
     "COMPANY_LOWER": "tathep",
 }
@@ -54,6 +55,7 @@ def load_config() -> dict:
         "SPACE_KEY": config["confluence"]["space_key"],
         "START_DATE_FIELD": config["jira"]["custom_fields"]["start_date"],
         "SPRINT_FIELD": config["jira"]["custom_fields"]["sprint"],
+        "BOARD_ID": config["jira"]["board_id"],
         "COMPANY": config.get("company", PLACEHOLDERS["COMPANY"]),
         "COMPANY_LOWER": config.get("company_lower", PLACEHOLDERS["COMPANY_LOWER"]),
     }
@@ -89,6 +91,8 @@ def get_replacement_patterns(values: dict, revert: bool = False) -> list[tuple[s
                     patterns.append((rf"https://{re.escape(actual_value)}", f"https://{placeholder}"))
             elif key in ("START_DATE_FIELD", "SPRINT_FIELD"):
                 patterns.append((rf"{re.escape(actual_value)}", placeholder))
+            elif key == "BOARD_ID":
+                patterns.append((rf"board_id={re.escape(str(actual_value))}", f"board_id={placeholder}"))
             elif key == "COMPANY":
                 # Company name in various contexts
                 patterns.extend(
@@ -127,6 +131,8 @@ def get_replacement_patterns(values: dict, revert: bool = False) -> list[tuple[s
                 patterns.append((r"https://\{\{CONFLUENCE_SITE\}\}", f"https://{actual_value}"))
             elif key in ("START_DATE_FIELD", "SPRINT_FIELD"):
                 patterns.append((rf"\{{\{{{key}\}}\}}", actual_value))
+            elif key == "BOARD_ID":
+                patterns.append((r"board_id=\{\{BOARD_ID\}\}", f"board_id={actual_value}"))
             elif key == "COMPANY":
                 patterns.extend(
                     [
