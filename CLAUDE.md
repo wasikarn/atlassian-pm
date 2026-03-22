@@ -82,7 +82,7 @@ Always: MCP create → verify `parent.key` via `jira_get_issue` → `acli edit` 
 Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to save 1 round-trip.
 </important>
 
-<important if="setting sprint field or customfield_10020 on any issue">
+<important if="setting sprint field or {{SPRINT_FIELD}} on any issue">
 **HR7 Sprint ID:** NEVER hardcode. Always `jira_get_sprints_from_board()`. Wrong sprint = silent failure.
 </important>
 
@@ -94,7 +94,7 @@ Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to s
 **HR9 Desc alignment:** Story ACs covered by subtask objectives. Epic scope in children. Run `/atlassian-pm:verify-issue --with-subtasks` (A1-A6).
 </important>
 
-<important if="creating subtasks or setting customfield_10020">
+<important if="creating subtasks or setting {{SPRINT_FIELD}}">
 **HR10 Subtask sprint:** NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent. API error + cascade failure.
 </important>
 
