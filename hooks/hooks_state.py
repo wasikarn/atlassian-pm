@@ -9,6 +9,7 @@ subagents access the same state file concurrently.
 """
 
 import fcntl
+import functools
 import json
 import sys
 from pathlib import Path
@@ -241,8 +242,10 @@ def _build_qmd_collections() -> dict[str, str]:
     return result
 
 
-# Known indexed project roots → collection name (built from project-config.json)
-QMD_COLLECTIONS = _build_qmd_collections()
+@functools.lru_cache(maxsize=None)
+def _get_qmd_collections() -> dict[str, str]:
+    """Lazy-loaded QMD collection map. Only evaluated on first call."""
+    return _build_qmd_collections()
 
 
 def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
@@ -261,7 +264,7 @@ def qmd_is_collection_searched(session_id: str, collection: str) -> bool:
 
 def qmd_collection_for_path(path: str) -> str | None:
     """Return collection name if path falls within an indexed project."""
-    for root, name in QMD_COLLECTIONS.items():
+    for root, name in _get_qmd_collections().items():
         if path.startswith(root):
             return name
     return None
