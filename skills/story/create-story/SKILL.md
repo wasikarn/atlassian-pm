@@ -255,7 +255,7 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 **Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) that the user approves before QG and creation.
 **Required inputs:** `file_paths[]`, `patterns[]`, `dependencies[]` from Phase 6; `acs[]` from Phase 2
 **Constraints:** ITERATE gate — max 3 annotation rounds; major rework returns to Phase 6; 1 subtask per service boundary unless complexity warrants more; VS integrity required (no horizontal layer subtasks)
-**Output:** `subtask_designs[]` approved by user, with SP values calibrated (Phase 7b); ready for Phase 8 alignment check
+**Output:** `subtask_designs[]` approved by user; SP calibration pending Phase 7b; ready for Phase 8 alignment check
 
 **Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
 

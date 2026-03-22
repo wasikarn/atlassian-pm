@@ -98,7 +98,7 @@ Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sp
 Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
-Step 2a: Team Velocity (SP-based)
+**Step 2a:** Team Velocity (SP-based)
 
 ```text
 If velocity.story_points.avg_velocity exists:
@@ -109,7 +109,7 @@ Else (bootstrap phase):
 Also: sum(customfield_10016) of sprint stories → compare with Sprint Capacity to detect over-commitment
 ```
 
-Step 2b: Individual Productive Hours
+**Step 2b:** Individual Productive Hours
 
 ```text
 Per person:
@@ -122,7 +122,7 @@ Per person:
 > **Review Cost:** Tech Lead reviews 4 people (~15h/sprint), Senior reviews 2 (~4h/sprint).
 > Read `review_cost` from `.claude/project-config-team-detail.json`.
 
-Step 2c: Skill Profile + Complexity
+**Step 2c:** Skill Profile + Complexity
 
 Read each member's `skill_profile` from `project-config.json`; `growth_tracks` + `bus_factor` from `project-config-team-detail.json`.
 Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw throughput for item count limits.
@@ -165,8 +165,6 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 **Input:** Source sprint items with statuses
 **Method:** Status-based probability model (from sprint-frameworks.md)
 
-**Output:**
-
 - Estimated carry-over count per person
 - High-probability items (>80%) → auto-include in target sprint
 - Medium-probability items (45-80%) → flag for user decision
@@ -205,8 +203,6 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 **Method:** Skill matrix match → existing context → hours capacity check → grouping
 
 > See [references/assignment-algorithm.md](references/assignment-algorithm.md) for the detailed skill-match scoring algorithm and assignment rules.
-
-**Output:** Assignment recommendation table with hours tracking
 
 ### 6. Risk Assessment
 
