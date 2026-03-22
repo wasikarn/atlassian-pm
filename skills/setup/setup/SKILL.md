@@ -413,6 +413,40 @@ Three independent sub-steps. Each guarded by Phase 0 flags.
 
 **Skip if `ENV_OK=true`.**
 
+**If `YAML_CONFIG=true` (and `ENV_OK=false`):** Read credentials from YAML file — skip the email + token questions.
+
+```bash
+if [ "$YAML_CONFIG" = "true" ] && [ "$ENV_OK" = "false" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  EMAIL=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c.get('credentials', {}).get('email', '').strip())
+except Exception:
+    print('')")
+
+  API_TOKEN=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c.get('credentials', {}).get('api_token', '').strip())
+except Exception:
+    print('')")
+
+  # If credentials missing from file (removed after --init), fall back to interactive
+  if [ -z "$EMAIL" ] || [ -z "$API_TOKEN" ]; then
+    echo "  credentials: not found in config file — asking interactively"
+    # → fall through to existing interactive questions
+  else
+    echo "  Reading credentials from config file [token: ****$(echo "$API_TOKEN" | tail -c 5)]"
+    # → proceed directly to writing ~/.config/atlassian/.env (skip interactive questions)
+  fi
+fi
+```
+
 Before asking for the token, print:
 
 ```text
@@ -456,6 +490,19 @@ Then set permissions:
 chmod 600 ~/.config/atlassian/.env
 echo "  Credentials file written (chmod 600) ✓"
 ```
+
+After writing `.env` successfully (when `YAML_CONFIG=true` and credentials were read from the config file), offer cleanup via AskUserQuestion:
+
+```text
+  ✓  Credentials written from config file
+
+  ⚠️  Your credentials: section in ~/.atlassian-pm.yaml is no longer needed.
+     Remove it now? Credentials are safely stored in ~/.config/atlassian/.env (chmod 600)
+```
+
+Buttons: `[Yes, remove credentials]` `[Keep for now]`
+
+If **Yes**: read `~/.atlassian-pm.yaml` via Read tool, remove the `credentials:` block (from `credentials:` line through the blank line after `api_token:`), write back via Write tool.
 
 ### 4b. Authenticate acli
 
