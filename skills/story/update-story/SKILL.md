@@ -12,7 +12,9 @@ description: |
 
   Supports: add AC, modify AC, adjust scope, format migration
 
-  Triggers: "update story", "edit story", "add AC"
+  Triggers: "update story", "edit story", "add AC", "แก้ไข story", "modify acceptance criteria", "adjust story scope"
+  Use when: modifying ACs, scope, or description of an existing User Story
+  Do NOT use for: creating new stories (use create-story); Sub-task updates (use update-subtask)
 argument-hint: "[issue-key] [changes]"
 effort: medium
 ---

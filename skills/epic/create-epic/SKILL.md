@@ -7,9 +7,9 @@ x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Create Epic + Epic Doc from product vision with a 6-phase PM workflow
-  Use when creating a new initiative, have a product vision, or need RICE prioritization
-
-  Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE"
+  Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "สร้าง epic"
+  Use when: creating a NEW Epic from a product vision or initiative idea that needs RICE prioritization and a Confluence Epic doc
+  Do NOT use for: stories or subtasks (use create-story); updating an existing epic (use update-epic)
 argument-hint: "[epic-title]"
 effort: medium
 ---
