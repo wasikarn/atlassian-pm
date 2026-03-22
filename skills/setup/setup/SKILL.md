@@ -193,6 +193,42 @@ if [ -f "${_PLUGIN_DATA}/venv/bin/python" ]; then
   VENV_OK=true
 fi
 
+# YAML config file detection
+YAML_CONFIG=false
+if [ -f "$YAML_CONFIG_FILE" ]; then
+  # Use venv Python if available (guarantees pyyaml); fall back to system Python
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+  if [ ! -f "$_VENV_PY" ] && ! python3 -c "import yaml" 2>/dev/null; then
+    echo "  config file: ~/.atlassian-pm.yaml found but pyyaml unavailable — install venv first, then re-run setup"
+  else
+    YAML_VALID=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" - <<'PYEOF'
+import yaml, os, sys
+path = os.environ["YAML_PATH"]
+try:
+    c = yaml.safe_load(open(path))
+    placeholders = {"your-company.atlassian.net", "your-token-here", "you@company.com", "PROJ"}
+    vals = [
+        c["jira"]["site"],
+        c["jira"]["project_key"],
+        c["credentials"]["email"],
+        c["credentials"]["api_token"],
+    ]
+    if all(vals) and not any(v in placeholders for v in vals):
+        print("ok")
+except Exception:
+    pass
+PYEOF
+    )
+    if [ "$YAML_VALID" = "ok" ]; then
+      YAML_CONFIG=true
+      echo "  config file: ~/.atlassian-pm.yaml detected ✓"
+    else
+      echo "  config file: ~/.atlassian-pm.yaml found but has placeholder or invalid values — using interactive setup"
+    fi
+  fi
+fi
+
 echo "Detection complete:"
 echo "  config:      $([ "$SKIP_CONFIG" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  credentials: $([ "$ENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
@@ -200,6 +236,7 @@ echo "  acli auth:   $([ "$ACLI_OK" = "true" ] && echo "✓ found" || echo "✗ 
 echo "  mcp:         $([ "$MCP_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  venv:        $([ "$VENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed (will sync)")"
 echo "  figma MCP:   $([ "$FIGMA_OK" = "true" ] && echo "✓ found" || echo "- not configured (optional)")"
+echo "  yaml config: $([ "$YAML_CONFIG" = "true" ] && echo "✓ found (will skip interactive questions)" || echo "- not found (interactive mode)")"
 ```
 
 **Second-run fast path:** If all five flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The venv check ensures Phase 1 always runs when venv is missing (e.g. after plugin reinstall).
