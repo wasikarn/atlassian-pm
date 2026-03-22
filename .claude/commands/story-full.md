@@ -26,4 +26,4 @@ The story_key flows via conversation context — no explicit passing needed.
 
 ### Step 3 — Verify
 
-Use the Skill tool to invoke `atlassian-pm:verify-issue` with `--with-subtasks`.
+Use the Skill tool to invoke `atlassian-pm:verify-issue` with the story key from conversation context and `--with-subtasks`.
