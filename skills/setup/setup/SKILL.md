@@ -311,6 +311,47 @@ UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
 
 **Skip entirely if `SKIP_CONFIG=true`.**
 
+**If `YAML_CONFIG=true`:** Read all values from `~/.atlassian-pm.yaml` — skip all questions in this phase.
+
+```bash
+if [ "$YAML_CONFIG" = "true" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  JIRA_SITE=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+c = yaml.safe_load(open(os.environ['YAML_PATH']))
+site = c['jira']['site'].removeprefix('https://').rstrip('/')
+print(site)")
+
+  PROJECT_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+c = yaml.safe_load(open(os.environ['YAML_PATH']))
+print(c['jira']['project_key'].strip().upper())")
+
+  BOARD_ID=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+c = yaml.safe_load(open(os.environ['YAML_PATH']))
+print(int(c['jira'].get('board_id', 0)))")
+
+  SPACE_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+c = yaml.safe_load(open(os.environ['YAML_PATH']))
+space = c.get('confluence', {}).get('space_key') or c['jira']['project_key']
+print(space)")
+
+  echo "  Read from config file:"
+  echo "    site:        $JIRA_SITE"
+  echo "    project_key: $PROJECT_KEY"
+  echo "    board_id:    $BOARD_ID"
+  echo "    space_key:   $SPACE_KEY"
+fi
+```
+
+Do **NOT** set `SKIP_CONFIG=true` here — Phase 3 must still write `project-config.json` from these variables.
+
+When `YAML_CONFIG=false`, all interactive questions below run unchanged.
+
 Ask questions in order. Each is a plain chat message.
 
 **Required:**
