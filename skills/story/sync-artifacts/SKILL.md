@@ -11,7 +11,7 @@ description: |
 
   ⭐ Composite: bidirectional sync from any artifact, covering both Jira + Confluence
 
-  Triggers: "sync alignment", "sync all", "update related", "cascade all", "align artifacts", "sync drift", "out of sync"
+  Triggers: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
   Use when: Story, Sub-tasks, or Confluence doc have drifted out of alignment and need bidirectional sync
   Do NOT use for: initial issue creation (use create-story); individual field updates (use update-story)
 argument-hint: "[issue-key-or-page-id] [changes]"
