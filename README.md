@@ -503,14 +503,19 @@ agents/                                  ← 18 subagent definitions (3-layer ar
 ├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
 └── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
 
-hooks/                         ← 44 Python hook scripts
+hooks/                         ← 46 Python hook scripts
 ├── hooks.json                 ← Plugin hook manifest
+├── tests/                     ← Unit tests for hook logic
 ├── plugin/
 │   ├── guards/                ← HR1–HR10 enforcement (15 hooks)
 │   ├── quality/               ← ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/                 ← Read optimization, dedup, field presets (6 hooks)
-│   └── session/               ← Session management, compaction, token filtering (12 hooks)
+│   └── session/               ← Session management, compaction, token filtering, skill telemetry (15 hooks)
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
+
+.claude/commands/              ← 9 orchestration chains (story-full, epic-full, blueprint-full, bug-full,
+                               │  sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full)
+                               └── Each chains existing skills end-to-end with confirmation gates
 
 mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
 ```
