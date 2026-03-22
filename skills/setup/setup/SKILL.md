@@ -568,6 +568,38 @@ echo "  mcp-atlassian: registered (user scope) ✓"
 
 If `FIGMA_OK=true`, print `"  figma MCP: already configured — skipping ✓"` and skip this step.
 
+**If `YAML_CONFIG=true` and `figma_token` is set in YAML (non-empty, not placeholder):**
+
+```bash
+if [ "$YAML_CONFIG" = "true" ] && [ "$FIGMA_OK" = "false" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  FIGMA_TOKEN_FROM_FILE=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    t = c.get('figma_token') or ''
+    # Skip if placeholder
+    if t.strip() in ('', 'figd_...'):
+        print('')
+    else:
+        print(t.strip())
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+
+  if [ -n "$FIGMA_TOKEN_FROM_FILE" ]; then
+    echo "  figma MCP: token found in config file — configuring..."
+    FIGMA_TOKEN="$FIGMA_TOKEN_FROM_FILE"
+    # → Skip the "Would you like to configure Figma MCP?" prompt
+    # → Use FIGMA_TOKEN variable in the existing write + register steps below
+  fi
+fi
+```
+
+When `FIGMA_TOKEN_FROM_FILE` is empty or placeholder → existing flow (ask user) runs unchanged.
+
 Otherwise, ask via AskUserQuestion:
 
 ```
