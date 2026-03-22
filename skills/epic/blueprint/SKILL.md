@@ -8,10 +8,10 @@ description: |
   Multi-perspective feature blueprint on Confluence — 5 roles debate (PO, Domain Expert, Tech Lead, Engineer, QA).
   Outputs: structured Confluence page + backlog map for downstream /create-epic + /create-story.
   Supports 3 tiers: S (quick, no debate) / M (standard, 2 rounds) / L (full + page tree).
-  Use when: new feature needing architecture review, multi-service changes, greenfield features before Jira.
-  Do NOT use for: creating a story without architecture review (use create-story); updating an existing epic (use update-epic).
   Triggers: "feature blueprint", "architecture doc", "design doc", "blueprint", "feature spec",
   "multi-perspective design", "research feature", "ทำ blueprint"
+  Use when: new feature needing architecture review, multi-service changes, greenfield features before Jira.
+  Do NOT use for: creating a story without architecture review (use create-story); updating an existing epic (use update-epic).
 argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 effort: high
 ---
