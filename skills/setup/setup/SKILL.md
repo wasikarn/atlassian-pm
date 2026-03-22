@@ -43,14 +43,14 @@ import os, yaml, sys
 try:
   c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
   print(c.get('jira',{}).get('site','?'))
-except: print('?')
+except Exception: print('?')
 " 2>/dev/null || echo "?")
     EXISTING_KEY=$(python3 -c "
 import os, yaml, sys
 try:
   c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
   print(c.get('jira',{}).get('project_key','?'))
-except: print('?')
+except Exception: print('?')
 " 2>/dev/null || echo "?")
     echo "~/.atlassian-pm.yaml already exists (site: $EXISTING_SITE, key: $EXISTING_KEY)"
     # → Ask via AskUserQuestion: buttons [Yes, overwrite] [No, keep existing]
@@ -319,26 +319,38 @@ if [ "$YAML_CONFIG" = "true" ]; then
   if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
 
   JIRA_SITE=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
-import yaml, os
-c = yaml.safe_load(open(os.environ['YAML_PATH']))
-site = c['jira']['site'].removeprefix('https://').rstrip('/')
-print(site)")
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    site = c['jira']['site'].removeprefix('https://').rstrip('/')
+    print(site)
+except Exception:
+    print('')")
 
   PROJECT_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
-import yaml, os
-c = yaml.safe_load(open(os.environ['YAML_PATH']))
-print(c['jira']['project_key'].strip().upper())")
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c['jira']['project_key'].strip().upper())
+except Exception:
+    print('')")
 
   BOARD_ID=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
-import yaml, os
-c = yaml.safe_load(open(os.environ['YAML_PATH']))
-print(int(c['jira'].get('board_id', 0)))")
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(int(c['jira'].get('board_id', 0)))
+except Exception:
+    print('')")
 
   SPACE_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
-import yaml, os
-c = yaml.safe_load(open(os.environ['YAML_PATH']))
-space = c.get('confluence', {}).get('space_key') or c['jira']['project_key']
-print(space)")
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    space = c.get('confluence', {}).get('space_key') or c['jira']['project_key']
+    print(space)
+except Exception:
+    print('')")
 
   echo "  Read from config file:"
   echo "    site:        $JIRA_SITE"
