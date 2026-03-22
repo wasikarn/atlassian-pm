@@ -69,6 +69,8 @@ def smudge(content, v):
 
     # BOARD_ID
     content = re.sub(r"board_id=\{\{BOARD_ID\}\}", f'board_id={v["BOARD_ID"]}', content)
+    content = re.sub(r"board_id: \{\{BOARD_ID\}\}", f'board_id: {v["BOARD_ID"]}', content)
+    content = re.sub(r"`\{\{BOARD_ID\}\}`", f'`{v["BOARD_ID"]}`', content)
 
     # COMPANY
     content = re.sub(r"\{\{COMPANY\}\} Platform", f"{v['COMPANY']} Platform", content)
@@ -126,7 +128,10 @@ def clean(content, v):
     content = re.sub(re.escape(v["SPRINT_FIELD"]), "{{SPRINT_FIELD}}", content)
 
     # BOARD_ID
-    content = re.sub(rf'board_id={re.escape(str(v["BOARD_ID"]))}', "board_id={{BOARD_ID}}", content)
+    bid = re.escape(str(v["BOARD_ID"]))
+    content = re.sub(rf'board_id={bid}', "board_id={{BOARD_ID}}", content)
+    content = re.sub(rf'board_id: {bid}', "board_id: {{BOARD_ID}}", content)
+    content = re.sub(rf'`{bid}`', "`{{BOARD_ID}}`", content)
 
     # COMPANY
     co = re.escape(v["COMPANY"])

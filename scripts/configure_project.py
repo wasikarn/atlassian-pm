@@ -21,7 +21,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
 CONFIG_PATH = PROJECT_DIR / ".claude" / "project-config.json"
-SKILLS_DIR = PROJECT_DIR / ".claude" / "skills"
+SKILLS_DIR = PROJECT_DIR / "skills"
 
 # Placeholder format: {{KEY}}
 # Default values are used as fallback when config doesn't have the key
@@ -92,7 +92,12 @@ def get_replacement_patterns(values: dict, revert: bool = False) -> list[tuple[s
             elif key in ("START_DATE_FIELD", "SPRINT_FIELD"):
                 patterns.append((rf"{re.escape(actual_value)}", placeholder))
             elif key == "BOARD_ID":
-                patterns.append((rf"board_id={re.escape(str(actual_value))}", f"board_id={placeholder}"))
+                bid = re.escape(str(actual_value))
+                patterns.extend([
+                    (rf"board_id={bid}", f"board_id={placeholder}"),
+                    (rf"board_id: {bid}", f"board_id: {placeholder}"),
+                    (rf"`{bid}`", f"`{placeholder}`"),
+                ])
             elif key == "COMPANY":
                 # Company name in various contexts
                 patterns.extend(
@@ -132,7 +137,11 @@ def get_replacement_patterns(values: dict, revert: bool = False) -> list[tuple[s
             elif key in ("START_DATE_FIELD", "SPRINT_FIELD"):
                 patterns.append((rf"\{{\{{{key}\}}\}}", actual_value))
             elif key == "BOARD_ID":
-                patterns.append((r"board_id=\{\{BOARD_ID\}\}", f"board_id={actual_value}"))
+                patterns.extend([
+                    (r"board_id=\{\{BOARD_ID\}\}", f"board_id={actual_value}"),
+                    (r"board_id: \{\{BOARD_ID\}\}", f"board_id: {actual_value}"),
+                    (r"`\{\{BOARD_ID\}\}`", f"`{actual_value}`"),
+                ])
             elif key == "COMPANY":
                 patterns.extend(
                     [

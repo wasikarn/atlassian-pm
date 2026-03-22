@@ -109,7 +109,7 @@ def main() -> None:
         f"AUTO-PARSED large output from {tool_name}:\n\n"
         f"{parsed}\n\n"
         f"Raw file: {file_path}\n"
-        f'Filter: python3 scripts/parse-mcp-output.py "{file_path}" --status "In Progress" --assignee {{SLOT_3}}'
+        'Filter: python3 scripts/parse-mcp-output.py "' + file_path + '" --status "In Progress" --assignee {{SLOT_3}}'
     )
 
 
