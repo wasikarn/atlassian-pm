@@ -48,6 +48,11 @@ effort: high
 
 ## Blueprint Handoff Check
 
+**Goal:** Detect whether a `/blueprint` output is present in conversation history and pre-populate story context from it, skipping redundant interview steps.
+**Required inputs:** Conversation history scan for `blueprint_backlog_map`; if present, user selection of story index (1-based)
+**Constraints:** GATE — do not proceed past story selection without user confirm; if index invalid, re-display list
+**Output:** `blueprint_page_id`, `selected_story_index`, `blueprint_acs_hints[]` added to context (or no-op if no blueprint in history)
+
 > **Check first:** ดู conversation history ว่ามี `/blueprint` output หรือไม่
 
 **If `blueprint_backlog_map` is present in history:**
@@ -98,6 +103,11 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 ### 1. Discovery
 
+**Goal:** Establish Epic context, domain knowledge, and user intent before writing the story.
+**Required inputs:** epic_key (ask if missing), user answers to Who / What / Why / Constraints, VS assignment
+**Constraints:** GATE — do not proceed without user confirmation of requirements + VS assignment; skip interview questions if blueprint context is present
+**Output:** `epic_data`, `vs_assignment`, `user_requirements`, `user_context`, and optional `domain_context` available for Phase 2
+
 - Ask: Who? What? Why? Constraints?
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
 - If Epic exists → `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` → receives epic context (narrative, scope, children stories). Avoids redundant MCP calls.
@@ -118,6 +128,11 @@ If no relevant pages found or MCP unavailable → skip silently, continue with e
 
 ### 2. Write User Story
 
+**Goal:** Produce a well-formed story narrative, acceptance criteria, scope, and DoD that the user has approved.
+**Required inputs:** `epic_data`, `user_requirements`, `vs_assignment` from Phase 1
+**Constraints:** ITERATE gate — max 3 annotation rounds; if no consensus after 3 rounds escalate to `/blueprint`
+**Output:** `story_narrative`, `acs[]`, `scope`, `dod` approved and ready for INVEST validation
+
 ```text
 📍 [User's current situation — what they're doing, what's difficult]  ⚡ optional
 As a [persona],
@@ -137,6 +152,11 @@ So that [benefit].
 
 ### 3. INVEST + VS Validation
 
+**Goal:** Verify the story meets all six INVEST criteria and delivers a true vertical slice before any Jira write.
+**Required inputs:** `story_narrative`, `acs[]`, `scope` from Phase 2
+**Constraints:** AUTO — auto-fix if any criterion fails; escalate to user only if unfixable after 2 attempts; do NOT create story if INVEST fails
+**Output:** `invest_score`, `vs_validated`; story ready for QG if all criteria pass
+
 - [ ] **I**ndependent - Not dependent on other stories
 - [ ] **N**egotiable - Room for discussion
 - [ ] **V**aluable - Clear business value
@@ -153,6 +173,11 @@ So that [benefit].
 
 ### 3b. Quality Gate — Story (HR1)
 
+**Goal:** Ensure story ADF JSON meets ≥ 90% quality score before any Jira write.
+**Required inputs:** story content from Phase 2-3, `artifacts_dir` path
+**Constraints:** HR1 — NEVER send story to Atlassian without QG ≥ 90%; AUTO — score → auto-fix → re-score; escalate only if still < 90% after 2 attempts
+**Output:** `story_adf_json` at `{{artifacts_dir}}/story.json`, `story_qg_score`; PASS status required to proceed to Phase 4
+
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate to user only if still < 90% after 2 attempts.
 > HR1: DO NOT send Story to Atlassian without QG ≥ 90%.
 
@@ -163,6 +188,11 @@ So that [benefit].
 5. If still FAIL after re-invoke → escalate to user with the failed check list
 
 ### 4. Create Story in Jira
+
+**Goal:** Persist the approved, QG-passed story to Jira and set estimation fields.
+**Required inputs:** `story_adf_json` (QG PASS from Phase 3b), SP estimate, size, start/due dates
+**Constraints:** HR1 — only execute if QG passed; HR6 — `cache_invalidate(story_key)` after create AND after field update; AUTO — no user interaction needed if Phase 3b passed
+**Output:** `story_key` (ABC-XXX) captured in context; estimation fields set; QG score recorded to history
 
 > **🟢 AUTO** — If Phase 3b QG passed → create automatically. No user interaction needed.
 
@@ -194,6 +224,11 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ### 5. Impact Analysis
 
+**Goal:** Identify which services are affected by the story and confirm the VS integrity before exploring the codebase.
+**Required inputs:** `story_key`, `story_narrative`, `acs[]` from Phase 2
+**Constraints:** REVIEW gate — present impact table to user and proceed unless user objects; flag shell-only anti-pattern (FE-only impact with no BE) for user confirmation
+**Output:** `services_impacted[]`, `vs_verified`; impact table approved before Phase 6 exploration begins
+
 | Service | Impact | Reason |
 | --- | --- | --- |
 | Backend | ✅/❌ | [why] |
@@ -206,11 +241,21 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 ### 6. Codebase Exploration ⚠️ MANDATORY
 
+**Goal:** Locate the exact file paths, patterns, and dependencies in each impacted service that the subtask designs will reference.
+**Required inputs:** `services_impacted[]` from Phase 5, service repo paths from `project-config.json`
+**Constraints:** Generic paths are REJECTED — re-explore max 2 attempts; validate all paths with Glob; launch 2-3 agents in parallel (Backend/Frontend/Shared); do NOT design subtasks without concrete file evidence
+**Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service; all paths validated and ready for Phase 7 design
+
 > [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 7. Design Sub-tasks
+
+**Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) that the user approves before QG and creation.
+**Required inputs:** `file_paths[]`, `patterns[]`, `dependencies[]` from Phase 6; `acs[]` from Phase 2
+**Constraints:** ITERATE gate — max 3 annotation rounds; major rework returns to Phase 6; 1 subtask per service boundary unless complexity warrants more; VS integrity required (no horizontal layer subtasks)
+**Output:** `subtask_designs[]` approved by user, with SP values calibrated (Phase 7b); ready for Phase 8 alignment check
 
 **Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
 
@@ -220,6 +265,11 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 - ACs: Thai narrative + English technical terms
 
 ### 7b. Estimation Calibration
+
+**Goal:** Calibrate subtask SP estimates against historical team data to reduce estimation variance.
+**Required inputs:** `subtask_designs[]` from Phase 7 (summary, service_tag, initial SP, scope file count, AC count)
+**Constraints:** AUTO — apply recommendation if confidence is HIGH or MEDIUM; skip if LOW confidence; note adjustment reason in plan card
+**Output:** `subtask_designs[]` updated with calibrated SP values and calibration notes
 
 > **🟢 AUTO** — Run for each subtask design. Apply recommendation if confidence is HIGH or MEDIUM. Skip if LOW confidence.
 
@@ -249,16 +299,31 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
 
 ### 8. Alignment Check
 
+**Goal:** Verify that subtask ACs collectively cover all story ACs and that scope tables are consistent with codebase exploration findings.
+**Required inputs:** `subtask_designs[]` from Phase 7b, `acs[]` from Phase 2, `file_paths[]` from Phase 6
+**Constraints:** AUTO — auto-fix misalignment; escalate only if unfixable; all story ACs must be traceable to at least one subtask AC
+**Output:** `alignment_checklist` with PASS status; subtask designs corrected and ready for QG
+
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 9. Quality Gate — Subtasks (MANDATORY)
+
+**Goal:** Ensure all subtask ADF JSON files meet ≥ 90% quality score before creating in Jira.
+**Required inputs:** `subtask_designs[]` (aligned, from Phase 8), `artifacts_dir` path
+**Constraints:** HR1 — NEVER create subtasks in Jira without QG ≥ 90%; AUTO — score → auto-fix → re-score; escalate only if still < 90% after 2 attempts
+**Output:** `qg_score`, `passed_qg`; subtask ADF JSON files at `{{artifacts_dir}}/subtask-*.json` ready for Phase 10
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 10. Create Sub-tasks
+
+**Goal:** Create all subtask shells in Jira, verify parent linkage, set dates/OE, and update descriptions — fully automated.
+**Required inputs:** `story_key` (parent), subtask ADF JSON files (QG PASS from Phase 9), date range from Phase 4 story fields
+**Constraints:** HR5 — two-step create + verify parent; HR6 — `cache_invalidate` after every write; HR8 — subtask dates within parent range; HR10 — NEVER set sprint on subtasks; HR3 — use acli for assignee; escalate only if parent verify fails after retry
+**Output:** `subtask_keys[]`; all subtasks created, parent-verified, dated, described, and QG scores recorded
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the parent field. MCP may silently ignore parent.
@@ -293,6 +358,11 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask-fe.json --yes
 > **🟢 AUTO** — Record subtask QG scores to history (uses `qg_score` and `passed_qg` from Phase 9 context). For each service tag in the subtask batch: `python scripts/qg_record.py --issue-key "ABC-XXX" --type Subtask --score QG_SCORE --status PASS --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS_IF_ANY"`. Use parent story key as `--issue-key` if subtask key not yet assigned.
 
 ### 11. Summary
+
+**Goal:** Present the completed workflow result and suggest next actions.
+**Required inputs:** `story_key`, `subtask_keys[]` from Phase 10
+**Constraints:** None
+**Output:** Completion summary with story + subtask keys and suggested follow-up commands
 
 ```text
 ## Story Full Complete
