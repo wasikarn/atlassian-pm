@@ -11,7 +11,7 @@ description: |
 
   Triggers: "create task", "new task", "สร้าง task", "tech debt task", "add chore", "new spike"
   Use when: creating a standalone task — tech-debt, bug, chore, or spike — that is not a User Story
-  Do NOT use for: User Stories (use create-story); epics (use create-epic)
+  Do NOT use for: User Stories (use create-story); epics (use create-epic); full bug triage with severity/dedup/assign (use bug-triage)
 argument-hint: "[type] [description]"
 effort: medium
 ---
