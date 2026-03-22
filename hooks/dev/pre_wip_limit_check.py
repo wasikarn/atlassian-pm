@@ -14,20 +14,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from hooks_lib import allow, inject_context, log_event, parse_stdin
+from hooks_lib import allow, inject_context, is_in_progress_transition, log_event, parse_stdin
 
 _HOOK = "wip-limit"
 _DEFAULT_WIP_LIMIT = 2
-
-_IN_PROGRESS_KEYWORDS = [
-    "in progress", "in development", "start", "doing", "active",
-    "in-progress", "inprogress",
-]
-
-
-def _is_in_progress(transition: str) -> bool:
-    t = transition.lower()
-    return any(kw in t for kw in _IN_PROGRESS_KEYWORDS)
 
 
 def _load_config() -> dict:
@@ -60,7 +50,7 @@ def main() -> None:
     issue_key = str(tool_input.get("issue_key", "")).upper()
     transition = str(tool_input.get("transition", tool_input.get("transition_id", "")))
 
-    if not _is_in_progress(transition):
+    if not is_in_progress_transition(transition):
         allow()
         return
 

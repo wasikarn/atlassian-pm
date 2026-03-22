@@ -46,7 +46,7 @@ _TYPE_PATTERNS = [
 
 _ISSUE_KEY_RE = re.compile(r"\b([A-Z]+-\d+)\b")
 
-_IN_PROGRESS_KEYWORDS = frozenset(["in progress", "inprogress", "start", "begin"])
+_IN_PROGRESS_KEYWORDS = frozenset(["in progress", "in development", "inprogress", "start", "begin", "doing", "active"])
 
 
 # ── Logging ────────────────────────────────────────────────────────────────
