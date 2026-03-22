@@ -146,6 +146,16 @@
 						"timeout": 5
 					}
 				]
+			},
+			{
+				"matcher": "Skill",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_skill_usage_log.py",
+						"timeout": 5
+					}
+				]
 			}
 		],
 		"PostToolUse": [
