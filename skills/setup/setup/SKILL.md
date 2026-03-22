@@ -8,8 +8,10 @@ description: |
   Idempotent: detects what is already configured and skips those steps.
   Re-running is safe — will ask before overwriting existing config.
 
+  Config-file mode: create ~/.atlassian-pm.yaml with --init, fill it in, then run setup for zero-question installation.
+
   Triggers: "setup", "atlassian-pm setup", "/setup", "install atlassian-pm", "configure plugin"
-argument-hint: ""
+argument-hint: "[--init]"
 effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion
 ---
@@ -795,6 +797,8 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 ### ✅ Good
 
 ```text
+/setup --init                         # create ~/.atlassian-pm.yaml template (fill it in, then run /setup)
+/setup                                # config-file mode: reads ~/.atlassian-pm.yaml if filled, skips all questions
 /setup                                # first-time setup on a fresh machine — installs all deps
 /setup                                # safe to re-run after plugin reinstall (idempotent, skips done steps)
 /setup                                # run when doctor reports acli not authenticated or mcp-atlassian missing
@@ -807,6 +811,7 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 /setup --skip-acli                    # no flags exist — setup runs all phases and skips what's already done automatically
 /setup                                # don't run just to fix board_id=0 — doctor → Phase 5b handles that without full re-setup
 /setup                                # don't run to update a single team member — edit project-config.json directly
+/setup --init                         # don't re-run --init after filling in the file — just run /setup
 ```
 
 **Common mistakes:**
@@ -815,6 +820,8 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 - Providing Jira site URL with `https://` prefix — setup strips it, but double-check the stored config has bare hostname format (`your-company.atlassian.net`).
 - Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup phases 4a+4b.
 - Re-running full setup to change only one thing (e.g., project key) — edit `project-config.json` directly and re-run `/doctor` to validate.
+- Filling in ~/.atlassian-pm.yaml but leaving placeholder values — setup detects placeholders and falls back to interactive mode. Check that all 5 required fields have real values.
+- Leaving credentials: section in ~/.atlassian-pm.yaml after setup — setup offers to remove it; accept the cleanup prompt to avoid leaving a plaintext token on disk.
 
 ## Error Handling Reference
 
