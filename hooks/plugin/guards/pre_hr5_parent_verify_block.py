@@ -8,12 +8,11 @@ hasn't been verified yet.
 Exit codes: 0 = allow, 2 = block (pending verification)
 """
 
-import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from hooks_lib import parse_stdin
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hooks_lib import get_additional_fields, get_parent_key, parse_stdin
 from hooks_state import hr5_get_pending
 
 data = parse_stdin()
@@ -23,14 +22,7 @@ tool_input = data.get("tool_input", {})
 session_id = data.get("session_id", "")
 
 # Check if this is a subtask creation (has parent field)
-additional = tool_input.get("additional_fields", {})
-if isinstance(additional, str):
-    try:
-        additional = json.loads(additional)
-    except (json.JSONDecodeError, TypeError):
-        additional = {}
-
-has_parent = bool(additional.get("parent")) or bool(tool_input.get("parent"))
+has_parent = bool(get_parent_key(tool_input))
 if not has_parent:
     sys.exit(0)
 

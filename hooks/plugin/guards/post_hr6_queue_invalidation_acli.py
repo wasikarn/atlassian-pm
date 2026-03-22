@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context
+from hooks_lib import get_issue_keys_from_text, get_tool_response, inject_context
 from hooks_state import hr6_add_pending
 
 # Patterns that indicate a Jira write via acli
@@ -48,13 +48,13 @@ def main() -> None:
         return
 
     # Extract issue keys from command and output
-    tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
+    tool_output = get_tool_response(data)
     all_text = command + " " + tool_output
 
-    keys = re.findall(r"[A-Z]+-\d+", all_text)
+    keys = get_issue_keys_from_text(all_text)
     if not keys:
         # Try uppercase extraction from filenames like tasks/bep-123.json
-        keys = re.findall(r"[A-Z]+-\d+", all_text.upper())
+        keys = get_issue_keys_from_text(all_text.upper())
 
     if not keys:
         print("{}")

@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event, parse_stdin
+from hooks_lib import get_additional_fields, log_event, parse_stdin
 
 CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"
 SPRINT_FIELD = "customfield_10020"
@@ -35,13 +35,7 @@ if not issue_key:
     sys.exit(0)
 
 # Check if sprint field is being set
-additional = tool_input.get("additional_fields", {})
-if isinstance(additional, str):
-    try:
-        additional = json.loads(additional)
-    except (json.JSONDecodeError, TypeError):
-        additional = {}
-
+additional = get_additional_fields(tool_input)
 has_sprint = SPRINT_FIELD in additional or "sprint" in additional
 if not has_sprint:
     sys.exit(0)

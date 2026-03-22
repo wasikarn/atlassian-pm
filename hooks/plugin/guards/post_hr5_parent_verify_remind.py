@@ -14,36 +14,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context, log_event
+from hooks_lib import get_parent_key, inject_context, log_event
 
 _HOOK = "hr5-verify-parent"
 CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"
-
-
-def extract_parent(tool_input: dict) -> str | None:
-    """Extract parent key from additional_fields or direct field."""
-    # Check additional_fields (most common path)
-    additional = tool_input.get("additional_fields", {})
-    if isinstance(additional, str):
-        try:
-            additional = json.loads(additional)
-        except (json.JSONDecodeError, TypeError):
-            additional = {}
-
-    parent = additional.get("parent", {})
-    if isinstance(parent, dict):
-        return parent.get("key")
-    if isinstance(parent, str):
-        return parent
-
-    # Check direct parent field
-    parent = tool_input.get("parent", {})
-    if isinstance(parent, dict):
-        return parent.get("key")
-    if isinstance(parent, str):
-        return parent
-
-    return None
 
 
 def extract_issue_key(data: dict) -> str | None:
@@ -68,7 +42,7 @@ def main() -> None:
         return
 
     tool_input = data.get("tool_input", {})
-    parent_key = extract_parent(tool_input)
+    parent_key = get_parent_key(tool_input)
 
     # Only fire for subtask creation (has parent)
     if not parent_key:
