@@ -18,17 +18,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
+_STATE_STR = str(STATE_DIR)  # cached str for Path ops
 
 # In-process read cache — avoids redundant file reads when a hook calls
 # multiple state functions in one execution (each hook is its own subprocess,
 # so this cache is discarded when the process exits).
 _cache: dict[str, dict] = {}
+_state_dir_ready: bool = False  # mkdir guard: only called once per process
 
 
+def _ensure_state_dir() -> None:
+    global _state_dir_ready
+    if not _state_dir_ready:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        _state_dir_ready = True
+
+
+@functools.lru_cache(maxsize=64)
 def _state_file(session_id: str) -> Path:
     return STATE_DIR / f"{session_id or 'default'}.json"
 
 
+@functools.lru_cache(maxsize=64)
 def _lock_file(session_id: str) -> Path:
     return STATE_DIR / f"{session_id or 'default'}.lock"
 
@@ -46,10 +57,9 @@ def _load(session_id: str) -> dict:
 
 
 def _save(session_id: str, state: dict) -> None:
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    _ensure_state_dir()
     lock = _lock_file(session_id)
-    lock.touch(exist_ok=True)
-    with open(lock, "r") as lf:
+    with open(lock, "a+") as lf:
         fcntl.flock(lf, fcntl.LOCK_EX)
         try:
             # Re-read under lock to merge concurrent writes
