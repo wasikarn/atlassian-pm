@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import parse_stdin
 from hooks_state import hr5_get_pending, hr5_remove_pending
 

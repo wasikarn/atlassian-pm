@@ -76,7 +76,6 @@ except Exception as e:
 if not is_subtask:
     try:
         session_id = data.get("session_id", "")
-        sys.path.insert(0, str(Path(__file__).parent))
         from hooks_state import hr5_is_known_subtask
 
         if hr5_is_known_subtask(session_id, issue_key):
