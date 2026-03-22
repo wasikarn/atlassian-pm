@@ -40,17 +40,17 @@ YAML_CONFIG_FILE="$HOME/.atlassian-pm.yaml"
 if [[ "${SKILL_ARGS:-}" == *"--init"* ]]; then
   if [ -f "$YAML_CONFIG_FILE" ]; then
     # Mask api_token: show last 4 chars only
-    EXISTING_SITE=$(python3 -c "
+    EXISTING_SITE=$(YAML_PATH="$YAML_CONFIG_FILE" python3 -c "
 import os, yaml, sys
 try:
-  c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
+  c = yaml.safe_load(open(os.environ['YAML_PATH']))
   print(c.get('jira',{}).get('site','?'))
 except Exception: print('?')
 " 2>/dev/null || echo "?")
-    EXISTING_KEY=$(python3 -c "
+    EXISTING_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" python3 -c "
 import os, yaml, sys
 try:
-  c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
+  c = yaml.safe_load(open(os.environ['YAML_PATH']))
   print(c.get('jira',{}).get('project_key','?'))
 except Exception: print('?')
 " 2>/dev/null || echo "?")
