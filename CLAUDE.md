@@ -56,18 +56,47 @@ Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scri
 
 > Hooks enforce HR2-HR7, HR10 automatically. Full definitions: `references/hr-rules.md`
 
-| Rule | Constraint |
-| --- | --- |
-| **HR1** QG ≥ 90% | NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit. |
-| **HR2** JQL parent | NEVER `ORDER BY` with `parent =`, `parent in`, `key in (...)` — parser error |
-| **HR3** Assignee | MCP assignee silently fails. Use `acli jira workitem assign -k "KEY" -a "email" -y` |
-| **HR4** Confluence macros | MCP HTML-escapes macros → raw XML. Use `update_page_storage.py` for ToC/Children/Code |
-| **HR5** Subtask parent | MCP may silently ignore parent → orphan. MCP create+verify parent → acli edit. |
-| **HR6** Cache invalidate | After any MCP write → `cache_invalidate(issue_key)`. Stale reads corrupt verify/cascade/planning |
-| **HR7** Sprint ID | NEVER hardcode. Always `jira_get_sprints_from_board()`. Wrong sprint = silent failure |
-| **HR8** Subtask alignment | Dates within parent range. SP sum ≈ parent. Misalignment → wrong burndown. |
-| **HR9** Desc alignment | Story ACs covered by subtask objectives. Epic scope in children. `/atlassian-pm:verify-issue --with-subtasks` (A1-A6) |
-| **HR10** Subtask sprint | NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent. API error + cascade failure. |
+<important if="creating or verifying issue quality before writing to Jira">
+**HR1 QG ≥ 90%:** NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit.
+</important>
+
+<important if="writing JQL with parent =, parent in, or key in clauses">
+**HR2 JQL parent:** NEVER add `ORDER BY` with `parent =`, `parent in`, `key in (...)` — parser error.
+</important>
+
+<important if="assigning issues to team members">
+**HR3 Assignee:** MCP assignee silently fails. Use `acli jira workitem assign -k "KEY" -a "email" -y`.
+</important>
+
+<important if="updating Confluence pages with macros, ToC, Children, or Code blocks">
+**HR4 Confluence macros:** MCP HTML-escapes macros → raw XML. Use `update_page_storage.py` for any page with macros.
+</important>
+
+<important if="creating subtasks or sub-tasks">
+**HR5 Subtask parent:** MCP may silently ignore parent → orphan.
+Always: MCP create → verify `parent.key` via `jira_get_issue` → `acli edit` if missing.
+</important>
+
+<important if="calling jira_update_issue, jira_create_issue, jira_transition_issue, or any Jira write tool">
+**HR6 Cache invalidate:** After ANY MCP write → `cache_invalidate(issue_key)`.
+Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to save 1 round-trip.
+</important>
+
+<important if="setting sprint field or customfield_10020 on any issue">
+**HR7 Sprint ID:** NEVER hardcode. Always `jira_get_sprints_from_board()`. Wrong sprint = silent failure.
+</important>
+
+<important if="creating subtasks or setting dates/story points on subtasks">
+**HR8 Subtask alignment:** Dates within parent range. SP sum ≈ parent. Misalignment → wrong burndown.
+</important>
+
+<important if="creating or updating subtasks, stories, or epics">
+**HR9 Desc alignment:** Story ACs covered by subtask objectives. Epic scope in children. Run `/atlassian-pm:verify-issue --with-subtasks` (A1-A6).
+</important>
+
+<important if="creating subtasks or setting customfield_10020">
+**HR10 Subtask sprint:** NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent. API error + cascade failure.
+</important>
 
 ## Context Management
 

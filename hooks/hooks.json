@@ -146,6 +146,16 @@
 						"timeout": 5
 					}
 				]
+			},
+			{
+				"matcher": "Skill",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_skill_usage_log.py",
+						"timeout": 5
+					}
+				]
 			}
 		],
 		"PostToolUse": [
@@ -322,6 +332,11 @@
 					{
 						"type": "command",
 						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/stop_hr6_unflushed_check.py",
+						"timeout": 10
+					},
+					{
+						"type": "command",
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_hr5_pending_check.py",
 						"timeout": 10
 					},
 					{
