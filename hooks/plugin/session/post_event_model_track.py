@@ -14,13 +14,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hooks_lib import parse_stdin
+from hooks_lib import get_tool_response, parse_stdin
 from hooks_state import event_set_domain_events
 
 data = parse_stdin()
 if not data:
     sys.exit(0)
-tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
+tool_output = get_tool_response(data)
 session_id = data.get("session_id", "")
 
 # Quick check: is this an Epic?

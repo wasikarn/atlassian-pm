@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hooks_lib import parse_stdin
+from hooks_lib import get_parent_key, get_tool_response, parse_stdin
 from hooks_state import vs_add_subtask, vs_get_coverage, vs_set_story_acs
 
 data = parse_stdin()
@@ -24,7 +24,7 @@ if not data:
     sys.exit(0)
 tool_name = data.get("tool_name", "")
 tool_input = data.get("tool_input", {})
-tool_output = str(data.get("tool_response", "") or data.get("tool_output", ""))
+tool_output = get_tool_response(data)
 session_id = data.get("session_id", "")
 
 # ── Story read: extract ACs ──────────────────────────
@@ -59,19 +59,7 @@ if "jira_get_issue" in tool_name:
 # ── Subtask create: track under parent ────────────────
 elif "jira_create_issue" in tool_name:
     # Check if subtask (has parent)
-    additional = tool_input.get("additional_fields", {})
-    if isinstance(additional, str):
-        try:
-            additional = json.loads(additional)
-        except (json.JSONDecodeError, TypeError):
-            additional = {}
-
-    parent = additional.get("parent", {})
-    parent_key = None
-    if isinstance(parent, dict):
-        parent_key = parent.get("key")
-    elif isinstance(parent, str):
-        parent_key = parent
+    parent_key = get_parent_key(tool_input)
 
     if not parent_key:
         sys.exit(0)
