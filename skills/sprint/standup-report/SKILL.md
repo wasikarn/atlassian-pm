@@ -7,7 +7,9 @@ x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Generate daily standup digest from active sprint — categorizes issues by status per assignee, flags anomalies.
   Optional --post flag posts digest as comment to sprint Confluence page.
-  Triggers: "standup", "daily digest", "sprint status", "daily summary", "สรุป standup"
+  Triggers: "standup", "daily digest", "sprint status", "daily summary", "สรุป standup", "daily standup"
+  Use when: generating a daily standup digest per assignee from the active sprint
+  Do NOT use for: sprint planning (use plan-sprint); full retrospective (use retrospective-analyst)
 argument-hint: "[--sprint <id>] [--post]"
 effort: low
 ---

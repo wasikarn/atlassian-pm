@@ -17,6 +17,7 @@ description: |
 
   Triggers: "dependency chain", "dependency analysis", "critical path", "swim lane",
   "blocking analysis", "parallel execution plan", "who blocks whom"
+  Do NOT use for: sprint capacity planning (use plan-sprint); closing sprint (use close-sprint)
 ---
 
 # /map-dependencies

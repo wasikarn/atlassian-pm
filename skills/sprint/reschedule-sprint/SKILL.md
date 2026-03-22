@@ -7,7 +7,9 @@ x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Bulk-shift issue dates across a sprint or issue list — shifts start/due dates by N days or to a new start date.
   Uses existing sprint_set_fields.py script. Always previews before executing.
-  Triggers: "reschedule", "shift dates", "bulk date", "move dates", "เลื่อนวัน"
+  Triggers: "reschedule", "shift dates", "bulk date", "move dates", "เลื่อนวัน", "push sprint dates"
+  Use when: bulk-shifting issue dates across a sprint or issue list by N days or to a new start date
+  Do NOT use for: sprint capacity planning (use plan-sprint); closing a sprint (use close-sprint)
 argument-hint: "[--sprint <id>] [--issues <keys>] [--shift <+N|-N>] [--new-start <YYYY-MM-DD>]"
 effort: medium
 ---
