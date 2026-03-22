@@ -7,11 +7,11 @@ Injects additionalContext suggestion to verify sprint capacity.
 Exit codes: 0 (always — PostToolUse cannot block)
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from config_loader import load_project_config
 from hooks_lib import inject_context, parse_stdin
 
 data = parse_stdin()
@@ -33,14 +33,12 @@ elif isinstance(sprint_value, (int, str)):
     sprint_id = sprint_value
 
 # Read team throughput from project-config.json
-config_path = Path(__file__).resolve().parent.parent / ".claude" / "project-config.json"
-avg_throughput = 39  # default from project-config.json
-if config_path.exists():
-    try:
-        cfg = json.loads(config_path.read_text())
-        avg_throughput = cfg.get("team", {}).get("avg_throughput_per_sprint", avg_throughput)
-    except Exception:
-        pass
+avg_throughput = 39  # default
+try:
+    cfg = load_project_config()
+    avg_throughput = cfg.get("team", {}).get("avg_throughput_per_sprint", avg_throughput)
+except Exception:
+    pass
 
 sprint_ref = f"sprint {sprint_id}" if sprint_id else "sprint"
 inject_context(

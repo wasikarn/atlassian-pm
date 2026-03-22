@@ -7,11 +7,11 @@ Reads threshold from project-config.json (jira.story_size_threshold, default: 13
 Exit codes: 0 = allow, 2 = deny
 """
 
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from config_loader import load_project_config
 from hooks_lib import block, log_event, parse_stdin
 
 _HOOK = "story-size-guard"
@@ -50,14 +50,12 @@ def main() -> None:
         sys.exit(0)
 
     # Read threshold from project-config.json (fallback: DEFAULT_THRESHOLD)
-    config_path = Path(__file__).resolve().parent.parent / ".claude" / "project-config.json"
     threshold = DEFAULT_THRESHOLD
-    if config_path.exists():
-        try:
-            cfg = json.loads(config_path.read_text())
-            threshold = cfg.get("jira", {}).get("story_size_threshold", DEFAULT_THRESHOLD)
-        except Exception:
-            pass
+    try:
+        cfg = load_project_config()
+        threshold = cfg.get("jira", {}).get("story_size_threshold", DEFAULT_THRESHOLD)
+    except Exception:
+        pass
 
     if sp <= threshold:
         sys.exit(0)

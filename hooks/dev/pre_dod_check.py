@@ -1,50 +1,53 @@
 #!/usr/bin/env python3
-"""DoD enforcement: block jira_transition_issue if transitioning to Done/Ready without explicit DoD confirmation.
+"""DoD enforcement: block jira_transition_issue if moving to Done without DoD confirmation.
 
-Checks for DoD confirmation signal in environment. If not present, blocks with reminder.
-DoD confirmation signal: CLAUDE_DOD_CONFIRMED=<issue_key> env var set by Claude after manual check.
+Blocks unless CLAUDE_DOD_CONFIRMED=<issue_key> env var is set.
+
+Exit codes: 0 (allow), 2 (block)
 """
-import json
+
 import os
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from hooks_lib import allow, block, log_event, parse_stdin
+
+_HOOK = "dod-check"
+_DONE_KEYWORDS = frozenset(["done", "ready", "waiting to test", "closed", "resolved"])
 
 
-def main():
-    tool_input_raw = os.environ.get("TOOL_INPUT", "{}")
-    try:
-        tool_input = json.loads(tool_input_raw)
-    except json.JSONDecodeError:
-        print(json.dumps({"continue": True}))
+def main() -> None:
+    data = parse_stdin()
+    if not data:
+        allow()
         return
 
-    issue_key = tool_input.get("issue_key", "")
+    tool_input = data.get("tool_input", {})
+    issue_key = str(tool_input.get("issue_key", "")).upper()
     transition = str(tool_input.get("transition", tool_input.get("transition_id", ""))).lower()
 
-    # Only check for Done/Ready transitions
-    done_keywords = ["done", "ready", "waiting to test", "closed", "resolved"]
-    if not any(kw in transition for kw in done_keywords):
-        print(json.dumps({"continue": True}))
+    if not any(kw in transition for kw in _DONE_KEYWORDS):
+        allow()
         return
 
-    # Check if DoD was already confirmed for this issue
     confirmed = os.environ.get("CLAUDE_DOD_CONFIRMED", "")
     if confirmed == issue_key:
-        print(json.dumps({"continue": True}))
+        log_event(_HOOK, "ALLOWED", {"issue_key": issue_key, "transition": transition})
+        allow()
         return
 
-    # Block with DoD checklist
     reason = (
         f"⛔ DoD Check required before transitioning {issue_key} to '{transition}'.\n\n"
         "Before proceeding, verify ALL of the following:\n"
-        "  1. All subtasks of this issue are in 'Done' status\n"
-        "  2. If this is a Story: a QA subtask exists and is Done\n"
-        "  3. Development info shows at least one PR link (check jira_get_issue_development_info)\n"
-        "  4. No subtask is still 'In Progress'\n\n"
-        "If all checks pass → set env CLAUDE_DOD_CONFIRMED={issue_key} and retry the transition.\n"
-        "If any check fails → fix the issue before transitioning."
-    ).format(issue_key=issue_key)
-
-    print(json.dumps({"decision": "block", "reason": reason}))
+        "  1. All subtasks are Done\n"
+        "  2. A QA subtask exists and is Done (Stories only)\n"
+        "  3. At least one PR link exists (jira_get_issue_development_info)\n"
+        "  4. No subtask is still In Progress\n\n"
+        f"If all pass → set env CLAUDE_DOD_CONFIRMED={issue_key} and retry."
+    )
+    log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "transition": transition})
+    block(reason)
 
 
 if __name__ == "__main__":
