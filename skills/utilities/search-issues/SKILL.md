@@ -17,6 +17,8 @@ description: |
   Triggers: "search", "find", "find issue", "does it already exist", "look for", "check if exists",
   "before creating", "is there already", "find related", "search sprint", "search backlog",
   "any similar issues", "ค้นหา", "มี issue อยู่แล้วไหม"
+  Use when: searching Jira for existing issues before creating new ones to prevent duplicates
+  Do NOT use for: creating issues (use create-story or create-task); full backlog analysis (use scan-tech-debt)
 argument-hint: "[keyword] [--filters]"
 ---
 

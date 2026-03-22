@@ -9,7 +9,9 @@ description: |
   Update an existing Confluence page with a 5-phase workflow
   Supports: content update, section update, status change, move
 
-  Triggers: "update doc", "edit doc", "update confluence", "move page"
+  Triggers: "update doc", "edit doc", "update confluence", "move page", "แก้ไข confluence", "edit confluence page"
+  Use when: updating or moving an existing Confluence page
+  Do NOT use for: creating new pages (use create-doc)
 argument-hint: "[page-id or title] [--move parent-id]"
 effort: medium
 ---

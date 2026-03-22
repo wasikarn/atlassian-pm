@@ -11,6 +11,8 @@ description: |
   Config-file mode: create ~/.atlassian-pm.yaml with --init, fill it in, then run setup for zero-question installation.
 
   Triggers: "setup", "atlassian-pm setup", "/setup", "install atlassian-pm", "configure plugin"
+  Use when: performing initial plugin setup — acli, MCP, credentials, git filters
+  Do NOT use for: daily operation (all other skills handle that); upgrading the plugin
 argument-hint: "[--init]"
 effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion

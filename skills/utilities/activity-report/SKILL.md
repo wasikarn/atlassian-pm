@@ -12,6 +12,8 @@ description: |
   Default: today. Supports date ranges, project filters, observation type filters.
 
   Triggers: "activity report", "work summary", "what did I do", "recent work", "session review"
+  Use when: generating a work activity report from session history stored in claude-mem
+  Do NOT use for: sprint planning (use plan-sprint); standup reports (use standup-report)
 argument-hint: "[--hours <N>] [--start <date>] [--end <date>] [--project <name>] [--types <types>]"
 ---
 

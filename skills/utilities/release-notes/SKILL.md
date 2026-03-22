@@ -11,6 +11,8 @@ description: |
   and creates a structured Confluence page ready to share with stakeholders.
   Triggers: "release notes", "create release notes", "generate release notes",
             "release documentation", "changelog", "สร้าง release notes"
+  Use when: generating Confluence release notes from a Jira Fix Version for stakeholder sharing
+  Do NOT use for: planning a release (use plan-release); creating epics (use create-epic)
 argument-hint: "--version <fix-version-key> [--epic <epic-key>] [--dry-run]"
 effort: medium
 ---
