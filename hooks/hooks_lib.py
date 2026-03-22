@@ -4,7 +4,8 @@
 Separate from hooks_state.py (session state) — this module provides:
   - Centralized logging    → log_event(hook_name, level, data)
   - I/O helpers            → parse_stdin, allow, block, inject_context, update_tool_input
-  - Data extraction        → get_issue_key, get_additional_fields, get_parent_key
+  - Data extraction        → get_issue_key, get_additional_fields, get_parent_key,
+                             get_tool_response, get_issue_keys_from_text, is_in_progress_transition
   - Constants              → ACLI_FROM_JSON_RE, LOG_DIR
   - Type detection         → detect_issue_type(data, file_path)
 
@@ -42,6 +43,10 @@ _TYPE_PATTERNS = [
     ("qa",      re.compile(r"qa|testplan|test[-_]plan", re.I)),
     ("task",    re.compile(r"task|migration|spike|chore|tech[-_]debt", re.I)),
 ]
+
+_ISSUE_KEY_RE = re.compile(r"\b([A-Z]+-\d+)\b")
+
+_IN_PROGRESS_KEYWORDS = frozenset(["in progress", "in_progress", "inprogress", "start", "begin"])
 
 
 # ── Logging ────────────────────────────────────────────────────────────────
@@ -198,6 +203,29 @@ def get_parent_key(tool_input: dict) -> str | None:
     if isinstance(parent, str):
         return parent
     return None
+
+
+def get_tool_response(data: dict) -> str:
+    """Extract tool response as string, handling both tool_response and tool_output keys.
+
+    Handles backwards-compat fallback: newer hooks use tool_response,
+    older MCP tool events may use tool_output.
+    """
+    resp = data.get("tool_response") or data.get("tool_output") or ""
+    if isinstance(resp, (dict, list)):
+        return json.dumps(resp)
+    return str(resp)
+
+
+def get_issue_keys_from_text(text: str) -> list[str]:
+    """Extract all Jira issue keys from arbitrary text (e.g. tool output)."""
+    return _ISSUE_KEY_RE.findall(text)
+
+
+def is_in_progress_transition(transition: str) -> bool:
+    """Return True if transition name indicates moving to In Progress."""
+    t = transition.lower().replace("-", " ").replace("_", " ")
+    return any(kw in t for kw in _IN_PROGRESS_KEYWORDS)
 
 
 # ── Type detection ─────────────────────────────────────────────────────────
