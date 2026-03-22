@@ -185,16 +185,6 @@
 				]
 			},
 			{
-				"matcher": "mcp__mcp-atlassian__(jira_update_issue|jira_add_comment|jira_transition_issue|jira_create_issue|jira_batch_create_issues|confluence_update_page|confluence_create_page)",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "TOOL_INPUT=\"$TOOL_INPUT\" python \"${CLAUDE_PLUGIN_ROOT}/hooks/plugin/cache_write_invalidate.py\"",
-						"timeout": 5
-					}
-				]
-			},
-			{
 				"matcher": "mcp__mcp-atlassian__jira_update_issue",
 				"hooks": [
 					{
