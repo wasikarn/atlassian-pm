@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Tests for stop_hr5_pending_check.py"""
-import json
 import sys
 from pathlib import Path
 
@@ -21,4 +20,4 @@ def test_blocked_when_pending():
 
     result = check_pending(pending=[{"child": "BEP-42", "parent": "BEP-10"}, {"child": "BEP-43", "parent": "BEP-10"}])
     assert result["ok"] is False
-    assert "BEP-42" in result["reason"] or "BEP-43" in result["reason"]
+    assert "BEP-42" in result["reason"] and "BEP-43" in result["reason"]
