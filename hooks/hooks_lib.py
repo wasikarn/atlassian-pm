@@ -46,7 +46,7 @@ _TYPE_PATTERNS = [
 
 _ISSUE_KEY_RE = re.compile(r"\b([A-Z]+-\d+)\b")
 
-_IN_PROGRESS_KEYWORDS = frozenset(["in progress", "in_progress", "inprogress", "start", "begin"])
+_IN_PROGRESS_KEYWORDS = frozenset(["in progress", "inprogress", "start", "begin"])
 
 
 # ── Logging ────────────────────────────────────────────────────────────────
@@ -211,7 +211,11 @@ def get_tool_response(data: dict) -> str:
     Handles backwards-compat fallback: newer hooks use tool_response,
     older MCP tool events may use tool_output.
     """
-    resp = data.get("tool_response") or data.get("tool_output") or ""
+    resp = data.get("tool_response")
+    if resp is None:
+        resp = data.get("tool_output")
+    if resp is None:
+        resp = ""
     if isinstance(resp, (dict, list)):
         return json.dumps(resp)
     return str(resp)
