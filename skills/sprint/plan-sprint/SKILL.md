@@ -23,6 +23,7 @@ effort: high
 
 - **Today:** !`date +%Y-%m-%d`
 - **Recent commits:** Read from `services.tags[].path` in `project-config.json` as needed
+- **Board ID:** !`python3 -c "import json,os; d=json.load(open(os.path.join(os.environ.get('CLAUDE_PROJECT_DIR', os.getcwd()), '.claude/project-config.json'))); print(d['jira']['board_id'])"`
 
 ## Pre-Meeting Checklist
 
