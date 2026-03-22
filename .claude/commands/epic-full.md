@@ -32,4 +32,4 @@ Ask: "Create the first story for this epic now?"
 
 ### Step 4 — Verify
 
-Use the Skill tool to invoke `atlassian-pm:verify-issue` with the epic key `--with-subtasks`.
+Use the Skill tool to invoke `atlassian-pm:verify-issue` with the epic key from conversation context and `--with-subtasks`.

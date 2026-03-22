@@ -18,10 +18,8 @@ Orchestrates: `blueprint` → `create-epic` → `create-story` → `verify-issue
 
 Auto-detect argument type from `$ARGUMENTS`:
 
-- If matches `BEP-\d+` pattern → use as existing epic key, skip create-epic
-- Otherwise → pass as description to blueprint
-
-Use the Skill tool to invoke `atlassian-pm:blueprint` with `$ARGUMENTS`.
+- If matches `BEP-\d+` pattern → use as existing epic key; skip to Step 2 (epic already exists)
+- Otherwise → Use the Skill tool to invoke `atlassian-pm:blueprint` with `$ARGUMENTS`
 
 ### Step 2 — Create Epic
 

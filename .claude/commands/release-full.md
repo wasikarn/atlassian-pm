@@ -20,4 +20,6 @@ Release context flows via conversation.
 
 ### Step 2 — Release Notes
 
-Use the Skill tool to invoke `atlassian-pm:release-notes`.
+Ask: "Generate and publish release notes now?"
+→ If yes: Use the Skill tool to invoke `atlassian-pm:release-notes`
+→ If no: exit after release plan

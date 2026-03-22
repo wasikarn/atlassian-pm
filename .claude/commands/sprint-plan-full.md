@@ -19,5 +19,7 @@ Use the Skill tool to invoke `atlassian-pm:plan-sprint` with `$ARGUMENTS`.
 
 ### Step 2 — Map Dependencies
 
-Use the Skill tool to invoke `atlassian-pm:map-dependencies`.
-(Uses the sprint from conversation context — no explicit passing needed)
+Ask: "Map dependencies for this sprint now?"
+→ If yes: Use the Skill tool to invoke `atlassian-pm:map-dependencies`
+→ If no: exit after sprint planning
+(Sprint context flows from conversation — no explicit passing needed)

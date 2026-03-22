@@ -27,3 +27,4 @@ Ask: "Which items should I create tasks for? (list numbers, 'all', or 'none')"
 ### Step 3 — Create Tasks
 
 For each selected item, use the Skill tool to invoke `atlassian-pm:create-task`.
+(Pass each item's title and description from scan output via conversation context)

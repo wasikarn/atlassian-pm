@@ -19,5 +19,5 @@ Use the Skill tool to invoke `atlassian-pm:close-sprint` with `$ARGUMENTS`.
 
 ### Step 2 — Retrospective
 
-Use the Skill tool to invoke `atlassian-pm:retrospective-analyst` (agent).
+Use the Skill tool to invoke `atlassian-pm:retrospective-analyst`.
 (Sprint data flows via conversation context)
