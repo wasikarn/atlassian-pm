@@ -39,22 +39,23 @@ if [[ "${SKILL_ARGS:-}" == *"--init"* ]]; then
   if [ -f "$YAML_CONFIG_FILE" ]; then
     # Mask api_token: show last 4 chars only
     EXISTING_SITE=$(python3 -c "
-import yaml, sys
+import os, yaml, sys
 try:
-  c = yaml.safe_load(open('$YAML_CONFIG_FILE'))
+  c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
   print(c.get('jira',{}).get('site','?'))
 except: print('?')
 " 2>/dev/null || echo "?")
     EXISTING_KEY=$(python3 -c "
-import yaml, sys
+import os, yaml, sys
 try:
-  c = yaml.safe_load(open('$YAML_CONFIG_FILE'))
+  c = yaml.safe_load(open(os.path.expanduser('~/.atlassian-pm.yaml')))
   print(c.get('jira',{}).get('project_key','?'))
 except: print('?')
 " 2>/dev/null || echo "?")
     echo "~/.atlassian-pm.yaml already exists (site: $EXISTING_SITE, key: $EXISTING_KEY)"
-    # Ask via AskUserQuestion — see prose instructions below
-    # If user says No: print "Keeping existing" and exit immediately (do NOT write template)
+    # → Ask via AskUserQuestion: buttons [Yes, overwrite] [No, keep existing]
+    # → If No: print "Keeping existing ~/.atlassian-pm.yaml" and exit immediately
+    # → If Yes: proceed to write template (below)
   fi
   # → Write template via Write tool (see prose below)
   # → chmod 600 immediately after
