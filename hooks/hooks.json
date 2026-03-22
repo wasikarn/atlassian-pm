@@ -354,6 +354,11 @@
 						"type": "command",
 						"command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}/tasks\"",
 						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_cleanup_artifacts.py",
+						"timeout": 10
 					}
 				]
 			},
