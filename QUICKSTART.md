@@ -27,13 +27,21 @@ acli auth login
 ## Install
 
 ```bash
-# Install the plugin
+# 1. Install the plugin
 claude plugin install atlassian-pm@atlassian-pm
 
-# Run first-time setup (interactive wizard)
-# Installs Python deps, configures Jira project key, registers MCP server
+# 2. Create config file template
+/atlassian-pm:setup --init
+
+# 3. Fill in ~/.atlassian-pm.yaml (site, project_key, email, api_token)
+
+# 4. Run setup — reads config file, no interactive questions
 /atlassian-pm:setup
 ```
+
+**Prefer the config file flow.** The `--init` → edit → run approach is faster and shows what information is needed upfront.
+
+> **Alternative:** Skip `--init` and run `/atlassian-pm:setup` directly for the original interactive wizard.
 
 ---
 

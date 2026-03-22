@@ -8,8 +8,10 @@ description: |
   Idempotent: detects what is already configured and skips those steps.
   Re-running is safe — will ask before overwriting existing config.
 
+  Config-file mode: create ~/.atlassian-pm.yaml with --init, fill it in, then run setup for zero-question installation.
+
   Triggers: "setup", "atlassian-pm setup", "/setup", "install atlassian-pm", "configure plugin"
-argument-hint: ""
+argument-hint: "[--init]"
 effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion
 ---
@@ -23,6 +25,91 @@ Guided first-time setup for the `atlassian-pm` plugin. Idempotent — safe to re
 ## Phase 0 — Config Detection
 
 Run as a **single Bash call** to detect current state. Sets flags used by all later phases.
+
+### `--init` — Create config file template
+
+If the user ran `/atlassian-pm:setup --init`, write the template and exit before any other setup logic.
+
+Insert this at the **very start** of the Phase 0 bash block (before the macOS guard):
+
+```bash
+# Define YAML config file path unconditionally — used by --init and detection
+YAML_CONFIG_FILE="$HOME/.atlassian-pm.yaml"
+
+# --init: create ~/.atlassian-pm.yaml template and exit
+if [[ "${SKILL_ARGS:-}" == *"--init"* ]]; then
+  if [ -f "$YAML_CONFIG_FILE" ]; then
+    # Mask api_token: show last 4 chars only
+    EXISTING_SITE=$(YAML_PATH="$YAML_CONFIG_FILE" python3 -c "
+import os, yaml, sys
+try:
+  c = yaml.safe_load(open(os.environ['YAML_PATH']))
+  print(c.get('jira',{}).get('site','?'))
+except Exception: print('?')
+" 2>/dev/null || echo "?")
+    EXISTING_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" python3 -c "
+import os, yaml, sys
+try:
+  c = yaml.safe_load(open(os.environ['YAML_PATH']))
+  print(c.get('jira',{}).get('project_key','?'))
+except Exception: print('?')
+" 2>/dev/null || echo "?")
+    echo "~/.atlassian-pm.yaml already exists (site: $EXISTING_SITE, key: $EXISTING_KEY)"
+    # → Ask via AskUserQuestion: buttons [Yes, overwrite] [No, keep existing]
+    # → If No: print "Keeping existing ~/.atlassian-pm.yaml" and exit immediately
+    # → If Yes: proceed to write template (below)
+  fi
+  # → Write template via Write tool (see prose below)
+  # → chmod 600 immediately after
+  echo ""
+  echo "✓  Created ~/.atlassian-pm.yaml (chmod 600)"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Edit ~/.atlassian-pm.yaml — fill in your Jira site, project key, email, and API token"
+  echo "  2. Run /atlassian-pm:setup — reads the file and completes all steps automatically"
+  exit 0
+fi
+```
+
+**When `--init` is detected:**
+
+1. If `~/.atlassian-pm.yaml` already exists:
+   - Print the existing site + project_key (mask api_token — never show it)
+   - Ask via AskUserQuestion: "~/.atlassian-pm.yaml already exists. Overwrite?" Buttons: `[Yes, overwrite]` `[No, keep existing]`
+   - If **No**: print `"Keeping existing ~/.atlassian-pm.yaml"` and **exit immediately** — do NOT write the template
+2. Write the template below via **Write tool** (not bash echo — avoids content in shell history):
+
+```yaml
+# atlassian-pm configuration
+# Fill in all required fields, then run: /atlassian-pm:setup
+#
+# ⚠️  This file contains credentials — keep it private.
+#     Created with chmod 600. Do not share or commit to git.
+
+jira:
+  site: your-company.atlassian.net      # required: bare hostname, no https://
+  project_key: PROJ                     # required: uppercase (e.g. BEP, MYPROJ)
+  board_id: 0                           # leave as 0 if unknown — setup will offer to look it up
+
+confluence:
+  space_key: PROJ                       # optional: defaults to project_key if omitted
+
+credentials:
+  email: you@company.com                # required: your Atlassian account email
+  api_token: "your-token-here"          # required: https://id.atlassian.com/manage-profile/security/api-tokens
+                                        # Note: tokens expire in ≤365 days — set a calendar reminder
+
+# Optional: Figma integration
+# figma_token: "figd_..."               # uncomment + fill to configure Figma MCP
+```
+
+1. Immediately set permissions:
+
+```bash
+chmod 600 "$HOME/.atlassian-pm.yaml"
+```
+
+1. Print next steps and exit (no further setup phases run).
 
 ```bash
 # macOS guard
@@ -108,6 +195,42 @@ if [ -f "${_PLUGIN_DATA}/venv/bin/python" ]; then
   VENV_OK=true
 fi
 
+# YAML config file detection
+YAML_CONFIG=false
+if [ -f "$YAML_CONFIG_FILE" ]; then
+  # Use venv Python if available (guarantees pyyaml); fall back to system Python
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+  if [ ! -f "$_VENV_PY" ] && ! python3 -c "import yaml" 2>/dev/null; then
+    echo "  config file: ~/.atlassian-pm.yaml found but pyyaml unavailable — install venv first, then re-run setup"
+  else
+    YAML_VALID=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" - <<'PYEOF'
+import yaml, os, sys
+path = os.environ["YAML_PATH"]
+try:
+    c = yaml.safe_load(open(path))
+    placeholders = {"your-company.atlassian.net", "your-token-here", "you@company.com", "PROJ"}
+    vals = [
+        c["jira"]["site"],
+        c["jira"]["project_key"],
+        c["credentials"]["email"],
+        c["credentials"]["api_token"],
+    ]
+    if all(vals) and not any(v in placeholders for v in vals):
+        print("ok")
+except Exception:
+    pass
+PYEOF
+    )
+    if [ "$YAML_VALID" = "ok" ]; then
+      YAML_CONFIG=true
+      echo "  config file: ~/.atlassian-pm.yaml detected ✓"
+    else
+      echo "  config file: ~/.atlassian-pm.yaml found but has placeholder or invalid values — using interactive setup"
+    fi
+  fi
+fi
+
 echo "Detection complete:"
 echo "  config:      $([ "$SKIP_CONFIG" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  credentials: $([ "$ENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
@@ -115,6 +238,7 @@ echo "  acli auth:   $([ "$ACLI_OK" = "true" ] && echo "✓ found" || echo "✗ 
 echo "  mcp:         $([ "$MCP_OK" = "true" ] && echo "✓ found" || echo "✗ needed")"
 echo "  venv:        $([ "$VENV_OK" = "true" ] && echo "✓ found" || echo "✗ needed (will sync)")"
 echo "  figma MCP:   $([ "$FIGMA_OK" = "true" ] && echo "✓ found" || echo "- not configured (optional)")"
+echo "  yaml config: $([ "$YAML_CONFIG" = "true" ] && echo "✓ found (will skip interactive questions)" || echo "- not found (interactive mode)")"
 ```
 
 **Second-run fast path:** If all five flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The venv check ensures Phase 1 always runs when venv is missing (e.g. after plugin reinstall).
@@ -189,6 +313,59 @@ UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
 
 **Skip entirely if `SKIP_CONFIG=true`.**
 
+**If `YAML_CONFIG=true`:** Read all values from `~/.atlassian-pm.yaml` — skip all questions in this phase.
+
+```bash
+if [ "$YAML_CONFIG" = "true" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  JIRA_SITE=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    site = c['jira']['site'].removeprefix('https://').rstrip('/')
+    print(site)
+except Exception:
+    print('')")
+
+  PROJECT_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c['jira']['project_key'].strip().upper())
+except Exception:
+    print('')")
+
+  BOARD_ID=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(int(c['jira'].get('board_id', 0)))
+except Exception:
+    print('')")
+
+  SPACE_KEY=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    space = c.get('confluence', {}).get('space_key') or c['jira']['project_key']
+    print(space)
+except Exception:
+    print('')")
+
+  echo "  Read from config file:"
+  echo "    site:        $JIRA_SITE"
+  echo "    project_key: $PROJECT_KEY"
+  echo "    board_id:    $BOARD_ID"
+  echo "    space_key:   $SPACE_KEY"
+fi
+```
+
+Do **NOT** set `SKIP_CONFIG=true` here — Phase 3 must still write `project-config.json` from these variables.
+
+When `YAML_CONFIG=false`, all interactive questions below run unchanged.
+
 Ask questions in order. Each is a plain chat message.
 
 **Required:**
@@ -250,6 +427,40 @@ Three independent sub-steps. Each guarded by Phase 0 flags.
 
 **Skip if `ENV_OK=true`.**
 
+**If `YAML_CONFIG=true` (and `ENV_OK=false`):** Read credentials from YAML file — skip the email + token questions.
+
+```bash
+if [ "$YAML_CONFIG" = "true" ] && [ "$ENV_OK" = "false" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  EMAIL=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c.get('credentials', {}).get('email', '').strip())
+except Exception:
+    print('')")
+
+  API_TOKEN=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os, sys
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    print(c.get('credentials', {}).get('api_token', '').strip())
+except Exception:
+    print('')")
+
+  # If credentials missing from file (removed after --init), fall back to interactive
+  if [ -z "$EMAIL" ] || [ -z "$API_TOKEN" ]; then
+    echo "  credentials: not found in config file — asking interactively"
+    # → fall through to existing interactive questions
+  else
+    echo "  Reading credentials from config file [token: ****$(echo "$API_TOKEN" | tail -c 5)]"
+    # → proceed directly to writing ~/.config/atlassian/.env (skip interactive questions)
+  fi
+fi
+```
+
 Before asking for the token, print:
 
 ```text
@@ -293,6 +504,19 @@ Then set permissions:
 chmod 600 ~/.config/atlassian/.env
 echo "  Credentials file written (chmod 600) ✓"
 ```
+
+After writing `.env` successfully (when `YAML_CONFIG=true` and credentials were read from the config file), offer cleanup via AskUserQuestion:
+
+```text
+  ✓  Credentials written from config file
+
+  ⚠️  Your credentials: section in ~/.atlassian-pm.yaml is no longer needed.
+     Remove it now? Credentials are safely stored in ~/.config/atlassian/.env (chmod 600)
+```
+
+Buttons: `[Yes, remove credentials]` `[Keep for now]`
+
+If **Yes**: read `~/.atlassian-pm.yaml` via Read tool, remove the `credentials:` block (from `credentials:` line through the blank line after `api_token:`), write back via Write tool.
 
 ### 4b. Authenticate acli
 
@@ -357,6 +581,38 @@ echo "  mcp-atlassian: registered (user scope) ✓"
 **Always runs — skip logic handled internally by `FIGMA_OK` flag.**
 
 If `FIGMA_OK=true`, print `"  figma MCP: already configured — skipping ✓"` and skip this step.
+
+**If `YAML_CONFIG=true` and `figma_token` is set in YAML (non-empty, not placeholder):**
+
+```bash
+if [ "$YAML_CONFIG" = "true" ] && [ "$FIGMA_OK" = "false" ]; then
+  _VENV_PY="${_PLUGIN_DATA}/venv/bin/python"
+  if [ -f "$_VENV_PY" ]; then _PARSE_PY="$_VENV_PY"; else _PARSE_PY="python3"; fi
+
+  FIGMA_TOKEN_FROM_FILE=$(YAML_PATH="$YAML_CONFIG_FILE" "$_PARSE_PY" -c "
+import yaml, os
+try:
+    c = yaml.safe_load(open(os.environ['YAML_PATH']))
+    t = c.get('figma_token') or ''
+    # Skip if placeholder
+    if t.strip() in ('', 'figd_...'):
+        print('')
+    else:
+        print(t.strip())
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+
+  if [ -n "$FIGMA_TOKEN_FROM_FILE" ]; then
+    echo "  figma MCP: token found in config file — configuring..."
+    FIGMA_TOKEN="$FIGMA_TOKEN_FROM_FILE"
+    # → Skip the "Would you like to configure Figma MCP?" prompt
+    # → Use FIGMA_TOKEN variable in the existing write + register steps below
+  fi
+fi
+```
+
+When `FIGMA_TOKEN_FROM_FILE` is empty or placeholder → existing flow (ask user) runs unchanged.
 
 Otherwise, ask via AskUserQuestion:
 
@@ -541,6 +797,8 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 ### ✅ Good
 
 ```text
+/setup --init                         # create ~/.atlassian-pm.yaml template (fill it in, then run /setup)
+/setup                                # config-file mode: reads ~/.atlassian-pm.yaml if filled, skips all questions
 /setup                                # first-time setup on a fresh machine — installs all deps
 /setup                                # safe to re-run after plugin reinstall (idempotent, skips done steps)
 /setup                                # run when doctor reports acli not authenticated or mcp-atlassian missing
@@ -553,6 +811,7 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 /setup --skip-acli                    # no flags exist — setup runs all phases and skips what's already done automatically
 /setup                                # don't run just to fix board_id=0 — doctor → Phase 5b handles that without full re-setup
 /setup                                # don't run to update a single team member — edit project-config.json directly
+/setup --init                         # don't re-run --init after filling in the file — just run /setup
 ```
 
 **Common mistakes:**
@@ -561,6 +820,8 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 - Providing Jira site URL with `https://` prefix — setup strips it, but double-check the stored config has bare hostname format (`your-company.atlassian.net`).
 - Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup phases 4a+4b.
 - Re-running full setup to change only one thing (e.g., project key) — edit `project-config.json` directly and re-run `/doctor` to validate.
+- Filling in ~/.atlassian-pm.yaml but leaving placeholder values — setup detects placeholders and falls back to interactive mode. Check that all 5 required fields have real values.
+- Leaving credentials: section in ~/.atlassian-pm.yaml after setup — setup offers to remove it; accept the cleanup prompt to avoid leaving a plaintext token on disk.
 
 ## Error Handling Reference
 
