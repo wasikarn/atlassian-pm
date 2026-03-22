@@ -213,6 +213,24 @@ Install without cloning the repo — Claude handles everything.
 > Setup takes **2–3 minutes** (downloads acli, uv, and syncs the cache server venv).
 > Claude Code must be **restarted once** after setup to activate the MCP server.
 
+### Claude Desktop (GUI)
+
+Open **Settings → Extensions → Add marketplace**, enter:
+
+```text
+wasikarn/atlassian-pm
+```
+
+Click **Sync** — Claude Desktop fetches the plugin catalog from GitHub. Then find `atlassian-pm` in the Extensions list and click **Install**.
+
+Finally, open the Code tab and run setup:
+
+```text
+/atlassian-pm:setup
+```
+
+### Claude Code (CLI)
+
 **Step 1** — Add marketplace
 
 ```text
@@ -231,6 +249,8 @@ Install without cloning the repo — Claude handles everything.
 /atlassian-pm:setup
 ```
 
+---
+
 Claude will ask for your Jira site, project key, and board ID, then write the config and configure git filters automatically.
 
 `/atlassian-pm:setup` configures:
@@ -240,8 +260,6 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 - ✓ `~/.config/atlassian/.env` — Jira/Confluence credentials
 - ✓ `~/.claude/CLAUDE.md` — Atlassian settings block
 - ✓ git smudge/clean filters — placeholder conversion
-
-> **Note:** The marketplace install commands above are based on Claude Code's plugin system. If these commands are not yet available in your version, use the manual installation below.
 
 ---
 
@@ -511,4 +529,4 @@ mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + 
 
 **Dev hot-reload** — after editing skill or agent files, use `/reload-plugins` in Claude Code.
 
-**Plugin development** — `plugin.json` must NOT contain a `hooks` field (causes duplicate hook error) or a `version` field (version lives in `.claude-plugin/marketplace.json` only). `marketplace.json` must be in `.claude-plugin/` (not repo root). When skills are organized in category subdirectories, `skills` must be an array of paths (e.g., `["./skills/setup/", "./skills/story/"]`) — a single `"./skills/"` path will not discover nested categories.
+**Plugin development** — `marketplace.json` must be in `.claude-plugin/` (not repo root). When skills are organized in category subdirectories, `skills` must be an array of paths (e.g., `["./skills/setup/", "./skills/story/"]`) — a single `"./skills/"` path will not discover nested categories.
