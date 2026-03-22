@@ -24,6 +24,90 @@ Guided first-time setup for the `atlassian-pm` plugin. Idempotent — safe to re
 
 Run as a **single Bash call** to detect current state. Sets flags used by all later phases.
 
+### `--init` — Create config file template
+
+If the user ran `/atlassian-pm:setup --init`, write the template and exit before any other setup logic.
+
+Insert this at the **very start** of the Phase 0 bash block (before the macOS guard):
+
+```bash
+# Define YAML config file path unconditionally — used by --init and detection
+YAML_CONFIG_FILE="$HOME/.atlassian-pm.yaml"
+
+# --init: create ~/.atlassian-pm.yaml template and exit
+if [[ "${SKILL_ARGS:-}" == *"--init"* ]]; then
+  if [ -f "$YAML_CONFIG_FILE" ]; then
+    # Mask api_token: show last 4 chars only
+    EXISTING_SITE=$(python3 -c "
+import yaml, sys
+try:
+  c = yaml.safe_load(open('$YAML_CONFIG_FILE'))
+  print(c.get('jira',{}).get('site','?'))
+except: print('?')
+" 2>/dev/null || echo "?")
+    EXISTING_KEY=$(python3 -c "
+import yaml, sys
+try:
+  c = yaml.safe_load(open('$YAML_CONFIG_FILE'))
+  print(c.get('jira',{}).get('project_key','?'))
+except: print('?')
+" 2>/dev/null || echo "?")
+    echo "~/.atlassian-pm.yaml already exists (site: $EXISTING_SITE, key: $EXISTING_KEY)"
+    # Ask via AskUserQuestion — see prose instructions below
+    # If user says No: print "Keeping existing" and exit immediately (do NOT write template)
+  fi
+  # → Write template via Write tool (see prose below)
+  # → chmod 600 immediately after
+  echo ""
+  echo "✓  Created ~/.atlassian-pm.yaml (chmod 600)"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Edit ~/.atlassian-pm.yaml — fill in your Jira site, project key, email, and API token"
+  echo "  2. Run /atlassian-pm:setup — reads the file and completes all steps automatically"
+  exit 0
+fi
+```
+
+**When `--init` is detected:**
+
+1. If `~/.atlassian-pm.yaml` already exists:
+   - Print the existing site + project_key (mask api_token — never show it)
+   - Ask via AskUserQuestion: "~/.atlassian-pm.yaml already exists. Overwrite?" Buttons: `[Yes, overwrite]` `[No, keep existing]`
+   - If **No**: print `"Keeping existing ~/.atlassian-pm.yaml"` and **exit immediately** — do NOT write the template
+2. Write the template below via **Write tool** (not bash echo — avoids content in shell history):
+
+```yaml
+# atlassian-pm configuration
+# Fill in all required fields, then run: /atlassian-pm:setup
+#
+# ⚠️  This file contains credentials — keep it private.
+#     Created with chmod 600. Do not share or commit to git.
+
+jira:
+  site: your-company.atlassian.net      # required: bare hostname, no https://
+  project_key: PROJ                     # required: uppercase (e.g. BEP, MYPROJ)
+  board_id: 0                           # leave as 0 if unknown — setup will offer to look it up
+
+confluence:
+  space_key: PROJ                       # optional: defaults to project_key if omitted
+
+credentials:
+  email: you@company.com                # required: your Atlassian account email
+  api_token: "your-token-here"          # required: https://id.atlassian.com/manage-profile/security/api-tokens
+                                        # Note: tokens expire in ≤365 days — set a calendar reminder
+
+# Optional: Figma integration
+# figma_token: "figd_..."               # uncomment + fill to configure Figma MCP
+```
+
+1. Immediately set permissions:
+
+```bash
+chmod 600 "$HOME/.atlassian-pm.yaml"
+```
+
+1. Print next steps and exit (no further setup phases run).
+
 ```bash
 # macOS guard
 if [[ "$(uname)" != "Darwin" ]]; then
