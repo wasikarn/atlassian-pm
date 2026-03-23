@@ -21,6 +21,7 @@ import argparse
 import json
 import logging
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # Add parent directory to path for lib imports
@@ -208,18 +209,23 @@ Config JSON format:
     total_pass = 0
     total_fail = 0
 
-    for rule in audit_rules:
-        passed, _ = audit_page(
+    def _audit_rule(rule):
+        return audit_page(
             api=api,
             page_id=rule["page_id"],
             label=rule.get("label", f"Page {rule['page_id']}"),
             should_have=rule.get("should_have", []),
             should_not_have=rule.get("should_not_have", []),
         )
-        if passed:
-            total_pass += 1
-        else:
-            total_fail += 1
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_audit_rule, rule): rule for rule in audit_rules}
+        for future in as_completed(futures):
+            passed, _ = future.result()
+            if passed:
+                total_pass += 1
+            else:
+                total_fail += 1
 
     # Summary
     print(f"\n{'=' * 60}")
