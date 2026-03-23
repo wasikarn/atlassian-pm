@@ -143,6 +143,22 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 | `/atlassian-pm:scan-tech-debt` | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
 | `/atlassian-pm:release-notes` | Generate Confluence release notes from a Jira Fix Version |
 
+### End-to-End Workflows
+
+One command chains multiple skills with confirmation gates between stages.
+
+| Command | Chains | Description |
+| --- | --- | --- |
+| `/story-full` | search-issues → create-story → verify-issue --with-subtasks | Full story creation with dedup + quality check |
+| `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
+| `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
+| `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
+| `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
+| `/sprint-plan-full` | plan-sprint → map-dependencies | Sprint planning with dependency critical path |
+| `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
+| `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
+| `/tech-debt-full` | scan-tech-debt → create-task (per item) | Scan and create tasks for selected tech-debt items |
+
 ---
 
 ## Usage Examples
