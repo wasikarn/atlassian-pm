@@ -111,65 +111,56 @@ End-to-end orchestration chains — the fastest way to get things done. Each com
 
 ## Skills
 
-Individual steps invoked as `/atlassian-pm:<name>`. Use when you need finer control over a specific phase. Each skill is a multi-phase workflow with domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) embedded alongside the steps.
+Individual steps invoked as `/atlassian-pm:<name>`. Use when you need finer control over a specific phase. Each skill is a multi-phase workflow with domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) embedded alongside the steps. Grouped by primary user role — many skills are useful across roles.
 
-### Feature Design
+### PM / Product Owner
 
-| Skill | Description |
-| --- | --- |
-| `/atlassian-pm:blueprint` | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
-| `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
-
-### Issue Creation
-
-| Skill | Description |
-| --- | --- |
-| `/atlassian-pm:create-story` | **Recommended** — Story + Sub-tasks in one workflow |
-| `/atlassian-pm:create-epic` | Epic + Confluence doc with RICE scoring |
-| `/atlassian-pm:plan-release` | Multi-sprint release plan + Confluence page + Jira Fix Version |
-| `/atlassian-pm:create-task` | Task: `tech-debt`, `bug`, `chore`, or `spike` |
-| `/atlassian-pm:bug-triage` | Full triage: intake → P1/P2/P3 severity → dedup check → assign |
-| `/atlassian-pm:analyze-story ABC-123` | Explore codebase → create Sub-tasks for existing Story |
-| `/atlassian-pm:create-testplan ABC-123` | Test Plan + `[QA]` Sub-tasks from Story ACs |
-| `/atlassian-pm:spec-to-stories 12345` | Convert Confluence spec page → batch-create User Stories |
-
-### Issue Updates
-
-| Skill | Description |
-| --- | --- |
-| `/atlassian-pm:update-story ABC-123` | Edit Story — ACs, scope, description |
-| `/atlassian-pm:update-epic ABC-123` | Edit Epic — scope, RICE, metrics |
-| `/atlassian-pm:update-task ABC-123` | Edit Task — format, details |
-| `/atlassian-pm:update-subtask ABC-123` | Edit Sub-task — format, content |
-| `/atlassian-pm:sync-artifacts ABC-123` | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
-
-### Search & Quality
+Backlog ownership, sprint management, documentation, and reporting.
 
 | Skill | Flags | Description |
 | --- | --- | --- |
+| `/atlassian-pm:blueprint` | | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
+| `/atlassian-pm:refine-epic` | | 4-role debate for unclear or high-risk requirements |
+| `/atlassian-pm:create-epic` | | Epic + Confluence doc with RICE scoring |
+| `/atlassian-pm:plan-release` | | Multi-sprint release plan + Confluence page + Jira Fix Version |
+| `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create User Stories |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
-| `/atlassian-pm:verify-issue ABC-123` | `--with-subtasks` `--fix` `--dry-run` | ADF format + INVEST criteria check |
 | `/atlassian-pm:assign-issue ABC-123 [name]` | | Assign issue (bypasses MCP silent failure) |
-
-### Sprint Planning
-
-| Skill | Flags | Description |
-| --- | --- | --- |
 | `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | 8-phase planning: capacity + carry-over + assign |
-| `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
 | `/atlassian-pm:close-sprint` | `--sprint 123` | Close sprint: triage incomplete → move → Confluence review |
 | `/atlassian-pm:standup-report` | `--post` | Daily standup digest per assignee with anomaly detection |
 | `/atlassian-pm:reschedule-sprint` | `--sprint 123 --shift +7` | Bulk-shift issue dates across a sprint or issue list |
 | `/atlassian-pm:activity-report` | `--hours 48` | Work activity report from session history |
+| `/atlassian-pm:create-doc` | | Create page: `tech-spec`, `adr`, `parent` |
+| `/atlassian-pm:update-doc` | | Update or move a Confluence page |
+| `/atlassian-pm:release-notes` | | Generate Confluence release notes from a Jira Fix Version |
 
-### Confluence
+### Engineer / Tech Lead
+
+Story and task authoring, codebase exploration, issue maintenance, and quality gates.
+
+| Skill | Flags | Description |
+| --- | --- | --- |
+| `/atlassian-pm:create-story` | | **Recommended** — Story + Sub-tasks in one workflow |
+| `/atlassian-pm:analyze-story ABC-123` | | Explore codebase → create Sub-tasks for existing Story |
+| `/atlassian-pm:create-task` | | Task: `tech-debt`, `bug`, `chore`, or `spike` |
+| `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
+| `/atlassian-pm:update-story ABC-123` | | Edit Story — ACs, scope, description |
+| `/atlassian-pm:update-epic ABC-123` | | Edit Epic — scope, RICE, metrics |
+| `/atlassian-pm:update-task ABC-123` | | Edit Task — format, details |
+| `/atlassian-pm:update-subtask ABC-123` | | Edit Sub-task — format, content |
+| `/atlassian-pm:sync-artifacts ABC-123` | | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
+| `/atlassian-pm:verify-issue ABC-123` | `--with-subtasks` `--fix` `--dry-run` | ADF format + INVEST criteria check |
+| `/atlassian-pm:scan-tech-debt` | | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
+
+### QA / Tester
+
+Test planning, bug intake, and acceptance verification.
 
 | Skill | Description |
 | --- | --- |
-| `/atlassian-pm:create-doc` | Create page: `tech-spec`, `adr`, `parent` |
-| `/atlassian-pm:update-doc` | Update or move a Confluence page |
-| `/atlassian-pm:scan-tech-debt` | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
-| `/atlassian-pm:release-notes` | Generate Confluence release notes from a Jira Fix Version |
+| `/atlassian-pm:create-testplan ABC-123` | Test Plan + `[QA]` Sub-tasks from Story ACs |
+| `/atlassian-pm:bug-triage` | Full triage: intake → P1/P2/P3 severity → dedup check → assign |
 
 ---
 
