@@ -1,12 +1,20 @@
 {
   "name": "atlassian-pm",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Agile Jira/Confluence automation: story creation, sprint planning, quality gates, HR enforcement",
-  "author": { "name": "Tathep" },
+  "author": {
+    "name": "Tathep"
+  },
   "homepage": "https://github.com/wasikarn/atlassian-pm",
   "repository": "https://github.com/wasikarn/atlassian-pm",
   "license": "MIT",
-  "keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
+  "keywords": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "agile",
+    "sprint"
+  ],
   "skills": [
     "./skills/setup/",
     "./skills/epic/",
