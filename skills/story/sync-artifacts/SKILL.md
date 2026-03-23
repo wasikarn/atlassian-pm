@@ -239,11 +239,10 @@ Living documentation (Nat Pryce & Steve Freeman, "Growing Object-Oriented Softwa
 
 | Framework | Applied In | Why |
 | --------- | --------- | --- |
-| Single Source of Truth (Atlassian) | Phase 3 Change Classification + Phase 6 tool selection | Authoritative content lives in exactly one place (Jira for workflow state, Confluence for context/rationale); sync direction always flows from the authoritative source outward |
-| Living Documentation (Nat Pryce) | Phase 8 Verify & Report via `audit_confluence_pages.py` | Documentation is verified against Jira state after every sync, not assumed to be correct; stale docs are surfaced rather than silently left in place |
-| Impact Level taxonomy (LOW/MEDIUM/HIGH) | Phase 3 Change Classification | Matches industry practice of triaging changes by blast radius before execution; LOW changes skip codebase exploration (Phase 5) entirely, reducing unnecessary cycle time |
-| Topological sort (dependency ordering) | Phase 7 Execute order: Parents → Children → Confluence | Avoids referential integrity failures: updating a child's AC before its parent's AC has been updated creates a window where the two are inconsistent |
-| Surgical vs. full-rewrite sync strategy | Phase 6 + Phase 7 tool selection table | Surgical text replacement (find/replace) preserves surrounding context and is idempotent; full rewrites risk overwriting concurrent edits; prefer surgical unless structural changes require a rewrite |
+| Single Source of Truth (Atlassian) | Phase 3 Change Classification + Phase 6 tool selection | Authoritative content lives in exactly one place (Jira for workflow state, Confluence for context/rationale); sync direction always flows from the authoritative source outward — never duplicate content across both |
+| Living Documentation (Nat Pryce & Steve Freeman) | Phase 8 Verify & Report via `audit_confluence_pages.py` | Pryce/Freeman: documentation is only trustworthy when continuously verified against the system it describes, not at point-of-write. The audit step implements this — docs are verified post-sync, not assumed correct |
+| Change Impact Analysis — PMBOK Integrated Change Control | Phase 3 Change Classification (LOW/MEDIUM/HIGH) | Triage by blast radius before execution. LOW changes skip Phase 5 codebase exploration entirely. PMBOK: every change should be assessed for impact on scope, schedule, and cost before approval — the blast radius map is the lightweight sprint-team equivalent |
+| Scope Change Discipline (Mike Cohn, "Succeeding with Agile") | Phase 3 HIGH-impact approval gate | Cohn: scope changes during a sprint should be treated as new backlog items, not silent edits. The HIGH-impact gate operationalises this — Remove AC / Change scope requires explicit APPROVAL before Phase 7 executes |
 
 ### Key Metrics
 

@@ -210,10 +210,10 @@ Task updates happen at two distinct moments with different risk profiles: pre-sp
 
 | Framework | Applied In | Why |
 | --- | --- | --- |
-| Kanban Change Management | Phase 2 change type classification (migrate/add-details/change-type/update-content) | Each change type has different WIP impact; classifying before acting prevents unplanned scope expansion |
-| ITSM Change Advisory | Phase 4 gate before applying changes | High-risk content changes (scope changes, type changes) require explicit approval — parallels CAB approval for significant changes |
-| Agile Impediment Escalation | Blocked task protocol in update-content changes | A task update that adds "blocked by" context triggers an impediment — must be visible to the Scrum Master within the same sprint day |
-| Documentation as Code | Format migration (Wiki → ADF) change type | Treating task descriptions as versioned, structured documents (not free text) ensures diffs are meaningful and QG is consistent |
+| Kanban Change Management (Anderson, 2010) | Phase 2 change type classification (migrate/add-details/change-type/update-content) | Anderson's explicit policies principle: classify changes by WIP impact before executing. `migrate` = standard change (zero WIP impact, pre-approved); `add-details` = low impact (additive, no scope shift); `change-type`/`update-content` = normal change (requires approval, WIP risk) |
+| ITIL 4 Change Enablement | Phase 4 gate before applying changes | ITIL 4 defines 4 change types: **standard** (pre-approved, low risk) = migrate/add-details; **normal** (approval required, risk assessed) = update-content with scope shift; **emergency** (expedited, documented post-hoc) = blocked escalation path; **undoable** (irreversible) = type-change operations. The Phase 4 gate classifies every update against this taxonomy before applying |
+| Agile Impediment Escalation (Scrum Guide) | Blocked task protocol in update-content changes | A task update that adds "blocked by" context triggers an impediment — must be visible to the Scrum Master within the same sprint day; description update alone is invisible on sprint board status filters |
+| Docs as Code (Anne Gentle, "Docs Like Code", 2017) | Format migration (Wiki → ADF) change type | Treating task descriptions as versioned, structured documents reviewed with the same rigour as source code. ADF enforces structure; QG scoring provides the equivalent of a code review gate — ensures docs remain machine-readable and diffable |
 
 ### Key Metrics
 

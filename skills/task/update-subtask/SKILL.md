@@ -149,10 +149,10 @@ In-sprint subtask updates are high-risk changes: a subtask that shifts scope mid
 
 | Framework | Applied In | Why |
 | --- | --- | --- |
-| Scrum Sprint Scope Protection | Phase 3 Preserve Intent rules | Sprint commitment is inviolable; updating format/language is safe, but changing objective requires PO/TL sign-off |
-| Earned Value Management (EVM) | HR8 date validation in Phase 6 | Subtask dates must stay within parent range to preserve schedule baseline integrity; violations distort EV calculations |
-| WIP Limit Discipline (Kanban) | Phase 2 change type identification | In-sprint scope expansion increases WIP; each change type is evaluated for WIP impact before applying |
-| Impediment Management (Scrum) | Content updates that add "blocked by" or remove ACs | Removals and dependency additions must be flagged to the Scrum Master, not silently applied |
+| Scrum Sprint Scope Protection (Scrum Guide) | Phase 3 Preserve Intent rules | Sprint commitment is inviolable; updating format/language is safe, but changing objective requires PO/TL sign-off. The Scrum Guide (2020) states: "Sprint scope may be clarified and renegotiated with the Product Owner as more is learned" — clarification is safe, renegotiation is not a silent edit |
+| Earned Value Management — ANSI/EIA-748 | HR8 date validation in Phase 6 | Subtask dates must stay within parent range to preserve schedule baseline integrity. ANSI/EIA-748 defines the "rubber baseline" anti-pattern: when dates shift continuously, EV calculations become meaningless. HR8 prevents this at the subtask level |
+| WIP Limit Discipline — Cost of Change (Anderson, Ch.5) | Phase 2 change type identification | Anderson: every in-sprint scope expansion increases active WIP, and **cost of change = WIP × lead time impact**. If current WIP = 3 parallel subtasks, a scope change ripples across all 3 streams simultaneously. Classify before applying to make WIP cost explicit |
+| Impediment Management (Scrum Guide) | Content updates that add "blocked by" or remove ACs | Removals and dependency additions must be flagged to the Scrum Master, not silently applied. The Scrum Guide defines impediments as anything preventing the Developers from achieving the Sprint Goal — a blocked subtask qualifies and must surface on the board, not just in the description |
 
 ### Key Metrics
 

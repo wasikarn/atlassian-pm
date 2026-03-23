@@ -30,7 +30,7 @@ effort: high
 
 JQL (HR2-safe — no parent filter):
 
-```
+```jql
 project={{PROJECT_KEY}} AND issuetype=Task AND labels in (tech-debt,chore,spike) ORDER BY created ASC
 ```
 
@@ -89,7 +89,7 @@ Check: issue count > 0, at least one quadrant populated, all required sections p
 
 Page structure (storage format — HR4: no macros via MCP):
 
-```
+```text
 # Tech Debt Radar — [date]
 
 ## Summary
@@ -168,9 +168,9 @@ Technical debt is a financial analogy (Ward Cunningham, 1992): the "principal" i
 
 | Framework | Applied In | Why |
 | --------- | --------- | --- |
-| Martin Fowler's Tech Debt Quadrant | Phase 3 impact scoring keywords | Fowler's quadrant (Prudent/Reckless × Deliberate/Inadvertent) maps to the keyword heuristics: "block/security" → Reckless debt with highest interest rate; "doc/readme" → Prudent debt with low interest |
-| Eisenhower/2×2 Priority Matrix | Phase 3 quadrant assignment | The Quick Win / Major Work / Fill-in / Avoid matrix is a direct application of effort-impact triage — identical to how SQALE prioritises remediation activities |
-| SQALE Pyramid principle | Phase 2 age bucketing | SQALE establishes that Testability is the foundational layer — old "spike" items (spikes define new tech) that stay open beyond 3 months become structural blockers, not just chores |
+| Martin Fowler's Tech Debt Quadrant | Phase 3 impact scoring keywords | Fowler's quadrant (Prudent/Reckless × Deliberate/Inadvertent) maps directly to keyword heuristics: "block/security/auth" → Reckless Inadvertent debt (highest interest rate, fix immediately); "refactor/clean" → Prudent Deliberate (acceptable, schedule it); "doc/readme" → Prudent Inadvertent (low interest, low priority) |
+| Effort × Impact (Eisenhower-derived) | Phase 3 quadrant assignment | Quick Win (high impact + low effort) / Major Work (high impact + high effort) / Fill-in (low impact + low effort) / Avoid (low impact + high effort) — this is a standard effort-impact triage, commonly applied in tech debt contexts. Note: SQALE uses a separate priority order (quality pyramid); these are complementary, not equivalent |
+| SQALE Quality Pyramid (Letouzey, 2012) | Phase 2 age bucketing + Phase 3 keyword priority order | SQALE defines remediation priority as a pyramid: **Testability** (base) → **Reliability** → **Security** → **Maintainability** → **Efficiency** → **Portability** (top). Applied here: `spike` items (testability debt) open > 3 months → structural blockers; `security/auth` keywords → reliability/security layer, always prioritised over `refactor` (maintainability layer); `doc` → bottom-tier unless it blocks testability |
 
 ### Key Metrics
 
@@ -184,7 +184,7 @@ Technical debt is a financial analogy (Ward Cunningham, 1992): the "principal" i
 - If >50% of debt items have no SP estimate → the effort axis of the priority matrix is unreliable; run a quick SP estimation session before using the matrix for sprint planning
 - If the "Avoid" quadrant (high effort + low impact) is the largest → these items should be closed as "Won't Fix" or converted to backlog epics; keeping them as active tasks inflates the debt count and hides real priorities
 - If `spike` label items are older than 2 sprints → they have become decision debt (a finding not acted on); escalate to the tech lead for a decision to proceed, park, or close
-- Scrum teams should allocate 15–20% of sprint capacity to debt reduction — if the `total SP` of Quick Wins exceeds 20% of sprint velocity, the team is under-investing in debt paydown
+- Scrum teams should allocate 15–20% of sprint capacity to debt reduction (ScrumInc field data; echoed by Google's 20% technical health time — Fitzpatrick & Collins-Sussman, "Team Geek", 2012) — if the `total SP` of Quick Wins exceeds 20% of sprint velocity, the team is under-investing in debt paydown
 - If a service tag (e.g., `[BE]`) consistently has the most Stale items → it is a candidate for a dedicated debt-reduction sprint or a mob refactoring session
 
 ### Common Failure Modes
