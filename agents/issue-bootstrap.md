@@ -38,6 +38,8 @@ Defaults:
 
 1. **Main issue** — try `cache_get_issue(ABC-XXX)` first, fallback `jira_get_issue` with preset fields (or full fields if no preset)
 
+   After Step 1, launch Steps 2, 3, and 4 in parallel (single message, up to 3 Tool calls) — all depend only on the issue key and flags from Step 1, not on each other.
+
 2. **Parent** — if issue has parent → `cache_get_issue(parent_key, fields="summary,status,issuetype,description")` (truncate description to first 300 chars)
 
 3. **Children** — if Story/Epic or `--with-children` → `jira_search(jql="parent = ABC-XXX", fields="summary,status,assignee,issuetype,timetracking,{{START_DATE_FIELD}},duedate")` ⚠️ NEVER add ORDER BY to parent queries

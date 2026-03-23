@@ -27,6 +27,8 @@ Optional: `--action-items` flag to auto-create Jira tasks for action items.
 
 ### Phase 2: Changelog Analysis
 
+> **🟢 PARALLEL** — Launch `jira_batch_get_changelogs` (Phase 2) and `Read .claude/project-config-team-detail.json` (Phase 3b) simultaneously after Phase 1. Changelog fetch and velocity history read have no dependency on each other.
+
 For each Story (not subtask) — batch fetch changelogs via `jira_batch_get_changelogs`:
 
 **Metrics to extract:**

@@ -20,7 +20,7 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
 
 2. **Fetch past sprints** — `jira_get_sprints_from_board(board_id, state="closed", limit=N+2)` → get last N completed sprints
 
-3. **Fetch items per sprint** — for each sprint: `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,timetracking")` → filter Stories + Tasks → partition into Done vs not-Done
+3. **Fetch items per sprint** — launch all `jira_get_sprint_issues` calls in parallel (single message, N Tool calls — one per sprint_id from Step 2). Each sprint is independent. `fields="summary,status,assignee,issuetype,customfield_10016,timetracking"` → filter Stories + Tasks → partition into Done vs not-Done
 
 4. **Calculate velocity metrics:**
    - Per-sprint completed SP (Done items only)
