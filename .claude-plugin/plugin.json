@@ -16,6 +16,5 @@
     "./skills/confluence/",
     "./skills/utilities/"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }
