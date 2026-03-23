@@ -115,8 +115,53 @@ Return exactly this JSON structure (no extra text):
 
 Status values: `pass` | `fail` | `skip` | `blocked`
 
+## Test Isolation Rules
+
+Each test case execution must be isolated:
+
+- **Fresh navigation**: always start from `env_url` base, not a previously loaded page from another test
+- **No shared state**: do not reuse DOM state, localStorage, or cookies across test cases unless precondition explicitly requires it
+- **Login once per session**: if multiple tests share the same precondition (ล็อกอินแล้ว), reuse the session within a single agent turn — do not log in/out between every test case
+- **Clean test data**: if a test creates data (e.g., connects a LINE account), the next test must account for this state or start from a known clean state
+
+## Wait Strategy (Explicit over Implicit)
+
+Never use arbitrary sleep/delay. Always use explicit waits:
+
+- Element present: `browser_wait_for(selector=".class-name")`
+- Network idle: use `browser_wait_for` after navigation for SPA route changes
+- Animation complete: wait for CSS transition class to disappear before asserting final state
+- API response: verify via `browser_network_requests()` not timing assumptions
+
+If a step fails due to element not found: retry once after 2 seconds before marking `fail`. If second attempt also fails → `fail` (not flaky retry).
+
 ## Error Handling
 
 - If `browser_navigate` fails (site unreachable): return `{ status: "blocked", actual_result: "Environment unreachable: <url>" }`
 - If a step throws unexpected error: capture screenshot, record error in `actual_result`, set status = `fail`
+- If element not found on first try: wait 2s, retry once — if still not found: `fail`
 - Never throw — always return structured result
+
+## 🎓 Domain Expert Notes
+
+### Test Isolation Principle (ISTQB)
+
+Each test case must be independent: it should not depend on the outcome of a previous test, and it should not leave side effects that affect subsequent tests. Violations cause cascading failures — one failing test causes all downstream tests to fail, making root cause analysis impossible.
+
+### Explicit Wait Pattern (Selenium/Playwright Best Practice)
+
+Implicit waits (fixed sleep) are the #1 cause of flaky tests in UI automation. Explicit waits tie execution to observable application state changes (element visible, network idle, class change) — they are both faster (no unnecessary delay) and more reliable (no race conditions).
+
+### Pass/Fail Verdict Rigor
+
+A test passes only when ALL assertions in `expected` are satisfied. Partial matches are failures. A test that "mostly passes" is a failure — the unconditional standard prevents false confidence in test results. Record the specific assertion that failed in `actual_result`, not a generic "test failed" message.
+
+### Boundary Value Analysis (Myers)
+
+For Edge test cases with numeric conditions (e.g., "up to 5 accounts"), always test:
+
+- At the boundary (exactly 5)
+- Just below (4)
+- Just above (6)
+
+If the test case only specifies one of these, execute the specified one and note which boundaries remain untested.

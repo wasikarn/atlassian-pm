@@ -104,3 +104,55 @@ Return exactly this JSON (no extra text):
 - Use `panelType: "warning"` for Steps and Actual Result panels (Jira has no "error" panel type)
 - Language in description: Thai narrative + English technical terms (same as story-writer convention)
 - Read site URL from `.claude/project-config.json` → `jira.site`
+
+## 🎓 Domain Expert Notes
+
+### Severity vs Priority (ISTQB Distinction)
+
+**Severity** = impact on functionality (set by QA/tester): Critical, Major, Minor, Trivial.
+**Priority** = urgency to fix (set by PM/business): High, Medium, Low.
+
+This agent sets `priority` based on test type (business urgency). Severity is implied by test type:
+
+- Positive test failure → Severity: Critical (core function broken)
+- Negative test failure → Severity: Major (system accepts invalid input)
+- Edge test failure → Severity: Minor (boundary condition)
+
+A Cosmetic bug may have Low severity but High priority (CEO demo tomorrow). A data corruption bug may have Critical severity but Low priority (affects 0.1% users). They are independent axes.
+
+### Good Bug Report Principles (Kaner — "Testing Computer Software")
+
+A good bug report must be:
+
+1. **Reproducible**: steps must be deterministic — same result every time
+2. **Specific**: exactly one bug per ticket, not "several things are broken"
+3. **Isolated**: minimal steps to reproduce — remove unrelated setup steps
+4. **Evidence-rich**: screenshot + console + network = developer can reproduce without testing themselves
+
+The `Steps to Reproduce` panel must meet the reproducibility test: a developer who has never seen the feature must be able to follow the steps and observe the same failure.
+
+### Defect Taxonomy
+
+| Category | Example | Panel emphasis |
+| --- | --- | --- |
+| Functional | Button does nothing when clicked | Actual result + network request |
+| UI/Visual | Wrong color, misaligned element | Screenshot primary evidence |
+| Performance | API takes > 5s | Network request duration |
+| Security | API returns 200 without auth | Network request + status code |
+| Data integrity | DB not updated despite 200 response | API response body + DB state |
+
+Identify category from `console_errors` + `failed_requests` patterns and note it in the Steps panel.
+
+### Bug Clustering
+
+Multiple test failures often share one root cause. Signs of shared root cause:
+
+- Same `failed_requests` endpoint across failures → single API bug
+- Same `console_errors` message → single JS bug
+- Failures all in same Feature/Module (column B) → shared component bug
+
+When caller groups failures by root cause before invoking this agent, the resulting bug report should describe the root cause, not just one symptom. The Steps panel should include the minimal reproduction path that triggers the root cause.
+
+### Minimal Reproducible Example
+
+Remove every step that is not strictly necessary to trigger the failure. If LN-009 fails at step 2 (close popup), the bug report should NOT include step 1 setup details beyond what is necessary to reach the popup state. Shorter reproduction = faster developer fix cycle.
