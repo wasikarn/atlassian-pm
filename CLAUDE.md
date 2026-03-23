@@ -11,7 +11,7 @@ Agile Documentation System — skills-based Jira/Confluence automation
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 31 skills with phases, categories, and argument patterns.
-**Hook reference:** [hooks/README.md](hooks/README.md) — all 44 hooks, what they enforce, and how to debug them.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all 46 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 
@@ -112,3 +112,4 @@ Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 - **Deliverable-first:** Every skill must produce its deliverable (ADF JSON, issue, report) within the session — don't stop at research phase.
 - **Simple patterns:** Prefer `*.md` over complex globs. Default to simplest pattern that works.
 - **Validate before commit:** Check frontmatter fields, `allowed-tools`, hook commands. Run markdownlint on `*.md` changes.
+- **Parallel dispatch:** Use `> **🟢 PARALLEL**` blockquote in skill/agent phases to mark calls that can launch simultaneously — no dependency = single message, N Tool calls. Use `> **🟢 AUTO + PARALLEL**` when subagents are also auto-invoked.
