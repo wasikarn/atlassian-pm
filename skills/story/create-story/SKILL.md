@@ -117,6 +117,8 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
 
+> **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously; they have no dependency on each other. `cache_search_confluence` needs only story keywords (known from user input), not epic data.
+
 After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
 
 ```text
@@ -273,9 +275,9 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 **Constraints:** AUTO — apply recommendation if confidence is HIGH or MEDIUM; skip if LOW confidence; note adjustment reason in plan card
 **Output:** `subtask_designs[]` updated with calibrated SP values and calibration notes
 
-> **🟢 AUTO** — Run for each subtask design. Apply recommendation if confidence is HIGH or MEDIUM. Skip if LOW confidence.
+> **🟢 AUTO + PARALLEL** — Launch all estimation-calibrator agents simultaneously — one per subtask (single message, N Task calls). Each subtask is independent. Apply recommendation if confidence is HIGH or MEDIUM; skip if LOW.
 
-For each subtask in the current design:
+For each subtask in the current design (all in parallel):
 
 ```text
 Agent(name: "estimation-calibrator"):

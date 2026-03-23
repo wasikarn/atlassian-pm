@@ -47,6 +47,8 @@ effort: high
 **Constraints:** HR6 — invalidate cache after any write; story must be a Story type, not Epic (wrong type creates orphan subtasks)
 **Output:** `story_data`, `epic_context`, `vs_assignment`, optional `domain_context` available in context for Phase 2
 
+> **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously (single message, 2 calls). Bootstrap needs only the issue key; Confluence search needs only title keywords — no dependency between them.
+
 - `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
 
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
