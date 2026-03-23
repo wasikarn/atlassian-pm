@@ -7,7 +7,9 @@ x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create a multi-sprint release plan from epics — calculates velocity-based timeline, maps dependencies,
   generates Confluence release page + Jira Fix Version.
-  Triggers: "release plan", "release timeline", "release planning", "plan release", "วาง release"
+  Triggers: "release plan", "release timeline", "release planning", "plan release", "วาง release", "multi-sprint release"
+  Use when: planning a multi-sprint release across epics — need velocity-based timeline, dependency map, Confluence release page, and Jira Fix Version
+  Do NOT use for: single-sprint work (use plan-sprint); generating release notes after a release (use release-notes)
 argument-hint: "[--epics <key1,key2>] [--date <YYYY-MM-DD>] [--name <release-name>]"
 effort: high
 ---

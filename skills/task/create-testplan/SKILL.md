@@ -12,7 +12,9 @@ description: |
 
   Output: [QA] Sub-task in Jira (Test Plan embedded in description)
 
-  Triggers: "create test plan", "QA", "test case", "testing"
+  Triggers: "create test plan", "QA", "test case", "testing", "สร้าง test plan", "add QA subtask"
+  Use when: adding a QA sub-task and test plan to an existing Story
+  Do NOT use for: initial story creation (use create-story); analyzing implementation (use analyze-story)
 argument-hint: "[issue-key]"
 effort: medium
 ---

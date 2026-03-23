@@ -12,7 +12,9 @@ description: |
 
   Supports: format migration, add details, language fix, add AC
 
-  Triggers: "update subtask", "edit subtask", "adjust subtask"
+  Triggers: "update subtask", "edit subtask", "adjust subtask", "แก้ไข subtask", "fix sub-task"
+  Use when: editing a Sub-task's objective, scope, or acceptance criteria
+  Do NOT use for: story updates (use update-story); creating sub-tasks (use analyze-story)
 argument-hint: "[issue-key] [changes]"
 effort: medium
 ---

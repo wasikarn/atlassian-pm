@@ -8,7 +8,9 @@ description: |
   Convert a Confluence spec/requirements page into Jira User Stories.
   Extracts personas, requirements, and AC hints via spec-parser-agent. Deduplicates against existing issues.
   --dry-run shows stories + QG scores without creating in Jira.
-  Triggers: "spec to stories", "import requirements", "convert spec", "requirements to stories", "แปลง spec"
+  Triggers: "spec to stories", "import requirements", "convert spec", "requirements to stories", "แปลง spec", "batch stories from spec"
+  Use when: batch-converting a Confluence spec or requirements page into multiple User Stories with deduplication
+  Do NOT use for: creating a single story (use create-story); updating existing stories (use update-story)
 argument-hint: "<confluence-page-id> [--epic <key>] [--dry-run]"
 effort: high
 ---

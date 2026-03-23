@@ -9,7 +9,9 @@ description: |
 
   Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Review → Execute
 
-  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution"
+  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution", "วางแผน sprint", "จัดสรรงาน"
+  Use when: planning a new sprint — fetching carry-over items, calculating team capacity, distributing work, and committing assignments to Jira
+  Do NOT use for: generating a standup digest (use standup-report); closing or reviewing a completed sprint (use close-sprint)
 argument-hint: "[--sprint <id>] [--carry-over-only]"
 effort: high
 ---
@@ -45,7 +47,7 @@ effort: high
 ## Context Object (accumulated across phases)
 
 | Phase | Adds to Context |
-|-------|----------------|
+| ----- | --------------- |
 | 1. Discovery | `source_sprint`, `target_sprint`, `sprint_items[]` |
 | 2. Capacity | `capacity_table[]`, `available_slots[]` |
 | 3. Carry-over | `carry_over_items[]`, `probability_scores[]` |
@@ -61,6 +63,11 @@ effort: high
 ## Part A: Data Collection (Phases 1-2) — Execution Layer
 
 ### 1. Sprint Discovery
+
+**Goal:** Identify source and target sprints, fetch all current items with statuses, and establish the data foundation for planning.
+**Required inputs:** target sprint (ask user or find next future sprint), source sprint (ask user or default to active sprint)
+**Constraints:** HR7 — NEVER hardcode sprint IDs; always use `jira_get_sprints_from_board(board_id, state="future")`; REVIEW gate — present data summary before proceeding
+**Output:** `source_sprint`, `target_sprint`, `sprint_items[]` with statuses, assignees, estimates, and dates
 
 Ask the user:
 
@@ -82,13 +89,18 @@ MCP: jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assigne
 
 ### 2. Team Capacity
 
+**Goal:** Calculate each team member's net available hours and complexity-adjusted throughput for the target sprint.
+**Required inputs:** `project-config.json` (members, focus_factor, throughput), `project-config-team-detail.json` (review_cost, growth_tracks, bus_factor, velocity history), leave data from user if applicable
+**Constraints:** REVIEW gate — present capacity table before proceeding; do NOT assign work before this phase completes; include review load and carry-over hours before any new assignment
+**Output:** `capacity_table[]` (productive hours, review load, net available, complexity-adjusted throughput per member); `available_slots[]` ready for Phase 3-5
+
 ```text
 Read: ../../../references/team-capacity.md
 Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sprint
 Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
-**Step 2a: Team Velocity (SP-based)**
+**Step 2a:** Team Velocity (SP-based)
 
 ```text
 If velocity.story_points.avg_velocity exists:
@@ -99,7 +111,7 @@ Else (bootstrap phase):
 Also: sum(customfield_10016) of sprint stories → compare with Sprint Capacity to detect over-commitment
 ```
 
-**Step 2b: Individual Productive Hours**
+**Step 2b:** Individual Productive Hours
 
 ```text
 Per person:
@@ -112,7 +124,7 @@ Per person:
 > **Review Cost:** Tech Lead reviews 4 people (~15h/sprint), Senior reviews 2 (~4h/sprint).
 > Read `review_cost` from `.claude/project-config-team-detail.json`.
 
-**Step 2c: Skill Profile + Complexity**
+**Step 2c:** Skill Profile + Complexity
 
 Read each member's `skill_profile` from `project-config.json`; `growth_tracks` + `bus_factor` from `project-config-team-detail.json`.
 Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw throughput for item count limits.
@@ -120,7 +132,7 @@ Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw th
 **Output:** Capacity table
 
 | Member | Role | Productive Hrs | Review Load | Net Available | Complexity-Adj Throughput |
-| ------ | ---- | -------------- | ----------- | ------------- | ------------------------ |
+| ------ | ---- | -------------- | ----------- | ------------- | ------------------------- |
 | ...    | ...  | ...            | ...         | ...           | ...                      |
 
 **🟡 REVIEW** — Present capacity table to user. Proceed unless user objects.
@@ -147,16 +159,24 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 ### 3. Carry-over Analysis
 
+**Goal:** Identify which source sprint items are likely to carry over and determine their probability scores for inclusion in target sprint planning.
+**Required inputs:** `sprint_items[]` from Phase 1 (source sprint items with statuses)
+**Constraints:** AUTO (delegated to sprint-planner agent); high-probability items (>80%) auto-include; medium-probability (45-80%) flag for user decision
+**Output:** `carry_over_items[]`, `probability_scores[]`; carry-over count per person; high/medium item classification
+
 **Input:** Source sprint items with statuses
 **Method:** Status-based probability model (from sprint-frameworks.md)
-
-**Output:**
 
 - Estimated carry-over count per person
 - High-probability items (>80%) → auto-include in target sprint
 - Medium-probability items (45-80%) → flag for user decision
 
 ### 4. Prioritization + Story Structure Validation
+
+**Goal:** Order target sprint items by business value and validate that each story delivers a true vertical slice.
+**Required inputs:** target sprint items + new items to add (from Phase 1), carry-over items (from Phase 3)
+**Constraints:** AUTO (delegated to sprint-planner agent); Definition of Ready must pass — flag unready stories, do NOT silently include them; VS labels required
+**Output:** `prioritized_items[]` (P1-P4 classification), `vs_validated`; unready stories flagged with reason
 
 **Validate stories are vertical slices** (see [Sprint Frameworks](../../../references/sprint-frameworks.md#vertical-slicing)):
 
@@ -176,14 +196,22 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 ### 5. Workload Distribution
 
+**Goal:** Assign each prioritized item to the best-fit team member without exceeding individual capacity.
+**Required inputs:** `prioritized_items[]` from Phase 4, `capacity_table[]` from Phase 2, `carry_over_items[]` from Phase 3, skill profiles from `project-config.json`
+**Constraints:** AUTO (delegated to sprint-planner agent); never assign above 95% utilization; use skill matrix match → context → hours capacity order; see assignment-algorithm.md for scoring rules
+**Output:** `assignment_map[]`, `workload_table` with hours tracking per member
+
 **Input:** Prioritized items + team capacity (hours) + carry-over + skill profiles
 **Method:** Skill matrix match → existing context → hours capacity check → grouping
 
 > See [references/assignment-algorithm.md](references/assignment-algorithm.md) for the detailed skill-match scoring algorithm and assignment rules.
 
-**Output:** Assignment recommendation table with hours tracking
-
 ### 6. Risk Assessment
+
+**Goal:** Identify capacity overloads, dependency gaps, bus factor exposures, and review load issues before the plan is approved.
+**Required inputs:** `assignment_map[]` from Phase 5, `capacity_table[]` from Phase 2, bus_factor data from `project-config-team-detail.json`
+**Constraints:** AUTO (delegated to sprint-planner agent); check all 8 risk dimensions listed below; if any member >95% utilization → remove an item, do not redistribute
+**Output:** `risk_flags[]` with severity + mitigation per flag; ready for Phase 6b risk-forecaster
 
 **Check:**
 
@@ -199,6 +227,11 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 **Output:** Risk flags with severity + mitigation
 
 ### 6b. Risk Forecast (risk-forecaster agent)
+
+**Goal:** Apply the risk-forecaster agent to quantify sprint risk level and produce adjusted mitigations before plan approval.
+**Required inputs:** `risk_flags[]` from Phase 6, sprint-planner output (carry_over_sp, utilization_table, p2_item_count), QG history (optional)
+**Constraints:** REVIEW gate — present risk forecast findings; if MEDIUM or higher risk, ask user whether to apply mitigations before proceeding to Phase 7
+**Output:** `risk_forecast_result`, `mitigations_applied[]`; sprint changes applied if user accepts mitigations
 
 > **🟡 REVIEW** — Run risk-forecaster with sprint-planner output. Present findings. Proceed unless user objects.
 
@@ -251,6 +284,11 @@ If user accepts mitigations → apply sprint changes (remove items, add pairing 
 
 ### 7. Sprint Plan Review ⚠️ GATE
 
+**Goal:** Get explicit user approval on the complete sprint plan (workload, assignments, risks, deferred items) before executing any Jira writes.
+**Required inputs:** all context from Phases 1-6b: capacity table, prioritized items, assignment map, risk flags, mitigations
+**Constraints:** ITERATE gate — max 3 annotation rounds; annotate → revise ONLY annotated items; major rework returns to Phase 4; do NOT execute assignments without APPROVE
+**Output:** `approved_plan`; user has confirmed sprint goal, assignments, and risk mitigations
+
 Present the complete sprint plan to the user:
 
 ```text
@@ -284,6 +322,11 @@ Status: 🟢 ≤80% | ⚠️ 80-95% | 🔴 >95%
 - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
 ### 8. Execute Assignments
+
+**Goal:** Apply the approved sprint plan to Jira — move items to target sprint, set estimation fields, assign team members, and run post-assignment alignment validation.
+**Required inputs:** `approved_plan` from Phase 7, sprint ID from `jira_get_sprints_from_board()` lookup
+**Constraints:** HR7 — sprint ID must be looked up dynamically, NEVER hardcoded; HR10 — NEVER set sprint field on subtasks; HR3 — use acli for assignee (MCP silently fails); HR6 — `cache_invalidate` after every write; HR8 — run `sprint_subtask_alignment.py` post-execution (mandatory); execute in due date + priority order
+**Output:** `execution_log[]`, `assigned_keys[]`; subtask alignment check passed; sprint planning complete
 
 > **🟢 AUTO** — If Phase 7 approved → execute all assignments automatically. Escalate only on failure.
 > HR7: Sprint ID must be looked up dynamically. NEVER hardcode sprint IDs.
@@ -405,7 +448,7 @@ The Scrum Guide 2020 defines Sprint Planning as answering three questions: Why i
 ### Industry Frameworks Used
 
 | Framework | Applied In | Why |
-|-----------|-----------|-----|
+| --------- | --------- | --- |
 | Scrum Guide 2020 Sprint Planning | Phases 1-8 overall structure | The authoritative definition of what Sprint Planning must produce: a Sprint Goal + Sprint Backlog + execution plan |
 | Yesterday's Weather (Scrum pattern) | Phase 2 — team velocity calculation | Plan at 80% of 3-sprint rolling average velocity; single-sprint data is noise; ±20% is the reliable precision band |
 | Definition of Ready (DoR) | Phase 4 — story readiness validation | A PBI is ready for planning only when it has: clear acceptance criteria, estimated size, no unresolved dependencies, and approved design/mockups; items failing DoR should be returned to refinement, not planned |
@@ -432,7 +475,7 @@ The Scrum Guide 2020 defines Sprint Planning as answering three questions: Why i
 ### Common Failure Modes
 
 | Symptom | Root Cause | Expert Fix |
-|---------|-----------|-----------|
+| ------- | --------- | --------- |
 | Sprint over-committed every time | Capacity calculated in items/sprint, not hours | Switch to focus-factor-adjusted hours; include review load and carry-over hours before any new assignment |
 | Team splits on estimation during planning | No shared Definition of Done; different complexity models | Run one round of planning poker on a reference story before starting; anchor the team's scale |
 | Sprint goal too vague ("continue features") | Product Owner hasn't defined value increment | Require SMART goal format; reject "continue" goals — they make sprint success unmeasurable |

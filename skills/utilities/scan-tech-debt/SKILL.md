@@ -9,6 +9,8 @@ description: |
   Clusters by service tag + age. Scores effort vs impact. Supports trend comparison via Confluence history.
   --update refreshes existing page instead of creating new.
   Triggers: "tech debt", "debt radar", "tech debt dashboard", "chore audit", "สรุป tech debt"
+  Use when: aggregating tech-debt and spike issues into an Effort×Impact matrix dashboard on Confluence
+  Do NOT use for: creating individual tasks (use create-task); sprint planning (use plan-sprint)
 argument-hint: "[--update]"
 effort: high
 ---

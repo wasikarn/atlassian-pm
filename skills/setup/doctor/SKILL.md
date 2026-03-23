@@ -9,7 +9,9 @@ description: |
 
   Never stops on failure — shows complete picture. Run after setup or after updates.
 
-  Triggers: "doctor", "health check", "check setup", "diagnose", "verify install", "/doctor"
+  Triggers: "doctor", "health check", "check setup", "diagnose", "verify install", "/doctor", "ตรวจสอบ setup", "เช็ค plugin"
+  Use when: verifying plugin health and configuration after setup or after issues arise
+  Do NOT use for: initial setup (use setup); creating issues (use create-story or create-task)
 argument-hint: ""
 effort: low
 allowed-tools: Bash

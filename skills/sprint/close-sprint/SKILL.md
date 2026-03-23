@@ -8,6 +8,8 @@ description: |
   Close an active sprint systematically — triage incomplete issues, execute moves, close sprint, generate Confluence review page.
   Distinct from retrospective-analyst (analysis only). This skill EXECUTES the closure.
   Triggers: "close sprint", "end sprint", "sprint closure", "ปิด sprint"
+  Use when: a sprint is ending and needs to be officially closed — issues moved, sprint status updated, Confluence review page created.
+  Do NOT use for: retrospective analysis only (use retrospective-analyst); planning the next sprint (use plan-sprint).
 argument-hint: "[--sprint <id>]"
 effort: high
 ---
@@ -38,12 +40,22 @@ effort: high
 
 ## Phase 1 — Fetch Sprint Data
 
+**Goal:** Resolve the active sprint ID and load all sprint issues with the fields needed for triage.
+**Required inputs:** `--sprint <id>` flag if provided; otherwise board_id from project-config.json
+**Constraints:** HR7 — NEVER hardcode sprint ID; always call `jira_get_sprints_from_board(board_id, state="active")` unless `--sprint` explicitly provided
+**Output:** `sprint_id`, `sprint_name`, `sprint_data`, `issue_list[]` available in context for Phase 2
+
 1. If `--sprint` flag provided → use that sprint ID.
 2. Else → `jira_get_sprints_from_board(board_id, state="active")` (HR7: never hardcode sprint ID)
 3. `jira_get_sprint_issues(sprint_id)` — fetch all issues with fields: `summary,status,assignee,issuetype,customfield_10016,{{START_DATE_FIELD}},duedate,parent`
 4. Display sprint summary: name, dates, total issues, SP breakdown
 
 ## Phase 2 — Triage
+
+**Goal:** Categorize all sprint issues into Done / Incomplete / Blocked and surface carry-over rate so the user has full visibility before the move plan is proposed.
+**Required inputs:** `issue_list[]` from Phase 1
+**Constraints:** Only count SP on issues with status = Done at triage time — partial credit corrupts velocity metrics
+**Output:** `done_issues[]`, `incomplete_issues[]`, `blocked_issues[]`, carry-over rate available in context for Phase 3
 
 Categorize:
 
@@ -64,6 +76,11 @@ Carry-over rate: `incomplete_count / total_count * 100%`
 
 ## Phase 3 — Move Plan
 
+**Goal:** Produce a per-issue move proposal (next sprint or backlog) and get explicit user confirmation before any moves are executed.
+**Required inputs:** `incomplete_issues[]` and `blocked_issues[]` from Phase 2; next sprint ID via `jira_get_sprints_from_board(state="future")`
+**Constraints:** GATE — must wait for user confirmation; In-Progress items go to next sprint only if >50% complete, otherwise backlog is more accurate
+**Output:** `move_plan[]` (per-issue: destination + next_sprint_id) confirmed by user, available in context for Phase 4
+
 🟡 REVIEW gate: for each incomplete issue, propose destination:
 
 - Blocked issues → backlog (default)
@@ -80,6 +97,11 @@ Display proposal table:
 
 ## Phase 4 — Execute Moves
 
+**Goal:** Execute all approved issue moves via the sprint-transition-agent and surface any failures before sprint close.
+**Required inputs:** `move_plan[]` confirmed in Phase 3; `sprint_id` from Phase 1
+**Constraints:** Do not proceed to Phase 5 if any moves failed — user must resolve failures manually first
+**Output:** `move_results` (moved/failed/skipped counts) available in context for Phase 5
+
 `Agent(name: "sprint-transition-agent"): sprint_id, move_plan`
 
 Display result: "Moved: X to next sprint | Y to backlog | Z failed"
@@ -87,6 +109,11 @@ Display result: "Moved: X to next sprint | Y to backlog | Z failed"
 If any failed → show failed keys + error, ask user to resolve manually before continuing.
 
 ## Phase 5 — Close Sprint
+
+**Goal:** Permanently close the sprint in Jira after explicit user confirmation — this operation is irreversible.
+**Required inputs:** `move_results` from Phase 4 (no failures); `sprint_id` from Phase 1; explicit user confirmation
+**Constraints:** GATE — explicit confirm required before calling `jira_update_sprint`; HR6 — `cache_invalidate(sprint_id)` immediately after close
+**Output:** `sprint_closed: true` available in context for Phase 6
 
 Show: "Ready to close sprint [name]. This is irreversible."
 
@@ -96,6 +123,11 @@ Show: "Ready to close sprint [name]. This is irreversible."
 2. HR6: `cache_invalidate(sprint_id)` (note: jira_update_sprint is in HR6 matcher)
 
 ## Phase 6 — Confluence Review Page
+
+**Goal:** Create a permanent Confluence review page capturing sprint velocity, completed issues, carry-over details, and anomalies for team reference.
+**Required inputs:** `sprint_closed: true` from Phase 5; triage data from Phase 2; move results from Phase 4
+**Constraints:** HR4 — no macros via MCP (plain storage format only); no cache invalidation needed for Confluence
+**Output:** `confluence_page_url` available in context for Phase 7
 
 Create Confluence page in {{PROJECT_KEY}} space: "Sprint [name] Review"
 
@@ -111,11 +143,21 @@ Use `confluence_create_page` (HR4: no macros via MCP — plain storage format).
 
 ## Phase 7 — Metrics Update
 
+**Goal:** Record sprint velocity and carry-over metrics for trend analysis used by plan-sprint and team-pattern-advisor.
+**Required inputs:** `sprint_id`, `planned_sp`, `completed_sp`, `carry_over_count`, `sprint_end_date` from prior phases
+**Constraints:** If velocity-tracker agent is not available → skip and note in Phase 8 summary; do not block closure on this phase
+**Output:** Velocity data persisted; available for `/team-pattern-advisor` and `/plan-sprint` historical reads
+
 `Agent(name: "velocity-tracker"): sprint_id, planned_sp, completed_sp, carry_over_count, sprint_end_date`
 
 Records velocity data for trend analysis. If velocity-tracker is not available (agent not found), skip this phase and note in summary.
 
 ## Phase 8 — Summary
+
+**Goal:** Record sprint health metrics to persistent history and present a complete closure summary to the user.
+**Required inputs:** All phase outputs (triage, moves, velocity, Confluence URL)
+**Constraints:** Run `sprint_health_record.py` before displaying summary — enables cross-sprint trend tools; display REVIEW gate for user acknowledgment
+**Output:** Closure summary displayed; sprint health record written to persistent history
 
 > **🟢 AUTO** — Record sprint health metrics to persistent history before displaying summary:
 >

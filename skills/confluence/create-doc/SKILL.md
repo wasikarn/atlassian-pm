@@ -9,7 +9,9 @@ description: |
   Create Confluence page from template with a 4-phase workflow
   Supports: tech-spec, adr, parent (category page)
 
-  Triggers: "create doc", "technical spec", "ADR"
+  Triggers: "create doc", "technical spec", "ADR", "สร้าง doc", "new confluence page", "create tech spec"
+  Use when: creating a new Confluence page — tech-spec, ADR, or parent category page
+  Do NOT use for: updating existing pages (use update-doc)
 argument-hint: "[template] [title] [--parent page-id]"
 effort: medium
 ---

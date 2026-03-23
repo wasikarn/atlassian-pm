@@ -12,7 +12,9 @@ description: |
 
   Supports: adjust scope, update RICE, add success metrics, format migration
 
-  Triggers: "update epic", "edit epic", "adjust epic"
+  Triggers: "update epic", "edit epic", "adjust epic", "แก้ไข epic", "update RICE", "fix epic scope"
+  Use when: modifying scope, RICE score, success metrics, or description of an existing Epic
+  Do NOT use for: creating new epics (use create-epic); story updates (use update-story)
 argument-hint: "[issue-key] [changes]"
 effort: medium
 ---

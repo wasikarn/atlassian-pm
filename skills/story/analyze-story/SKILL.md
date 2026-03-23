@@ -9,6 +9,8 @@ description: |
   MANDATORY: Must explore codebase before creating Sub-tasks
 
   Triggers: "analyze story", "TA", "technical analysis", "create subtasks", "break down story", "explore story", "วิเคราะห์ story"
+  Use when: exploring an existing Story to design its implementation Sub-tasks (TA role). Start here when a Story is already created and needs Sub-tasks.
+  Do NOT use for: creating a new Story from scratch (use create-story); updating existing Sub-tasks (use sync-artifacts).
 argument-hint: "[issue-key]"
 effort: high
 ---
@@ -26,7 +28,7 @@ effort: high
 
 | Phase | Adds to Context |
 | ----- | -------------- |
-| 1. Discovery | `story_data`, `epic_context`, `vs_assignment` |
+| 1. Discovery | `story_data`, `epic_context`, `vs_assignment`, `domain_context` (optional) |
 | 2. Impact | `services_impacted[]`, `vs_verified` |
 | 3. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
 | 4. Design | `subtask_designs[]` |
@@ -40,7 +42,13 @@ effort: high
 
 ### 1. Discovery
 
+**Goal:** Establish full story context (narrative, ACs, epic linkage, domain knowledge) before any design begins.
+**Required inputs:** story issue key (ask if missing); epic key resolved automatically via bootstrap
+**Constraints:** HR6 — invalidate cache after any write; story must be a Story type, not Epic (wrong type creates orphan subtasks)
+**Output:** `story_data`, `epic_context`, `vs_assignment`, optional `domain_context` available in context for Phase 2
+
 - `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
+
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
@@ -57,6 +65,11 @@ If no relevant pages found → skip silently.
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of story understanding.
 
 ### 2. Impact Analysis
+
+**Goal:** Determine which services are affected and validate the story delivers a vertical slice (not a horizontal layer).
+**Required inputs:** `story_data` and `epic_context` from Phase 1
+**Constraints:** If an event consumer appears in the Event Flow but not in the Impact table, add that service before proceeding to Phase 3
+**Output:** `services_impacted[]`, `vs_verified` flag available in context for Phase 3
 
 | Service | Impact | Reason |
 | --- | --- | --- |
@@ -78,11 +91,21 @@ If no relevant pages found → skip silently.
 
 ### 3. Codebase Exploration ⚠️ MANDATORY
 
+**Goal:** Discover real file paths, patterns, and dependencies for every impacted service so Phase 4 subtask ACs reference actual code, not assumptions.
+**Required inputs:** `services_impacted[]` from Phase 2; `domain_context` if available
+**Constraints:** Generic paths (e.g. `src/controllers/`) are REJECTED — re-explore max 2 attempts; skip for services confirmed not impacted
+**Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service available in context for Phase 4
+
 > [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 4. Design Sub-tasks
+
+**Goal:** Produce subtask designs with real file paths, dependency-ordered, each covering exactly one service boundary and traceable to at least one story AC.
+**Required inputs:** `file_paths[]` and `patterns[]` from Phase 3; all story ACs from Phase 1
+**Constraints:** 1 subtask per service boundary (split only if complexity warrants); subtask count target 3-6; each AC must appear in at least one subtask objective
+**Output:** `subtask_designs[]` (tag, scope files, ACs, OE) available in context for Phase 5
 
 **Tech Lead Decomposition — dependency ordering:**
 
@@ -109,10 +132,20 @@ If no relevant pages found → skip silently.
 
 ### 5. Alignment Check
 
+**Goal:** Verify that every story AC maps to at least one subtask objective and that VS integrity holds across the full subtask set.
+**Required inputs:** `subtask_designs[]` from Phase 4; story ACs from Phase 1
+**Constraints:** HR9 — story ACs must be covered by subtask objectives; auto-fix misalignment; escalate only if unfixable
+**Output:** `alignment_checklist` (pass/fail per AC) available in context for Phase 5b
+
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 5b. Quality Gate — Subtasks (MANDATORY)
+
+**Goal:** Confirm all subtask designs meet quality threshold (≥ 90%) before any Jira write occurs.
+**Required inputs:** `subtask_designs[]` from Phase 4; `alignment_checklist` from Phase 5
+**Constraints:** HR1 — NEVER create subtasks in Jira without QG ≥ 90%; auto-fix → re-score max 2 attempts; record QG score via `qg_record.py` after completion
+**Output:** `qg_score`, `passed_qg` (bool) available in context for Phase 6
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
@@ -120,6 +153,11 @@ If no relevant pages found → skip silently.
 > **🟢 AUTO** — After QG completes, record score: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS"`. Use parent story key (from Phase 1) as `--issue-key`.
 
 ### 6. Create Artifacts
+
+**Goal:** Create all approved subtasks in Jira with correct parent linkage, estimation, and dates, then create the Technical Note if needed.
+**Required inputs:** `subtask_designs[]` from Phase 4; `passed_qg = true` from Phase 5b; parent story key from Phase 1
+**Constraints:** HR5 — Two-Step: MCP create → verify parent via `jira_get_issue(fields="parent")` → acli edit if missing; HR6 — `cache_invalidate` after every write; HR3 — use acli for assignee; HR10 — NEVER set sprint on subtasks; HR8 — subtask dates within parent range
+**Output:** `subtask_keys[]` created and verified in Jira; Technical Note page URL if applicable
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the `parent` field. MCP may silently ignore parent.
@@ -143,6 +181,11 @@ MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
   - With code blocks → Python script (see `.claude/skills/utilities/atlassian-scripts/SKILL.md`)
 
 ### 7. Handoff
+
+**Goal:** Confirm completion to the user with subtask keys, links, and recommended next skill.
+**Required inputs:** `subtask_keys[]` from Phase 6; story key from Phase 1
+**Constraints:** Only display after all subtasks are verified with correct parent linkage
+**Output:** Handoff summary with subtask keys and next-step prompt
 
 ```text
 ## TA Complete: [Title] ({{PROJECT_KEY}}-XXX)

@@ -10,13 +10,13 @@ description: |
   Sprint dependency analysis: build dependency graphs, identify critical paths, generate parallel
   execution plans (swim lanes) per team member, and suggest decoupling strategies.
 
+  Triggers: "dependency chain", "dependency analysis", "critical path", "swim lane",
+  "blocking analysis", "parallel execution plan", "who blocks whom", "วิเคราะห์ dependencies", "dependency map"
   Use when: (1) planning a new sprint and need to check for blocking dependencies,
   (2) asked to analyze dependencies between sprint/backlog items, (3) need to create
   parallel execution plans or swim lanes, (4) want to identify critical path in a sprint,
   (5) looking for ways to reduce blocking between team members (API Contract First, MSW mocks, etc.)
-
-  Triggers: "dependency chain", "dependency analysis", "critical path", "swim lane",
-  "blocking analysis", "parallel execution plan", "who blocks whom"
+  Do NOT use for: sprint capacity planning (use plan-sprint); closing sprint (use close-sprint)
 ---
 
 # /map-dependencies
