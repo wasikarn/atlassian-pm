@@ -8,8 +8,9 @@ paths:
 ## Tool Selection
 
 | Operation | Tool | Notes |
-| --- | --- |  --- |
-| Description | `acli --from-json` (ADF JSON) | Fields: MCP `jira_update_issue` |
+| --- | --- | --- |
+| Description (full replace) | `acli --from-json` (ADF JSON) | Fields only: MCP `jira_update_issue` · **NEVER use MCP for find/replace** |
+| Description (find/replace) | `update_jira_description.py` (REST) | ADF-safe · preserves panels/tables/code blocks · supports batch + dry-run |
 | Read issue | `cache_get_issue` → `jira_get_issue` | Always use `fields` param |
 | Search | `cache_search` / `cache_text_search` → `jira_search` | Always use `fields` + `limit` |
 | Comment | MCP `jira_add_comment` | |
