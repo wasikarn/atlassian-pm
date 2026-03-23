@@ -101,6 +101,7 @@ End-to-end orchestration chains — the fastest way to get things done. Each com
 | `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
 | `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
 | `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
+| `/qa-full` | create-testplan → execute-testplan | Create test plan + run against staging in one step |
 | `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
 | `/sprint-plan-full` | plan-sprint → map-dependencies | Sprint planning with dependency critical path |
 | `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
@@ -189,6 +190,8 @@ Internal subagents dispatched automatically by skills and commands — not invok
 | `risk-forecaster` | sonnet | 4-dimension delivery risk; named mitigations; adjusted scenarios |
 | `adf-surgeon` | haiku | Structural ADF repair; 10 known Jira quirks; content-safe |
 | `team-pattern-advisor` | sonnet | Multi-sprint strategic patterns; ≥3 data point threshold |
+| `test-case-runner` | sonnet | Execute single Playwright test case; return structured result + evidence |
+| `bug-evidence-writer` | haiku | Generate ADF bug description from test failure evidence |
 
 ---
 
