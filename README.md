@@ -81,9 +81,27 @@ flowchart TD
 
 ---
 
+## Commands
+
+End-to-end orchestration chains — the fastest way to get things done. Each command chains multiple skills in sequence with confirmation gates between stages. Invoked as `/name` (no namespace prefix).
+
+| Command | Chains | Description |
+| --- | --- | --- |
+| `/story-full` | search-issues → create-story → verify-issue --with-subtasks | Full story creation with dedup + quality check |
+| `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
+| `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
+| `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
+| `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
+| `/sprint-plan-full` | plan-sprint → map-dependencies | Sprint planning with dependency critical path |
+| `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
+| `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
+| `/tech-debt-full` | scan-tech-debt → create-task (per item) | Scan and create tasks for selected tech-debt items |
+
+---
+
 ## Skills
 
-Invoked as `/atlassian-pm:<name>`. Each skill is a multi-phase workflow with domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) embedded alongside the steps.
+Individual steps invoked as `/atlassian-pm:<name>`. Use when you need finer control over a specific phase. Each skill is a multi-phase workflow with domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) embedded alongside the steps.
 
 ### Feature Design
 
@@ -145,27 +163,9 @@ Invoked as `/atlassian-pm:<name>`. Each skill is a multi-phase workflow with dom
 
 ---
 
-## Commands
-
-End-to-end orchestration chains. Each command calls multiple skills in sequence with confirmation gates between stages. Invoked as `/name` (no namespace prefix).
-
-| Command | Chains | Description |
-| --- | --- | --- |
-| `/story-full` | search-issues → create-story → verify-issue --with-subtasks | Full story creation with dedup + quality check |
-| `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
-| `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
-| `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
-| `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
-| `/sprint-plan-full` | plan-sprint → map-dependencies | Sprint planning with dependency critical path |
-| `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
-| `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
-| `/tech-debt-full` | scan-tech-debt → create-task (per item) | Scan and create tasks for selected tech-debt items |
-
----
-
 ## Agents
 
-Internal subagents dispatched automatically by skills — not invoked directly. Organized in 3 layers by responsibility.
+Internal subagents dispatched automatically by skills and commands — not invoked directly. Organized in 3 layers by responsibility.
 
 | Agent | Model | Role |
 | --- | --- | --- |
