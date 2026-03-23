@@ -7,7 +7,6 @@
   "repository": "https://github.com/wasikarn/atlassian-pm",
   "license": "MIT",
   "keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
-  "agents": "./agents/",
   "skills": [
     "./skills/setup/",
     "./skills/epic/",
