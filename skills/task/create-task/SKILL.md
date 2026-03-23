@@ -63,6 +63,8 @@ What type of Task do you want to create?
 
 ### 2. Generate Template
 
+> **⚠️ MANDATORY:** Read `references/templates-task.md` before generating any ADF. All sections use `panel` ADF nodes — NEVER use `heading` nodes in task descriptions.
+
 Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
 
 **tech-debt Template:**

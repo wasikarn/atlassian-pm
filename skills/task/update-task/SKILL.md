@@ -97,6 +97,8 @@ Ask the user what they want to update:
 
 ### 4. Generate Update
 
+> **⚠️ MANDATORY:** Read `references/templates-task.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
+
 Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
 
 **EDIT format (do not include projectKey, type, summary):**

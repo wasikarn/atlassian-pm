@@ -184,6 +184,7 @@ So that [benefit].
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate to user only if still < 90% after 2 attempts.
 > HR1: DO NOT send Story to Atlassian without QG ≥ 90%.
+> **⚠️ MANDATORY:** Read `references/templates-story.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
 
 1. Generate ADF JSON → `{{artifacts_dir}}/story.json`
 2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Receives: `{score, status, checks_failed[], auto_fixable}`.

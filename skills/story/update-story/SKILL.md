@@ -66,6 +66,8 @@ effort: medium
 
 ### 4. Generate Update
 
+> **⚠️ MANDATORY:** Read `references/templates-story.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
+
 - Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
 - Show comparison:
   - Narrative: [No change / Changed]

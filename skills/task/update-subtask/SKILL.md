@@ -68,6 +68,8 @@ effort: medium
 
 ### 4. Generate Update
 
+> **⚠️ MANDATORY:** Read `references/templates-subtask.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
+
 - If file paths need updating → `Task(Explore)`
 - Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
 - Show Before/After comparison

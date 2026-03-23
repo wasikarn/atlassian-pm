@@ -68,6 +68,8 @@ effort: medium
 
 ### 4. Generate Update
 
+> **⚠️ MANDATORY:** Read `references/templates-epic.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
+
 - Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-epic-update.json`
 - Show comparison: Before/After for RICE, objectives, scope
 - **⛔ GATE — DO NOT APPLY** without user approval of all generated changes.
