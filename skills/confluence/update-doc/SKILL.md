@@ -295,10 +295,10 @@ The mandatory Phase 2 (Fetch Current) before any write enforces the core evergre
 
 | Framework | Applied In | Why |
 | --- | --- | --- |
-| Content Lifecycle Management (CLM) | Phases 2–5 (fetch → generate → review → update) | CLM treats every update as a lifecycle event, not a free-form edit; the fetch+diff loop is the foundation of debt-free maintenance |
-| Evergreen Documentation | Phase 3 section-scoped updates | Updating only the changed section preserves stable content; full rewrites introduce regression risk in sections not under review |
-| Keep a Changelog convention | `status` update type | Status transitions (Draft → In Review → Published) are changelog events; they should be traceable and intentional, not silent field flips |
-| Docs as Code (version traceability) | Version number displayed in Phase 4 preview | Showing current version before write creates an implicit audit trail; reviewers can verify they are not overwriting a concurrent edit |
+| Content Lifecycle Management — CLM (AIIM / Gartner framework) | Phases 2–5 (fetch → generate → review → update) | CLM defines 5 stages: Create → Review → Approve → Publish → Archive. This skill's 5-phase workflow maps directly: Fetch=Approve-gate (check for existing approved content), Generate=Create, QG=Review, Update=Publish. The 30% threshold (section vs. content update) approximates the CLM "change scope" boundary between an amendment and a new revision |
+| Evergreen Documentation (Tom Johnson, *I'd Rather Be Writing*, 2015) | Phase 3 section-scoped updates | Johnson's evergreen principle: each section is independently stable; updates should scope to the changed section only, not touch unrelated stable sections. A section update touching >30% of total page content violates evergreen boundaries — it's a version revision, not an amendment |
+| Keep a Changelog convention (Olivier Lacan, keepachangelog.com) | `status` update type | Status transitions (Draft → In Review → Published) are lifecycle events that warrant a human-readable summary. The 90-day stale threshold aligns with Lacan's "Unreleased" convention: content not updated in 90+ days is effectively unreleased — may not reflect current reality |
+| Docs as Code version traceability (Anne Gentle, *Docs Like Code*, 2017) | Version number displayed in Phase 4 preview | Showing the current Confluence version number before write surfaces concurrent-edit risk. Gentle's principle: documentation changes should be as reviewable as code changes — the version display is the equivalent of `git status` before committing |
 
 ### Key Metrics
 

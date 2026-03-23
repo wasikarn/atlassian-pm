@@ -114,15 +114,15 @@ Activity reports derive from the SPACE framework's "Activity" dimension — trac
 
 | Framework | Applied In | Why |
 | --------- | --------- | --- |
-| SPACE Framework (Activity dimension) | Phase 2–3 output grouping | Structures observations by type (feature, bugfix, decision) rather than raw log lines, matching SPACE's principle of multi-dimensional activity capture |
-| DORA Lead Time proxy | `--hours` range selection | Short-range reports (≤24h) approximate DORA's "lead time for changes" at the individual contributor level |
-| OKR progress signal | `--types decision,feature` filter | Filtering by type lets managers extract signal relevant to OKR check-ins without noise from routine chores |
+| SPACE Framework — Activity dimension (Forsgren et al., 2021, *Queue*) | Phase 2–3 output grouping | SPACE Activity = "actions or outputs" (commits, PRs, issues resolved). This skill captures the pre-Jira equivalent: session-level observations before they become tickets. Critically: SPACE explicitly states Activity must be combined with Satisfaction, Performance, Communication, and Efficiency — **activity alone is not a productivity signal** |
+| DORA Lead Time proxy | `--hours` range selection | Short-range reports (≤24h) approximate DORA's "lead time for changes" at the individual contributor level; useful for identifying days where work was done but not yet reflected in PRs or Jira |
+| OKR progress signal (Doerr, *Measure What Matters*, 2018) | `--types decision,feature` filter | Filtering by decision + feature types extracts the Key Result–relevant signal: what strategic choices were made this week? Absence of `decision` observations for a sprint period → architectural decisions may be undocumented |
 
 ### Key Metrics
 
-- **Session depth:** Number of distinct observation types in a session — low variety (all `change`) suggests mechanical work; high variety (mix of `decision`, `discovery`, `feature`) suggests exploratory or design work
-- **Decision density:** Ratio of `decision` observations to total — target >10% on architecture-heavy weeks; <5% may indicate execution-only sprints with no strategic thinking
-- **Bugfix recurrence:** Repeated `bugfix` observations on the same area across sessions signal systemic quality debt, not isolated incidents
+- **Session depth (variety):** Count of distinct observation types per session — low variety: ≤2 types (all `change` or all `bugfix`) = mechanical/execution work; high variety: ≥4 types (`decision`, `discovery`, `feature`, `bugfix` in same session) = exploratory or design work
+- **Decision density:** Ratio of `decision` to total observations per sprint period — target >10% on architecture-heavy weeks; <5% over a full sprint may indicate execution-only mode with undocumented architectural choices; 0% = strong signal to introduce ADR practice
+- **Bugfix recurrence:** Same component appearing in `bugfix` observations across 2+ sessions within 5 days = systemic quality debt, not isolated incidents; trigger a root cause review, not just more fixes
 
 ### Expert Decision Criteria
 
@@ -141,9 +141,9 @@ Activity reports derive from the SPACE framework's "Activity" dimension — trac
 
 ### Authoritative References
 
-- **Nicole Forsgren et al. (SPACE, 2021):** "Activity metrics should never be used in isolation — they gain meaning only when correlated with satisfaction and efficiency dimensions"
-- **DORA State of DevOps Report 2024:** Deployment frequency and lead time are the two DORA metrics most correlated with organizational performance — cross-reference activity report dates against deploy events for richer signal
-- **Atlassian Engineering Blog:** Session-level observation capture (what this skill uses) maps to the "flow state" signals in SPACE's Efficiency dimension
+- **Forsgren, Storey, Maddila, Wilson, Zimmermann, Zimmermann — "SPACE: A Framework for Understanding Developer Productivity" (*ACM Queue*, 2021):** "Activity metrics should never be used in isolation — they gain meaning only when correlated with satisfaction and efficiency dimensions." The paper explicitly warns: activity counts are easily gamed (can increase commits/observations without increasing value delivered)
+- **DORA State of DevOps Report 2024 (Forsgren, Humble, Kim):** Deployment frequency and lead time are the two DORA metrics most correlated with organizational performance; this skill's `--hours` windowing can serve as a lead-time proxy at the individual level
+- **Goodhart's Law (Charles Goodhart, 1975):** "When a measure becomes a target, it ceases to be a good measure." Activity reports expose this risk: if managers reward high observation counts, developers will artificially generate observations. Use for retrospective archaeology only — never as a performance target
 
 ---
 

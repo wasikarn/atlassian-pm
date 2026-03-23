@@ -179,8 +179,8 @@ The 5-phase PM workflow (Discovery → RICE → Scope → QG → Create) encodes
 | --- | --- | --- |
 | SAFe Epic Hypothesis Statement | Phase 1 Discovery — problem narrative | Every SAFe epic starts as a hypothesis: "We believe [this capability] will result in [this outcome], as evidenced by [this leading indicator]." Narrative Arc is the lightweight equivalent |
 | RICE Prioritization (Intercom) | Phase 2 | Converts subjective stakeholder preference into a comparable score; particularly valuable when multiple epics compete for the same sprint capacity |
-| Jobs-to-be-Done (Christensen / Ulwick) | Phase 1 — target users + business value | Frame user need as a job: "When I [situation], I want to [motivation], so I can [outcome]." Prevents solution-first epic definitions |
-| OKR → Epic traceability | Phase 1 — success metrics | Each epic should trace to at least one Key Result; if it doesn't, question whether the epic belongs in the portfolio at all. 32% of agile teams now link OKRs to epics for executive delivery measurement |
+| Jobs-to-be-Done (Christensen, *Innovator's Dilemma*, 1997; Ulwick, *What Customers Want*, 2005) | Phase 1 — target users + business value | Note: Christensen's JTBD frames the *context* of use ("hire/fire" framing); Ulwick's ODI (Outcome-Driven Innovation) frames *desired outcomes*. Both converge on the same principle for epic work: "When I [situation], I want to [motivation], so I can [outcome]" — prevents solution-first epic definitions |
+| OKR → Epic traceability (Doerr, *Measure What Matters*, 2018) | Phase 1 — success metrics | Each epic should trace to at least one Key Result; if it doesn't, question whether the epic belongs in the portfolio at all. OKR-to-epic linkage is the agile equivalent of MBO portfolio alignment — without it, epics optimize for output (features shipped) rather than outcomes (business results) |
 | Lean Startup MVP framing | Phase 3 — MVP definition | MVP boundary in VS planning answers: "What is the minimum set of vertical slices that validates our hypothesis?" Not "what is the minimum we can ship" |
 
 ### Key Metrics

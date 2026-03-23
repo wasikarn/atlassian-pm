@@ -223,8 +223,8 @@ Sprint closure is a hard boundary event in Scrum — the Scrum Guide (2020) defi
 | Scrum Guide 2020 Sprint Retrospective | Phase 2 Triage + Phase 7 Metrics | Inspects "what went well, what problems, how solved" — maps directly to Done/Incomplete/Blocked categories |
 | Yesterday's Weather (Scrum pattern) | Phase 7 velocity-tracker | Team velocity is the running average of recent sprints (±20% precision); single-sprint data is noise |
 | DORA Metrics (Google DevOps Research) | Phase 6 Review Page — Anomalies section | Deployment frequency and change lead time surface in blocked/late-start anomalies; carry-over rate is a proxy for delivery predictability |
-| Start/Stop/Continue (retrospective) | Post-closure: feeds `/retrospective-analyst` | Simplest actionable retro format; each action maps to a backlog item or team agreement |
-| 4Ls (Liked/Learned/Lacked/Longed For) | Optional retro input after page is generated | Richer emotional signal; useful when velocity is stable but morale is low |
+| Start/Stop/Continue (Roger Schwarz, adapted by Scrum community) | Post-closure: feeds `/retrospective-analyst` | Simplest actionable retro format — each action maps to a backlog item or team agreement. Schwarz's "Team Effectiveness Model" is the origin; the 3-column format was widely adopted by agile coaches circa 2005-2010 for its low facilitation overhead |
+| 4Ls (Liked/Learned/Lacked/Longed For) (Diana Larsen, popularised via Agile Retrospectives) | Optional retro input after page is generated | Richer emotional signal than Start/Stop/Continue; the "Longed For" dimension surfaces aspirational team improvements that "Lacked" alone misses. Most useful when velocity metrics are stable but morale or collaboration quality is declining |
 
 ### Key Metrics
 

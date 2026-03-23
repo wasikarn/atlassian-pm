@@ -169,7 +169,13 @@ Display: "Fix Version [name] created. [N] epics linked."
 
 ### Why This Approach
 
-Release planning at the multi-epic level is a forecasting exercise, not a commitment exercise. The velocity-based timeline (Phase 3) plus dependency-aware sequencing (Phase 4) mirrors SAFe PI Planning's core output — a Program Board showing team commitments and cross-team dependencies across a fixed time horizon. The 10% carry-over buffer encodes the empirical finding that teams consistently over-plan sprint capacity by 10-20%.
+Release planning at the multi-epic level is a forecasting exercise, not a commitment exercise. The velocity-based timeline (Phase 3) plus dependency-aware sequencing (Phase 4) mirrors SAFe PI Planning's core output — a Program Board showing team commitments and cross-team dependencies across a fixed time horizon.
+
+Three distinct buffer concepts appear in this skill — they are independent, not interchangeable:
+
+- **Velocity buffer (10%):** `effective_velocity = rolling_avg × 0.9` — reserves 10% of sprint capacity for interruptions and unplanned work within each sprint
+- **Buffer sprint (10-15% of total release SP):** a dedicated final sprint reserved for stabilisation, testing, and unfinished work — SAFe PI cadence standard
+- **Carry-over pre-allocation (20% of buffer sprint):** within the buffer sprint, 20% of its capacity is pre-allocated for carry-over from the prior sprint before any new work is added
 
 ### Industry Frameworks Used
 

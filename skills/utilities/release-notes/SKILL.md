@@ -263,9 +263,9 @@ Release notes serve two distinct audiences with opposing needs: engineers want c
 
 | Framework | Applied In | Why |
 | --------- | --------- | --- |
-| Keep a Changelog format | Phase 3 page structure (Added/Fixed/Changed groupings) | Industry-standard changelog format (keepachangelog.com) — audiences instantly recognize the structure and can scan for relevant change type |
-| Semantic Versioning (SemVer 2.0) | `--version` argument parsing | MAJOR.MINOR.PATCH signals impact at a glance — MAJOR = breaking change, MINOR = new feature, PATCH = bugfix; aligns stakeholder expectations before they read content |
-| Audience segmentation | Phase 3 narrative paragraph vs. issue table | Internal engineers read the table; external stakeholders read the narrative — single page, two reading paths |
+| Keep a Changelog format (Olivier Lacan, keepachangelog.com) | Phase 3 issue table structure (Added/Fixed/Changed groupings) | Changelog = developer-facing, entry per commit/PR, all changes including internal. Release notes = stakeholder-facing, curated summary of user-visible changes only. They are distinct artifacts: this skill produces **release notes** that adopt changelog *structure* for the issue table but adds a stakeholder narrative layer that a raw changelog never has |
+| Semantic Versioning (SemVer 2.0, Tom Preston-Werner, semver.org) | `--version` argument parsing | MAJOR.MINOR.PATCH communicates breaking change risk before stakeholders read content: MAJOR = read everything carefully; MINOR = scan for new features; PATCH = safe to upgrade. Sets expectation before opening the page |
+| Audience-based writing (Ginny Redish, *Letting Go of the Words*, 2012) | Phase 3 narrative paragraph vs. issue table | Different reading goals = different content layers. Engineers scan the issue table (find my fix). Stakeholders read the narrative (understand the impact). Single-page dual-track: the page succeeds for both audiences without being written twice |
 
 ### Key Metrics
 
@@ -292,6 +292,7 @@ Release notes serve two distinct audiences with opposing needs: engineers want c
 
 ### Authoritative References
 
-- **Keep a Changelog (keepachangelog.com):** "Don't dump your git log" — curated, human-written changelogs consistently outperform auto-generated ones for stakeholder comprehension
-- **Semantic Versioning 2.0.0 (semver.org):** Version numbers communicate intent — a PATCH release should contain only backwards-compatible bug fixes; audience expectations are set before they open the page
-- **Atlassian Release Management Guide:** Fix Versions in Jira are the canonical grouping unit for releases — sprints are planning units, versions are delivery units; these should never be conflated
+- **Olivier Lacan — Keep a Changelog:** "Don't dump your git log into changelogs" — the discipline of curating change entries rather than auto-generating them is what makes the document trustworthy. The timing tension: publish immediately (incomplete but timely) vs. publish when complete (accurate but late). Resolution: publish a DRAFT within hours of release, mark clearly as draft, update within 24h — trust comes from speed + accuracy together, not either alone
+- **Tom Preston-Werner — Semantic Versioning 2.0.0 (semver.org):** "If your software is used by others, you owe them compatibility guarantees." Version numbers are a promise, not a label — MAJOR bump means you broke that promise intentionally and stakeholders must be informed before upgrading
+- **Ginny Redish — *Letting Go of the Words* (2012):** "People don't read web pages; they scan them." The dual-track layout (table for scanning, narrative for reading) applies this directly — engineers scan the table, stakeholders read the paragraph. A single wall of text fails both audiences
+- **Atlassian Fix Versions:** Sprints are planning units; Fix Versions are delivery units — conflating them (using sprint names as release identifiers) breaks the release notes chain and corrupts burndown reporting

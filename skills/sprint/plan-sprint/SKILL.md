@@ -456,7 +456,7 @@ The Scrum Guide 2020 defines Sprint Planning as answering three questions: Why i
 | Definition of Ready (DoR) | Phase 4 — story readiness validation | A PBI is ready for planning only when it has: clear acceptance criteria, estimated size, no unresolved dependencies, and approved design/mockups; items failing DoR should be returned to refinement, not planned |
 | Impact/Effort Matrix (2×2) | Phase 4 — prioritization | P1 (high impact, low effort) items are the sprint's non-negotiables; P4 (low impact, high effort) items should be explicitly deferred with a written reason in Jira |
 | Focus Factor (capacity model) | Phase 2 individual capacity | Industry benchmark: 0.6–0.7 for most developers; <0.5 signals meeting overload or context switching — investigate before sprint starts |
-| SMART Sprint Goals | Phase 7 review | Sprint Goals must be Specific (names the value), Measurable (has a done signal), Achievable (fits capacity), Relevant (aligned to product goal), Time-bound (sprint end = deadline) |
+| SMART Goals (Doran, 1981, *Management Review*) | Phase 7 Sprint Goal review | Applied to Sprint Goals: Specific (names the value delivered), Measurable (has a verifiable done signal), Achievable (fits capacity), Relevant (aligned to product goal/OKR), Time-bound (sprint end = immovable deadline). "Continue features" goals fail Specific — they make sprint success unmeasurable and erode team accountability |
 
 ### Key Metrics
 
@@ -487,5 +487,5 @@ The Scrum Guide 2020 defines Sprint Planning as answering three questions: Why i
 ### Authoritative References
 
 - **Scrum Guide 2020 (Sutherland/Schwaber):** Sprint Planning is timeboxed to 8 hours for a one-month sprint. "The Sprint Goal, the Product Backlog items selected for the Sprint, plus the plan for delivering them are together referred to as the Sprint Backlog."
-- **Scrum Patterns — Yesterday's Weather (Coplien/Harrison):** "Teams that plan to their recent actual velocity consistently outperform teams that plan to theoretical capacity by 25-40% in delivery predictability."
+- **Scrum Patterns — Yesterday's Weather (Coplien/Harrison, 2010):** The Yesterday's Weather pattern advocates using recent actual velocity as the primary planning input rather than theoretical capacity; practitioners across the Scrum community consistently report improved sprint predictability when planning to rolling velocity vs. capacity estimates. (Note: the "25-40%" figure circulates widely in Scrum communities but does not appear verbatim in the Coplien/Harrison text — treat as practitioner consensus, not a controlled study result.)
 - **Roman Pichler — Definition of Ready:** "Using a DoR helps teams avoid pulling in items that are not sufficiently understood, thereby reducing the risk of incomplete work and carry-over."

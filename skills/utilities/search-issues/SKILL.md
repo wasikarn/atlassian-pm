@@ -193,4 +193,4 @@ Jira's JQL engine is an indexed database query — query structure determines ex
 
 - **Atlassian JQL Optimisation Guide (support.atlassian.com):** "Limiting the scope of queries by focusing on specific projects allows Jira to ignore unnecessary work items" — `project =` is the single most impactful clause
 - **Atlassian Advanced JQL Tips (community.atlassian.com):** Use `AND` mostly in sub-clauses and reserve `OR` for main clauses — the query planner handles this structure most efficiently
-- **University of Waterloo Atlassian JQL Best Practices:** "Breaking down complex queries into simpler saved filters and combining them makes queries easier to understand and maintain" — the `--jql` flag in this skill is the composition mechanism for that pattern
+- **Atlassian Jira Advanced Searching (support.atlassian.com):** Saved filters act as reusable query components; combining them with `AND`/`OR` avoids duplicating filter logic and keeps individual filters maintainable across sprint boundaries — the `--jql` flag in this skill is the composition mechanism for that pattern

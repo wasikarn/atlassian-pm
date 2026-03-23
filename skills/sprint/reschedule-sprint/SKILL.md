@@ -143,7 +143,7 @@ Sprint date rescheduling is a scope change management operation, not a planning 
 
 ### Expert Decision Criteria
 
-- **If shift > 5 working days:** question whether this is a reschedule or a sprint replanning event — a >1-week shift usually indicates the sprint goal itself needs renegotiation with the Product Owner
+- **If shift > 5 working days:** question whether this is a reschedule or a sprint cancellation/replanning event. The Scrum Guide (2020) explicitly allows the Product Owner to cancel a sprint when "the Sprint Goal becomes obsolete" — a >1-week shift often signals the goal is no longer achievable in the current sprint, making cancellation + replanning the more honest choice over a date-shift patch
 - **If rescheduling a subtask before its parent:** always reschedule the parent story first, then run the subtask validation — the reverse order produces guaranteed HR8 violations
 - **If an issue has no start date ({{START_DATE_FIELD}} is null):** skip it in the delta calculation; null + delta = incorrect anchor; surface as a warning, not an error
 - **If the new due date of any issue exceeds the sprint end date:** flag it before writing — an issue due after sprint end will never appear on the burndown correctly and will auto-carry-over
@@ -162,7 +162,7 @@ Sprint date rescheduling is a scope change management operation, not a planning 
 ### Authoritative References
 
 - **Scrum Guide 2020:** "Only the Developers can change their Sprint Backlog during the Sprint. The Developers may find that they have more or less work than expected, and scope may be clarified and re-negotiated between the Product Owner and Development Team as more is learned." — date shifts are scope clarification, not scope change
-- **ITIL Change Management:** "No change should be executed without an assessed impact and a defined rollback plan" — the Phase 2 preview gate is the Scrum equivalent of a change impact assessment
+- **ITIL 4 Change Enablement (Axelos, 2019):** The ITIL principle that every change requires impact assessment and a rollback path before execution is the inspiration for the Phase 2 preview gate (paraphrased from ITIL 4 change practice guidance, not a verbatim quote). The gate produces an impact table (what will change) and leaves the reschedule reversible (delta can be negated) — meeting ITIL's spirit for a standard change category
 - **Mike Cohn (Agile Estimating and Planning):** "A plan is a snapshot of your best understanding at a point in time, not a contract" — rescheduling is routine; the discipline is in the visibility of the shift, not in avoiding it
 
 ---

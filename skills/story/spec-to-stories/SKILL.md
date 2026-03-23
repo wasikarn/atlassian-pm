@@ -165,7 +165,7 @@ Specification by Example (Gojko Adzic) establishes that requirements only become
 | User Story Mapping (Jeff Patton) | Phase 3 grouping by persona + feature area | Patton's backbone → activities → tasks hierarchy maps to: Persona → Feature Area → Story cluster; this grouping prevents persona-crossing stories |
 | Feature Injection (Chris Matts) | Phase 2 persona + constraint extraction | "In order to [goal], As a [persona], I want [feature]" — Feature Injection starts from goals, not from system features; ensures extracted stories anchor to real user needs |
 | BDD Given-When-Then (Dan North) | Phase 3 AC format per requirement | Minimum 1 happy path + 1 error case per requirement cluster; this satisfies the "Testable" criterion without requiring full test case design at story-creation time |
-| Semantic dedup (cosine similarity > 0.8) | Phase 4 Dedup Check | Industry threshold for near-duplicate detection in NLP; below 0.8 = distinct enough to proceed; above 0.8 = manual review required before creating in Jira |
+| Semantic dedup (cosine similarity thresholds) | Phase 4 Dedup Check | Two-tier threshold for English+Thai mixed-language backlogs: similarity **> 0.8** = likely duplicate → auto-flag, require confirmation before creating; similarity **0.7–0.8** = borderline → show candidate to user for manual decision, do not auto-flag or auto-skip. Below 0.7 = distinct enough to proceed without review |
 
 ### Key Metrics
 
