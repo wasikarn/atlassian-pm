@@ -9,7 +9,9 @@ description: |
 
   Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Review → Execute
 
-  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution"
+  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution", "วางแผน sprint", "จัดสรรงาน"
+  Use when: planning a new sprint — fetching carry-over items, calculating team capacity, distributing work, and committing assignments to Jira
+  Do NOT use for: generating a standup digest (use standup-report); closing or reviewing a completed sprint (use close-sprint)
 argument-hint: "[--sprint <id>] [--carry-over-only]"
 effort: high
 ---

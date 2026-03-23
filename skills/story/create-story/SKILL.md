@@ -11,7 +11,9 @@ description: |
 
   Composite: No need to copy-paste issue keys, context preserved throughout workflow
 
-  Triggers: "story full", "create story + subtasks", "full workflow", "create story with subtasks", "story and subtasks"
+  Triggers: "create story", "new story", "story + subtasks", "full workflow", "สร้าง story", "story ครบ"
+  Use when: creating a User Story with sub-tasks end-to-end — from discovery and INVEST check through codebase exploration, subtask design, and Jira creation
+  Do NOT use for: creating standalone tasks (use create-task); creating an epic (use create-epic); refining scope before writing (use refine-epic)
 argument-hint: "[story-description]"
 effort: high
 ---
