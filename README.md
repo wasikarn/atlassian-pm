@@ -81,20 +81,20 @@ flowchart TD
 
 ---
 
-## Commands
+## Skills
 
-All commands are available as `/atlassian-pm:<name>` after installing the plugin.
+Invoked as `/atlassian-pm:<name>`. Each skill is a multi-phase workflow with domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) embedded alongside the steps.
 
 ### Feature Design
 
-| Command | Description |
+| Skill | Description |
 | --- | --- |
 | `/atlassian-pm:blueprint` | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
 | `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
 
 ### Issue Creation
 
-| Command | Description |
+| Skill | Description |
 | --- | --- |
 | `/atlassian-pm:create-story` | **Recommended** — Story + Sub-tasks in one workflow |
 | `/atlassian-pm:create-epic` | Epic + Confluence doc with RICE scoring |
@@ -107,7 +107,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ### Issue Updates
 
-| Command | Description |
+| Skill | Description |
 | --- | --- |
 | `/atlassian-pm:update-story ABC-123` | Edit Story — ACs, scope, description |
 | `/atlassian-pm:update-epic ABC-123` | Edit Epic — scope, RICE, metrics |
@@ -117,7 +117,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ### Search & Quality
 
-| Command | Flags | Description |
+| Skill | Flags | Description |
 | --- | --- | --- |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
 | `/atlassian-pm:verify-issue ABC-123` | `--with-subtasks` `--fix` `--dry-run` | ADF format + INVEST criteria check |
@@ -125,7 +125,7 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ### Sprint Planning
 
-| Command | Flags | Description |
+| Skill | Flags | Description |
 | --- | --- | --- |
 | `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | 8-phase planning: capacity + carry-over + assign |
 | `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
@@ -136,16 +136,18 @@ All commands are available as `/atlassian-pm:<name>` after installing the plugin
 
 ### Confluence
 
-| Command | Description |
+| Skill | Description |
 | --- | --- |
 | `/atlassian-pm:create-doc` | Create page: `tech-spec`, `adr`, `parent` |
 | `/atlassian-pm:update-doc` | Update or move a Confluence page |
 | `/atlassian-pm:scan-tech-debt` | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
 | `/atlassian-pm:release-notes` | Generate Confluence release notes from a Jira Fix Version |
 
-### End-to-End Workflows
+---
 
-One command chains multiple skills with confirmation gates between stages.
+## Commands
+
+End-to-end orchestration chains. Each command calls multiple skills in sequence with confirmation gates between stages. Invoked as `/name` (no namespace prefix).
 
 | Command | Chains | Description |
 | --- | --- | --- |
@@ -158,6 +160,33 @@ One command chains multiple skills with confirmation gates between stages.
 | `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
 | `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
 | `/tech-debt-full` | scan-tech-debt → create-task (per item) | Scan and create tasks for selected tech-debt items |
+
+---
+
+## Agents
+
+Internal subagents dispatched automatically by skills — not invoked directly. Organized in 3 layers by responsibility.
+
+| Agent | Model | Role |
+| --- | --- | --- |
+| `code-explorer` | haiku | Codebase exploration; Memory-First Protocol |
+| `issue-bootstrap` | haiku | Pre-fetch issue + parent + children context in one pass |
+| `jira-search` | haiku | Duplicate detection with confidence scoring (EXACT/HIGH/MEDIUM/LOW) |
+| `quality-gate` | sonnet | ADF quality scoring; Pattern Memory; Team Convention Check |
+| `pr-description-writer` | haiku | Generate PR description from branch + issue |
+| `pr-review-jira-sync` | haiku | Sync merged PR back to Jira (transition + comment) |
+| `velocity-tracker` | haiku | Velocity history; anomaly detection (1.5σ); per-member stats |
+| `sprint-transition-agent` | haiku | Batch sprint issue moves + sprint state transitions |
+| `spec-parser-agent` | haiku | Parse Confluence spec → structured requirements (Read-only) |
+| `story-writer` | sonnet | ADF JSON generation; Convention Memory; Service-Aware AC Defaults |
+| `alignment-checker` | sonnet | AC Coverage Matrix; Predictive Risk Flags; Scope Drift detection |
+| `backlog-groomer` | sonnet | WSJF scoring; aging alerts; Sprint-Ready/Blocked/Orphan grouping |
+| `retrospective-analyst` | sonnet | Cross-Sprint Comparison; Team Health Score (0–100) |
+| `sprint-planner` | sonnet | Risk-Adjusted Capacity; 3 Scenario Planning |
+| `estimation-calibrator` | haiku | SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence |
+| `risk-forecaster` | sonnet | 4-dimension delivery risk; named mitigations; adjusted scenarios |
+| `adf-surgeon` | haiku | Structural ADF repair; 10 known Jira quirks; content-safe |
+| `team-pattern-advisor` | sonnet | Multi-sprint strategic patterns; ≥3 data point threshold |
 
 ---
 
