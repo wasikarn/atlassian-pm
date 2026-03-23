@@ -196,9 +196,13 @@ def main():
         return api.search_issues(jql, fields=subtask_fields, max_results=50).get("issues", [])
 
     all_subtasks = []
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        for issues in executor.map(_fetch_batch, batches):
-            all_subtasks.extend(issues)
+    try:
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            for issues in executor.map(_fetch_batch, batches):
+                all_subtasks.extend(issues)
+    except Exception as exc:
+        print(f"Error fetching subtask batches: {exc}")
+        return 1
 
     # Filter out done
     active_subtasks = []
@@ -407,7 +411,6 @@ def main():
 
     if not dry_run:
         # Apply all updates concurrently — each is an independent PATCH call
-        from concurrent.futures import ThreadPoolExecutor
 
         def _apply(fix: tuple) -> tuple[str, str | None]:
             key, fields, _ = fix

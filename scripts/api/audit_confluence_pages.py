@@ -18,10 +18,12 @@ Example usage:
 """
 
 import argparse
+import contextlib
+import io
 import json
 import logging
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 # Add parent directory to path for lib imports
@@ -210,18 +212,22 @@ Config JSON format:
     total_fail = 0
 
     def _audit_rule(rule):
-        return audit_page(
-            api=api,
-            page_id=rule["page_id"],
-            label=rule.get("label", f"Page {rule['page_id']}"),
-            should_have=rule.get("should_have", []),
-            should_not_have=rule.get("should_not_have", []),
-        )
+        """Run audit_page and capture its stdout output for atomic printing."""
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            result = audit_page(
+                api=api,
+                page_id=rule["page_id"],
+                label=rule.get("label", f"Page {rule['page_id']}"),
+                should_have=rule.get("should_have", []),
+                should_not_have=rule.get("should_not_have", []),
+            )
+        return result, buf.getvalue()
 
+    # executor.map preserves config order; captured output printed atomically in main thread
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {executor.submit(_audit_rule, rule): rule for rule in audit_rules}
-        for future in as_completed(futures):
-            passed, _ = future.result()
+        for (passed, _), output in executor.map(_audit_rule, audit_rules):
+            print(output, end="")
             if passed:
                 total_pass += 1
             else:
