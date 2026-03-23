@@ -22,6 +22,7 @@ import argparse
 import json
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -187,12 +188,17 @@ def main():
     # --- Phase 2: Fetch subtasks ---
     parent_keys = list(parents.keys())
     # JQL: fetch in batches of 20 (HR2: no ORDER BY with parent)
-    all_subtasks = []
-    for i in range(0, len(parent_keys), 20):
-        batch = parent_keys[i : i + 20]
+    # Batches are independent — fetch in parallel
+    batches = [parent_keys[i : i + 20] for i in range(0, len(parent_keys), 20)]
+
+    def _fetch_batch(batch):
         jql = f"parent in ({','.join(batch)})"
-        sub_result = api.search_issues(jql, fields=subtask_fields, max_results=50)
-        all_subtasks.extend(sub_result.get("issues", []))
+        return api.search_issues(jql, fields=subtask_fields, max_results=50).get("issues", [])
+
+    all_subtasks = []
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for issues in executor.map(_fetch_batch, batches):
+            all_subtasks.extend(issues)
 
     # Filter out done
     active_subtasks = []

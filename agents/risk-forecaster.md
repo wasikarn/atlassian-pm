@@ -20,6 +20,8 @@ Sprint plan context (from sprint-planner output):
 
 ## Steps
 
+> **🟢 PARALLEL** — Steps 1 and 2 have no dependency on each other. Launch simultaneously (single message, 3 Tool calls): `Read project-config.json` + `Read project-config-team-detail.json` + `cache_sprint_issues(sprint_id)`.
+
 1. **Load team data** — `Read .claude/project-config.json` for team member skills. `Read .claude/project-config-team-detail.json` for velocity anomalies and member velocity trends.
 
 2. **Fetch sprint items** — `cache_sprint_issues(sprint_id)` or fallback `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,labels,issuelinks")`. Analyze actual item data for Complexity and Dependency risk dimensions.

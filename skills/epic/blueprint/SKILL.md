@@ -93,9 +93,11 @@ effort: high
 
 **Actions:**
 
-1. Read input + parent epic/page (if exists)
+> **🟢 PARALLEL** — Steps 1 and 2 have no dependency on each other. Launch simultaneously (single message, 2 calls): `cache_get_issue` / `confluence_get_page` + `cache_similar_issues`. Summarize only after both complete.
+
+1. Read input + parent epic/page (if exists) — `cache_get_issue(key)` or `confluence_get_page(id)`
 2. Dedup check: `cache_search` or `cache_similar_issues` for related blueprints/stories
-3. Summarize into `feature_brief`: what we know, what we don't, affected services
+3. Summarize into `feature_brief`: what we know, what we don't, affected services (after 1–2 complete)
 
 **⛔ GATE** — Present understanding + affected services to user. Ask:
 

@@ -75,8 +75,10 @@ Ask the user:
 - Which source sprint for carry-over? (if not specified → current active sprint)
 
 ```text
-MCP: jira_get_sprint_issues(sprint_id="<source>", fields="summary,status,assignee,priority,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate")
-MCP: jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assignee,priority,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate")
+# Launch both in parallel — source and target have no dependency on each other
+MCP (parallel):
+  jira_get_sprint_issues(sprint_id="<source>", fields="summary,status,assignee,priority,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate")
+  jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assignee,priority,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate")
 ```
 
 **Collect:**

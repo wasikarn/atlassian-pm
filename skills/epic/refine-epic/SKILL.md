@@ -52,10 +52,12 @@ effort: medium
 
 **Actions:**
 
-1. Read input + parent epic (if exists)
+> **🟢 PARALLEL** — Steps 1, 2, and 3 have no dependency on each other. Launch simultaneously (single message, 3 calls): `cache_get_issue` + `cache_similar_issues` + `Task(Explore)`. Summarize only after all 3 complete.
+
+1. Read input + parent epic (if exists) — `cache_get_issue(key)` or capture feature text
 2. Dedup check: `cache_search` or `cache_similar_issues` for related stories
 3. Quick codebase scan: 1 `Task(Explore)` on likely affected services — identify existing patterns, constraints
-4. Summarize context into `debate_brief` for all roles
+4. Summarize context into `debate_brief` for all roles (after 1–3 complete)
 
 **⛔ GATE** — Present understanding + affected services to user. DO NOT launch debate without confirmation.
 

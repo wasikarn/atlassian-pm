@@ -124,6 +124,8 @@ Show: "Ready to close sprint [name]. This is irreversible."
 
 ## Phase 6 — Confluence Review Page
 
+> **🟢 PARALLEL** — Phase 6 (Confluence page) and Phase 7 (velocity-tracker) have no dependency on each other — both consume data from Phase 2/4. Launch them simultaneously after Phase 5 sprint close.
+
 **Goal:** Create a permanent Confluence review page capturing sprint velocity, completed issues, carry-over details, and anomalies for team reference.
 **Required inputs:** `sprint_closed: true` from Phase 5; triage data from Phase 2; move results from Phase 4
 **Constraints:** HR4 — no macros via MCP (plain storage format only); no cache invalidation needed for Confluence

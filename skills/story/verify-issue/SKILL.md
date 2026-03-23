@@ -70,10 +70,11 @@ Score: ⭐⭐⭐☆☆ (per dimension, 5-point scale)
 **Data fetching:**
 
 ```text
-1. Story → jira_get_issue(story_key) — ACs, scope, services impacted
+1. Story → jira_get_issue(story_key) — ACs, scope, services impacted   ← must come first (need story.parent key)
+   Then in parallel (single message, 2 calls):
 2. Epic → jira_get_issue(story.parent) — scope, must-have list (skip if none)
-3. Subtasks → already fetched in Phase 1
 4. Confluence → confluence_search("ABC-XXX") — Tech Note (skip if none)
+3. Subtasks → already fetched in Phase 1
 ```
 
 **Alignment checks:**
