@@ -123,6 +123,10 @@ info "Updating .claude-plugin/marketplace.json..."
 update_json_version ".claude-plugin/marketplace.json" "$NEW_VERSION"
 ok "marketplace.json → $NEW_VERSION"
 
+info "Updating .claude-plugin/plugin.json..."
+update_json_version ".claude-plugin/plugin.json" "$NEW_VERSION"
+ok "plugin.json → $NEW_VERSION"
+
 info "Updating README.md badge..."
 sed -i '' "s/version-${CURRENT}-blue\.svg/version-${NEW_VERSION}-blue.svg/g" README.md
 ok "README.md badge → $NEW_VERSION"
@@ -141,7 +145,7 @@ echo ""
 # ── 3. commit + tag + push ────────────────────────────────────────────────────
 
 info "Committing..."
-git add .claude-plugin/marketplace.json README.md
+git add .claude-plugin/marketplace.json .claude-plugin/plugin.json README.md
 git commit -m "chore: bump version to $NEW_VERSION"
 ok "Committed"
 
