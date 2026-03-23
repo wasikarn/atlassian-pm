@@ -502,7 +502,7 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 31 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
+skills/                        ← 32 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
 ├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release
 ├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
@@ -527,7 +527,7 @@ scripts/                       ← All Python scripts + lib (merged atlassian-sc
 ├── test-install.sh             ← Install validation (remove → install → setup simulation → doctor, 18 checks)
 └── git_filter.py              ← Smudge/clean placeholder conversion
 
-agents/                                  ← 18 subagent definitions (3-layer architecture)
+agents/                                  ← 20 subagent definitions (3-layer architecture)
 │
 │  Layer 1 — Foundation (compact output, token-optimized)
 ├── code-explorer.md (haiku)             ← Codebase exploration; Memory-First Protocol; --domain flag
@@ -545,7 +545,9 @@ agents/                                  ← 18 subagent definitions (3-layer ar
 ├── alignment-checker.md (sonnet)        ← AC Coverage Matrix; Predictive Risk Flags; Scope Drift
 ├── backlog-groomer.md (sonnet)          ← WSJF scoring; aging alerts; Top Candidates output
 ├── retrospective-analyst.md (sonnet)    ← Cross-Sprint Comparison; Team Health Score (0-100)
-└── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
+├── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
+├── test-case-runner.md (sonnet)         ← Execute single Playwright test case; structured result + evidence
+└── bug-evidence-writer.md (haiku)       ← Generate ADF bug description from test failure evidence
 │
 │  Layer 3 — Synthesis (cross-domain specialists)
 ├── estimation-calibrator.md (haiku)     ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
@@ -563,8 +565,8 @@ hooks/                         ← 46 Python hook scripts
 │   └── session/               ← Session management, compaction, token filtering, skill telemetry (15 hooks)
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
 
-.claude/commands/              ← 9 orchestration chains (story-full, epic-full, blueprint-full, bug-full,
-                               │  sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full)
+.claude/commands/              ← 10 orchestration chains (story-full, epic-full, blueprint-full, bug-full,
+                               │  qa-full, sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full)
                                └── Each chains existing skills end-to-end with confirmation gates
 
 mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
