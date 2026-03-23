@@ -12,6 +12,7 @@ description: |
   Triggers: "doctor", "health check", "check setup", "diagnose", "verify install", "/doctor", "ตรวจสอบ setup", "เช็ค plugin"
   Use when: verifying plugin health and configuration after setup or after issues arise
   Do NOT use for: initial setup (use setup); creating issues (use create-story or create-task)
+x-compatibility: []
 argument-hint: ""
 effort: low
 allowed-tools: Bash
@@ -290,3 +291,9 @@ Doctor implements the **pre-flight checklist pattern** from aviation: a complete
 - **Atul Gawande, "The Checklist Manifesto" (2009):** Checklists work because they encode expert knowledge in a form that survives high-pressure situations — the same reason doctor never stops on failure.
 - **Google SRE Book — "Testing for Reliability":** Environment validation is a form of canary testing; catching drift in dev prevents cascading failures in production.
 - **BetterStack Health Check Guide:** Health check operations must be idempotent and read-only — they can be called repeatedly without side effects, making them safe for automation and CI gates.
+
+---
+
+## References
+
+No shared reference dependencies — all checks performed via Bash commands only.

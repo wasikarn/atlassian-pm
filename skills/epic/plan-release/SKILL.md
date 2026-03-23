@@ -211,3 +211,12 @@ Release planning at the multi-epic level is a forecasting exercise, not a commit
 - ROAM framework (SAFe Inspect & Adapt): All risks surface during planning must be ROAMed before the plan is baselined; "we'll handle it" is not ROAM — it must be Owned by a specific person
 - Mike Cohn, *Agile Estimating and Planning*: Release planning using velocity requires at least 3 sprints of historical data; fewer than 3 sprints means the estimate is a guess, not a forecast — communicate this to stakeholders
 - Atlassian Agile Coach: Fix Versions in Jira are the release coordination mechanism — they drive release notes generation, JQL filtering, and burndown reporting; treat creation as a commitment gate
+
+---
+
+## References
+
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Epic Template](../../../references/templates-epic.md) - Epic ADF template
+- [Sprint Frameworks](../../../references/sprint-frameworks.md) - Velocity-based release forecasting, RICE scoring
+- [Mermaid Guide](../../../references/mermaid-guide.md) - Diagrams for Confluence release plan page

@@ -257,3 +257,12 @@ Sprint closure is a hard boundary event in Scrum — the Scrum Guide (2020) defi
 - **Scrum Guide 2020 (Sutherland/Schwaber):** "The Sprint Retrospective concludes the Sprint. It is timeboxed to a maximum of three hours for a one-month Sprint." — closure order matters: retro before close is the correct sequence
 - **Accelerate (Forsgren, Humble, Kim):** The four DORA metrics — deployment frequency, lead time, change fail rate, recovery time — are the only engineering metrics proven to correlate with organizational performance; carry-over rate is a leading indicator of degraded deployment frequency
 - **Scrum Patterns (Coplien/Harrison):** Yesterday's Weather — "use the team's recent velocity as the primary forecast signal; adjust only for known capacity changes (leave, team size)"
+
+---
+
+## References
+
+- [Sprint Frameworks](../../../references/sprint-frameworks.md) - Carry-over model, velocity forecasting, DORA metrics
+- [Team Capacity](../../../references/team-capacity.md) - Capacity formulas, complexity-adjusted throughput
+- [Skill Orchestration](../../../references/skill-orchestration.md) - How close-sprint chains with retrospective-analyst
+- [Mermaid Guide](../../../references/mermaid-guide.md) - Diagrams for Confluence sprint review page

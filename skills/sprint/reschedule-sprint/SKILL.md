@@ -164,3 +164,10 @@ Sprint date rescheduling is a scope change management operation, not a planning 
 - **Scrum Guide 2020:** "Only the Developers can change their Sprint Backlog during the Sprint. The Developers may find that they have more or less work than expected, and scope may be clarified and re-negotiated between the Product Owner and Development Team as more is learned." — date shifts are scope clarification, not scope change
 - **ITIL Change Management:** "No change should be executed without an assessed impact and a defined rollback plan" — the Phase 2 preview gate is the Scrum equivalent of a change impact assessment
 - **Mike Cohn (Agile Estimating and Planning):** "A plan is a snapshot of your best understanding at a point in time, not a contract" — rescheduling is routine; the discipline is in the visibility of the shift, not in avoiding it
+
+---
+
+## References
+
+- [HR Rules](../../../references/hr-rules.md) - HR6 cache invalidation (required after every date update)
+- [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for fetching sprint issues by date range

@@ -203,6 +203,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 | `tools.md` | MCP vs acli decision rules, field presets, effort sizing |
 | `writing-style.md` | Thai + transliteration conventions, concise scan-first format |
 | `jql-quick-ref.md` | JQL patterns and filters |
+| `hr-rules.md` | Full definitions for HR1–HR10 hard rules |
+| `hooks-reference.md` | Hook enforcement details and event reference |
+| `subtask-design-patterns.md` | Sub-task decomposition patterns, scope format, AC specificity |
 
 ---
 

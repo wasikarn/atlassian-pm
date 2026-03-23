@@ -100,7 +100,7 @@ Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to s
 
 ## Context Management
 
-**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Hooks re-inject HR reminders via `plugin/session/post_compact_reinject.py`.
+**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Two hooks handle this: `start_compact_reinject.py` (SessionStart — re-injects context when session starts from a compacted state) and `post_compact_reinject.py` (PostCompact — re-injects HR rules immediately after compaction).
 
 **Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Available: `code-explorer` (haiku), `jira-search` (haiku), `issue-bootstrap` (haiku), `quality-gate` (sonnet), `pr-description-writer` (haiku), `pr-review-jira-sync` (haiku), `velocity-tracker` (haiku), `story-writer` (sonnet), `alignment-checker` (sonnet), `backlog-groomer` (sonnet), `retrospective-analyst` (sonnet), `sprint-planner` (sonnet), `estimation-calibrator` (haiku, L3), `risk-forecaster` (sonnet, L3), `adf-surgeon` (haiku, L3), `team-pattern-advisor` (sonnet, L3), `sprint-transition-agent` (haiku) — batch sprint issue moves + sprint state transitions; used by close-sprint Phase 4, `spec-parser-agent` (haiku, L1) — parse Confluence page content into structured requirements (personas, requirements, constraints); used by spec-to-stories Phase 2; receives pre-fetched content, tools: Read only.
 

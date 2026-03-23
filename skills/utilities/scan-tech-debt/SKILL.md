@@ -202,3 +202,11 @@ Technical debt is a financial analogy (Ward Cunningham, 1992): the "principal" i
 - **Martin Fowler (martinfowler.com/bliki/TechnicalDebt):** "The interest analogy is important — not all debt is bad, but you need to be conscious of both the principal and the interest you're paying"
 - **Fowler's Technical Debt Quadrant (2009):** Deliberate+Prudent debt ("we know we're cutting corners now") is the only acceptable form — all other quadrants represent unintentional or negligent debt that should be addressed immediately
 - **SQALE Method (Letouzey, 2012):** Remediation priority follows the quality pyramid — fix Testability first, then Reliability, then Security; the keyword-based impact scoring in this skill approximates this order
+
+---
+
+## References
+
+- [Task Template](../../../references/templates-task.md) - ADF template for tech-debt task creation
+- [Dependency Frameworks](../../../references/dependency-frameworks.md) - Effort×Impact matrix, risk scoring
+- [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for tech-debt issue filtering

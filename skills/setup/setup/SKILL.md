@@ -13,6 +13,7 @@ description: |
   Triggers: "setup", "atlassian-pm setup", "/setup", "install atlassian-pm", "configure plugin"
   Use when: performing initial plugin setup — acli, MCP, credentials, git filters
   Do NOT use for: daily operation (all other skills handle that); upgrading the plugin
+x-compatibility: []
 argument-hint: "[--init]"
 effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion
@@ -890,3 +891,9 @@ Setup is engineered as an **idempotent provisioning script** — a concept from 
 - **12factor.net — Factor III (Config):** "Store config in the environment. Config varies across deploys, code does not." The `.env` file pattern is the standard local-dev approximation of environment-injected config.
 - **OWASP Secrets Management Cheat Sheet:** Secrets must never appear in process argument lists, logs, or version control. File-based injection (`--env-file`) and `chmod 600` are the minimum viable controls for local development secrets.
 - **Infisical — Local Development Secrets Guide:** The core onboarding problem with `.env` files is drift when one developer rotates a secret — setup's backup-restore pattern mitigates this for single-developer plugin reinstalls but does not solve team-wide drift (use a secrets manager for that).
+
+---
+
+## References
+
+No shared reference dependencies — all configuration performed via Bash commands only.

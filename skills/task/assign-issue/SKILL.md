@@ -112,3 +112,10 @@ Pull-based assignment (developers choose work matching their current capacity an
 
 - Atlassian Workload Management Guide: skill-based routing + WIP limits reduce context-switching fatigue by up to 40%
 - Cognitive Load Theory (Sweller, 1988): simultaneous task overload degrades working memory — validated by modern PM research as basis for WIP limits
+
+---
+
+## References
+
+- [Tools](../../../references/tools.md) - MCP vs acli decision rules, acli assign command
+- [HR Rules](../../../references/hr-rules.md) - HR3: MCP assignee silently fails — always use acli

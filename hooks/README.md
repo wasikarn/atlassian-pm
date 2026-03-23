@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-43 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+46 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## Directory structure
 
@@ -14,7 +14,7 @@ hooks/
 │   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (15 hooks)
 │   ├── quality/      — ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/        — read optimization, dedup, field presets (6 hooks)
-│   └── session/      — session management, compaction, token filtering, tracking (12 hooks)
+│   └── session/      — session management, compaction, token filtering, skill telemetry (15 hooks)
 └── dev/              — developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
 ```
 
@@ -67,9 +67,14 @@ Manage state, tracking, and cross-hook coordination.
 |------|-------|---------|
 | `start_prerequisite_check.py` | SessionStart | Checks acli + MCP prerequisites; warns if missing |
 | `start_subagent_context.py` | SessionStart, SubagentStart | Injects HR rule reminders into subagent context |
+| `start_cleanup_artifacts.py` | SessionStart | Removes stale task artifacts and trims unbounded JSONL files |
+| `start_compact_reinject.py` | SessionStart (compact) | Re-injects critical context when session starts from a compacted state |
 | `compact_pre_save.py` | PreCompact | Saves in-progress state before context compaction |
 | `post_compact_reinject.py` | PostCompact | Re-injects HR rules + active state after compaction |
+| `pre_skill_usage_log.py` | PreToolUse (Skill) | Logs every skill invocation for telemetry and usage measurement |
+| `post_event_model_track.py` | PostToolUse (async) | Tracks Domain Model events from Epic descriptions |
 | `stop_hr6_unflushed_check.py` | Stop | Warns on unflushed HR6 cache invalidations before session ends |
+| `stop_hr5_pending_check.py` | Stop | Checks for subtasks with unverified parent links (HR5) before session ends |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit | Pre-fetches Jira issue when user mentions {{PROJECT_KEY}}-XXX in prompt |
 | `post_hr5_parent_verify_remind.py` | jira_create_issue, jira_batch_create_issues | Reminds to verify parent link after creation |
 | `post_hr5_parent_verify_clear.py` | (after parent verify) | Clears parent verify state after successful verification |
@@ -106,6 +111,7 @@ Manage state, tracking, and cross-hook coordination.
 | `pre_search_before_create.py` | jira_create_issue, jira_batch_create_issues |
 | `pre_dod_check.py` | jira_transition_issue |
 | `pre_wip_limit_check.py` | jira_transition_issue |
+| `pre_skill_usage_log.py` | Skill |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit |
 
 ### PostToolUse
@@ -113,6 +119,7 @@ Manage state, tracking, and cross-hook coordination.
 | Script | Triggered by |
 |--------|-------------|
 | `post_filter_mcp_response.py` | jira_get_issue, jira_search |
+| `post_event_model_track.py` | jira_create_issue (async) |
 | `post_hr5_parent_verify_remind.py` | jira_create_issue, jira_batch_create_issues |
 | `post_hr5_parent_verify_clear.py` | (after parent verify) |
 | `post_vs_integrity_track.py` | jira_create_issue, jira_batch_create_issues |
@@ -134,9 +141,12 @@ Manage state, tracking, and cross-hook coordination.
 |--------|-------|
 | `start_prerequisite_check.py` | SessionStart |
 | `start_subagent_context.py` | SessionStart, SubagentStart |
+| `start_cleanup_artifacts.py` | SessionStart |
+| `start_compact_reinject.py` | SessionStart (compact) |
 | `compact_pre_save.py` | PreCompact |
 | `post_compact_reinject.py` | PostCompact |
 | `stop_hr6_unflushed_check.py` | Stop |
+| `stop_hr5_pending_check.py` | Stop |
 
 ## Utility files
 

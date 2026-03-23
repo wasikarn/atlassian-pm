@@ -13,6 +13,8 @@ Plan sprints with carry-over analysis, risk-adjusted capacity calculation, and w
 
 ## Rules
 
+> **🟢 PARALLEL** — At the start, launch all 3 context-gathering calls simultaneously (single message): `Read references/team-capacity.md` + `Read references/sprint-frameworks.md` + `jira_get_sprints_from_board()`. No dependency between them.
+
 - Read team capacity from `references/team-capacity.md`
 - Read sprint frameworks from `references/sprint-frameworks.md`
 - HR7: ALWAYS lookup sprint ID via `jira_get_sprints_from_board()` — never hardcode

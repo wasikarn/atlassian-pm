@@ -18,6 +18,14 @@ Verify and predict alignment between related Jira tickets: Epic→Story→Subtas
 - HR8: Subtask dates within parent range, points sum reasonable
 - Return: alignment score (A1-A6), mismatches, predicted risks, suggested fixes
 
+## Data Fetching
+
+> **🟢 PARALLEL** — After fetching the story (Step 1), launch Step 2 and Step 3 simultaneously (single message, 2 Tool calls): they have no dependency on each other.
+
+1. Fetch story: `cache_get_issue(story_key)` — get ACs, scope, parent key, subtask list
+2. Fetch parent epic: `cache_get_issue(story.parent.key)` — get epic scope, must-have list (skip if no parent)
+3. Fetch subtasks: `jira_search(jql: "parent = story_key")` — get all subtask objectives and tags (skip if subtask list already in context)
+
 ## Checks
 
 ### Current Alignment (A1-A6)

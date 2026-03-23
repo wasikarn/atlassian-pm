@@ -198,3 +198,12 @@ Specification by Example (Gojko Adzic) establishes that requirements only become
 - **Jeff Patton, "User Story Mapping" (2014):** "Don't just break down stories — map the whole journey first"; the persona + feature area grouping in Phase 3 is the lightweight version of Patton's backbone construction
 - **Chris Matts (Feature Injection):** Goals before features — if the spec doesn't state a user goal for a requirement, the extracted story will lack the "Valuable" INVEST criterion
 - **Dan North (BDD, 2006):** "The scenario title should describe a role and an action"; Phase 3's `AC{N}: [Verb] — [Scenario Name]` format directly implements this naming convention
+
+---
+
+## References
+
+- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
+- [Story Template](../../../references/templates-story.md) - Story ADF template + best practices
+- [Writing Style](../../../references/writing-style.md) - Thai + transliteration conventions
+- [Verification Checklist](../../../references/verification-checklist.md) - INVEST criteria, quality checks

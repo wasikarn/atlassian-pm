@@ -149,3 +149,10 @@ The Scrum Guide 2020 redefined the Daily Scrum away from the classic three-quest
 - **Scrum Guide 2020 (Sutherland/Schwaber):** "The Daily Scrum is a 15-minute event for the Developers of the Scrum Team. [...] The structure of the event is set by the Developers and can be conducted in different ways if their focus is on progress toward the Sprint Goal."
 - **Scrum.org — Going Beyond Three Questions:** "The three-question format is no longer in the Scrum Guide. Teams are encouraged to select structures that best inspect their progress toward the Sprint Goal — walking the board is often more effective."
 - **Edmondson (2025, European Journal of Work and Organizational Psychology):** Daily stand-ups have a statistically significant positive effect on psychological safety perceptions — the framing of updates as observations, not evaluations, is critical to maintaining this benefit
+
+---
+
+## References
+
+- [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for fetching in-progress and blocked issues
+- [Sprint Frameworks](../../../references/sprint-frameworks.md) - Anomaly detection thresholds, velocity context

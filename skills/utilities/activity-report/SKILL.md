@@ -144,3 +144,9 @@ Activity reports derive from the SPACE framework's "Activity" dimension — trac
 - **Nicole Forsgren et al. (SPACE, 2021):** "Activity metrics should never be used in isolation — they gain meaning only when correlated with satisfaction and efficiency dimensions"
 - **DORA State of DevOps Report 2024:** Deployment frequency and lead time are the two DORA metrics most correlated with organizational performance — cross-reference activity report dates against deploy events for richer signal
 - **Atlassian Engineering Blog:** Session-level observation capture (what this skill uses) maps to the "flow state" signals in SPACE's Efficiency dimension
+
+---
+
+## References
+
+- [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for filtering by date and assignee
