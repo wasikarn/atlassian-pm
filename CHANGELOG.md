@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2026-03-23
+
+### Changed
+
+- **Domain Expert Notes quality audit — all 32 skills** — systematic audit across PM (15 skills), Engineer (11 skills), QA (3 skills), Setup (2 skills), and Utilities (5 skills); 4 Adequate Engineer skills and 15 PM/remaining skills elevated to Strong with specialist-level framework citations, primary author attributions, and causal reasoning
+- **Citation integrity fixes** — removed 4 fabricated/unverifiable references: "University of Waterloo Atlassian JQL Best Practices" (search-issues), "32% of agile teams link OKRs" (create-epic), "Infisical Local Development Secrets Guide" (setup), "BetterStack Health Check Guide" (doctor); replaced with NIST SP 800-57 Part 1 Rev 5, Beyer et al. SRE Book Ch.17, 12-Factor App (Wiggins 2011), and real Atlassian Developer Docs
+- **Framework attribution completeness** — added primary author + year + venue for: JTBD (Christensen 1997 vs Ulwick ODI 2005 as distinct frameworks), T-shaped skills (Guest 1991 + Tim Brown/IDEO 2010), SMART Goals (Doran 1981 Management Review), Goodhart's Law (1975), 4Ls (Diana Larsen), Walk-the-Board (Scrum.org / Sutherland 2014), Docs as Code (Anne Gentle 2017), CLM (AIIM/Gartner), Keep a Changelog (Olivier Lacan)
+- **Numeric threshold disambiguation** — plan-release: 3 distinct buffer concepts separated (10% velocity buffer / 10-15% buffer sprint / 20% carry-over pre-allocation); spec-to-stories: cosine similarity tiers clarified (>0.8 auto-flag vs 0.7–0.8 manual review, <0.7 distinct)
+- **P1 escalation consistency** — bug-triage: all 3 triggers (PII/auth bypass, payment failure, database corruption) now share base actions (freeze deployments + Tech Lead escalation) with path-specific follow-on steps
+- **Empirical observation labeling** — atlassian-scripts: `~15% MCP parent-drop` statistic marked as "observed empirically — not a documented Atlassian behavior"
+- **qa-full Step 0 Guard** — idempotency check added before create-testplan invocation: detects existing `[QA]` sub-tasks and routes to 3 options (A: execute existing / B: update+execute / C: create new); prevents duplicate test plans per sprint
+- **README counts corrected** — 31→32 skills, 18→20 agents, 9→10 commands; `test-case-runner` and `bug-evidence-writer` added to agents architecture tree
+
 ## [1.6.1] - 2026-03-23
 
 ### Added
