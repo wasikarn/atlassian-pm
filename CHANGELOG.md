@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-03-23
+
+### Added
+
+- **9 orchestration Commands** — end-to-end workflow chains in `.claude/commands/`: `story-full`, `epic-full`, `blueprint-full`, `bug-full`, `story-analyze-full`, `sprint-plan-full`, `sprint-close-full`, `release-full`, `tech-debt-full`; each chains existing skills with confirmation gates
+- **Parallel dispatch annotation** — `> **🟢 PARALLEL**` and `> **🟢 AUTO + PARALLEL**` blockquote convention in skill/agent phases marks independent tool calls for single-message dispatch; documented in CLAUDE.md Efficiency section and applied across 11 skill/agent files
+- **HR5 Stop hook** (`stop_hr5_pending_check.py`) — session-end guard that flags any subtask creation where parent verification was not confirmed; prevents orphaned subtasks from being silently abandoned
+- **Skill usage telemetry hook** (`pre_skill_usage_log.py`) — PreToolUse:Skill hook logs skill invocations with timestamp, model, and session ID for usage analysis
+- **Model tracking hook** (`post_event_model_track.py`) — PostToolUse async hook tracks domain model events per session
+- **Session artifact cleanup hook** (`start_cleanup_artifacts.py`) — SessionStart hook removes stale task artifacts beyond configurable TTL
+- **`<important if>` conditional tags on HR1–HR10** in CLAUDE.md — context-sensitive rule loading; only the relevant rules surface in context based on the current operation
+- **Dynamic config injection** — 4 skills now read `project_key` and `board_id` directly from `.claude/project-config.json` at runtime instead of hardcoded placeholders
+- **Skill trigger descriptions (P3 pattern)** — all 31 skills now have `Triggers:`, `Use when:`, `Do NOT use for:` in their `description:` block with Thai trigger phrases for bilingual discovery
+- **Goal-oriented phase headers (P9 pattern)** — create-story, analyze-story, blueprint, close-sprint, plan-sprint phases now open with `**Goal:**`, `**Required inputs:**`, `**Constraints:**`, `**Output:**`
+
+### Changed
+
+- **README restructured** — 3 distinct sections (Commands → Skills → Agents) ordered by real usage flow; Commands section added with fast-path table; Agents section clarified as internal subagents
+- **Workflow diagram updated** — added Commands fast-path node, `spec-to-stories` branch, `/bug-triage → /create-testplan` split from `/create-task`, and `close-sprint → retrospective-analyst` in sprint subgraph
+- **`references/` count corrected** — 19 → 24 documents; missing entries (`hr-rules.md`, `hooks-reference.md`, `subtask-design-patterns.md`, `update-workflow.md`) added to skills/README.md shared references table
+- **Hook count corrected** — 43 → 46 hooks; 5 previously undocumented session hooks added to hooks/README.md workflow and event tables
+
+### Fixed
+
+- **Hooks library refactor** — replaced inline duplication across 6 hook files with `hooks_lib` helpers (`get_tool_response`, `get_issue_keys_from_text`, `is_in_progress`); fixed `pre_dod_check.py` stdin API and config path
+- **Hooks performance** — eliminated redundant `mkdir`/`utime`/`stat` calls per save with path caching; lazy-load QMD collections to avoid config reads on every hook invocation
+- **Parallel script output** — `audit_confluence_pages.py` and `sprint_health_record.py` use `ThreadPoolExecutor` with atomic print for deterministic parallel output
+- **P1 skill routing fixes** — verify-issue context clarification, blueprint branch logic, retrospective-analyst invocation, release-full and sprint-plan-full gate additions
+- **Missing frontmatter fields** — `argument-hint` added to map-dependencies (was the only skill missing it); `x-compatibility: []` added to doctor, setup, atlassian-scripts
+
 ## [1.5.2] - 2026-03-22
 
 ### Fixed
