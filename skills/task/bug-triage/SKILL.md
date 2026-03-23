@@ -295,9 +295,9 @@ Bug triage separates _severity_ (technical impact on the system) from _priority_
 
 **P1 escalation triggers (immediate action required):**
 
-- Any bug involving PII exposure or auth bypass → Security incident, not just bug triage
-- Payment or financial transaction failure → Escalate to Tech Lead within 15 minutes
-- Database corruption or data loss → Freeze deployments, notify all stakeholders
+- Any bug involving PII exposure or auth bypass → Freeze deployments immediately, escalate to Tech Lead + legal/security team; treat as a security incident, not standard triage
+- Payment or financial transaction failure → Freeze deployments if occurring in production, escalate to Tech Lead within 15 minutes; document all affected transaction IDs before investigating
+- Database corruption or data loss → Freeze deployments immediately, escalate to Tech Lead, notify all stakeholders; do not attempt manual recovery without senior oversight
 
 **Assignee skill matching (Phase 4):**
 

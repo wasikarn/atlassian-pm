@@ -128,7 +128,7 @@ Direct REST API scripts exist because MCP tool abstractions trade off completene
 
 - **Rate limit budget:** Atlassian Cloud points-based quota — write operations cost 1 point each; scripts creating 50 issues in a loop consume 50 points from the daily quota. Batch where possible.
 - **Retry-After compliance:** HTTP 429 responses include a `Retry-After` header — scripts must honour it exactly; ignoring it and retrying immediately causes quota exhaustion and escalating ban windows
-- **Verification coverage:** `verify_write.py` should confirm 100% of subtask creates — MCP silently ignores parent fields ~15% of the time (HR5); unverified creates are orphaned in the backlog
+- **Verification coverage:** `verify_write.py` should confirm 100% of subtask creates — MCP silently ignores parent fields ~15% of the time (observed empirically — not a documented Atlassian behavior; HR5); unverified creates are orphaned in the backlog
 
 ### Expert Decision Criteria
 

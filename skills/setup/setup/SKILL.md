@@ -890,7 +890,7 @@ Setup is engineered as an **idempotent provisioning script** — a concept from 
 
 - **12factor.net — Factor III (Config):** "Store config in the environment. Config varies across deploys, code does not." The `.env` file pattern is the standard local-dev approximation of environment-injected config.
 - **OWASP Secrets Management Cheat Sheet:** Secrets must never appear in process argument lists, logs, or version control. File-based injection (`--env-file`) and `chmod 600` are the minimum viable controls for local development secrets.
-- **Infisical — Local Development Secrets Guide:** The core onboarding problem with `.env` files is drift when one developer rotates a secret — setup's backup-restore pattern mitigates this for single-developer plugin reinstalls but does not solve team-wide drift (use a secrets manager for that).
+- **NIST SP 800-57 Part 1 Rev 5 — Key Management Guidelines (NIST, 2020):** Secret rotation creates team-wide drift risk — when one developer rotates an API token, all others' local `.env` files become stale instantly. Setup's backup-restore pattern mitigates this for single-developer reinstalls only; centralized secrets management (vault, secrets manager) is the durable solution for team environments.
 
 ---
 
