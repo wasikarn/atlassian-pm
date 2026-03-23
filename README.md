@@ -27,10 +27,11 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 ## How It Works
 
 ```text
-You  →  /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
+⚡ Commands:  /story-full · /epic-full · /bug-full · /sprint-plan-full · …  (chains skills end-to-end with confirmation gates)
+   Skills:   /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
 ```
 
-1. Describe what you need in natural language
+1. Describe what you need in natural language (or pick a Command for the full end-to-end chain)
 2. Claude explores your codebase to find real implementation paths
 3. Writes properly-structured ADF JSON and scores it against a quality gate
 4. Publishes to Jira via `acli` — MCP handles field updates and metadata
@@ -39,10 +40,13 @@ You  →  /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →
 
 ```mermaid
 flowchart TD
-    A([💬 User Intent]) --> B{New or Existing?}
+    A([💬 User Intent]) --> CMD["⚡ Commands Fast-Path\n/story-full · /epic-full · /blueprint-full\n/bug-full · /sprint-plan-full · /sprint-close-full\n/release-full · /tech-debt-full · /story-analyze-full"]
+    A --> B{New or Existing?}
+    CMD -.->|"auto-chains skills below"| M
 
     B -->|New| C["/search-issues\ndedup check"]
     B -->|Existing| D{Edit scope?}
+    B -->|"Confluence spec"| SS["/spec-to-stories"]
 
     D -->|Single issue| E["/update-{epic,story,task,subtask}"]
     D -->|Need new Sub-tasks| AS["/analyze-story"]
@@ -51,32 +55,38 @@ flowchart TD
     E --> V["/verify-issue"]
     AS --> V
     F --> V
+    SS --> V
 
     C --> G{Scope?}
     G -->|"Greenfield / Architecture"| H["/blueprint\nConfluence + backlog map"]
     G -->|"Unclear / High-risk"| I["/refine-epic\n4-role debate"]
     G -->|"Clear scope"| K["/create-story"]
-    G -->|"Bug / Task / Spike"| T["/create-task"]
+    G -->|"Bug report"| BT["/bug-triage"]
+    G -->|"Task / Spike"| T["/create-task"]
 
     H --> J["/create-epic"] --> K
     I --> K
     K --> L["/create-testplan\noptional"] --> V
     K --> V
+    BT --> TP["/create-testplan"] --> V
     T --> V
     V --> M([✅ Jira + Confluence])
 
     subgraph sprint["Sprint Planning"]
         direction LR
         N["/plan-sprint"] --> O["/map-dependencies"]
+        O -.->|"sprint runs"| Q["/close-sprint"] --> R["/retrospective-analyst"]
     end
     M -.->|"After backlog ready"| sprint
 
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
-    class C,E,F,AS,H,I,J,K,L,N,O,T skill
+    classDef cmd fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    class C,E,F,AS,H,I,J,K,L,N,O,T,BT,TP,Q,R,SS skill
     class V gate
     class A,M endpoint
+    class CMD cmd
 ```
 
 ---
