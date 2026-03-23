@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-31 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+32 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -33,6 +33,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | analyze-story | `/atlassian-pm:analyze-story` | 7 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
 | create-task | `/atlassian-pm:create-task` | 6 | atlassian-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
 | create-testplan | `/atlassian-pm:create-testplan` | 6 | atlassian-cache, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
+| execute-testplan | `/atlassian-pm:execute-testplan` | 6 | mcp-atlassian, playwright | Execute test cases from a Google Sheet (linked via Jira Web links) using Playwright. Writes Pass/Fail/Skip results back to Sheet. Creates bug tickets with screenshot evidence for failures. |
 | bug-triage | `/atlassian-pm:bug-triage` | 6 | atlassian-cache, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
 | update-story | `/atlassian-pm:update-story` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
 | update-subtask | `/atlassian-pm:update-subtask` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |

@@ -160,6 +160,7 @@ Test planning, bug intake, and acceptance verification.
 | Skill | Description |
 | --- | --- |
 | `/atlassian-pm:create-testplan ABC-123` | Test Plan + `[QA]` Sub-tasks from Story ACs |
+| `/atlassian-pm:execute-testplan ABC-123` | Run Google Sheet test cases via Playwright → write results back → create bug tickets |
 | `/atlassian-pm:bug-triage` | Full triage: intake → P1/P2/P3 severity → dedup check → assign |
 
 ---
