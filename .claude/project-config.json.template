@@ -44,6 +44,7 @@
   },
 
   "environments": {
+    "preview":    {"admin": "your-cf-pages-admin-project",  "web": "your-cf-pages-web-project"},
     "staging":    {"web": "staging.yourapp.com",    "admin": "admin-staging.yourapp.com",    "api": "api-staging.yourapp.com"},
     "production": {"web": "yourapp.com",            "admin": "admin.yourapp.com",            "api": "api.yourapp.com"}
   },
@@ -70,7 +71,7 @@
       },
       "QA": {
         "wip_max": 3,
-        "statuses": ["QA", "Testing", "In QA"]
+        "statuses": ["QA", "Testing", "In QA", "Ready for QA"]
       }
     }
   }
