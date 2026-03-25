@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-03-25
+
+### Added
+
+- `start-ticket` skill — DLC workflow shortcut: reads ticket AC + transitions to In Progress; tiered status guard (warn for In Progress/Reopened, block for Done/Closed); handles hard WIP gate via `CLAUDE_WIP_CONFIRMED` env var
+- `ship-to-qa` skill — DLC workflow shortcut: auto-detects PR via `gh pr view`, constructs CF Pages preview URLs from `environments.preview` config (branch slug, 28-char truncation), posts Jira comment (PR + preview + optional staging BE), transitions to Ready for QA with WIP gate enforcement
+- `environments.preview` in `project-config.json.template` — CF Pages project names for branch preview URL construction (`admin`, `web` keys)
+- "Ready for QA" added to QA column `statuses` in `project-config.json.template` — ensures `pre_wip_limit_check` WIP gate fires on ship-to-qa transitions
+
 ## [1.7.0] - 2026-03-25
 
 ### Added

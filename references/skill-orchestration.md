@@ -25,6 +25,8 @@
 | Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
 | Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
 | Release notes | `/plan-release` → `/close-sprint` → `/release-notes` | N/A |
+| Start ticket (DLC) | `/start-ticket` | pre: ticket in Jira · post: status = In Progress, AC displayed |
+| Ship to QA (DLC) | `/ship-to-qa` | pre: PR open, branch deployed · post: Jira comment posted, status = Ready for QA |
 
 **Rules:**
 
