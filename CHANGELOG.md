@@ -7,16 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-25
+
 ### Added
 
-- `flow-check` skill — board health snapshot + Scrumban replenishment
-- Hard WIP gate hook (`plugin/guards/pre_wip_limit_check.py`) — blocks transition until Claude confirms WIP count (DoR/DoD pattern with `CLAUDE_WIP_CONFIRMED` env var)
-- Auto-trigger hook (`post_done_flow_check.py`) — injects `/flow-check --replenish` on Done transitions
-- `workflow` + `board.columns` config in `project-config.json`
+- `flow-check` skill — board health snapshot + Scrumban replenishment (WSJF-approximated pull queue)
+- Hard WIP gate hook (`plugin/guards/pre_wip_limit_check.py`) — blocks `jira_transition_issue` until Claude confirms WIP count below limit (DoR/DoD pattern with `CLAUDE_WIP_CONFIRMED=<key>:<col>` env var)
+- Auto-trigger hook (`plugin/session/post_done_flow_check.py`) — injects `/flow-check --replenish` imperative on Done transitions
+- `workflow` + `board.columns` config in `project-config.json.template` — Scrumban config schema with WIP limits per column and `kanban_board_id`
 
 ### Removed
 
 - `hooks/dev/pre_wip_limit_check.py` (soft warn) — replaced by hard gate in `plugin/guards/`
+
+### Fixed
+
+- `scripts/setup.sh` — removed `--extra embeddings` flag (extra was removed from `mcp-servers/atlassian-cache/pyproject.toml`)
 
 ### Breaking
 
