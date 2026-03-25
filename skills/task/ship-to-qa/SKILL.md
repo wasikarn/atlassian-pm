@@ -35,6 +35,8 @@ description: |
 1. `jira_get_issue` with fields: `summary,status,labels`
 2. `Bash: gh pr view --json url,number,headRefName`
 
+> Try `cache_get_issue` first; on cache miss or stale data, call `jira_get_issue`.
+
 If `gh pr view` fails (no PR found): stop and ask user "Could not auto-detect PR. Please provide PR URL and number:"
 
 **Step 1B — Guard**
@@ -71,8 +73,7 @@ Call `jira_add_comment` with plain text body (no ADF wrapper needed):
 [ship-to-qa] {issue_key} — {summary}
 
 PR: #{pr_number} — {pr_url}
-Preview (Admin): {preview_admin_url}
-Preview (Web): {preview_web_url}
+Preview ({service_key}): {preview_url}   ← one line per service in environments.preview
 Staging (BE): {staging_api_url}
 ```
 
@@ -80,7 +81,7 @@ Omit lines that don't apply: no "Staging (BE)" line for `fe-only`; omit preview 
 
 **Step 5 — WIP Check + Transition**
 
-1. Call `jira_get_transitions` → find transition named "Ready for QA" (case-insensitive; also check "QA")
+1. Call `jira_get_transitions` → find transition named "Ready for QA" (case-insensitive; also check "QA"); call `jira_transition_issue` passing the transition **name** (not numeric ID) using the `transition` field — this ensures the `pre_wip_limit_check` hook detects the target column correctly
 2. The `pre_wip_limit_check` hook will **automatically block** if QA column WIP limit is reached
 3. If blocked by hook:
    - Run the JQL the hook provides
@@ -88,7 +89,6 @@ Omit lines that don't apply: no "Staging (BE)" line for `fe-only`; omit preview 
    - If count < wip_max: run `export CLAUDE_WIP_CONFIRMED={issue_key}:{col_name}` where `{col_name}` is the column name from the hook's block message, then retry `jira_transition_issue`
    - If count >= wip_max: **STOP** — "QA WIP limit reached ({count}/{wip_max}). Wait for QA to finish an item first."
 4. If transition not found: show available transitions and ask user to pick
-5. Call `jira_transition_issue` — pass the transition **name** (not numeric ID) using the `transition` field so the `pre_wip_limit_check` hook can detect the target column correctly
 
 **Step 6 — HR6**
 
