@@ -147,8 +147,8 @@
 					},
 					{
 						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_wip_limit_check.py",
-						"timeout": 5
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_wip_limit_check.py",
+						"timeout": 10
 					}
 				]
 			},
