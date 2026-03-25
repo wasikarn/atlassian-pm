@@ -1,8 +1,8 @@
 # atlassian-pm
 
-> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and plan Sprints using natural language. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
+> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and manage Scrumban flow using natural language. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
-[![Version](https://img.shields.io/badge/version-1.7.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-1.8.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -27,7 +27,7 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 ## How It Works
 
 ```text
-⚡ Commands:  /story-full · /epic-full · /bug-full · /sprint-plan-full · …  (chains skills end-to-end with confirmation gates)
+⚡ Commands:  /story-full · /epic-full · /bug-full · /sprint-close-full · …  (chains skills end-to-end with confirmation gates)
    Skills:   /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
 ```
 
@@ -72,18 +72,19 @@ flowchart TD
     T --> V
     V --> M([✅ Jira + Confluence])
 
-    subgraph sprint["Sprint Planning"]
+    subgraph flow["Scrumban Flow"]
         direction LR
-        N["/plan-sprint"] --> O["/map-dependencies"]
-        O -.->|"sprint runs"| Q["/close-sprint"] --> R["/retrospective-analyst"]
+        FC["/flow-check\n--replenish"] --> ST["/start-ticket"]
+        ST --> SQ["/ship-to-qa"]
+        SQ -.->|"sprint close"| Q["/close-sprint"] --> R["/retrospective-analyst"]
     end
-    M -.->|"After backlog ready"| sprint
+    M -.->|"Pull when Ready queue low"| flow
 
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
     classDef cmd fill:#fef9c3,stroke:#ca8a04,color:#713f12
-    class C,E,F,AS,H,I,J,K,L,N,O,T,BT,TP,Q,R,SS skill
+    class C,E,F,AS,H,I,J,K,L,FC,ST,SQ,T,BT,TP,Q,R,SS skill
     class V gate
     class A,M endpoint
     class CMD cmd
@@ -103,8 +104,8 @@ End-to-end orchestration chains — the fastest way to get things done. Each com
 | `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
 | `/qa-full` | create-testplan → execute-testplan | Create test plan + run against staging in one step |
 | `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
-| `/sprint-plan-full` | plan-sprint → map-dependencies | Sprint planning with dependency critical path |
 | `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
+| `/sprint-plan-full` | plan-sprint → map-dependencies | _(Release forecasting only — not Scrumban daily flow)_ Capacity-based sprint allocation |
 | `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
 | `/tech-debt-full` | scan-tech-debt → create-task (per item) | Scan and create tasks for selected tech-debt items |
 
@@ -116,7 +117,7 @@ Individual steps invoked as `/atlassian-pm:<name>`. Use when you need finer cont
 
 ### PM / Product Owner
 
-Backlog ownership, sprint management, documentation, and reporting.
+Backlog ownership, flow management, documentation, and reporting.
 
 | Skill | Flags | Description |
 | --- | --- | --- |
@@ -127,7 +128,7 @@ Backlog ownership, sprint management, documentation, and reporting.
 | `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create User Stories |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
 | `/atlassian-pm:assign-issue ABC-123 [name]` | | Assign issue (bypasses MCP silent failure) |
-| `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | 8-phase planning: capacity + carry-over + assign |
+| `/atlassian-pm:flow-check` | `--replenish` | Board health snapshot + Scrumban replenishment trigger |
 | `/atlassian-pm:close-sprint` | `--sprint 123` | Close sprint: triage incomplete → move → Confluence review |
 | `/atlassian-pm:standup-report` | `--post` | Daily standup digest per assignee with anomaly detection |
 | `/atlassian-pm:reschedule-sprint` | `--sprint 123 --shift +7` | Bulk-shift issue dates across a sprint or issue list |
@@ -135,13 +136,16 @@ Backlog ownership, sprint management, documentation, and reporting.
 | `/atlassian-pm:create-doc` | | Create page: `tech-spec`, `adr`, `parent` |
 | `/atlassian-pm:update-doc` | | Update or move a Confluence page |
 | `/atlassian-pm:release-notes` | | Generate Confluence release notes from a Jira Fix Version |
+| `/atlassian-pm:plan-sprint` | `--sprint 123` `--carry-over-only` | _(Release forecasting only)_ Capacity-based sprint allocation |
 
 ### Engineer / Tech Lead
 
-Story and task authoring, codebase exploration, issue maintenance, and quality gates.
+Story and task authoring, DLC flow, codebase exploration, issue maintenance, and quality gates.
 
 | Skill | Flags | Description |
 | --- | --- | --- |
+| `/atlassian-pm:start-ticket ABC-123` | `--force` | Read AC + transition to In Progress. WIP gate enforced. |
+| `/atlassian-pm:ship-to-qa ABC-123` | | Post PR + preview URLs to Jira + transition to Ready for QA. WIP gate enforced. |
 | `/atlassian-pm:create-story` | | **Recommended** — Story + Sub-tasks in one workflow |
 | `/atlassian-pm:analyze-story ABC-123` | | Explore codebase → create Sub-tasks for existing Story |
 | `/atlassian-pm:create-task` | | Task: `tech-debt`, `bug`, `chore`, or `spike` |
@@ -229,12 +233,17 @@ Internal subagents dispatched automatically by skills and commands — not invok
 → Output: revised story + refined ACs → ready for /create-story
 ```
 
-### Sprint Planning Example
+### Scrumban Flow Example
 
 ```text
-/atlassian-pm:plan-sprint
-→ Discovery → Capacity → Carry-over → Prioritize
-→ Distribute → Risk → Review → Execute
+# Check board health + replenish Ready queue when low
+/atlassian-pm:flow-check
+
+# Start a ticket (read AC + move to In Progress)
+/atlassian-pm:start-ticket BEP-123
+
+# Ship to QA after PR is open (posts PR + preview URLs + transitions ticket)
+/atlassian-pm:ship-to-qa BEP-123
 ```
 
 ### Update with Cascade
@@ -468,7 +477,7 @@ All project-specific values live in `.claude/project-config.json` — the single
 | File | Loaded | Contains |
 | --- | --- | --- |
 | `.claude/project-config.json` | Every session | Jira fields, team roster, services, environments |
-| `.claude/project-config-team-detail.json` | Sprint planning only | Git evidence, bus factor, velocity history *(gitignored — create from template)* |
+| `.claude/project-config-team-detail.json` | Release forecasting only | Git evidence, bus factor, velocity history _(gitignored — create from template)_ |
 
 ### Git Filter — Automatic Placeholder Conversion
 
@@ -502,12 +511,12 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 32 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
+skills/                        ← 35 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
 ├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release
 ├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
-├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-subtask, update-task
-├── sprint/                    ← plan-sprint, map-dependencies, close-sprint, standup-report, reschedule-sprint
+├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-subtask, update-task, start-ticket, ship-to-qa
+├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint
 ├── confluence/                ← create-doc, update-doc
 └── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts
 
@@ -580,7 +589,7 @@ mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + 
 
 **Always verify after** — run `/atlassian-pm:verify-issue ABC-XXX --with-subtasks` to check ADF format, INVEST criteria, and alignment across the full tree.
 
-**Save tokens** — run `cache_sprint_issues(sprint_id=...)` before sprint planning to pre-cache all issues. Repeated reads cost 0 API tokens.
+**Save tokens** — run `cache_sprint_issues(sprint_id=...)` before flow-check or close-sprint to pre-cache all issues. Repeated reads cost 0 API tokens.
 
 **Let Claude explore** — `/atlassian-pm:analyze-story` always explores the codebase before creating Sub-tasks. Never skip — generic sub-tasks miss real implementation paths.
 
