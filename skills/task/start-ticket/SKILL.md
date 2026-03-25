@@ -1,10 +1,10 @@
 ---
 name: start-ticket
-model: haiku
+disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
-argument-hint: "[issue-key]"
+argument-hint: "[issue-key] [--force]"
 effort: low
 allowed-tools: Read, Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_get_transitions, mcp__mcp-atlassian__jira_transition_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
@@ -23,7 +23,8 @@ description: |
 
 ## Dynamic Context
 
-- **Config:** @.claude/project-config.json → `team.members[]`, `board.columns`
+- **Config:** @.claude/project-config.json → `team.members[]`
+- **Note:** `board.columns` is consumed by the WIP gate hook automatically — the skill does not query it directly
 
 ## Steps
 
@@ -31,7 +32,7 @@ description: |
 
 Call `jira_get_issue` with fields: `summary,status,description,labels,issuetype`
 
-> **🟢 PARALLEL** — also call `cache_get_issue` first; if cache hit and status fresh, skip `jira_get_issue`
+> Try `cache_get_issue` first; on cache miss or stale data, call `jira_get_issue`.
 
 **Step 2 — Tiered Guard**
 
@@ -50,9 +51,9 @@ Check current status:
 3. If blocked by hook:
    - Run the JQL the hook provides
    - Count results
-   - If count < wip_max: run `export CLAUDE_WIP_CONFIRMED={issue_key}:In Progress` then retry transition
+   - If count < wip_max: run `export CLAUDE_WIP_CONFIRMED={issue_key}:{col_name}` where `{col_name}` is the column name shown in the hook's block message (e.g., "In Progress"), then retry `jira_transition_issue`
    - If count >= wip_max: **STOP** — report "WIP limit reached for In Progress ({count}/{wip_max}). Finish an existing item first."
-4. Call `jira_transition_issue` with the found transition ID
+4. Call `jira_transition_issue` — pass the transition **name** (not numeric ID) using the `transition` field so the `pre_wip_limit_check` hook can detect the target column correctly
 
 **Step 4 — HR6**
 
