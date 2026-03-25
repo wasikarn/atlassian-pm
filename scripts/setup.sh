@@ -37,7 +37,7 @@ if [ -d "$PROJECT_DIR/mcp-servers/atlassian-cache" ]; then
     CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
   fi
   mkdir -p "$CLAUDE_PLUGIN_DATA"
-  UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/atlassian-cache" --extra embeddings --quiet
+  UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/atlassian-cache" --quiet
   cp "$PROJECT_DIR/mcp-servers/atlassian-cache/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
 fi
 
