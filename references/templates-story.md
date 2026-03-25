@@ -155,11 +155,33 @@ Additional: Workflow Steps | CRUD | User Roles | Complexity (manual vs automated
             ]}]}
           ]}
         ]
+      },
+      {"type": "rule"},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "📐 Technical Notes"}]},
+      {
+        "type": "panel",
+        "attrs": {"panelType": "note"},
+        "content": [
+          {"type": "paragraph", "content": [
+            {"type": "text", "text": "Architecture guardrails: ", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "[patterns/conventions to follow — e.g. repo pattern, event-driven, auth middleware]"}
+          ]},
+          {"type": "paragraph", "content": [
+            {"type": "text", "text": "Key files: ", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "[relevant file paths from codebase exploration — populated after Phase 6]"}
+          ]},
+          {"type": "paragraph", "content": [
+            {"type": "text", "text": "Previous learnings: ", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "[anti-patterns or pitfalls from related past stories — leave blank if none known]"}
+          ]}
+        ]
       }
     ]
   }
 }
 ```
+
+> **⚡ Technical Notes section is optional** — include when `domain_context` is available (Phase 1 Confluence search) or after codebase exploration (Phase 6). Skip if no relevant context exists. Update via `acli jira workitem edit --from-json` after Phase 7 if richer technical notes become available post-exploration.
 
 **AC Scenario Naming:**
 

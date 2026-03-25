@@ -113,6 +113,30 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 - Ask: Who? What? Why? Constraints?
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
 - If Epic exists → `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` → receives epic context (narrative, scope, children stories). Avoids redundant MCP calls.
+
+**Epic Readiness Pre-check (🟢 AUTO — runs after epic fetch, before GATE):**
+
+After receiving epic data, verify epic quality before investing in story writing:
+
+| Check | Pass Condition | If Fail |
+| --- | --- | --- |
+| ACs defined | Epic description contains ≥ 3 AC lines or bullet points | Warn — story ACs will be vague |
+| SP estimated | `customfield_10016` is set (not null/0) | Warn — story estimation reference missing |
+| No blockers | No linked issues with type "Blocks" in Open/In Progress status | Warn — story may be blocked before dev starts |
+
+**If 1+ checks fail:** Show warning table to user:
+
+```text
+⚠️ Epic Readiness Warning
+Epic {{PROJECT_KEY}}-XXX has quality gaps that may affect this story:
+  ❌ No SP estimate — consider /refine-epic {{PROJECT_KEY}}-XXX first
+  ❌ Only 1 AC defined — story ACs will be weak
+Proceed anyway? (y = continue, n = stop and fix epic first)
+```
+
+**⛔ GATE if ≥ 2 checks fail** — require explicit user `y` before continuing.
+**🟡 REVIEW if 1 check fails** — show warning, continue if user doesn't object within 10s.
+
 - **VS Assignment:** Which vertical slice? (`vs1-skeleton`, `vs2-*`, `vs-enabler`)
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
@@ -148,6 +172,16 @@ So that [benefit].
 - Define ACs, Scope, DoD
 - **AC Naming:** Use `AC{N}: [Verb] — [Scenario Name]` (not just "AC1: Title")
 - **VS Check:** Story delivers e2e value? All layers touched? (not shell-only)
+
+**📐 Technical Notes (⚡ populate if `domain_context` from Phase 1 exists):**
+
+Include the optional `📐 Technical Notes` section in the story ADF when domain context is available. Populate from:
+
+- `domain_context` — business rules, API contracts, constraints extracted from Confluence in Phase 1
+- Epic technical notes (if epic description has architectural guidance)
+
+Leave `Key files:` blank at this stage — it will be filled post-Phase 6 exploration if needed.
+
 - **🔄 ITERATE** — Present story draft as plan card (narrative, ACs, scope, DoD). Ask: Approve / Annotate / Major rework.
   - Annotate → user specifies items to change → revise ONLY those items → re-present (max 3 rounds)
   - Approve → proceed to INVEST validation

@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-46 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+48 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## Directory structure
 
@@ -11,7 +11,7 @@ hooks/
 ├── config_loader.py  — project-config.json reader (cached per process)
 ├── hooks.json        — hook registry (wires hooks to Claude events)
 ├── plugin/
-│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (15 hooks)
+│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (17 hooks)
 │   ├── quality/      — ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/        — read optimization, dedup, field presets (6 hooks)
 │   └── session/      — session management, compaction, token filtering, skill telemetry (15 hooks)
@@ -37,6 +37,8 @@ Enforce the hard rules defined in CLAUDE.md. Blocking hooks output a human-reada
 | HR5 | `pre_hr5_parent_verify_block.py` | Subtask creation without verified parent link |
 | HR6 | `pre_hr6_stale_read_guard.py` | Reading cache after a recent write (stale data warning) |
 | HR7 | `pre_hr7_sprint_id_guard.py` | Hardcoded sprint IDs — enforces dynamic lookup |
+| HR8 | `pre_hr8_subtask_date_guard.py` | Subtask dates outside parent story's date range |
+| HR9 | `post_hr9_alignment_suggest.py` | Suggests `/verify-issue --with-subtasks` when AC:subtask ratio is poor |
 | HR10 | `pre_hr10_subtask_sprint_guard.py` | Setting sprint field on subtasks (API error + cascade failure) |
 | DoR | `pre_dor_check.py` | Blocks moving to In Progress without story subtasks + AC + QG ≥ 90% |
 | WIP | `pre_wip_limit_check.py` | Injects reminder to verify assignee WIP < team limit before moving to In Progress |

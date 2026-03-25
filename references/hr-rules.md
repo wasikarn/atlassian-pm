@@ -3,8 +3,8 @@
 Single source of truth for all Hard Rules.
 Referenced by: `CLAUDE.md`, `skill-orchestration.md`, `workflow-patterns.md`
 
-Hooks enforce **HR2–HR7, HR10** automatically (PreToolUse blocking).
-HR8 has suggestion-only hook. HR9 has no hook — manual via `/verify-issue --with-subtasks`.
+Hooks enforce **HR2–HR10** automatically.
+HR8: PreToolUse blocking on date fields outside parent range. HR9: PostToolUse suggestion after subtask batch. Manual check: `/verify-issue --with-subtasks`.
 
 ## HR1. Quality Gate ≥ 90% Before Atlassian Writes
 
@@ -80,9 +80,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Why:** Misaligned dates break capacity tracking and burndown charts. Subtask points summing to 3× parent points indicates planning error that confuses sprint velocity.
 
-**Enforcement:** `post_subtask_alignment_suggest.py` (suggestion only — no block)
-
-> **Enforcement gap:** This rule has no blocking hook. Requires manual check or `/verify-issue --with-subtasks` (A3-A4 checks).
+**Enforcement:** `pre_hr8_subtask_date_guard.py` (blocks `jira_update_issue` when date fields on subtask fall outside parent range)
 
 - ✅ Parent due 2026-03-31 → subtasks due ≤ 2026-03-31
 - ❌ Parent 3 SP, subtasks total 15 SP
@@ -91,9 +89,7 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Why:** Misaligned descriptions create ambiguity — a Story says "user can X" but no subtask implements X. Leads to QA finding gaps after development.
 
-**Enforcement:** None (no hook)
-
-> **Enforcement gap:** This rule has no hook enforcement. Run `/verify-issue --with-subtasks` (A1-A6 alignment checks) manually after creating subtasks.
+**Enforcement:** `post_hr9_alignment_suggest.py` (suggestion — fires PostToolUse after subtask creation when AC:subtask ratio > 2.5:1 or ≥ 2 subtasks created; injects reminder to run `/verify-issue --with-subtasks`)
 
 - ✅ Story has AC1: Login with email → subtask "[BE] Implement email auth endpoint"
 - ❌ Story has 5 ACs → only 2 subtasks with vague objectives

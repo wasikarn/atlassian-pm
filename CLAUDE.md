@@ -31,7 +31,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for spr
 
 ## Common Mistakes
 
-> Hook-enforced mistakes (HR2-HR7, HR10) are blocked automatically. Full troubleshooting: `references/troubleshooting.md`
+> Hook-enforced mistakes (HR2-HR10) are blocked automatically. Full troubleshooting: `references/troubleshooting.md`
 
 | Category | Quick Fix |
 | --- | --- |
@@ -54,7 +54,7 @@ Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scri
 
 ### HARD RULES
 
-> Hooks enforce HR2-HR7, HR10 automatically. Full definitions: `references/hr-rules.md`
+> Hooks enforce HR2-HR10 automatically. Full definitions: `references/hr-rules.md`
 
 <important if="creating or verifying issue quality before writing to Jira">
 **HR1 QG ≥ 90%:** NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit.
