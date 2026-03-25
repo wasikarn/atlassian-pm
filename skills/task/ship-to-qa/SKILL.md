@@ -5,15 +5,15 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 argument-hint: "[issue-key]"
-effort: low
+effort: medium
 allowed-tools: Read, Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_get_transitions, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Bundle: post PR + preview URLs to Jira + transition to Ready for QA in one command.
   Auto-detects PR from current branch. Constructs CF Pages URLs from project-config.json.
 
-  Triggers: "ship to qa", "ready for qa", "send to qa", "ส่ง qa", "ship {{PROJECT_KEY}}-XXX", "ready for review"
+  Triggers: "ship to qa", "ready for qa", "send to qa", "ส่ง qa", "ship {{PROJECT_KEY}}-XXX", "ready for qa review"
   Use when: after PR is open — adds PR link + preview URLs to Jira comment and transitions ticket
-  Do NOT use for: merging (use superpowers:finishing-a-development-branch); post-merge sync (use pr-review-jira-sync)
+  Do NOT use for: merging (use superpowers:finishing-a-development-branch); post-merge sync (use pr-review-jira-sync); asking if code is ready for peer review (that is not a QA handoff)
 ---
 
 # /ship-to-qa
@@ -61,6 +61,7 @@ If `environments.preview` is missing from config: warn "environments.preview not
 
 | Label | Preview URLs | Staging BE |
 |-------|-------------|-----------|
+| `fe-only` + `needs-be` | All services from `environments.preview` | `environments.staging.api` (`needs-be` wins) |
 | `fe-only` | All services from `environments.preview` | Hidden |
 | `needs-be` | All services from `environments.preview` | `environments.staging.api` |
 | _(no label)_ | All services from `environments.preview` | `environments.staging.api` (safe default) |
