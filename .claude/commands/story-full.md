@@ -21,6 +21,12 @@ Use the Skill tool to invoke `atlassian-pm:search-issues` with `$ARGUMENTS` as t
 
 ### Step 2 — Create Story
 
+**Circuit breaker:** Before invoking create-story, check conversation history for a completed story key (pattern `BEP-\d+` from a previous create-story run in this session). If found, ask:
+
+> "Story [KEY] was already created in this session. Skip to Step 3 (verify) or restart from scratch?"
+> → Skip: proceed to Step 3 with that key
+> → Restart: invoke create-story again (warn that a duplicate may be created)
+
 Use the Skill tool to invoke `atlassian-pm:create-story` with `$ARGUMENTS`.
 The story_key flows via conversation context — no explicit passing needed.
 

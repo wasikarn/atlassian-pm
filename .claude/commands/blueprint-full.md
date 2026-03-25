@@ -5,6 +5,7 @@ description: |
   Orchestrates: blueprint → create-epic → create-story → verify-issue --with-subtasks
   Args: auto-detected — BEP-\d+ pattern = existing epic key; otherwise = description
 model: sonnet
+context: fork
 argument-hint: "[description] or EPIC-KEY"
 ---
 

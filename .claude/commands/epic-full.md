@@ -4,6 +4,7 @@ description: |
   Triggers: "epic full", "create epic end-to-end", "epic with story", "สร้าง epic ครบ"
   Orchestrates: search-issues → create-epic → create-story → verify-issue --with-subtasks
 model: sonnet
+context: fork
 argument-hint: "[epic-description]"
 ---
 

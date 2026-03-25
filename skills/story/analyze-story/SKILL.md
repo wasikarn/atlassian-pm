@@ -53,6 +53,21 @@ effort: high
 
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
 
+**Story Readiness Pre-check (🟢 AUTO — runs after bootstrap, before GATE):**
+
+Before investing in subtask design, verify the story is ready for analysis:
+
+| Check | Pass Condition | If Fail |
+| --- | --- | --- |
+| ACs defined | Story description contains ≥ 1 AC panel | ⛔ STOP — no ACs = cannot design subtasks; suggest `/create-story` to rewrite |
+| Story type | `issuetype.name = "Story"` (not Epic, Task, Subtask) | ⛔ STOP — wrong type creates orphan subtasks |
+| Not Done | Status not in `Done / Closed / Cancelled` | ⚠️ Warn — analyzing a completed story may redo finished work |
+| Epic linked | `parent` field set | ⚠️ Warn — orphan story breaks VS traceability; suggest setting epic link |
+| No existing subtasks | `subtasks[]` is empty | ⚠️ Warn — subtasks already exist; suggest `/sync-artifacts` instead |
+
+**If ACs or story type check fails → ⛔ STOP** — show error and do not proceed to Phase 2.
+**If status / epic / subtask warnings → 🟡 REVIEW** — show warning table, continue if user confirms.
+
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
 
 Search for domain documentation relevant to this story using its title + AC keywords:

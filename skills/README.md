@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-32 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+33 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -69,6 +69,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | scan-tech-debt | `/atlassian-pm:scan-tech-debt` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | release-notes | `/atlassian-pm:release-notes` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
 | atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
+| status | `/atlassian-pm:status` | 4 | atlassian-cache, mcp-atlassian | Session navigator — active sprint status, team WIP, pending HR violations, and suggested next action. Use at session start or to resume after a break. |
 
 ---
 

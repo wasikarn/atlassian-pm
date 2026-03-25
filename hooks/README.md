@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-48 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+49 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## Directory structure
 

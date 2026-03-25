@@ -192,13 +192,20 @@ else
   WARN=$((WARN+1))
 fi
 
-# Check 10: team-detail config (optional)
+# Check 10: team-detail config (optional — auto-scaffold from template)
 TEAM_DETAIL="${PLUGIN_ROOT}/.claude/project-config-team-detail.json"
+TEAM_TEMPLATE="${PLUGIN_ROOT}/.claude/project-config-team-detail.json.template"
 if [ -f "$TEAM_DETAIL" ]; then
   echo "  ✓  project-config-team-detail.json present"
   PASS=$((PASS+1))
+elif [ -f "$TEAM_TEMPLATE" ]; then
+  cp "$TEAM_TEMPLATE" "$TEAM_DETAIL"
+  echo "  ~  project-config-team-detail.json scaffolded from template"
+  echo "     → Edit $TEAM_DETAIL to add real git evidence and capacity data"
+  echo "     → Run /atlassian-pm:velocity-tracker to populate velocity history"
+  WARN=$((WARN+1))
 else
-  echo "  -  project-config-team-detail.json not found"
+  echo "  -  project-config-team-detail.json not found (no template to scaffold from)"
   echo "     (optional — needed for sprint planning only)"
   SKIP=$((SKIP+1))
 fi

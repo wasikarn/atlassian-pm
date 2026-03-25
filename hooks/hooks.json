@@ -211,6 +211,11 @@
 						"type": "command",
 						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_sprint_capacity_recheck.py",
 						"timeout": 5
+					},
+					{
+						"type": "command",
+						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr8_sp_sum_suggest.py",
+						"timeout": 5
 					}
 				]
 			},

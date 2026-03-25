@@ -80,7 +80,10 @@ Explore → ADF → Self-check (verification-checklist.md) → Score → QG ≥ 
 
 **Why:** Misaligned dates break capacity tracking and burndown charts. Subtask points summing to 3× parent points indicates planning error that confuses sprint velocity.
 
-**Enforcement:** `pre_hr8_subtask_date_guard.py` (blocks `jira_update_issue` when date fields on subtask fall outside parent range)
+**Enforcement:**
+
+- `pre_hr8_subtask_date_guard.py` — blocks `jira_update_issue` when date fields on subtask fall outside parent range
+- `post_hr8_sp_sum_suggest.py` — warns PostToolUse when subtask SP sum exceeds parent SP by >50%
 
 - ✅ Parent due 2026-03-31 → subtasks due ≤ 2026-03-31
 - ❌ Parent 3 SP, subtasks total 15 SP

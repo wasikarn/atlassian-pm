@@ -3,11 +3,11 @@ name: atlassian-scripts
 description: |
   Python scripts for updating Confluence pages and Jira issues via REST API directly.
 
-  Triggers: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script"
+  Triggers: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script", "list scripts", "what scripts"
   Use when: MCP tools have limitations (e.g., code macro formatting, ADF manipulation, bulk ADF repair)
   Do NOT use for: standard issue creation (use create-story or create-task); normal Confluence updates (use update-doc)
 x-compatibility: []
-argument-hint: "[script-name] [args]"
+argument-hint: "[script-name] [args] | --list"
 effort: low
 user-invocable: false
 ---
@@ -19,6 +19,29 @@ user-invocable: false
 **Library:** `scripts/lib/`
 
 > See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full architecture, available scripts, and module responsibilities.
+
+---
+
+## Discovery
+
+**If invoked with `--list` or no clear script target**, run this to show available scripts:
+
+```bash
+echo "=== Available atlassian-pm scripts ===" && \
+for f in scripts/api/*.py; do
+  name=$(basename "$f")
+  desc=$(python3 -c "
+import ast, sys
+try:
+    tree = ast.parse(open('$f').read())
+    ds = ast.get_docstring(tree)
+    print(ds.split('.')[0].strip() if ds else '(no docstring)')
+except:
+    print('(parse error)')
+")
+  printf '  %-40s %s\n' "$name" "$desc"
+done
+```
 
 ---
 
@@ -35,6 +58,7 @@ user-invocable: false
 | `fix_confluence_code_blocks.py` | Fix broken code formatting |
 | `audit_confluence_pages.py` | Verify content across multiple pages |
 | `update_jira_description.py` | Find/replace in Jira ADF descriptions |
+| `workflow_checkpoint.py` | Save/restore multi-step workflow state |
 
 ## Usage Pattern
 
