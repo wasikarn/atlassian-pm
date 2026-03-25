@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-33 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+35 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -43,16 +43,25 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | sync-artifacts | `/atlassian-pm:sync-artifacts` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Bidirectional sync from any artifact (Epic/Story/Sub-task/Confluence). Cascades changes across the full artifact graph. |
 | spec-to-stories | `/atlassian-pm:spec-to-stories` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Convert Confluence spec page to Jira User Stories via spec-parser-agent. Dedup check, QG, batch create with HR5 verification. --dry-run supported. |
 
-### Sprint Planning
+### DLC Workflow
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| plan-sprint | `/atlassian-pm:plan-sprint` | 8 | atlassian-cache, mcp-atlassian, acli | 8-phase sprint planning: capacity → carry-over → prioritize (Impact/Effort) → distribute (skill matrix + hours) → risk → execute assignments in Jira. |
-| map-dependencies | `/atlassian-pm:map-dependencies` | 5 | atlassian-cache, mcp-atlassian | Sprint dependency analysis: dependency graph (Mermaid), critical path (CPM), swim lane plan per team member, decoupling strategies. |
-| close-sprint | `/atlassian-pm:close-sprint` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
-| standup-report | `/atlassian-pm:standup-report` | 4 | atlassian-cache, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
+| start-ticket | `/atlassian-pm:start-ticket` | 5 | mcp-atlassian, atlassian-cache | Read ticket AC + transition to In Progress in one command. Tiered guard: warn on In Progress/Reopened, block on Done. WIP gate enforced. |
+| ship-to-qa | `/atlassian-pm:ship-to-qa` | 7 | mcp-atlassian, atlassian-cache, Bash (gh) | Post PR + CF Pages preview URLs to Jira comment + transition to Ready for QA. Auto-detects PR from current branch. WIP gate enforced. |
+
+### Flow & Release
+
+> **Scrumban:** No sprint planning ceremony — work flows via pull/replenishment (`/flow-check`). Skills below support flow health, release forecasting, and sprint close.
+
+| Skill | Command | Phases | Requires | Description |
+| --- | --- | --- | --- | --- |
+| flow-check | `/atlassian-pm:flow-check` | 3 | atlassian-cache, mcp-atlassian | Board health snapshot + Scrumban replenishment trigger. Primary Scrumban flow tool. |
+| map-dependencies | `/atlassian-pm:map-dependencies` | 5 | atlassian-cache, mcp-atlassian | Dependency graph (Mermaid), critical path (CPM), swim lane per team member, decoupling strategies. |
+| close-sprint | `/atlassian-pm:close-sprint` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. |
+| standup-report | `/atlassian-pm:standup-report` | 4 | atlassian-cache, mcp-atlassian | Daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
 | reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | atlassian-cache, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
-| flow-check | `/atlassian-pm:flow-check` | 3 | atlassian-cache, mcp-atlassian | Board health snapshot + Scrumban replenishment trigger |
+| plan-sprint | `/atlassian-pm:plan-sprint` | 8 | atlassian-cache, mcp-atlassian, acli | _(Release forecasting only)_ Capacity-based sprint allocation for release planning context. Not used in Scrumban daily flow. |
 
 ### Confluence
 
@@ -121,7 +130,7 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 ## Quick Reference — Argument Patterns
 
-```
+```text
 /atlassian-pm:create-story                            # interactive, no args
 /atlassian-pm:create-story "admin monthly report"     # description as seed
 
@@ -132,12 +141,15 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:verify-issue {{PROJECT_KEY}}-123 --with-subtasks    # story + all subtasks
 /atlassian-pm:verify-issue {{PROJECT_KEY}}-123 --with-subtasks --fix  # verify + auto-fix
 
-/atlassian-pm:plan-sprint                             # next future sprint
-/atlassian-pm:plan-sprint --sprint 456                # specific sprint ID
-/atlassian-pm:plan-sprint --carry-over-only           # carry-over analysis only
+/atlassian-pm:flow-check                              # board health + WIP status
+/atlassian-pm:flow-check --replenish                  # replenish Ready queue only
 
-/atlassian-pm:map-dependencies                        # current sprint
+/atlassian-pm:map-dependencies                        # dependency graph for current issues
 /atlassian-pm:map-dependencies --keys {{PROJECT_KEY}}-10,{{PROJECT_KEY}}-11  # specific issues
+
+# (release forecasting only — not Scrumban daily flow)
+/atlassian-pm:plan-sprint                             # capacity-based sprint allocation
+/atlassian-pm:plan-sprint --sprint 456                # specific sprint ID
 
 /atlassian-pm:search-issues "credit top-up"           # keyword search
 /atlassian-pm:search-issues {{PROJECT_KEY}}-123 --children        # list subtasks
@@ -176,6 +188,10 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:release-notes --version v2.3.0             # specific version
 /atlassian-pm:release-notes --version v2.3.0 --dry-run  # preview
 /atlassian-pm:release-notes                              # pick version interactively
+
+/atlassian-pm:start-ticket BEP-123                       # read AC + transition In Progress
+/atlassian-pm:start-ticket BEP-123 --force               # override Done/Closed guard
+/atlassian-pm:ship-to-qa BEP-123                         # post PR + preview URLs + transition QA
 ```
 
 ---

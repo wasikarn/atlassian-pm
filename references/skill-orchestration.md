@@ -16,10 +16,11 @@
 | Test plan | `/create-testplan` → verify | ≥ 90% |
 | Update single | `/update-{epic,story,task,subtask}` → verify | ≥ 90% |
 | Update cascade | `/sync-artifacts` → verify `--with-subtasks` | ≥ 90% |
-| Plan sprint | `/plan-sprint` → `/map-dependencies` | N/A |
+| Board replenishment | `/flow-check --replenish` | N/A |
+| Dependency check | `/map-dependencies` | N/A |
 | Close sprint | `/close-sprint` → `/retrospective-analyst` | N/A |
 | Daily standup | `/standup-report` | N/A |
-| Release planning | `/plan-release` → `/plan-sprint` | N/A |
+| Release planning | `/plan-release` | N/A |
 | Bulk reschedule | `/reschedule-sprint` | N/A |
 | Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
 | Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
@@ -111,8 +112,10 @@ flowchart LR
 | `/create-task` | `/search-issues` | `/verify-issue` >= 90% |
 | `/update-{type}` | Issue exists | `/verify-issue` >= 90% |
 | `/sync-artifacts` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
-| `/plan-sprint` | Sprint exists | — |
-| `/map-dependencies` | Sprint planned | — |
+| `/start-ticket` | Issue key exists in Jira | Ticket → In Progress + AC displayed |
+| `/ship-to-qa` | PR open, issue In Progress | Jira comment (PR + preview URLs) + ticket → Ready for QA |
+| `/flow-check` | Board config in project-config.json | WIP table + optional replenishment |
+| `/map-dependencies` | Issues with links in Jira | Dependency graph + critical path |
 | `/close-sprint` | Active sprint with issues | Closed sprint + Confluence review page |
 | `/standup-report` | Active sprint | Digest output (optional Confluence post) |
 | `/plan-release` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
@@ -170,4 +173,4 @@ mcp__repomix__pack_codebase(
 
 - After any MCP write (`jira_update_issue`, `jira_create_issue`) → `cache_invalidate(issue_key)`
 - After sprint manipulation → `cache_invalidate(sprint_id)`
-- Before sprint planning → `cache_refresh(sprint_id)` for fresh data
+- Before flow-check or map-dependencies → `cache_refresh(sprint_id)` for fresh data
