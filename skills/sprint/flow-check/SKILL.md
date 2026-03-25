@@ -79,7 +79,7 @@ Skip Phase 1 if `--replenish` flag passed.
 
 **Goal:** Determine if the Ready queue needs items pulled from Backlog.
 **Required inputs:** Replenishment threshold from config (default 4)
-**Constraints:** Transition items only after explicit user confirmation; HR6 — cache_invalidate after each transition
+**Constraints:** Transition items only after explicit user confirmation; HR6 — cache_invalidate after each transition; WIP gate fires on each Ready transition — set CLAUDE_WIP_CONFIRMED=\<key\>:Ready after confirming count < wip_max
 **Output:** "Queue healthy" or top-5 WSJF-ranked candidates + confirmation prompt
 
 Count current Ready items (from Phase 1 or re-query if `--replenish` fast path).

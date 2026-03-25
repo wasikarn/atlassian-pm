@@ -57,6 +57,7 @@ def main() -> None:
 
     log_event(_HOOK, "TRIGGERED", {"issue_key": issue_key, "transition": transition})
     inject_context(build_replenish_instruction(issue_key))
+    # inject_context prints the JSON payload and returns normally — exit 0 is implicit
 
 
 if __name__ == "__main__":

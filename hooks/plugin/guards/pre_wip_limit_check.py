@@ -105,8 +105,8 @@ def main() -> None:
 
     # Build JQL for Claude to run the count check
     project_key = cfg.get("jira", {}).get("project_key", "")
-    statuses_quoted = ", ".join(f'"{s}"' for s in col_cfg.get("statuses", []))
-    jql = f'project = "{project_key}" AND status IN ({statuses_quoted})'
+    statuses_quoted = ", ".join(f"'{s}'" for s in col_cfg.get("statuses", []))
+    jql = f"project = '{project_key}' AND status IN ({statuses_quoted})"
 
     log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "col": col_name, "wip_max": wip_max})
     block(build_block_message(issue_key, col_name, wip_max, jql))
