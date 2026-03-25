@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `flow-check` skill — board health snapshot + Scrumban replenishment
+- Hard WIP gate hook (`plugin/guards/pre_wip_limit_check.py`) — blocks transition until Claude confirms WIP count (DoR/DoD pattern with `CLAUDE_WIP_CONFIRMED` env var)
+- Auto-trigger hook (`post_done_flow_check.py`) — injects `/flow-check --replenish` on Done transitions
+- `workflow` + `board.columns` config in `project-config.json`
+
+### Removed
+
+- `hooks/dev/pre_wip_limit_check.py` (soft warn) — replaced by hard gate in `plugin/guards/`
+
+### Breaking
+
+- WIP enforcement is now a hard block (was soft warn). Claude must confirm WIP count before transitioning. Set `CLAUDE_WIP_CONFIRMED=<key>:<column>` after verifying count is below limit.
+
 ## [1.6.2] - 2026-03-23
 
 ### Changed
