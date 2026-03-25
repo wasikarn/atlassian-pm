@@ -8,6 +8,7 @@ Injects an imperative instruction so Claude runs /flow-check --replenish.
 
 Exit codes: always 0 (inject_context or pass through silently)
 """
+import re
 import sys
 from pathlib import Path
 
@@ -19,14 +20,17 @@ _DONE_KEYWORDS = frozenset([
     "done", "close", "closed", "complete", "completed",
     "resolve", "resolved", "finish", "finished",
 ])
+_DONE_PATTERN = re.compile(
+    r'\b(' + '|'.join(re.escape(kw) for kw in sorted(_DONE_KEYWORDS)) + r')\b',
+    re.IGNORECASE,
+)
 
 
 def is_done_transition(transition: str) -> bool:
     """Return True if transition name indicates moving to a Done-equivalent state."""
     if not transition:
         return False
-    t = transition.lower().strip()
-    return any(kw in t for kw in _DONE_KEYWORDS)
+    return bool(_DONE_PATTERN.search(transition))
 
 
 def build_replenish_instruction(issue_key: str) -> str:

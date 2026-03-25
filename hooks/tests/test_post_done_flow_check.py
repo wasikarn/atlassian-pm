@@ -32,6 +32,19 @@ def test_is_done_transition_non_done():
     assert is_done_transition("") is False
 
 
+def test_is_done_transition_negation_prefixes_not_matched():
+    from plugin.session.post_done_flow_check import is_done_transition
+    assert is_done_transition("Incomplete") is False
+    assert is_done_transition("Uncompleted") is False
+    assert is_done_transition("Unresolved") is False
+
+
+def test_is_done_transition_substring_not_matched():
+    from plugin.session.post_done_flow_check import is_done_transition
+    assert is_done_transition("Disclose") is False
+    assert is_done_transition("Disclosed") is False
+
+
 def test_build_replenish_instruction_contains_required_parts():
     from plugin.session.post_done_flow_check import build_replenish_instruction
     msg = build_replenish_instruction("BEP-42")
