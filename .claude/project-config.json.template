@@ -62,7 +62,8 @@
         "statuses": ["Selected for Development", "Ready"]
       },
       "In Progress": {
-        "wip_max": 6,
+        "wip_max": 2,
+        "wip_scope": "per-assignee",
         "statuses": ["In Progress", "In Dev"]
       },
       "Review": {
@@ -70,7 +71,7 @@
         "statuses": ["Code Review", "Review", "In Review"]
       },
       "QA": {
-        "wip_max": 3,
+        "wip_max": 4,
         "statuses": ["QA", "Testing", "In QA", "Ready for QA"]
       }
     }

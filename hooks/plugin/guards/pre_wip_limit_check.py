@@ -54,10 +54,12 @@ def build_block_message(
     col_name: str,
     wip_max: int,
     jql: str,
+    per_assignee: bool = False,
 ) -> str:
     """Build the block reason shown to Claude. Instructs count check + confirmation."""
+    scope_note = " (per assignee)" if per_assignee else ""
     return (
-        f"⛔ HR-WIP: Confirm WIP count before moving {issue_key} to '{col_name}' (limit: {wip_max}).\n\n"
+        f"⛔ HR-WIP: Confirm WIP count before moving {issue_key} to '{col_name}' (limit: {wip_max}{scope_note}).\n\n"
         f"Run: jira_search(jql=\"{jql}\", fields=\"summary,key\", max_results=50)\n"
         f"Count the results.\n"
         f"  • If count < {wip_max}: set CLAUDE_WIP_CONFIRMED={issue_key}:{col_name} then retry.\n"
@@ -106,10 +108,12 @@ def main() -> None:
     # Build JQL for Claude to run the count check
     project_key = cfg.get("jira", {}).get("project_key", "")
     statuses_quoted = ", ".join(f"'{s}'" for s in col_cfg.get("statuses", []))
-    jql = f"project = '{project_key}' AND status IN ({statuses_quoted})"
+    per_assignee = col_cfg.get("wip_scope") == "per-assignee"
+    assignee_filter = " AND assignee = currentUser()" if per_assignee else ""
+    jql = f"project = '{project_key}' AND status IN ({statuses_quoted}){assignee_filter}"
 
-    log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "col": col_name, "wip_max": wip_max})
-    block(build_block_message(issue_key, col_name, wip_max, jql))
+    log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "col": col_name, "wip_max": wip_max, "per_assignee": per_assignee})
+    block(build_block_message(issue_key, col_name, wip_max, jql, per_assignee=per_assignee))
 
 
 if __name__ == "__main__":
