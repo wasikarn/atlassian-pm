@@ -46,22 +46,9 @@ def test_find_column_empty_transition_returns_none():
 
 def test_build_block_message_contains_key_info():
     from plugin.guards.pre_wip_limit_check import build_block_message
-    msg = build_block_message("BEP-5", "In Progress", 3, ["BEP-1", "BEP-2", "BEP-3"], "project = \"BEP\" AND status IN (\"In Progress\")")
+    msg = build_block_message("BEP-5", "In Progress", 3, "project = \"BEP\" AND status IN (\"In Progress\")")
     assert "In Progress" in msg
     assert "3" in msg
     assert "BEP-5" in msg
     assert "CLAUDE_WIP_CONFIRMED" in msg
     assert "jira_search" in msg
-
-
-def test_build_block_message_shows_up_to_5_current_items():
-    from plugin.guards.pre_wip_limit_check import build_block_message
-    keys = [f"BEP-{i}" for i in range(10)]
-    # Use BEP-100 to avoid substring collision with BEP-9 (BEP-99 contains "BEP-9")
-    msg = build_block_message("BEP-100", "Review", 2, keys, "project = \"BEP\" AND status IN (\"Review\")")
-    # First 5 shown
-    assert "BEP-0" in msg
-    assert "BEP-4" in msg
-    # Items 6-10 not shown
-    assert "BEP-5" not in msg
-    assert "BEP-9" not in msg

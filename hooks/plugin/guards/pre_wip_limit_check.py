@@ -22,7 +22,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, block, log_event, parse_stdin
 
 _HOOK = "wip-hard-gate"
-_MAX_DISPLAY_KEYS = 5
 
 
 def _load_config() -> dict:
@@ -54,20 +53,15 @@ def build_block_message(
     issue_key: str,
     col_name: str,
     wip_max: int,
-    current_keys: list[str],
     jql: str,
 ) -> str:
     """Build the block reason shown to Claude. Instructs count check + confirmation."""
-    display = current_keys[:_MAX_DISPLAY_KEYS]
-    suffix = " ..." if len(current_keys) > _MAX_DISPLAY_KEYS else ""
-    keys_str = ", ".join(display) + suffix if display else "(none yet)"
     return (
         f"⛔ HR-WIP: Confirm WIP count before moving {issue_key} to '{col_name}' (limit: {wip_max}).\n\n"
         f"Run: jira_search(jql=\"{jql}\", fields=\"summary,key\", max_results=50)\n"
         f"Count the results.\n"
         f"  • If count < {wip_max}: set CLAUDE_WIP_CONFIRMED={issue_key}:{col_name} then retry.\n"
-        f"  • If count >= {wip_max}: Do NOT proceed. Finish or move an existing item first.\n\n"
-        f"Known items in '{col_name}': {keys_str}"
+        f"  • If count >= {wip_max}: Do NOT proceed. Finish or move an existing item first."
     )
 
 
@@ -98,7 +92,7 @@ def main() -> None:
         return
 
     wip_max = col_cfg.get("wip_max")
-    if not wip_max:
+    if wip_max is None:
         allow()
         return
 
@@ -115,7 +109,7 @@ def main() -> None:
     jql = f'project = "{project_key}" AND status IN ({statuses_quoted})'
 
     log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "col": col_name, "wip_max": wip_max})
-    block(build_block_message(issue_key, col_name, wip_max, [], jql))
+    block(build_block_message(issue_key, col_name, wip_max, jql))
 
 
 if __name__ == "__main__":
