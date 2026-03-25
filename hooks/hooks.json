@@ -1,462 +1,472 @@
 {
-	"description": "HR enforcement hooks and workflow automation for atlassian-pm plugin",
-	"hooks": {
-		"PreToolUse": [
-			{
-				"matcher": "Bash",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_adf_structure_validate.py",
-						"timeout": 10
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_event_ac_check.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr1_quality_gate.py",
-						"timeout": 10
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_update_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr3_block_mcp_assignee.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr10_subtask_sprint_guard.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr8_subtask_date_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr2_jql_order_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__confluence_update_page",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr4_confluence_macro_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr6_stale_read_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_search_before_create.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr5_parent_verify_block.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr7_sprint_id_guard.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_story_size_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_field_preset_guard.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_cache_prefer.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "Glob|Grep",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_qmd_auto_search.py",
-						"timeout": 10
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_transition_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_dod_check.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_dor_check.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_wip_limit_check.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "Skill",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_skill_usage_log.py",
-						"timeout": 5
-					}
-				]
-			}
-		],
-		"PostToolUse": [
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_filter_mcp_response.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr5_parent_verify_remind.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_vs_integrity_track.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr9_alignment_suggest.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic|mcp__mcp-atlassian__jira_update_sprint",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_queue_invalidation.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_update_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_sprint_capacity_recheck.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr8_sp_sum_suggest.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_search_track.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_sprints_from_board",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr7_sprint_lookup_track.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_confirm_invalidation.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__plugin_atlassian-pm_atlassian-cache__cache_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_auto_parse_large_output.py",
-						"timeout": 15
-					}
-				]
-			},
-			{
-				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_subtask_alignment_suggest.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/post_cache_suggest.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__mcp-atlassian__jira_get_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr5_parent_verify_clear.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_event_model_track.py",
-						"timeout": 5,
-						"async": true
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_vs_integrity_track.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/post_cache_checked_track.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "Task",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_explore_fallback_suggest.py",
-						"timeout": 10
-					}
-				]
-			},
-			{
-				"matcher": "Bash",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/post_auto_verify_suggest.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_queue_invalidation_acli.py",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_pr_sync.py",
-						"timeout": 5
-					}
-				]
-			}
-		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/stop_hr6_unflushed_check.py",
-						"timeout": 10
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_hr5_pending_check.py",
-						"timeout": 10
-					},
-					{
-						"type": "prompt",
-						"prompt": "First: scan tool calls in this conversation. If none of these Jira write tools appear \u2014 jira_create_issue, jira_batch_create_issues, jira_update_issue, jira_transition_issue, jira_delete_issue, jira_add_comment, jira_add_worklog, jira_link_to_epic \u2014 respond {\"ok\": true} immediately. Otherwise verify: (1) subtask created \u2192 parent verified via jira_get_issue? (2) skill invoked (/story-full, /analyze-story, /plan-sprint) \u2192 all phases complete? (3) pending ops (not cache_invalidate) unresolved? Note: HR6 cache_invalidate is handled by command hook \u2014 skip it. Complete or Q&A only: {\"ok\": true}. Critical step skipped: {\"ok\": false, \"reason\": \"step missed\"}. Be conservative \u2014 only block if confident.",
-						"timeout": 30
-					}
-				]
-			}
-		],
-		"SessionStart": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
-						"timeout": 60
-					},
-					{
-						"type": "command",
-						"command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}/tasks\"",
-						"timeout": 5
-					},
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_cleanup_artifacts.py",
-						"timeout": 10
-					}
-				]
-			},
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_prerequisite_check.py",
-						"timeout": 5
-					}
-				]
-			},
-			{
-				"matcher": "compact",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_compact_reinject.py",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"PreCompact": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/compact_pre_save.py",
-						"timeout": 10
-					}
-				]
-			}
-		],
-		"PostToolUseFailure": [
-			{
-				"matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_confirm_invalidation.py",
-						"timeout": 5
-					}
-				]
-			}
-		],
-		"UserPromptSubmit": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_prompt_issue_prefetch.py",
-						"timeout": 5
-					}
-				]
-			}
-		],
-		"PostCompact": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_compact_reinject.py",
-						"timeout": 5
-					}
-				]
-			}
-		],
-		"SubagentStart": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_subagent_context.py",
-						"timeout": 5
-					}
-				]
-			}
-		]
-	}
+  "description": "HR enforcement hooks and workflow automation for atlassian-pm plugin",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_adf_structure_validate.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_event_ac_check.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr1_quality_gate.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_update_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr3_block_mcp_assignee.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr10_subtask_sprint_guard.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr8_subtask_date_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr2_jql_order_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__confluence_update_page",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr4_confluence_macro_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr6_stale_read_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_search_before_create.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr5_parent_verify_block.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr7_sprint_id_guard.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_story_size_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_field_preset_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_cache_prefer.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_qmd_auto_search.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_transition_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_dod_check.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/pre_dor_check.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_wip_limit_check.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_skill_usage_log.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_filter_mcp_response.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr5_parent_verify_remind.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_vs_integrity_track.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr9_alignment_suggest.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues|mcp__mcp-atlassian__jira_update_issue|mcp__mcp-atlassian__jira_transition_issue|mcp__mcp-atlassian__jira_create_issue_link|mcp__mcp-atlassian__jira_remove_issue_link|mcp__mcp-atlassian__jira_create_remote_issue_link|mcp__mcp-atlassian__jira_add_comment|mcp__mcp-atlassian__jira_add_worklog|mcp__mcp-atlassian__jira_delete_issue|mcp__mcp-atlassian__jira_link_to_epic|mcp__mcp-atlassian__jira_update_sprint",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_queue_invalidation.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_update_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_sprint_capacity_recheck.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr8_sp_sum_suggest.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_search_track.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_sprints_from_board",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr7_sprint_lookup_track.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_confirm_invalidation.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_issue|mcp__plugin_atlassian-pm_atlassian-cache__cache_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_auto_parse_large_output.py",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_subtask_alignment_suggest.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/post_cache_suggest.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_get_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr5_parent_verify_clear.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_event_model_track.py",
+            "timeout": 5,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_vs_integrity_track.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/post_cache_checked_track.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_explore_fallback_suggest.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/post_auto_verify_suggest.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_queue_invalidation_acli.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_pr_sync.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__mcp-atlassian__jira_transition_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_done_flow_check.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/stop_hr6_unflushed_check.py",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_hr5_pending_check.py",
+            "timeout": 10
+          },
+          {
+            "type": "prompt",
+            "prompt": "First: scan tool calls in this conversation. If none of these Jira write tools appear \u2014 jira_create_issue, jira_batch_create_issues, jira_update_issue, jira_transition_issue, jira_delete_issue, jira_add_comment, jira_add_worklog, jira_link_to_epic \u2014 respond {\"ok\": true} immediately. Otherwise verify: (1) subtask created \u2192 parent verified via jira_get_issue? (2) skill invoked (/story-full, /analyze-story, /plan-sprint) \u2192 all phases complete? (3) pending ops (not cache_invalidate) unresolved? Note: HR6 cache_invalidate is handled by command hook \u2014 skip it. Complete or Q&A only: {\"ok\": true}. Critical step skipped: {\"ok\": false, \"reason\": \"step missed\"}. Be conservative \u2014 only block if confident.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\" >/dev/null 2>&1 || (mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && UV_PROJECT_ENVIRONMENT=\"${CLAUDE_PLUGIN_DATA}/venv\" uv sync --project \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache\" --extra embeddings --quiet && cp \"${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/pyproject.toml\" \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\") || rm -f \"${CLAUDE_PLUGIN_DATA}/pyproject.toml\"",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}/tasks\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_cleanup_artifacts.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_prerequisite_check.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_compact_reinject.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/compact_pre_save.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_confirm_invalidation.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_prompt_issue_prefetch.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_compact_reinject.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_subagent_context.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -52,6 +52,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | close-sprint | `/atlassian-pm:close-sprint` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. Distinct from retrospective-analyst (analysis only). |
 | standup-report | `/atlassian-pm:standup-report` | 4 | atlassian-cache, mcp-atlassian | Generate daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
 | reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | atlassian-cache, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
+| flow-check | `/atlassian-pm:flow-check` | 3 | atlassian-cache, mcp-atlassian | Board health snapshot + Scrumban replenishment trigger |
 
 ### Confluence
 

@@ -46,5 +46,32 @@
   "environments": {
     "staging":    {"web": "staging.yourapp.com",    "admin": "admin-staging.yourapp.com",    "api": "api-staging.yourapp.com"},
     "production": {"web": "yourapp.com",            "admin": "admin.yourapp.com",            "api": "api.yourapp.com"}
+  },
+
+  "workflow": {
+    "type": "scrumban",
+    "replenishment_threshold": 4
+  },
+
+  "board": {
+    "kanban_board_id": null,
+    "columns": {
+      "Ready": {
+        "wip_max": 6,
+        "statuses": ["Selected for Development", "Ready"]
+      },
+      "In Progress": {
+        "wip_max": 6,
+        "statuses": ["In Progress", "In Dev"]
+      },
+      "Review": {
+        "wip_max": 3,
+        "statuses": ["Code Review", "Review", "In Review"]
+      },
+      "QA": {
+        "wip_max": 3,
+        "statuses": ["QA", "Testing", "In QA"]
+      }
+    }
   }
 }
