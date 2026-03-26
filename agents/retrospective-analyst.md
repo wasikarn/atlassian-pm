@@ -171,7 +171,7 @@ Before adding an action item to the retrospective, check:
 - Time-bound: has a due date (typically: next sprint end date)
 
 Reject generic action items. Replace with specific alternatives:
-❌ "Improve code review" → ✅ "{{SLOT_2}} reviews BE PRs within 24h of request (due: Sprint 47 end)"
+❌ "Improve code review" → ✅ "K.Thanainun reviews BE PRs within 24h of request (due: Sprint 47 end)"
 
 For each action item in the retrospective:
 

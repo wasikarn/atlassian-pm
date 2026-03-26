@@ -20,7 +20,7 @@ effort: low
 
 ```text
 /assign ABC-XXX Kobi        → assign to Kobi
-/assign ABC-XXX {{SLOT_5}}  → assign to {{SLOT_5}}
+/assign ABC-XXX Natthakarn  → assign to Natthakarn
 /assign ABC-XXX unassign    → remove assignee
 ```
 
@@ -40,7 +40,7 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 
 | Name | Note |
 |------|------|
-| {{SLOT_5}} | Jira display name differs from config `name` — always lookup email from config |
+| Natthakarn | Jira display name differs from config `name` — always lookup email from config |
 
 > HR3: NEVER use MCP `jira_update_issue` with assignee — silently fails.
 > HR6: `cache_invalidate(issue_key)` after assign.
@@ -50,10 +50,10 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 ### ✅ Good
 
 ```text
-/assign-issue {{PROJECT_KEY}}-88 {{SLOT_3}}             # assign by first name (case-insensitive lookup)
-/assign-issue {{PROJECT_KEY}}-88 {{SLOT_4}}         # assign to another team member
+/assign-issue {{PROJECT_KEY}}-88 joakim             # assign by first name (case-insensitive lookup)
+/assign-issue {{PROJECT_KEY}}-88 wanchalerm         # assign to another team member
 /assign-issue {{PROJECT_KEY}}-88 unassign           # remove current assignee
-/assign-issue {{PROJECT_KEY}}-112 {{SLOT_5}}        # special case: email resolved from config, not Jira display name
+/assign-issue {{PROJECT_KEY}}-112 Natthakarn        # special case: email resolved from config, not Jira display name
 ```
 
 ### ❌ Bad
@@ -61,15 +61,15 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 ```text
 /assign-issue                           # missing issue key and name — both are required
 /assign-issue {{PROJECT_KEY}}-88                    # missing assignee name — skill cannot guess who to assign to
-/assign-issue {{PROJECT_KEY}}-88 {{SLOT_6}}@example.com  # email works but prefer first-name lookup from project-config.json
+/assign-issue {{PROJECT_KEY}}-88 kanya@example.com  # email works but prefer first-name lookup from project-config.json
 /assign-issue {{PROJECT_KEY}}-88 "Product Owner"    # role name, not a team member name — lookup will fail
 ```
 
 **Common mistakes:**
 
 - Using MCP `jira_update_issue` with an `assignee` field instead of this skill — HR3: MCP assignee silently fails with no error, leaving the issue unassigned
-- Passing a display name that doesn't match the `name` field in `project-config.json` — always use the config `name` value (e.g., `{{SLOT_3}}`, not the full display name)
-- Not confirming the resolved email before assigning — especially important for members whose Jira display name differs from their config name (e.g., {{SLOT_5}})
+- Passing a display name that doesn't match the `name` field in `project-config.json` — always use the config `name` value (e.g., `joakim`, not the full display name)
+- Not confirming the resolved email before assigning — especially important for members whose Jira display name differs from their config name (e.g., Natthakarn)
 
 ## 🎓 Domain Expert Notes
 
@@ -96,8 +96,8 @@ Pull-based assignment (developers choose work matching their current capacity an
 - If `skill_profile[domain] = "expert"` AND current WIP < 2 → strong recommend
 - If `skill_profile[domain] = "intermediate"` AND task is P1 → pair with an expert or escalate to Tech Lead
 - If `skill_profile[domain] = "intermediate"` AND task is non-critical → this is a **growth assignment** — intentionally assigning 1 level above current skill to develop capability. Growth assignments require: (a) no sprint-critical timeline, (b) senior reviewer listed as watcher, (c) note in the issue description that this is a learning opportunity
-- If `focus_factor < 0.6` (e.g., 0.5 for {{SLOT_1}}) → reserve for complex/review work, avoid routine chores
-- If member has `email: null` → QA roles ({{SLOT_6}}, {{SLOT_7}}) cannot be assigned via acli; flag for manual Jira assignment
+- If `focus_factor < 0.6` (e.g., 0.5 for BIG-TATHEP) → reserve for complex/review work, avoid routine chores
+- If member has `email: null` → QA roles (kanya, Kanthisorn) cannot be assigned via acli; flag for manual Jira assignment
 - Never assign a P1 Critical bug to a single junior without a senior reviewer listed as watcher
 
 ### Common Failure Modes
@@ -106,7 +106,7 @@ Pull-based assignment (developers choose work matching their current capacity an
 |---------|-----------|-----------|
 | Issue stays unassigned after skill runs | `email: null` in config OR MCP used instead of acli (HR3) | Always use `acli assign`; populate email in config for QA members |
 | Same person always overloaded | Assignment ignores current WIP, only matches skill | Check open issues per member before assigning; rotate chores |
-| Jira shows wrong assignee | Display name mismatch ({{SLOT_5}} case) | Always resolve via `project-config.json` email, never Jira display name |
+| Jira shows wrong assignee | Display name mismatch (Natthakarn case) | Always resolve via `project-config.json` email, never Jira display name |
 | Unassigned after "unassign" command | acli called with non-empty string instead of `""` | Use `-a ""` (empty string) not `-a "unassign"` |
 
 ### Authoritative References

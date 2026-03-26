@@ -98,15 +98,15 @@ Overall Risk: 🟡 MEDIUM (58/100)
 
 | Dimension | Score | Weight | Contribution | Key Signals |
 |-----------|-------|--------|-------------|------------|
-| Capacity | 65 | 30% | 19.5 | {{SLOT_2}} at 94%, 3 carry-overs |
+| Capacity | 65 | 30% | 19.5 | K.Thanainun at 94%, 3 carry-overs |
 | Complexity | 55 | 25% | 13.8 | 2 P2 items, new payment domain |
 | Dependency | 30 | 25% | 7.5 | Clean chain |
 | Team | 60 | 20% | 12.0 | BE bus factor = 1 |
 
 ### Specific Risks
 
-1. 🟠 HIGH — {{PROJECT_KEY}}-301 (payment integration): {{SLOT_2}} is sole BE expert with payment domain knowledge. If 1-day absence → sprint miss.
-   Mitigation: Pair {{SLOT_3}} with {{SLOT_2}} on {{PROJECT_KEY}}-301 for knowledge transfer before sprint start.
+1. 🟠 HIGH — {{PROJECT_KEY}}-301 (payment integration): K.Thanainun is sole BE expert with payment domain knowledge. If 1-day absence → sprint miss.
+   Mitigation: Pair joakim with K.Thanainun on {{PROJECT_KEY}}-301 for knowledge transfer before sprint start.
 
 2. 🟡 MEDIUM — Backend at 94% utilization: no buffer for scope discovery.
    Mitigation: Move {{PROJECT_KEY}}-315 (P3 chore, 3 SP) to next sprint → reduces BE load to 78%.

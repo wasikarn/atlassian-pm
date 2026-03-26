@@ -142,7 +142,7 @@ Display oldest items with assignee and age (days since created):
 ```
 ⚠️  Bottleneck: In Progress (6/6 FULL)
 Oldest items:
-  BEP-38 — Migrate auth service ({{SLOT_3}}) — 8 days
-  BEP-42 — Admin dashboard refactor ({{SLOT_4}}) — 6 days
+  BEP-38 — Migrate auth service (joakim) — 8 days
+  BEP-42 — Admin dashboard refactor (wanchalerm) — 6 days
 → Suggest: Swarm on BEP-38 to unblock flow.
 ```
