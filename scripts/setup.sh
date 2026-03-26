@@ -39,6 +39,33 @@ if [ -d "$PROJECT_DIR/mcp-servers/atlassian-cache" ]; then
   mkdir -p "$CLAUDE_PLUGIN_DATA"
   UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/atlassian-cache" --quiet
   cp "$PROJECT_DIR/mcp-servers/atlassian-cache/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
+
+  # Verify MCP server dependencies are actually importable
+  VENV_PYTHON="$CLAUDE_PLUGIN_DATA/venv/bin/python"
+  if [ ! -f "$VENV_PYTHON" ]; then
+    echo "  WARNING: venv not found at $CLAUDE_PLUGIN_DATA/venv — uv sync may have failed"
+  else
+    echo "  Verifying atlassian-cache dependencies..."
+    MISSING=$("$VENV_PYTHON" - << 'PYCHECK' 2>&1
+import sys
+failed = []
+for pkg, import_name in [("mcp", "mcp"), ("sqlite-vec", "sqlite_vec"), ("sentence-transformers", "sentence_transformers")]:
+    try:
+        __import__(import_name)
+    except ImportError:
+        failed.append(pkg)
+if failed:
+    print("MISSING: " + ", ".join(failed))
+    sys.exit(1)
+PYCHECK
+)
+    if [ $? -eq 0 ]; then
+      echo "  [OK] mcp, sqlite-vec, sentence-transformers"
+    else
+      echo "  [FAIL] $MISSING"
+      echo "  Try: UV_PROJECT_ENVIRONMENT=\"$CLAUDE_PLUGIN_DATA/venv\" uv sync --project mcp-servers/atlassian-cache"
+    fi
+  fi
 fi
 
 echo ""
@@ -47,7 +74,7 @@ echo ""
 LEGACY_CACHE="$HOME/.cache/jira-generator"
 if [ -d "$LEGACY_CACHE" ]; then
   echo "[migrate] Removing legacy cache at $LEGACY_CACHE ..."
-  rm -rf "$LEGACY_CACHE"
+  trash "$LEGACY_CACHE"
   echo "  Done. DB now stored in CLAUDE_PLUGIN_DATA (plugin data dir)."
   echo ""
 fi
