@@ -23,7 +23,7 @@ description: |
 
 ## Dynamic Context
 
-- **Config:** @.claude/project-config.json → `team.members[]`
+- **Config:** @.claude/project-config.json
 - **Note:** `board.columns` is consumed by the WIP gate hook automatically — the skill does not query it directly
 
 ## Steps
@@ -87,7 +87,6 @@ If no ACs found: show description excerpt (first 300 chars) with note "No explic
 | Transition "In Progress" not found | Show available transitions, ask user to pick |
 | No description | Show "No description available" in AC section |
 | `--force` on Done ticket | Warn prominently, proceed, log to stderr |
-| status ≠ In Progress before ship | Not applicable here (handled by ship-to-qa skill) |
 
 ## Domain Expert Notes
 
