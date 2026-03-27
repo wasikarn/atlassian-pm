@@ -25,7 +25,7 @@ Guided first-time setup for the `atlassian-pm` plugin. Idempotent — safe to re
 
 ---
 
-## Phase 0 — Config Detection
+## Phase 1 — Config Detection
 
 Run as a **single Bash call** to detect current state. Sets flags used by all later phases.
 
@@ -33,7 +33,7 @@ Run as a **single Bash call** to detect current state. Sets flags used by all la
 
 If the user ran `/atlassian-pm:setup --init`, write the template and exit before any other setup logic.
 
-Insert this at the **very start** of the Phase 0 bash block (before the macOS guard):
+Insert this at the **very start** of the Phase 1 bash block (before the macOS guard):
 
 ```bash
 # Define YAML config file path unconditionally — used by --init and detection
@@ -244,7 +244,7 @@ echo "  figma MCP:   $([ "$FIGMA_OK" = "true" ] && echo "✓ found" || echo "- n
 echo "  yaml config: $([ "$YAML_CONFIG" = "true" ] && echo "✓ found (will skip interactive questions)" || echo "- not found (interactive mode)")"
 ```
 
-**Second-run fast path:** If all five flags are true after Phase 0: skip Phases 1–4, jump to Phase 5b. The venv check ensures Phase 1 always runs when venv is missing (e.g. after plugin reinstall).
+**Second-run fast path:** If all five flags are true after Phase 1: skip Phases 2–5, jump to Phase 6 step 2. The venv check ensures Phase 2 always runs when venv is missing (e.g. after plugin reinstall).
 
 ```bash
 if [ "$SKIP_CONFIG" = "true" ] && [ "$ENV_OK" = "true" ] && \
@@ -252,20 +252,20 @@ if [ "$SKIP_CONFIG" = "true" ] && [ "$ENV_OK" = "true" ] && \
   echo ""
   echo "System already configured (config ✓  credentials ✓  mcp ✓  venv ✓)"
   echo "Running validation only..."
-  # → Jump to Phase 5b (health check)
+  # → Jump to Phase 6 step 2 (health check)
 fi
 ```
 
-If fast path triggered → skip Phases 1–4, jump to Phase 5b.
+If fast path triggered → skip Phases 2–5, jump to Phase 6 step 2.
 
 ---
 
-## Phase 1 — Check + Auto-install
+## Phase 2 — Check + Auto-install
 
-Run as a **single Bash call**. Prints status for every dep — both installed and skipped. Skip if fast path triggered in Phase 0.
+Run as a **single Bash call**. Prints status for every dep — both installed and skipped. Skip if fast path triggered in Phase 1.
 
 ```bash
-echo "Note: Phase 1 may take 1-2 minutes on first install. Safe to re-run if interrupted."
+echo "Note: Phase 2 may take 1-2 minutes on first install. Safe to re-run if interrupted."
 echo ""
 
 echo "[1/3] Checking acli..."
@@ -312,7 +312,7 @@ UV_PROJECT_ENVIRONMENT="${CLAUDE_PLUGIN_DATA}/venv" \
 
 ---
 
-## Phase 2 — Configuration
+## Phase 3 — Configuration
 
 **Skip entirely if `SKIP_CONFIG=true`.**
 
@@ -385,7 +385,7 @@ Ask questions in order. Each is a plain chat message.
 
 3. **Board ID**
    - Ask: "What is your Jira board ID? (enter `0` if you don't know it yet — I'll help look it up after setup)"
-   - Accept: positive integer (known) or `0` (unknown — defer to Phase 5b)
+   - Accept: positive integer (known) or `0` (unknown — defer to Phase 6 step 2)
    - Store as: `jira.board_id` (integer)
 
 **Optional** (via AskUserQuestion with buttons):
@@ -395,7 +395,7 @@ Ask questions in order. Each is a plain chat message.
 
 ---
 
-## Phase 3 — Write Config
+## Phase 4 — Write Config
 
 **Skip if `SKIP_CONFIG=true`** — print `"  config: already valid — skipping ✓"`.
 
@@ -422,11 +422,11 @@ echo "  → Config backed up to ~/.config/atlassian/ ✓"
 
 ---
 
-## Phase 4 — Credentials & MCP
+## Phase 5 — Credentials & MCP
 
-Three independent sub-steps. Each guarded by Phase 0 flags.
+Three independent sub-steps. Each guarded by Phase 1 flags.
 
-### 4a. Create `~/.config/atlassian/.env`
+### 1. Create `~/.config/atlassian/.env`
 
 **Skip if `ENV_OK=true`.**
 
@@ -521,11 +521,11 @@ Buttons: `[Yes, remove credentials]` `[Keep for now]`
 
 If **Yes**: read `~/.atlassian-pm.yaml` via Read tool, remove the `credentials:` block (from `credentials:` line through the blank line after `api_token:`), write back via Write tool.
 
-### 4b. Authenticate acli
+### 2. Authenticate acli
 
 **Skip if `ACLI_OK=true`.**
 
-**Variable sourcing:** Use `EMAIL`/`API_TOKEN` from 4a if available. If `ENV_OK=true` (4a skipped):
+**Variable sourcing:** Use `EMAIL`/`API_TOKEN` from step 1 if available. If `ENV_OK=true` (step 1 skipped):
 
 ```bash
 if [ -z "$EMAIL" ]; then
@@ -557,7 +557,7 @@ else
 fi
 ```
 
-### 4c. Register mcp-atlassian
+### 3. Register mcp-atlassian
 
 **Skip if `MCP_OK=true`.**
 
@@ -579,7 +579,7 @@ echo "  mcp-atlassian: registered (user scope) ✓"
 
 ---
 
-### 4d. Configure Figma MCP (optional)
+### 4. Configure Figma MCP (optional)
 
 **Always runs — skip logic handled internally by `FIGMA_OK` flag.**
 
@@ -626,11 +626,11 @@ Would you like to configure Figma MCP for design references in skills?
 
 Buttons: `[Yes, configure]` `[Skip for now]`
 
-If **Skip for now**: print `"  figma MCP: skipped"` and continue to Phase 5.
+If **Skip for now**: print `"  figma MCP: skipped"` and continue to Phase 6.
 
 If **Yes, configure**:
 
-**Step 1.** Print token visibility warning (same as Phase 4a):
+**Step 1.** Print token visibility warning (same as Phase 5 step 1):
 
 ```
 ⚠️  Your token will be visible in this chat session.
@@ -660,7 +660,7 @@ claude mcp add --scope user figma -- npx -y figma-developer-mcp \
   --env-file "${HOME}/.config/atlassian/.figma.env"
 ```
 
-> **Note:** `figma-developer-mcp` reads `FIGMA_API_KEY` from the env file. Token is never passed as an argv argument — consistent with Phase 4c security pattern.
+> **Note:** `figma-developer-mcp` reads `FIGMA_API_KEY` from the env file. Token is never passed as an argv argument — consistent with Phase 5 step 3 security pattern.
 
 **Step 5.** Verify registration:
 
@@ -681,9 +681,9 @@ fi
 
 ---
 
-## Phase 5 — Finalize + Validate
+## Phase 6 — Finalize + Validate
 
-### 5a. Run setup.sh
+### 1. Run setup.sh
 
 ```bash
 # Copy team-detail config from template if missing
@@ -709,7 +709,7 @@ cd "$PLUGIN_ROOT" && ./scripts/setup.sh
 
 Handles: git smudge/clean filter + global `~/.claude/CLAUDE.md` Atlassian block.
 
-### 5b. Health Check
+### 2. Health Check
 
 ```bash
 echo ""
@@ -739,7 +739,7 @@ fi
 
 **Board ID lookup (if board_id = 0):**
 
-After the Phase 5b Bash block completes, read `project-config.json`. If `jira.board_id = 0`:
+After the Phase 6 step 2 Bash block completes, read `project-config.json`. If `jira.board_id = 0`:
 
 1. Print: `"Board ID is 0 (not set). MCP is now connected."`
 2. Ask via AskUserQuestion: `"Look up your board ID now?"` with buttons `[Yes, look it up]` `[Skip for now]`
@@ -756,7 +756,7 @@ If **Skip for now**:
 
 - Print: `"  Board ID left as 0 — doctor will warn about this"`
 
-### 5c. Summary Output
+### 3. Summary Output
 
 ```text
 ✅ atlassian-pm setup complete
@@ -771,7 +771,7 @@ If **Skip for now**:
 → /atlassian-pm:plan-sprint   sprint planning
 ```
 
-### 5d. Restart Notice (conditional on `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`)
+### 4. Restart Notice (conditional on `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`)
 
 Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 
@@ -812,7 +812,7 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 ```text
 /setup                                # don't run mid-session while a sprint planning skill is active — MCP restart will kill context
 /setup --skip-acli                    # no flags exist — setup runs all phases and skips what's already done automatically
-/setup                                # don't run just to fix board_id=0 — doctor → Phase 5b handles that without full re-setup
+/setup                                # don't run just to fix board_id=0 — doctor → Phase 6 step 2 handles that without full re-setup
 /setup                                # don't run to update a single team member — edit project-config.json directly
 /setup --init                         # don't re-run --init after filling in the file — just run /setup
 ```
@@ -821,7 +821,7 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 
 - Not restarting Claude Code after setup completes — MCP servers registered during setup are inactive until restart, causing "tool not found" errors in all Jira skills.
 - Providing Jira site URL with `https://` prefix — setup strips it, but double-check the stored config has bare hostname format (`your-company.atlassian.net`).
-- Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup phases 4a+4b.
+- Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup Phase 5 steps 1+2.
 - Re-running full setup to change only one thing (e.g., project key) — edit `project-config.json` directly and re-run `/doctor` to validate.
 - Filling in ~/.atlassian-pm.yaml but leaving placeholder values — setup detects placeholders and falls back to interactive mode. Check that all 5 required fields have real values.
 - Leaving credentials: section in ~/.atlassian-pm.yaml after setup — setup offers to remove it; accept the cleanup prompt to avoid leaving a plaintext token on disk.

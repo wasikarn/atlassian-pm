@@ -5,7 +5,7 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Analyze User Story and create Sub-tasks + Technical Note with a 7-phase TA workflow
+  Analyze User Story and create Sub-tasks + Technical Note with an 8-phase TA workflow
   MANDATORY: Must explore codebase before creating Sub-tasks
 
   Triggers: "analyze story", "TA", "technical analysis", "create subtasks", "break down story", "explore story", "วิเคราะห์ story"
@@ -33,8 +33,8 @@ effort: high
 | 3. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
 | 4. Design | `subtask_designs[]` |
 | 5. Alignment | `alignment_checklist` |
-| 5b. QG | `qg_score`, `passed_qg` |
-| 6. Create | `subtask_keys[]` |
+| 6. QG | `qg_score`, `passed_qg` |
+| 7. Create | `subtask_keys[]` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
@@ -49,7 +49,7 @@ effort: high
 
 > **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously (single message, 2 calls). Bootstrap needs only the issue key; Confluence search needs only title keywords — no dependency between them.
 
-- `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
+- `Agent(name: "issue-bootstrap"): BEP-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
 
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
 
@@ -73,7 +73,7 @@ Before investing in subtask design, verify the story is ready for analysis:
 Search for domain documentation relevant to this story using its title + AC keywords:
 
 ```text
-MCP: cache_search_confluence(query="[story_title_keywords]", space_key="{{SPACE_KEY}}", limit=3)
+MCP: cache_search_confluence(query="[story_title_keywords]", space_key="BEP", limit=3)
 ```
 
 If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
@@ -152,29 +152,29 @@ If no relevant pages found → skip silently.
 **Goal:** Verify that every story AC maps to at least one subtask objective and that VS integrity holds across the full subtask set.
 **Required inputs:** `subtask_designs[]` from Phase 4; story ACs from Phase 1
 **Constraints:** HR9 — story ACs must be covered by subtask objectives; auto-fix misalignment; escalate only if unfixable
-**Output:** `alignment_checklist` (pass/fail per AC) available in context for Phase 5b
+**Output:** `alignment_checklist` (pass/fail per AC) available in context for Phase 6
 
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
-### 5b. Quality Gate — Subtasks (MANDATORY)
+### 6. Quality Gate — Subtasks (MANDATORY)
 
 **Goal:** Confirm all subtask designs meet quality threshold (≥ 90%) before any Jira write occurs.
 **Required inputs:** `subtask_designs[]` from Phase 4; `alignment_checklist` from Phase 5
 **Constraints:** HR1 — NEVER create subtasks in Jira without QG ≥ 90%; auto-fix → re-score max 2 attempts; record QG score via `qg_record.py` after completion
-**Output:** `qg_score`, `passed_qg` (bool) available in context for Phase 6
+**Output:** `qg_score`, `passed_qg` (bool) available in context for Phase 7
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 > **🟢 AUTO** — After QG completes, record score: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS"`. Use parent story key (from Phase 1) as `--issue-key`.
 
-### 6. Create Artifacts
+### 7. Create Artifacts
 
 **Goal:** Create all approved subtasks in Jira with correct parent linkage, estimation, and dates, then create the Technical Note if needed.
-**Required inputs:** `subtask_designs[]` from Phase 4; `passed_qg = true` from Phase 5b; parent story key from Phase 1
+**Required inputs:** `subtask_designs[]` from Phase 4; `passed_qg = true` from Phase 6; parent story key from Phase 1
 **Constraints:** HR5 — Two-Step: MCP create → verify parent via `jira_get_issue(fields="parent")` → acli edit if missing; HR6 — `cache_invalidate` after every write; HR3 — use acli for assignee; HR10 — NEVER set sprint on subtasks; HR8 — subtask dates within parent range
-**Output:** `subtask_keys[]` created and verified in Jira; Technical Note page URL if applicable
+**Output:** `subtask_keys[]` created and verified in Jira; Technical Note page URL if applicable; available in context for Phase 8
 
 > **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
 > HR5: Two-Step + Verify Parent. acli does not support the `parent` field. MCP may silently ignore parent.
@@ -197,17 +197,17 @@ MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
   - Simple text → `MCP: confluence_create_page`
   - With code blocks → Python script (see `.claude/skills/utilities/atlassian-scripts/SKILL.md`)
 
-### 7. Handoff
+### 8. Handoff
 
 **Goal:** Confirm completion to the user with subtask keys, links, and recommended next skill.
-**Required inputs:** `subtask_keys[]` from Phase 6; story key from Phase 1
+**Required inputs:** `subtask_keys[]` from Phase 7; story key from Phase 1
 **Constraints:** Only display after all subtasks are verified with correct parent linkage
 **Output:** Handoff summary with subtask keys and next-step prompt
 
 ```text
-## TA Complete: [Title] ({{PROJECT_KEY}}-XXX)
+## TA Complete: [Title] (BEP-XXX)
 Sub-tasks: ABC-YYY, ABC-ZZZ
-→ Use /create-testplan {{PROJECT_KEY}}-XXX to continue
+→ Use /create-testplan BEP-XXX to continue
 ```
 
 ---
@@ -225,7 +225,7 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 ### ✅ Good
 
 ```text
-/analyze-story {{PROJECT_KEY}}-123                   # existing story key → Phase 1 bootstraps from Jira, all 7 phases run correctly
+/analyze-story {{PROJECT_KEY}}-123                   # existing story key → Phase 1 bootstraps from Jira, all 8 phases run correctly
 /analyze-story {{PROJECT_KEY}}-456                   # story with complex cross-service ACs → codebase exploration discovers real file paths per service
 /analyze-story {{PROJECT_KEY}}-789                   # story already has epic context → event flow table auto-populated in Phase 2
 ```
@@ -243,7 +243,7 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 
 - Passing an Epic key instead of a Story key — subtasks will be parented to the Epic directly, breaking hierarchy (HR5 will catch this but wastes a cycle).
 - Skipping or rushing through Phase 3 codebase exploration — generic file paths (e.g. `src/controllers/`) get rejected at QG; real module paths are required.
-- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` first to review existing coverage.
+- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue BEP-XXX --with-subtasks` first to review existing coverage.
 - Using `/analyze-story` when the Story doesn't exist yet — run `/create-story` instead to go through the full PO+TA combined workflow.
 
 ## 🎓 Domain Expert Notes
@@ -303,4 +303,4 @@ Technical analysis works backward from user value: first establish what the stor
 - [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS decomposition, patterns
 - [Tool Selection](../../../references/tools.md) - Tools, service tags, effort sizing
 - [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
-- After creation: `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
+- After creation: `/verify-issue BEP-XXX --with-subtasks`

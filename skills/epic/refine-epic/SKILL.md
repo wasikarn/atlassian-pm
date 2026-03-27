@@ -33,8 +33,8 @@ effort: medium
 | 2. Propose | `po_proposal`, `tl_assessment`, `eng_approach`, `qa_scenarios` |
 | 3. Challenge | `po_revised`, `tl_verdict`, `eng_verdict`, `qa_verdict` |
 | 4. Converge | `refined_stories[]`, `risks[]`, `estimates`, `out_of_scope[]` |
-| 4d. QG | `qg_passed`, `qg_fixes[]` |
-| 5. Handoff | `next_skill`, `debate_summary` |
+| 5. QG | `qg_passed`, `qg_fixes[]` |
+| 6. Handoff | `next_skill`, `debate_summary` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels, ITERATE cycle.
 
@@ -83,7 +83,7 @@ Each agent now **challenges the others** based on their expertise.
 
 **Main session synthesizes** all 8 agent outputs (Round 1 + Round 2):
 
-#### 4a. Refined Stories
+#### 1. Refined Stories
 
 Per story:
 
@@ -97,7 +97,7 @@ Per story:
 | Test Outline | QA scenarios mapped to ACs |
 | Out of Scope | Items cut with rationale from debate |
 
-#### 4b. Debate Summary Table
+#### 2. Debate Summary Table
 
 | Topic | PO | Tech Lead | Engineer | QA | Resolution |
 |-------|----|-----------|----------|----|------------|
@@ -105,7 +105,7 @@ Per story:
 
 Show only **disagreements and their resolutions** — skip topics where all agreed.
 
-#### 4c. Consensus Checks
+#### 3. Consensus Checks
 
 - [ ] All roles agree on MVP scope?
 - [ ] Estimate variance < 2x between Tech Lead and Engineer?
@@ -121,7 +121,7 @@ If any check fails → flag to user with the disagreement.
 - **Annotate** → user specifies which story # and section to revise → re-run **only the affected role agents** (e.g., scope change → PO + Tech Lead only, not all 4) with updated context (max 2 rounds)
 - **Another debate round** → repeat full Round 2 with updated context (expensive, use sparingly)
 
-### 4d. Quality Gate — Refined Stories
+### 5. Quality Gate — Refined Stories
 
 > **🟢 AUTO** — Validate refined stories before handoff. Escalate only if unfixable.
 
@@ -140,7 +140,7 @@ If any check fails → auto-fix from debate context → re-check. Escalate to us
 
 > Stories will be formatted per [templates-story.md](../../../references/templates-story.md) when passed to `/create-story`.
 
-### 5. Handoff
+### 6. Handoff
 
 ```text
 ## Feature Refined: [Title]
@@ -207,7 +207,7 @@ Backlog refinement fails most often not because requirements are unclear but bec
 | --- | --- | --- |
 | SPIDR Splitting (Mike Cohn) | Phase 4 Converge — story splitting decisions | S=Spike, P=Paths, I=Interfaces, D=Data, R=Rules; when a story is too large, SPIDR provides five concrete axes to split on rather than arbitrary chunking |
 | Three Amigos (BDD) | Roles structure — PO + Engineer + QA core trio | "Three Amigos" (BA/PO, Dev, QA) is the industry standard for story refinement; the TL is added as a fourth perspective for architectural risk on complex stories |
-| INVEST criteria (Bill Wake) | Phase 4d Quality Gate checks | Independent, Negotiable, Valuable, Estimable, Small, Testable — the 6 checks in Phase 4d map directly to INVEST; AC format, SP assignment, VS label, QA coverage, testability, and out-of-scope are INVEST operationalized |
+| INVEST criteria (Bill Wake) | Phase 5 Quality Gate checks | Independent, Negotiable, Valuable, Estimable, Small, Testable — the 6 checks in Phase 5 map directly to INVEST; AC format, SP assignment, VS label, QA coverage, testability, and out-of-scope are INVEST operationalized |
 | Behavior-Driven Development (BDD) | AC format: `AC{N}: [Verb] — Given/When/Then` | ACs written in BDD format are executable specifications — QA can write automated tests directly from them without interpretation; "measurable Given/When/Then" is the testability gate |
 | Vertical Slice decomposition | VS assignment per story | Each story must deliver end-to-end value (a slice of the cake, not a layer); VS labels enforce this — a story labeled `vs-enabler` must have a follow-on user-facing story that it enables |
 
@@ -233,7 +233,7 @@ Backlog refinement fails most often not because requirements are unclear but bec
 | Refined stories have 8+ ACs each | Story scope was not split; refinement added detail instead of removing scope | Apply SPIDR-Rules: identify which ACs belong to different business rules or user segments; split into 2-3 stories |
 | TL and Engineer estimate differ by 3x | Different assumptions about existing code reuse or new service creation | Resolve in Phase 4 convergence by asking both to state their assumptions explicitly; the disagreement is the finding, not an average |
 | QA Round 2 scenarios are identical to Round 1 | QA agent didn't receive the architecture context from TL/Engineer Round 1 | Ensure QA Round 2 prompt includes full TL + Engineer Round 1 output; architectural decisions create new edge cases |
-| Stories pass QG but fail in sprint | "Testability" check was formal (has Given/When/Then) but not verified for feasibility | During Phase 4d, QA must confirm each AC is automatable with the current test stack (e.g., Cypress for FE, supertest for BE); flag non-automatable ACs explicitly |
+| Stories pass QG but fail in sprint | "Testability" check was formal (has Given/When/Then) but not verified for feasibility | During Phase 5, QA must confirm each AC is automatable with the current test stack (e.g., Cypress for FE, supertest for BE); flag non-automatable ACs explicitly |
 | Debate converges too fast (< 2 disagreements) | Agents are anchoring on the feature brief framing | Force at minimum one "what could go wrong" challenge per role in Round 2; if no disagreements, the debate brief was too solution-specific |
 
 ### Authoritative References

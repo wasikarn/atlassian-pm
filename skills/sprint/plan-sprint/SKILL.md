@@ -5,9 +5,9 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
-  Sprint Planning using an 8-phase workflow
+  Sprint Planning using a 9-phase workflow
 
-  Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Review → Execute
+  Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Risk Forecast → Review → Execute
 
   Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution", "วางแผน sprint", "จัดสรรงาน"
   Use when: planning a new sprint — fetching carry-over items, calculating team capacity, distributing work, and committing assignments to Jira
@@ -54,9 +54,9 @@ effort: high
 | 4. Prioritize | `prioritized_items[]`, `vs_validated` |
 | 5. Distribute | `assignment_map[]`, `workload_table` |
 | 6. Risk | `risk_flags[]`, `mitigations[]` |
-| 6b. Risk Forecast | `risk_forecast_result`, `mitigations_applied[]` |
-| 7. Review | `approved_plan` |
-| 8. Execute | `execution_log[]`, `assigned_keys[]` |
+| 7. Risk Forecast | `risk_forecast_result`, `mitigations_applied[]` |
+| 8. Review | `approved_plan` |
+| 9. Execute | `execution_log[]`, `assigned_keys[]` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
@@ -102,7 +102,7 @@ Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sp
 Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
-**Step 2a:** Team Velocity (SP-based)
+**Step 1:** Team Velocity (SP-based)
 
 ```text
 If velocity.story_points.avg_velocity exists:
@@ -113,7 +113,7 @@ Else (bootstrap phase):
 Also: sum(customfield_10016) of sprint stories → compare with Sprint Capacity to detect over-commitment
 ```
 
-**Step 2b:** Individual Productive Hours
+**Step 2:** Individual Productive Hours
 
 ```text
 Per person:
@@ -126,7 +126,7 @@ Per person:
 > **Review Cost:** Tech Lead reviews 4 people (~15h/sprint), Senior reviews 2 (~4h/sprint).
 > Read `review_cost` from `.claude/project-config-team-detail.json`.
 
-**Step 2c:** Skill Profile + Complexity
+**Step 3:** Skill Profile + Complexity
 
 Read each member's `skill_profile` from `project-config.json`; `growth_tracks` + `bus_factor` from `project-config-team-detail.json`.
 Use **complexity-adjusted throughput** (from team-capacity.md) instead of raw throughput for item count limits.
@@ -213,7 +213,7 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 **Goal:** Identify capacity overloads, dependency gaps, bus factor exposures, and review load issues before the plan is approved.
 **Required inputs:** `assignment_map[]` from Phase 5, `capacity_table[]` from Phase 2, bus_factor data from `project-config-team-detail.json`
 **Constraints:** AUTO (delegated to sprint-planner agent); check all 8 risk dimensions listed below; if any member >95% utilization → remove an item, do not redistribute
-**Output:** `risk_flags[]` with severity + mitigation per flag; ready for Phase 6b risk-forecaster
+**Output:** `risk_flags[]` with severity + mitigation per flag; ready for Phase 7 risk-forecaster
 
 **Check:**
 
@@ -228,11 +228,11 @@ Returns: Carry-over Summary + Prioritized Items + Recommended Assignments + Risk
 
 **Output:** Risk flags with severity + mitigation
 
-### 6b. Risk Forecast (risk-forecaster agent)
+### 7. Risk Forecast (risk-forecaster agent)
 
 **Goal:** Apply the risk-forecaster agent to quantify sprint risk level and produce adjusted mitigations before plan approval.
 **Required inputs:** `risk_flags[]` from Phase 6, sprint-planner output (carry_over_sp, utilization_table, p2_item_count), QG history (optional)
-**Constraints:** REVIEW gate — present risk forecast findings; if MEDIUM or higher risk, ask user whether to apply mitigations before proceeding to Phase 7
+**Constraints:** REVIEW gate — present risk forecast findings; if MEDIUM or higher risk, ask user whether to apply mitigations before proceeding to Phase 8
 **Output:** `risk_forecast_result`, `mitigations_applied[]`; sprint changes applied if user accepts mitigations
 
 > **🟡 REVIEW** — Run risk-forecaster with sprint-planner output. Present findings. Proceed unless user objects.
@@ -280,14 +280,14 @@ Present the Risk Forecast to user. If MEDIUM or higher risk:
 - Show Adjusted Risk if mitigations applied
 - Ask: "Apply recommended mitigations before finalizing? (yes/no)"
 
-If user accepts mitigations → apply sprint changes (remove items, add pairing notes) before proceeding to Phase 7.
+If user accepts mitigations → apply sprint changes (remove items, add pairing notes) before proceeding to Phase 8.
 
-## Part C: Approval & Execution (Phases 7-8) — Execution Layer
+## Part C: Approval & Execution (Phases 8-9) — Execution Layer
 
-### 7. Sprint Plan Review ⚠️ GATE
+### 8. Sprint Plan Review ⚠️ GATE
 
 **Goal:** Get explicit user approval on the complete sprint plan (workload, assignments, risks, deferred items) before executing any Jira writes.
-**Required inputs:** all context from Phases 1-6b: capacity table, prioritized items, assignment map, risk flags, mitigations
+**Required inputs:** all context from Phases 1-7: capacity table, prioritized items, assignment map, risk flags, mitigations
 **Constraints:** ITERATE gate — max 3 annotation rounds; annotate → revise ONLY annotated items; major rework returns to Phase 4; do NOT execute assignments without APPROVE
 **Output:** `approved_plan`; user has confirmed sprint goal, assignments, and risk mitigations
 
@@ -307,7 +307,7 @@ Status: 🟢 ≤80% | ⚠️ 80-95% | 🔴 >95%
 
 ### Items to Assign (sorted by Due Date ↑ then Priority ↑)
 | # | Key | Summary | Assignee | Skill Match | Est. Hours | Due Date | Priority | Action |
-| 1 | {{PROJECT_KEY}}-XXX | ... | Name | expert | 4h | Feb 10 | Highest | assign + move |
+| 1 | BEP-XXX | ... | Name | expert | 4h | Feb 10 | Highest | assign + move |
 
 ### Risk Summary
 | Risk | Severity | Mitigation |
@@ -323,10 +323,10 @@ Status: 🟢 ≤80% | ⚠️ 80-95% | 🔴 >95%
 - Major rework → back to Prioritization (Phase 4)
 - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
-### 8. Execute Assignments
+### 9. Execute Assignments
 
 **Goal:** Apply the approved sprint plan to Jira — move items to target sprint, set estimation fields, assign team members, and run post-assignment alignment validation.
-**Required inputs:** `approved_plan` from Phase 7, sprint ID from `jira_get_sprints_from_board()` lookup
+**Required inputs:** `approved_plan` from Phase 8, sprint ID from `jira_get_sprints_from_board()` lookup
 **Constraints:** HR7 — sprint ID must be looked up dynamically, NEVER hardcoded; HR10 — NEVER set sprint field on subtasks; HR3 — use acli for assignee (MCP silently fails); HR6 — `cache_invalidate` after every write; HR8 — run `sprint_subtask_alignment.py` post-execution (mandatory); execute in due date + priority order
 **Output:** `execution_log[]`, `assigned_keys[]`; subtask alignment check passed; sprint planning complete
 
@@ -340,7 +340,7 @@ Execute according to the user-approved plan (in due date + priority order):
 ```text
 # Move items to target sprint + set estimation fields (⚠️ sprint field = plain number, NOT object)
 # Story/Task: set sprint + story_points + size + dates
-MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
+MCP: jira_update_issue(issue_key="BEP-XXX", additional_fields={
   "{{SPRINT_FIELD}}": 123,
   "customfield_10016": 3,                        # Story Points
   "customfield_10107": {"value": "M"},            # Size
@@ -356,7 +356,7 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-YYY", additional_fields={
 })
 
 # Assign items (⚠️ MCP assignee silent fail — use acli instead)
-Bash: acli jira workitem assign -k "{{PROJECT_KEY}}-XXX" -a "email@domain.com" -y
+Bash: acli jira workitem assign -k "BEP-XXX" -a "email@domain.com" -y
 ```
 
 > ⚠️ Sprint field uses `{{SPRINT_FIELD}}` with plain number (e.g. `123`) — do not use `{"id": 123}`
@@ -374,7 +374,7 @@ Bash: python3 scripts/sprint/sprint_subtask_alignment.py --sprint <target_sprint
 # Then cache_invalidate(sprint_id=<id>) to refresh cache
 ```
 
-> **🟢 AUTO** — Always run alignment check after Phase 8. This is the safety net for HR8.
+> **🟢 AUTO** — Always run alignment check after Phase 9. This is the safety net for HR8.
 
 **Output:**
 
@@ -387,10 +387,10 @@ Subtask alignment: [X checked, Y fixed]
 
 ### Execution Log (ordered by Due Date ↑ then Priority ↑)
 | # | Key | Due | Priority | Action | Status |
-| 1 | {{PROJECT_KEY}}-XXX | Feb 10 | Highest | Assigned to Name + moved to sprint | ✅ |
+| 1 | BEP-XXX | Feb 10 | Highest | Assigned to Name + moved to sprint | ✅ |
 
-→ To verify: /verify-issue {{PROJECT_KEY}}-XXX
-→ To update a story: /update-story {{PROJECT_KEY}}-XXX
+→ To verify: /verify-issue BEP-XXX
+→ To update a story: /update-story BEP-XXX
 ```
 
 ## Options
@@ -410,7 +410,7 @@ Subtask alignment: [X checked, Y fixed]
 
 ```text
 /plan-sprint                                  # interactive — resolves next future sprint via jira_get_sprints_from_board
-/plan-sprint --sprint 47                      # sprint ID from jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="future")
+/plan-sprint --sprint 47                      # sprint ID from jira_get_sprints_from_board(board_id=2, state="future")
 /plan-sprint --carry-over-only                # analysis-only — review carry-over candidates without assigning or moving
 /plan-sprint --sprint 47 --carry-over-only    # carry-over analysis for a specific future sprint
 ```
@@ -427,7 +427,7 @@ Subtask alignment: [X checked, Y fixed]
 **Common mistakes:**
 
 - Skipping capacity calculation (Phase 2) and jumping straight to assignments — leads to over-committed sprints and ignored skill fit
-- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id={{BOARD_ID}}, state="future")` (HR7 violation)
+- Hardcoding a sprint ID instead of calling `jira_get_sprints_from_board(board_id=2, state="future")` (HR7 violation)
 - Setting the sprint field (`{{SPRINT_FIELD}}`) on subtasks during Phase 8 — subtasks inherit sprint from parent (HR10)
 - Using `acli` or MCP assignee field directly instead of `acli jira workitem assign -k KEY -a email -y` (HR3 — MCP assignee silently fails)
 - Not running `sprint_subtask_alignment.py` after execution — skipping the mandatory HR8 post-assignment check

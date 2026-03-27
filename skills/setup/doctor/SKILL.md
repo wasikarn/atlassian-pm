@@ -153,7 +153,7 @@ if [ -f "$CONFIG_FILE" ]; then
     PASS=$((PASS+1))
   else
     echo "  !  board_id = 0 (placeholder)"
-    echo "     → Run: /atlassian-pm:setup (will offer MCP lookup in Phase 5b)"
+    echo "     → Run: /atlassian-pm:setup (will offer MCP lookup in Phase 6 step 2)"
     WARN=$((WARN+1))
   fi
 else
@@ -278,7 +278,7 @@ Doctor implements the **pre-flight checklist pattern** from aviation: a complete
 
 **How to interpret results:**
 
-- `✗ fail` on acli auth → run `/setup` phases 4a+4b only (not full setup)
+- `✗ fail` on acli auth → run `/setup` Phase 5 steps 1+2 only (not full setup)
 - `✗ fail` on mcp-atlassian → registered but inactive means restart needed; missing means run `/setup`
 - `! warning` on venv → doctor auto-heals this; if it fails, uv or PLUGIN_ROOT resolution is broken
 - All checks green but Jira still fails → live API connectivity issue, not environment (doctor can't test that)
@@ -289,9 +289,9 @@ Doctor implements the **pre-flight checklist pattern** from aviation: a complete
 | --- | --- | --- |
 | mcp-atlassian shows `✓` but Jira tools return "not found" | MCP registered this session — tools activate only after restart | Restart Claude Code, re-run doctor |
 | venv check fails repeatedly after auto-heal attempt | `uv` installed after session start — not in PATH for this shell | Open new terminal, re-run doctor |
-| board_id = 0 warning persists | Setup was run without Phase 5b board lookup | Run `/setup` and choose board when prompted, or edit `project-config.json` directly |
+| board_id = 0 warning persists | Setup was run without Phase 6 step 2 board lookup | Run `/setup` and choose board when prompted, or edit `project-config.json` directly |
 | git filters `! warning` in cache install | Plugin loaded from `~/.claude/plugins/cache/` — filters are in source repo, not cache | Expected behavior; filters only needed in source repo contributors |
-| All checks pass but `CLAUDE.md` block warning | `~/.claude/CLAUDE.md` was manually edited and block removed | Re-run `/setup` Phase 5a (`setup.sh`) to re-inject the block |
+| All checks pass but `CLAUDE.md` block warning | `~/.claude/CLAUDE.md` was manually edited and block removed | Re-run `/setup` Phase 6 step 1 (`setup.sh`) to re-inject the block |
 
 ### Authoritative References
 

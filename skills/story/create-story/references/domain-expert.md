@@ -12,7 +12,7 @@ User stories are not requirements documents — they are promises of a conversat
 | 3 Cs — Card, Conversation, Confirmation (Ron Jeffries) | Phase 2 Write Story → ITERATE gate | Narrative = Card; annotation cycle = Conversation; AC sign-off = Confirmation; skipping Conversation produces unvalidated assumptions |
 | Gherkin / BDD Given-When-Then (Dan North) | Phase 2 AC format `AC{N}: [Verb] — [Scenario]` | Scenario-naming forces testability; unnamed ACs (e.g. "AC1: Login") lack the verb-object structure needed to derive test cases |
 | Vertical Slicing (Jeff Patton, "User Story Mapping") | Phase 3 VS Anti-pattern Check | A story that touches only one layer (shell-only, BE-only) is not independently shippable; the map backbone → release slices pattern informs VS label assignment |
-| Estimation Calibration (historical throughput) | Phase 7b Estimation Calibration agent | Anchoring estimates to team velocity data (not abstract complexity) reduces estimation variance by 25-40% vs. pure Planning Poker |
+| Estimation Calibration (historical throughput) | Phase 9 Estimation Calibration agent | Anchoring estimates to team velocity data (not abstract complexity) reduces estimation variance by 25-40% vs. pure Planning Poker |
 | Blueprint-first for complex features | Phase 0 Blueprint Handoff Check | Jeff Patton's "story mapping before story writing" principle — mapping the whole before writing individual stories prevents VS label conflicts and scope gaps |
 
 ### Key Metrics
