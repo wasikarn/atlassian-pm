@@ -1,6 +1,8 @@
 ---
 name: assign-issue
 disable-model-invocation: true
+context: fork
+agent: general-purpose
 x-compatibility: [acli]
 description: |
   Quick assign a Jira issue to a team member using acli (bypasses MCP silent failure)
