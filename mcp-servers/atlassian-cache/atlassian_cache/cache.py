@@ -313,6 +313,9 @@ class AtlassianCache:
         # P2-A: Strip noise BEFORE storing
         data = strip_noise(data)
 
+        # Normalize key to the stored key (issue data may have a different key field)
+        data = {**data, "key": issue_key}
+
         # T12: Embed cache timestamp metadata so callers can do lazy version-checks
         now_ts = time.time()
         now_iso = datetime.fromtimestamp(now_ts, tz=timezone.utc).isoformat()

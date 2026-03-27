@@ -240,10 +240,10 @@ Internal subagents dispatched automatically by skills and commands — not invok
 /atlassian-pm:flow-check
 
 # Start a ticket (read AC + move to In Progress)
-/atlassian-pm:start-ticket BEP-123
+/atlassian-pm:start-ticket {{PROJECT_KEY}}-123
 
 # Ship to QA after PR is open (posts PR + preview URLs + transitions ticket)
-/atlassian-pm:ship-to-qa BEP-123
+/atlassian-pm:ship-to-qa {{PROJECT_KEY}}-123
 ```
 
 ### Update with Cascade
@@ -482,7 +482,7 @@ All project-specific values live in `.claude/project-config.json` — the single
 ### Git Filter — Automatic Placeholder Conversion
 
 ```text
-Committed:    {{PROJECT_KEY}}-XXX   ← always placeholders
+Committed:    BEP-XXX   ← always placeholders
                       │
                [smudge on checkout]
                       ↓
@@ -490,7 +490,7 @@ Working tree: ABC-XXX               ← real values
                       │
                [clean on commit]
                       ↓
-Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
+Staged:       BEP-XXX   ← always placeholders
 ```
 
 | Placeholder | Example |

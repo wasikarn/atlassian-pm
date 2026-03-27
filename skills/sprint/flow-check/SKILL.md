@@ -107,8 +107,8 @@ Compute WSJF score ≈ priority_weight / story_points (Highest=5, High=4, Medium
 ```
 Ready queue low (X/<threshold> items). Top backlog candidates:
 
-1. BEP-55 — Add payment retry [High, 3 SP, WSJF≈1.33]
-2. BEP-61 — Fix login timeout [Highest, 5 SP, WSJF≈1.00]
+1. {{PROJECT_KEY}}-55 — Add payment retry [High, 3 SP, WSJF≈1.33]
+2. {{PROJECT_KEY}}-61 — Fix login timeout [Highest, 5 SP, WSJF≈1.00]
 ...
 
 Move to Ready? Enter numbers (e.g. "1,3") or "none" to skip:
@@ -142,7 +142,7 @@ Display oldest items with assignee and age (days since created):
 ```
 ⚠️  Bottleneck: In Progress (6/6 FULL)
 Oldest items:
-  BEP-38 — Migrate auth service (joakim) — 8 days
-  BEP-42 — Admin dashboard refactor (wanchalerm) — 6 days
-→ Suggest: Swarm on BEP-38 to unblock flow.
+  {{PROJECT_KEY}}-38 — Migrate auth service (joakim) — 8 days
+  {{PROJECT_KEY}}-42 — Admin dashboard refactor (wanchalerm) — 6 days
+→ Suggest: Swarm on {{PROJECT_KEY}}-38 to unblock flow.
 ```
