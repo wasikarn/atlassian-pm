@@ -189,9 +189,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:release-notes --version v2.3.0 --dry-run  # preview
 /atlassian-pm:release-notes                              # pick version interactively
 
-/atlassian-pm:start-ticket BEP-123                       # read AC + transition In Progress
-/atlassian-pm:start-ticket BEP-123 --force               # override Done/Closed guard
-/atlassian-pm:ship-to-qa BEP-123                         # post PR + preview URLs + transition QA
+/atlassian-pm:start-ticket {{PROJECT_KEY}}-123                       # read AC + transition In Progress
+/atlassian-pm:start-ticket {{PROJECT_KEY}}-123 --force               # override Done/Closed guard
+/atlassian-pm:ship-to-qa {{PROJECT_KEY}}-123                         # post PR + preview URLs + transition QA
 ```
 
 ---

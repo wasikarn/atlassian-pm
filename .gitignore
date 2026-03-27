@@ -16,9 +16,6 @@ __pycache__/
 # Team detail (internal: git stats, capacity, sprint history)
 .claude/project-config-team-detail.json
 
-# Internal planning/design docs (may contain real paths and project values)
-docs/superpowers/
-
 # Generated output
 output/
 

@@ -99,7 +99,7 @@ Output a structured status report:
 ### 🟡 In Progress ({{N}} issues)
 | Key | Summary | Assignee | Status |
 |-----|---------|----------|--------|
-| {{PROJECT_KEY}}-XXX | [summary] | [name] | In Progress |
+| BEP-XXX | [summary] | [name] | In Progress |
 
 ### 🟢 Ready for Review ({{N}} issues)
 [Stories/tasks in "In Review" needing review]
@@ -133,7 +133,7 @@ Output a structured status report:
 ### ❌ Bad
 
 ```text
-/status BEP-123              # takes no arguments — use /verify-issue for single issue check
+/status {{PROJECT_KEY}}-123              # takes no arguments — use /verify-issue for single issue check
 /status --verbose            # no flags supported
 ```
 

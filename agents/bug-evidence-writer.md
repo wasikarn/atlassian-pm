@@ -27,7 +27,7 @@ Generate ADF JSON for a Jira Bug ticket from test execution failure evidence. Co
     "console_errors": ["TypeError: Cannot read properties of undefined (reading 'close')"],
     "failed_requests": ["POST /v1/auth/line/notification-callback → 500"]
   },
-  "story_key": "BEP-3282",
+  "story_key": "{{PROJECT_KEY}}-3282",
   "story_summary": "[FE-Web][BE] ระบบแจ้งเตือนผ่าน Line",
   "env": "staging"
 }

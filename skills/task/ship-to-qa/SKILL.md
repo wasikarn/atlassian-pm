@@ -57,12 +57,13 @@ If `environments.preview` is missing from config: warn "environments.preview not
 
 **Step 3 — Hybrid URL Selection**
 
-| Label | Preview URLs | Staging BE |
-|-------|-------------|-----------|
-| `fe-only` + `needs-be` | All services from `environments.preview` | `environments.staging.api` (`needs-be` wins) |
-| `fe-only` | All services from `environments.preview` | Hidden |
-| `needs-be` | All services from `environments.preview` | `environments.staging.api` |
-| _(no label)_ | All services from `environments.preview` | `environments.staging.api` (safe default) |
+Labels are service tags (`be`, `fe-admin`, `fe-web`, `video`, `player`, `ai-agent`). Multiple labels allowed.
+
+| Condition | Preview URLs | Staging BE |
+|-----------|-------------|-----------|
+| Has `be` label | All services from `environments.preview` | `environments.staging.api` |
+| No `be` label | All services from `environments.preview` | Hidden |
+| _(no labels)_ | All services from `environments.preview` | `environments.staging.api` (safe default) |
 
 **Step 4 — Post Jira Comment**
 
@@ -76,7 +77,7 @@ Preview ({service_key}): {preview_url}   ← one line per service in environment
 Staging (BE): {staging_api_url}
 ```
 
-Omit lines that don't apply: no "Staging (BE)" line for `fe-only`; omit preview lines if config was missing and user couldn't provide URLs.
+Omit lines that don't apply: no "Staging (BE)" line when no `be` label; omit preview lines if config was missing and user couldn't provide URLs.
 
 **Step 5 — WIP Check + Transition**
 

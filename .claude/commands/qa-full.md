@@ -21,20 +21,20 @@ Before creating anything, check if a `[QA]` sub-task already exists for the stor
 acli jira issue list --jql "parent = <issue-key> AND summary ~ \"[QA]\" AND issuetype = Sub-task" -y
 ```
 
-**If `[QA]` sub-task found** (e.g., `{{PROJECT_KEY}}-XXXX`):
+**If `[QA]` sub-task found** (e.g., `BEP-XXXX`):
 
 Present the user with 3 options:
 
-> Test plan already exists: **{{PROJECT_KEY}}-XXXX** — "[QA] …"
+> Test plan already exists: **BEP-XXXX** — "[QA] …"
 >
-> (A) **Execute existing plan** — run execute-testplan on {{PROJECT_KEY}}-XXXX as-is
+> (A) **Execute existing plan** — run execute-testplan on BEP-XXXX as-is
 > (B) **Update + execute** — update test plan for current AC, then execute
 > (C) **Create new plan** — create a fresh [QA] sub-task (use if scope changed significantly)
 
 Wait for user choice before proceeding:
 
 - **(A)** → skip to Step 3 using the existing sub-task key
-- **(B)** → invoke `atlassian-pm:create-testplan` with `--update {{PROJECT_KEY}}-XXXX`, then Step 3
+- **(B)** → invoke `atlassian-pm:create-testplan` with `--update BEP-XXXX`, then Step 3
 - **(C)** → proceed to Step 1
 
 **If no `[QA]` sub-task found** → proceed to Step 1.
@@ -46,11 +46,11 @@ Wait for user choice before proceeding:
 Use the Skill tool to invoke `atlassian-pm:create-testplan` with `$ARGUMENTS`.
 
 → Produces `[QA]` Sub-task with embedded test plan linked to the story.
-→ Wait for skill to complete and confirm `[QA]` Sub-task key (e.g., `{{PROJECT_KEY}}-XXXX`).
+→ Wait for skill to complete and confirm `[QA]` Sub-task key (e.g., `BEP-XXXX`).
 
 ### Step 2 — Confirm Execute
 
-Ask: "Test plan created (`{{PROJECT_KEY}}-XXXX`). Run execute-testplan against **staging** now?"
+Ask: "Test plan created (`BEP-XXXX`). Run execute-testplan against **staging** now?"
 
 → If yes (or no `--env` specified): proceed with `--env staging`
 → If user specifies `--env production`: warn "⚠️ Running against production — confirm?" before proceeding
@@ -67,11 +67,11 @@ Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the issue key 
 
 | Scenario | Command | Behavior |
 | --- | --- | --- |
-| First QA run on a story | `/qa-full BEP-3282` | Create plan → confirm → execute on staging |
-| Regression after a fix | `/qa-full BEP-3282 --rerun-failed` | Guard finds existing plan → option A/B → rerun only failed cases |
-| Production smoke test | `/qa-full BEP-3282 --env production` | Guard check → execute on production (with warning) |
-| OAuth / LINE test | `/qa-full BEP-3282 --headed` | Guard check → execute with visible browser |
-| Plan only, no run | `/qa-full BEP-3282` → answer "No" at Step 2 | Create plan, exit |
+| First QA run on a story | `/qa-full {{PROJECT_KEY}}-3282` | Create plan → confirm → execute on staging |
+| Regression after a fix | `/qa-full {{PROJECT_KEY}}-3282 --rerun-failed` | Guard finds existing plan → option A/B → rerun only failed cases |
+| Production smoke test | `/qa-full {{PROJECT_KEY}}-3282 --env production` | Guard check → execute on production (with warning) |
+| OAuth / LINE test | `/qa-full {{PROJECT_KEY}}-3282 --headed` | Guard check → execute with visible browser |
+| Plan only, no run | `/qa-full {{PROJECT_KEY}}-3282` → answer "No" at Step 2 | Create plan, exit |
 
 ## 🎓 Domain Expert Notes
 

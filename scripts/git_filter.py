@@ -56,6 +56,7 @@ def smudge(content, v):
     content = re.sub(r'space_key:\s*"\{\{SPACE_KEY\}\}"', f'space_key: "{pk}"', content)
     content = re.sub(r'space_key="\{\{SPACE_KEY\}\}"', f'space_key="{pk}"', content)
     content = re.sub(r"\{\{PROJECT_KEY\}\}-XXX", f"{pk}-XXX", content)
+    content = re.sub(r"\{\{PROJECT_KEY\}\}-(\d+)", lambda m: f"{pk}-{m.group(1)}", content)
 
     # JIRA_SITE
     content = re.sub(r"https://\{\{JIRA_SITE\}\}", f"https://{v['JIRA_SITE']}", content)
@@ -107,6 +108,7 @@ def clean(content, v):
     content = re.sub(rf'space_key="{pk}"', 'space_key="{{SPACE_KEY}}"', content)
     # Issue key pattern (but not in URLs/smart links)
     content = re.sub(rf"(?<!/browse/){pk}-XXX", "{{PROJECT_KEY}}-XXX", content)
+    content = re.sub(rf"(?<!/browse/){pk}-(\d+)", r"{{PROJECT_KEY}}-\1", content)
 
     # JIRA_SITE
     content = re.sub(
