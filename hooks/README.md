@@ -92,65 +92,6 @@ Manage state, tracking, and cross-hook coordination.
 | `post_cache_checked_track.py` | (cache tools) | Tracks cache hit/miss stats |
 | `post_explore_fallback_suggest.py` | PostToolUseFailure | Suggests alternatives when cache/search fails |
 
-## Full hook table by event
-
-### PreToolUse
-
-| Script | Triggered by |
-|--------|-------------|
-| `pre_adf_structure_validate.py` | Bash |
-| `pre_event_ac_check.py` | Bash |
-| `pre_hr1_quality_gate.py` | Bash |
-| `pre_hr2_jql_order_guard.py` | jira_search |
-| `pre_hr3_block_mcp_assignee.py` | jira_update_issue |
-| `pre_hr4_confluence_macro_guard.py` | confluence_update_page |
-| `pre_hr5_parent_verify_block.py` | jira_create_issue, jira_batch_create_issues |
-| `pre_hr6_stale_read_guard.py` | cache_get_issue |
-| `pre_hr7_sprint_id_guard.py` | jira_create_issue, jira_batch_create_issues, jira_update_issue |
-| `pre_hr10_subtask_sprint_guard.py` | jira_update_issue |
-| `pre_field_preset_guard.py` | jira_get_issue, jira_search |
-| `pre_cache_prefer.py` | jira_get_issue |
-| `pre_qmd_auto_search.py` | Glob, Grep |
-| `pre_search_before_create.py` | jira_create_issue, jira_batch_create_issues |
-| `pre_dod_check.py` | jira_transition_issue |
-| `pre_wip_limit_check.py` | jira_transition_issue |
-| `pre_skill_usage_log.py` | Skill |
-| `pre_prompt_issue_prefetch.py` | UserPromptSubmit |
-
-### PostToolUse
-
-| Script | Triggered by |
-|--------|-------------|
-| `post_filter_mcp_response.py` | jira_get_issue, jira_search |
-| `post_event_model_track.py` | jira_create_issue (async) |
-| `post_hr5_parent_verify_remind.py` | jira_create_issue, jira_batch_create_issues |
-| `post_hr5_parent_verify_clear.py` | (after parent verify) |
-| `post_vs_integrity_track.py` | jira_create_issue, jira_batch_create_issues |
-| `post_hr6_queue_invalidation.py` | any Jira write |
-| `post_hr6_queue_invalidation_acli.py` | acli Bash write |
-| `post_hr6_confirm_invalidation.py` | cache_invalidate |
-| `post_search_track.py` | jira_search |
-| `post_hr7_sprint_lookup_track.py` | jira_get_sprints_from_board |
-| `post_auto_parse_large_output.py` | search/sprint/get tools |
-| `post_subtask_alignment_suggest.py` | cache_sprint_issues, jira_get_sprint_issues |
-| `post_cache_suggest.py` | jira_get_issue, jira_search |
-| `post_auto_verify_suggest.py` | (after creation) |
-| `post_cache_checked_track.py` | (cache tools) |
-| `post_explore_fallback_suggest.py` | PostToolUseFailure |
-
-### Session
-
-| Script | Event |
-|--------|-------|
-| `start_prerequisite_check.py` | SessionStart |
-| `start_subagent_context.py` | SessionStart, SubagentStart |
-| `start_cleanup_artifacts.py` | SessionStart |
-| `start_compact_reinject.py` | SessionStart (compact) |
-| `compact_pre_save.py` | PreCompact |
-| `post_compact_reinject.py` | PostCompact |
-| `stop_hr6_unflushed_check.py` | Stop |
-| `stop_hr5_pending_check.py` | Stop |
-
 ## Utility files
 
 | File | Purpose |

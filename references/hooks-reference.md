@@ -6,8 +6,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 
 **Action types:** Block = exits 2 (tool call aborted) · Warn = exits 0 with message · Track = state update only · Suggest = injects additionalContext
 
----
-
 ## Session Lifecycle
 
 | File | Event | Matcher | Action | Purpose |
@@ -15,8 +13,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `start_prerequisite_check.py` | SessionStart | _(all)_ | Warn | Check acli, qmd, cache DB, state dir — advisory only, never blocks |
 | `start_compact_reinject.py` | SessionStart | `compact` | Inject | Re-inject HR reminders + pending state after compaction |
 | `compact_pre_save.py` | PreCompact | _(all)_ | Save | Snapshot session state to file before compaction (not injected into context) |
-
----
 
 ## HR Rule Enforcement — Blocking
 
@@ -45,8 +41,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `post_hr6_confirm_invalidation.py` | PostToolUse / PostToolUseFailure | `cache_invalidate` | Track | HR6 | Clear pending-invalidate flag when invalidation confirmed |
 | `post_hr7_sprint_lookup_track.py` | PostToolUse | `jira_get_sprints_from_board` | Track | HR7 | Mark sprint lookup done for session (enables HR7 gate) |
 
----
-
 ## Quality & Validation
 
 | File | Event | Matcher | Action | Purpose |
@@ -57,8 +51,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `post_event_model_track.py` | PostToolUse | `jira_get_issue` | Track | Extract Domain Events from Epic descriptions for AC consistency |
 | `post_subtask_alignment_suggest.py` | PostToolUse | `cache_sprint_issues` / `get_sprint_issues` | Suggest | Warn when subtask dates/SP don't align with parent (HR8) |
 
----
-
 ## Cache Management
 
 | File | Event | Matcher | Action | Purpose |
@@ -68,8 +60,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `post_cache_suggest.py` | PostToolUse | `jira_get_issue` / `jira_search` | Suggest | After direct MCP read, suggest cache warm-up; mark issue as cache-checked |
 | `post_cache_checked_track.py` | PostToolUse | `cache_get_issue` | Track | Record that cache was used for this issue key |
 
----
-
 ## Search & Dedup
 
 | File | Event | Matcher | Action | Purpose |
@@ -78,16 +68,12 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `post_search_track.py` | PostToolUse | `jira_search` | Track | Record that a search was done this session (used by dedup guard) |
 | `post_search_before_create.py` | PostToolUse | `jira_search` / sprint/project/board gets | Track+Suggest | Dedup reminder post-create; integrates with VS integrity tracking |
 
----
-
 ## Skill Invocation Enforcement
 
 | File | Event | Matcher | Action | Purpose |
 |------|-------|---------|--------|---------|
 | `pre_prompt_skill_redirect.py` | UserPromptSubmit | _(all)_ | Inject | Detect bug/story/task/epic creation intent → inject reminder to invoke matching skill before writing to Jira |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit | _(all)_ | Inject | Pre-fetch issue data from cache when user mentions {{PROJECT_KEY}}-XXX keys |
-
----
 
 ## Workflow Suggestions
 
@@ -97,8 +83,6 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `post_auto_verify_suggest.py` | PostToolUse | `Bash` (acli) | Suggest | After acli write, suggest running `/verify-issue` |
 | `post_explore_fallback_suggest.py` | PostToolUse | `Task` | Suggest | When Explore agent returns generic paths, suggest hybrid mode |
 
----
-
 ## QMD Integration
 
 | File | Event | Matcher | Action | Purpose |
@@ -106,16 +90,12 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 | `pre_qmd_auto_search.py` | PreToolUse | `Glob` / `Grep` | Suggest | Auto-inject QMD search results before file pattern search |
 | `post_qmd_usage_track.py` | PostToolUse | `mcp__qmd__*` | Track | Track QMD usage for session analytics |
 
----
-
 ## Transition & Output
 
 | File | Event | Matcher | Action | Purpose |
 |------|-------|---------|--------|---------|
 | `pre_transition_guard.py` | PreToolUse | `jira_transition_issue` | Warn | Inject context reminding Claude to verify transition + run cache invalidate |
 | `post_auto_parse_large_output.py` | PostToolUse | `Bash` | Suggest | When MCP output exceeds token limit, auto-run parse script and inject summary |
-
----
 
 ## Shared Modules
 

@@ -4,8 +4,6 @@
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
----
-
 ## Skills by Category
 
 ### Setup & Health
@@ -81,11 +79,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
 | status | `/atlassian-pm:status` | 4 | atlassian-cache, mcp-atlassian | Session navigator — active sprint status, team WIP, pending HR violations, and suggested next action. Use at session start or to resume after a break. |
 
----
-
 ## Compatibility Legend
-
-The `x-compatibility` frontmatter field lists which external tools a skill depends on:
 
 | Value | Meaning |
 | --- | --- |
@@ -94,8 +88,6 @@ The `x-compatibility` frontmatter field lists which external tools a skill depen
 | `mcp-confluence` | Uses mcp-atlassian's Confluence tools (`confluence_get_page`, `confluence_create_page`, `confluence_update_page`, `confluence_search`). |
 | `acli` | Uses Atlassian CLI (`acli`) for operations where MCP silently fails: assignee (HR3), parent field on existing issues. |
 | `claude-mem` | Uses claude-mem MCP for session memory and observation history. |
-
----
 
 ## Skill Anatomy
 
@@ -125,8 +117,6 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 | REVIEW | `🟡 REVIEW` | Presents result and proceeds unless user objects |
 | ITERATE | `🔄 ITERATE` | Shows plan cards; loops until Approve/Annotate/Rework |
 | GATE | `⛔ GATE` | Hard stop — waits for explicit user confirmation |
-
----
 
 ## Quick Reference — Argument Patterns
 
@@ -194,11 +184,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 /atlassian-pm:ship-to-qa {{PROJECT_KEY}}-123                         # post PR + preview URLs + transition QA
 ```
 
----
-
 ## Shared References
 
-`references/` (project root) contains 24 reference docs loaded on demand by skills. They are never loaded eagerly — each skill specifies which docs it needs.
+`references/` (project root) contains 24 reference docs loaded on demand by skills. Each skill specifies which docs it needs.
 
 | File | Purpose |
 | --- | --- |
@@ -222,11 +210,9 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 | `tools.md` | MCP vs acli decision rules, field presets, effort sizing |
 | `writing-style.md` | Thai + transliteration conventions, concise scan-first format |
 | `jql-quick-ref.md` | JQL patterns and filters |
-| `hr-rules.md` | Full definitions for HR1–HR10 hard rules |
 | `hooks-reference.md` | Hook enforcement details and event reference |
 | `subtask-design-patterns.md` | Sub-task decomposition patterns, scope format, AC specificity |
-
----
+| `agents.md` | All subagents: model, tier, and usage context |
 
 ## Creating or Modifying Skills
 
