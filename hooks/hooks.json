@@ -440,6 +440,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_prompt_skill_redirect.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_prompt_issue_prefetch.py",
             "timeout": 5
           }

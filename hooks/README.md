@@ -77,6 +77,7 @@ Manage state, tracking, and cross-hook coordination.
 | `post_event_model_track.py` | PostToolUse (async) | Tracks Domain Model events from Epic descriptions |
 | `stop_hr6_unflushed_check.py` | Stop | Warns on unflushed HR6 cache invalidations before session ends |
 | `stop_hr5_pending_check.py` | Stop | Checks for subtasks with unverified parent links (HR5) before session ends |
+| `pre_prompt_skill_redirect.py` | UserPromptSubmit | Detect bug/story/task/epic creation intent → redirect to matching skill |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit | Pre-fetches Jira issue when user mentions {{PROJECT_KEY}}-XXX in prompt |
 | `post_hr5_parent_verify_remind.py` | jira_create_issue, jira_batch_create_issues | Reminds to verify parent link after creation |
 | `post_hr5_parent_verify_clear.py` | (after parent verify) | Clears parent verify state after successful verification |

@@ -80,6 +80,15 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 
 ---
 
+## Skill Invocation Enforcement
+
+| File | Event | Matcher | Action | Purpose |
+|------|-------|---------|--------|---------|
+| `pre_prompt_skill_redirect.py` | UserPromptSubmit | _(all)_ | Inject | Detect bug/story/task/epic creation intent → inject reminder to invoke matching skill before writing to Jira |
+| `pre_prompt_issue_prefetch.py` | UserPromptSubmit | _(all)_ | Inject | Pre-fetch issue data from cache when user mentions {{PROJECT_KEY}}-XXX keys |
+
+---
+
 ## Workflow Suggestions
 
 | File | Event | Matcher | Action | Purpose |
