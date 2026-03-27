@@ -102,8 +102,8 @@ else
   # Auto-generate from commits since last tag (first commit subject, title-cased)
   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
   if [[ -n "$LAST_TAG" ]]; then
-    RELEASE_TITLE=$(git log "${LAST_TAG}..HEAD" --oneline --no-merges \
-      | head -1 | sed 's/^[a-f0-9]* //' | sed 's/^[a-z]*: //' \
+    FIRST_COMMIT=$(git log "${LAST_TAG}..HEAD" --oneline --no-merges | head -1 || true)
+    RELEASE_TITLE=$(echo "$FIRST_COMMIT" | sed 's/^[a-f0-9]* //' | sed 's/^[a-z]*: //' \
       | python3 -c "import sys; s=sys.stdin.read().strip(); print(s[0].upper()+s[1:] if s else 'Release')")
   else
     RELEASE_TITLE="Release"
