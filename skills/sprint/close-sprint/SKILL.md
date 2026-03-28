@@ -48,7 +48,7 @@ effort: high
 
 1. If `--sprint` flag provided → use that sprint ID.
 2. Else → `jira_get_sprints_from_board(board_id, state="active")` (HR7: never hardcode sprint ID)
-3. `jira_get_sprint_issues(sprint_id)` — fetch all issues with fields: `summary,status,assignee,issuetype,customfield_10016,{{START_DATE_FIELD}},duedate,parent`
+3. `jira_get_sprint_issues(sprint_id)` — fetch all issues with fields: `summary,status,assignee,issuetype,customfield_10016,{{START_DATE_FIELD}},duedate,parent,labels`
 4. Display sprint summary: name, dates, total issues, SP breakdown
 
 ## Phase 2 — Triage
@@ -177,6 +177,22 @@ Records velocity data for trend analysis. If velocity-tracker is not available (
 > ```
 >
 > Fill values from Phase 2 Triage and Phase 4 execution results. This enables `/team-pattern-advisor` and `/plan-sprint` to read historical completion ratios and carry-over trends across sprints.
+>
+> Then record per-story outcomes for predictive intelligence:
+>
+> ```bash
+> python scripts/story_outcome_record.py \
+>   --sprint-id SPRINT_ID \
+>   --sprint-name "SPRINT_NAME" \
+>   --issues-json 'JSON_ARRAY'
+> ```
+>
+> Build `JSON_ARRAY` from Phase 1 `issue_list`: one object per issue with keys
+> `key`, `summary`, `status`, `sp` (customfield\_10016), `assignee`
+> (displayName), `issuetype` (name), `labels` (array of label strings).
+> Include **all** sprint issues (done and incomplete). This powers carry-over
+> rate prediction in `/risk-forecaster` and estimation drift detection in
+> `/estimation-calibrator`.
 
 🟡 REVIEW: Display:
 

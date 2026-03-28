@@ -23,13 +23,24 @@ Sprint plan context (from sprint-planner output):
 
 ## Steps
 
-> **🟢 PARALLEL** — Steps 1 and 2 have no dependency on each other. Launch simultaneously (single message, 3 Tool calls): `Read project-config.json` + `Read project-config-team-detail.json` + `cache_sprint_issues(sprint_id)`.
+> **🟢 PARALLEL** — Steps 1, 2, and 3 have no dependencies. Launch simultaneously (single message, 4 Tool calls): `Read project-config.json` + `Read project-config-team-detail.json` + `cache_sprint_issues(sprint_id)` + `Read story-outcomes.jsonl`.
 
 1. **Load team data** — `Read .claude/project-config.json` for team member skills. `Read .claude/project-config-team-detail.json` for velocity anomalies and member velocity trends.
 
 2. **Fetch sprint items** — `cache_sprint_issues(sprint_id)` or fallback `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,labels,issuelinks")`. Analyze actual item data for Complexity and Dependency risk dimensions.
 
-3. **Score each risk dimension:**
+3. **Load historical story outcomes** — `Read ${CLAUDE_PLUGIN_DATA}/story-outcomes.jsonl` (path: `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl`). If file absent or empty, skip outcome-based signals silently (note "no outcome history yet").
+
+   From the JSONL compute per-issuetype and per-assignee carry-over rates:
+
+   ```text
+   carry_over_rate[issuetype] = count(outcome=="carry_over" for issuetype) / total for issuetype
+   carry_over_rate[assignee]  = count(outcome=="carry_over" for assignee)  / total for assignee
+   ```
+
+   Use only the **last 200 records** for recency (tail of file). Require ≥5 records per group before trusting the rate.
+
+4. **Score each risk dimension:**
 
 ### Capacity Risk (0-100, weight 30%)
 
@@ -50,8 +61,11 @@ base_score = 30
 +20 if any item touches a domain tagged as new/first-time (detect from labels or summary keywords "new-service", "migration", "integration")
 +15 if any item has scope table with >6 files
 +15 if sprint contains items spanning 3+ services
++15 if carry_over_rate[issuetype] > 40% for any issuetype in this sprint (from story-outcomes.jsonl — historical pattern for this issue type)
 −15 if all items are P1 or P3 (clear scope, manageable size)
 ```
+
+> When a historical carry-over signal fires, name the issuetype and rate in Specific Risks output: e.g. "Story carry-over rate: 52% (11/21 historical stories) — this sprint has 4 Stories".
 
 ### Dependency Risk (0-100, weight 25%)
 
@@ -71,9 +85,12 @@ base_score = 30
 +25 if any critical domain has single assignee with no backup skill (bus factor = 1)
 +20 if any member had velocity dip (>1.5σ below avg) in previous sprint
 +15 if critical items assigned to member currently at >90% utilization
++15 if carry_over_rate[assignee] > 50% for any assignee in this sprint (from story-outcomes.jsonl — this person carries over more than half their stories historically)
 +10 if team has new member working in unfamiliar service area
 −20 if critical items have backup assignee with adequate skill
 ```
+
+> When a historical assignee carry-over signal fires, name the person and rate in Specific Risks: e.g. "K.Peeraya carry-over rate: 58% (7/12 stories) — assigned 3 stories this sprint".
 
 **Overall Risk Score:**
 
@@ -135,6 +152,7 @@ Apply these defaults when data is absent — do not skip the dimension, do not f
 | No assignee on items | Score team risk +10 (unassigned = invisible bottleneck) |
 | No labels / service tag | Skip service-span check; note "service tags missing — cross-service risk undetectable" |
 | `project-config-team-detail.json` absent | Skip velocity trend analysis; set Team base_score = 40 (unknown) |
+| `story-outcomes.jsonl` absent or < 5 records per group | Skip historical carry-over signals; note "no outcome history yet — run `/close-sprint` after first sprint to build history" |
 | Sprint has 0 items | Return: "Sprint has no items yet — run after backlog grooming" |
 
 ### LOW Risk Calibration Example

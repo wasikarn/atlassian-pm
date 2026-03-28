@@ -3,7 +3,7 @@ name: estimation-calibrator
 description: Calibrate SP estimates by comparing against historically similar stories. Uses cache_similar_issues for semantic search and velocity history for actual completion data.
 model: haiku
 effort: low
-tools: mcp__plugin_atlassian-pm_atlassian-cache__cache_similar_issues, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, Read
+tools: mcp__plugin_atlassian-pm_atlassian-cache__cache_similar_issues, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, Read, Bash
 permissionMode: dontAsk
 maxTurns: 8
 ---
@@ -37,17 +37,26 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
 3. **Load velocity history** — `Read .claude/project-config-team-detail.json` → find `velocity.story_points.history[]`. If file doesn't exist or velocity section is missing → skip cycle time analysis, proceed with SP comparison only.
 
-4. **Extract comparison data** from each similar story:
+3b. **Load story outcome history** — Read last 200 lines of `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl` (use Bash: `tail -200 ~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl 2>/dev/null`). If file absent → skip, note "no outcome history yet". Parse JSONL and compute:
+
+- `assignee_carry_over_rate`: for the assigned member (if known), count `outcome=="carry_over"` / total — requires ≥5 records for this assignee
+- `issuetype_carry_over_rate`: for "Story" issuetype, count carry-overs / total — requires ≥5 records
+- `service_tag_carry_over_rate`: for the matching service tag (BE/FE-Admin/FE-Web), count carry-overs / total — requires ≥5 records
+
+   Use these rates in Step 5 pattern detection and Step 6 adjustments.
+
+1. **Extract comparison data** from each similar story:
    - Estimated SP (from issue fields) vs actual cycle time (from velocity history if available)
    - Complexity signals: number of files in scope table (count CREATE + MODIFY lines in description), number of ACs
    - Keywords that correlate with under-estimation (auth, payment, integration, migration, new-service)
 
-5. **Identify patterns:**
+2. **Identify patterns:**
    - Stories with `auth` / `payment` / `integration` keywords: track if they consistently took longer than estimated
    - Stories with similar scope size (file count): track actual vs estimated SP
    - Carry-over rate for this story type: if >30% of similar stories carried over → flag
+   - **From story-outcomes.jsonl**: if `assignee_carry_over_rate` > 50% → flag assignee drift; if `service_tag_carry_over_rate` > 40% → flag service area pattern
 
-6. **Generate calibrated estimate:**
+3. **Generate calibrated estimate:**
    - Base: majority SP of similar completed stories with same service tag
    - Adjustments:
      - +1 SP if story contains auth/payment/integration keywords AND historical pattern shows underestimation
@@ -55,6 +64,9 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
      - +1 SP if story involves new domain/service (first time touching that area)
      - −1 SP if story is clearly simpler than comparables (fewer files, fewer ACs)
    - Confidence: HIGH (3+ strong comparables) / MEDIUM (1-2 comparables) / LOW (no direct comparables, using pattern only)
+   - **Drift adjustment**: if `assignee_carry_over_rate` > 50% (≥5 records) → add +1 SP regardless of other signals (this person consistently underestimates); flag in output as "assignee drift detected"
+   - **Service area adjustment**: if `service_tag_carry_over_rate` > 40% (≥5 records) → add +1 SP; flag as "service area pattern"
+   - Never exceed +2 SP total from drift/area adjustments combined
 
 ## Output Format
 
