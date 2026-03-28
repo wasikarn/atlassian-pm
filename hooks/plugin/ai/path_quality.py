@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
-from plugin.ai.claude_call import claude_call
-from plugin.ai.json_utils import RATE_SCHEMA, parse_json
+from plugin.ai.claude_call import claude_call_json
+from plugin.ai.json_utils import RATE_JSON_SCHEMA
 from plugin.ai.prompts import RATE_PROMPT
 
 _HOOK = "ai-path-quality"
@@ -34,13 +34,15 @@ def rate_paths(paths: list[str]) -> str | None:
     if not paths:
         return None
     paths_text = "\n".join(f"- {p}" for p in paths[:15])
-    result = claude_call(RATE_PROMPT.format(paths=paths_text), timeout=10)
-    if not result:
-        return None
-    data = parse_json(result, RATE_SCHEMA)
+    data = claude_call_json(
+        RATE_PROMPT.format(paths=paths_text),
+        json_schema=RATE_JSON_SCHEMA,
+        timeout=10,
+    )
     if data is None:
         return None
-    return data["rating"]  # already lowercased + validated by schema
+    rating = data.get("rating", "").lower()
+    return rating if rating in {"good", "fair", "poor"} else None
 
 
 def main() -> None:

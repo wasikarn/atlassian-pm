@@ -24,8 +24,9 @@ def run_claude(
                 "--output-format", "json",
                 "--model", model,
                 "--max-turns", "1",
-                "--allowedTools", "",
+                "--tools", "",
                 "--dangerously-skip-permissions",
+                "--no-session-persistence",
             ],
             env=env, capture_output=True, text=True, timeout=timeout,
         )

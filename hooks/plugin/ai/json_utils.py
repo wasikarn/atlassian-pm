@@ -68,7 +68,7 @@ def parse_json(text: str, schema: dict | None = None) -> dict | None:
     return data
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────────
+# ── Python schemas (for parse_json fallback) ──────────────────────────────────
 
 SCORE_SCHEMA: dict = {
     "score": {"type": int, "required": True, "min": 0, "max": 100},
@@ -84,4 +84,31 @@ CLASSIFY_SCHEMA: dict = {
 
 RATE_SCHEMA: dict = {
     "rating": {"type": str, "required": True, "choices": ["good", "fair", "poor"]},
+}
+
+# ── JSON Schemas (for --json-schema flag → structured_output) ─────────────────
+
+SCORE_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {"score": {"type": "integer", "minimum": 0, "maximum": 100}},
+    "required": ["score"],
+}
+
+CLASSIFY_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "intent": {
+            "type": "string",
+            "enum": ["bug", "story", "epic", "subtask", "task", "none"],
+        }
+    },
+    "required": ["intent"],
+}
+
+RATE_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "rating": {"type": "string", "enum": ["good", "fair", "poor"]}
+    },
+    "required": ["rating"],
 }
