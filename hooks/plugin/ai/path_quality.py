@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
-from plugin.ai.claude_call import claude_call
-from plugin.ai.json_utils import RATE_SCHEMA, parse_json
+from plugin.ai.claude_call import claude_call_json
+from plugin.ai.json_utils import RATE_JSON_SCHEMA
 from plugin.ai.prompts import RATE_PROMPT
 
 _HOOK = "ai-path-quality"
@@ -34,13 +34,34 @@ def rate_paths(paths: list[str]) -> str | None:
     if not paths:
         return None
     paths_text = "\n".join(f"- {p}" for p in paths[:15])
-    result = claude_call(RATE_PROMPT.format(paths=paths_text), timeout=10)
-    if not result:
-        return None
-    data = parse_json(result, RATE_SCHEMA)
+    data = claude_call_json(
+        RATE_PROMPT.format(paths=paths_text),
+        json_schema=RATE_JSON_SCHEMA,
+        timeout=10,
+    )
     if data is None:
         return None
-    return data["rating"]  # already lowercased + validated by schema
+    rating = data.get("rating", "").lower()
+    return rating if rating in {"good", "fair", "poor"} else None
+
+
+def rate_paths_with_suggestion(paths: list[str]) -> tuple[str | None, str | None]:
+    """Return (rating, suggestion) tuple. suggestion is None when rating is good or unavailable."""
+    if not paths:
+        return None, None
+    paths_text = "\n".join(f"- {p}" for p in paths[:15])
+    data = claude_call_json(
+        RATE_PROMPT.format(paths=paths_text),
+        json_schema=RATE_JSON_SCHEMA,
+        timeout=10,
+    )
+    if data is None:
+        return None, None
+    rating = data.get("rating", "").lower()
+    if rating not in {"good", "fair", "poor"}:
+        return None, None
+    suggestion = data.get("suggestion") or None
+    return rating, suggestion
 
 
 def main() -> None:
@@ -63,7 +84,7 @@ def main() -> None:
             allow()
             return
 
-        rating = rate_paths(paths)
+        rating, suggestion = rate_paths_with_suggestion(paths)
         if rating is None:
             allow()
             return
@@ -71,10 +92,15 @@ def main() -> None:
         log_event(_HOOK, "RATED", {"rating": rating, "path_count": len(paths)})
 
         if rating == "poor":
+            suggestion_text = (
+                f" Suggestion: {suggestion}"
+                if suggestion
+                else " Consider re-running Explore with more specific queries "
+                     "(e.g. grep for class/function names, not just directories)."
+            )
             inject_context(
                 f"AI PATH QUALITY: Explore returned {len(paths)} paths rated '{rating}'. "
-                f"Paths like {paths[:3]} are too generic. Consider re-running Explore with "
-                f"more specific queries (e.g. grep for class/function names, not just directories)."
+                f"Paths like {paths[:3]} are too generic.{suggestion_text}"
             )
     except Exception:
         allow()

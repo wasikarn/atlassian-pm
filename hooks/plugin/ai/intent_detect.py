@@ -12,8 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
 from hooks_state import _load, _save
-from plugin.ai.claude_call import claude_call
-from plugin.ai.json_utils import CLASSIFY_SCHEMA, parse_json
+from plugin.ai.claude_call import claude_call_json
+from plugin.ai.json_utils import CLASSIFY_JSON_SCHEMA
 from plugin.ai.prompts import CLASSIFY_PROMPT
 
 _HOOK = "ai-intent-detect"
@@ -28,13 +28,14 @@ _SKILL_MAP = {
 
 def classify_intent(prompt: str) -> str | None:
     """Return issue type string or None if no creation intent detected."""
-    result = claude_call(CLASSIFY_PROMPT.format(prompt=prompt[:500]), timeout=10)
-    if not result:
-        return None
-    data = parse_json(result, CLASSIFY_SCHEMA)
+    data = claude_call_json(
+        CLASSIFY_PROMPT.format(prompt=prompt[:500]),
+        json_schema=CLASSIFY_JSON_SCHEMA,
+        timeout=10,
+    )
     if data is None:
         return None
-    classification = data["intent"]  # already lowercased + validated by schema
+    classification = data.get("intent", "").lower()
     return classification if classification in _SKILL_MAP else None
 
 
