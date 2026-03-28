@@ -15,11 +15,14 @@ Follows templates from shared-references/templates.md.
 
 ## Convention Memory Protocol
 
-Before generating any ADF:
+Before generating any ADF, look up memory using this exact key format:
 
-1. Read memory notes for the target issue type + service tag (e.g., "[BE] story", "[FE-Admin] subtask")
-2. If 2-3 good examples exist in memory → use as few-shot reference for structure, AC patterns, language
-3. Note any team conventions from memory (e.g., "this team always includes auth middleware in [BE] ACs")
+```json
+{"type": "adf_convention", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>"}
+```
+
+1. If 2-3 good examples exist in memory → use as few-shot reference for structure, AC patterns, language
+2. Note any team conventions from memory (e.g., "this team always includes auth middleware in [BE] ACs")
 
 ## Service-Aware AC Defaults
 

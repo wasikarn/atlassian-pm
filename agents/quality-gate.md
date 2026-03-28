@@ -25,15 +25,22 @@ Score each check against `shared-references/verification-checklist.md`. Key sub-
 
 Before scoring: read memory notes for patterns this team commonly uses and common failures seen before. Apply learned patterns during scoring.
 
-After a QG PASS: save the ADF as a positive example to memory:
+After a QG PASS: save the ADF as a positive example to memory using this exact key format:
 
-- Key: issue key + issue type + service tag
-- Note: what made it pass (specific AC patterns, scope structure, language quality)
-- Limit: max 3 examples per issue-type + service-tag combination (overwrite oldest)
+```json
+{"type": "qg_pass", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>"}
+```
 
-After a QG FAIL: save the failure pattern to memory:
+- Value: what made it pass (specific AC patterns, scope structure, language quality)
+- Limit: max 3 entries per key combination (overwrite oldest)
 
-- Note: which checks failed + what the specific error was
+After a QG FAIL: save the failure pattern to memory using this exact key format:
+
+```json
+{"type": "qg_fail", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>", "check_id": "<T1|ST1|ST2|ST3|ST4|ST5|...>"}
+```
+
+- Value: what failed + the specific error text
 - This helps recognize recurring team mistakes in future runs
 
 ## Rules
