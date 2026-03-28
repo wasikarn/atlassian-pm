@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import datetime
 import json
 import logging
 import sys
@@ -25,6 +26,7 @@ from lib.auth import create_ssl_context, get_auth_header, load_credentials
 from lib.jira_api import JiraAPI, derive_jira_url
 
 from monitor.handlers import issue_changed, pr_sync, sprint_health
+from monitor.handlers import stuck_issue_detector, velocity_feed
 from monitor.state import MonitorState, diff_snapshots
 
 _LOG_DIR = _ROOT / "monitor" / "logs"
@@ -41,6 +43,32 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 _STATE_PATH = Path.home() / ".claude" / "monitor-state.json"
+
+
+def _get_poll_interval(board_state: dict, config: dict) -> int:
+    """Return poll interval in seconds based on board activity level.
+
+    Priority (highest wins):
+      weekend           → 900 s  (15 min)
+      off-hours (local) → 600 s  (10 min)
+      active sprint     → 120 s  ( 2 min)
+      default           → 300 s  ( 5 min)
+    """
+    now = datetime.datetime.now()
+
+    is_weekend = now.weekday() >= 5
+    is_off_hours = now.hour < 8 or now.hour >= 20
+
+    if is_weekend:
+        return 900
+    if is_off_hours:
+        return 600
+
+    active_sprint = board_state.get("active_sprint")
+    if active_sprint:
+        return 120
+
+    return 300
 
 
 def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict[str, Any]:
@@ -92,12 +120,23 @@ def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict[str, Any]:
     return result
 
 
+def _detect_active_sprint(jira: JiraAPI, board_id: int) -> dict | None:
+    """Return the active sprint dict (id, name, endDate) or None if none active."""
+    try:
+        result = jira.get_board_sprints(board_id, state="active")
+        sprints = result.get("values", [])
+        return sprints[0] if sprints else None
+    except Exception:
+        return None
+
+
 def run_cycle(
     jira: JiraAPI,
     state: MonitorState,
     board_config: dict,
     project_key: str,
     dry_run: bool = False,
+    poll_count: int = 0,
 ) -> None:
     """Single poll cycle: fetch → diff → dispatch handlers."""
     old_snapshot = state.load_snapshot()
@@ -127,7 +166,29 @@ def run_cycle(
         if synced:
             log.info("Synced PRs for: %s", ", ".join(synced))
 
-        state.save_snapshot(new_snapshot)
+        # Stuck issue detection: run every 3rd poll or when there are issue changes
+        if poll_count % 3 == 0 or changes:
+            try:
+                created = stuck_issue_detector.check_stuck_issues(new_snapshot, state, jira)
+                if created:
+                    log.info("Stuck detector created follow-up tasks: %s", ", ".join(created))
+            except Exception as e:
+                log.error("Stuck issue detector failed: %s", e)
+
+        # Velocity feed: run when sprint state has changed to closed
+        try:
+            velocity_feed.check_and_update_velocity(jira, board_config, _ROOT)
+        except Exception as e:
+            log.error("Velocity feed failed: %s", e)
+
+        # Enrich snapshot with status-entry timestamps before saving so stuck
+        # detector can measure staleness across cycles.
+        try:
+            enriched = stuck_issue_detector.enrich_snapshot_with_status_since(new_snapshot, state)
+            state.save_snapshot(enriched)
+        except Exception as e:
+            log.error("Failed to enrich/save snapshot: %s", e)
+            state.save_snapshot(new_snapshot)
     else:
         log.info("[DRY RUN] %d changes detected, no writes", len(changes))
         for c in changes[:5]:
@@ -136,7 +197,10 @@ def run_cycle(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Atlassian-pm autonomous board monitor")
-    parser.add_argument("--interval", type=int, default=300)
+    parser.add_argument(
+        "--interval", type=int, default=0,
+        help="Poll interval in seconds. 0 (default) = adaptive (120/300/600/900 based on time/sprint).",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--once", action="store_true", help="Run one cycle and exit")
     args = parser.parse_args()
@@ -172,25 +236,51 @@ def main() -> None:
 
     state = MonitorState(_STATE_PATH)
 
+    board_id = config.get("jira", {}).get("board_id") or config.get("board", {}).get("kanban_board_id")
+
     log.info(
-        "Monitor started. Project: %s, site: %s, interval: %ds, dry_run: %s",
-        project_key, site, args.interval, args.dry_run,
+        "Monitor started. Project: %s, site: %s, board_id: %s, interval: %s, dry_run: %s",
+        project_key, site, board_id,
+        "adaptive" if args.interval == 0 else f"{args.interval}s",
+        args.dry_run,
     )
 
     if args.once:
-        run_cycle(jira, state, board_config, project_key, dry_run=args.dry_run)
+        run_cycle(jira, state, board_config, project_key, dry_run=args.dry_run, poll_count=0)
         return
+
+    poll_count = 0
+    board_state: dict = {}
 
     while True:
         try:
-            run_cycle(jira, state, board_config, project_key, dry_run=args.dry_run)
-            time.sleep(args.interval)
+            # Refresh active sprint info for adaptive interval calculation
+            if board_id:
+                active_sprint = _detect_active_sprint(jira, board_id)
+                board_state = {"active_sprint": active_sprint}
+            else:
+                board_state = {}
+
+            run_cycle(
+                jira, state, board_config, project_key,
+                dry_run=args.dry_run, poll_count=poll_count,
+            )
+            poll_count += 1
+
+            interval = (
+                args.interval
+                if args.interval > 0
+                else _get_poll_interval(board_state, config)
+            )
+            log.info("Next poll in %ds", interval)
+            time.sleep(interval)
         except KeyboardInterrupt:
             log.info("Monitor stopped by user")
             break
         except Exception as e:
             log.error("Cycle error: %s", e)
-            time.sleep(args.interval)
+            fallback = args.interval if args.interval > 0 else 300
+            time.sleep(fallback)
 
 
 if __name__ == "__main__":
