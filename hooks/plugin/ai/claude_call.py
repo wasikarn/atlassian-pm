@@ -16,13 +16,12 @@ preventing infinite loops when claude -p fires a new Claude Code session.
 import json
 import os
 import subprocess
-from typing import Optional
 
 RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _CLAUDE_TIMEOUT = 15  # seconds
 
 
-def claude_call(prompt: str, timeout: int = _CLAUDE_TIMEOUT) -> Optional[str]:
+def claude_call(prompt: str, timeout: int = _CLAUDE_TIMEOUT) -> str | None:
     """Call `claude -p` non-interactively and return the text response.
 
     Args:
@@ -60,7 +59,7 @@ def claude_call(prompt: str, timeout: int = _CLAUDE_TIMEOUT) -> Optional[str]:
     return extract_result(data)
 
 
-def extract_result(data: dict) -> Optional[str]:
+def extract_result(data: dict) -> str | None:
     """Extract the text result from a `claude -p --output-format json` response."""
     if data.get("is_error"):
         return None

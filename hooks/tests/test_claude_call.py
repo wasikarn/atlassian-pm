@@ -76,6 +76,10 @@ class TestClaudeCall(unittest.TestCase):
         data = {"type": "result", "subtype": "error", "is_error": True, "result": ""}
         self.assertIsNone(extract_result(data))
 
+    def test_extract_result_returns_none_on_empty_string(self):
+        data = {"type": "result", "subtype": "success", "is_error": False, "result": ""}
+        self.assertIsNone(extract_result(data))
+
 
 if __name__ == "__main__":
     unittest.main()
