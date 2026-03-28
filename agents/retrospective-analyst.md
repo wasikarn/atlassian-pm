@@ -16,9 +16,29 @@ Generate a data-driven retrospective for a completed sprint. Analyzes real Jira 
 Sprint ID or sprint name (e.g., `{{PROJECT_KEY}} Sprint 42` or sprint ID `123`).
 Optional: `--action-items` flag to auto-create Jira tasks for action items.
 
+## Pre-computed Metrics Check (fast path)
+
+**Before Phase 1**, check if `retro-data-extractor` has already run for this sprint:
+
+```text
+Read {artifacts_dir}/retro-metrics-{sprint_id}.json
+```
+
+- If file exists and `extracted_at` is within last 4 hours → **SKIP Phases 1–3** entirely.
+  Load `metrics`, `items[]`, `bottleneck_counts`, `carry_over_keys` from file.
+  Jump directly to Phase 3b (cross-sprint comparison) → Phase 4 synthesis.
+  Note in output: "Metrics from retro-data-extractor ({extracted_at})"
+- If file does not exist or is stale → run Phases 1–3 normally (self-sufficient fallback).
+
+This allows running `Agent(name: "retro-data-extractor")` first (Haiku = cheaper) to
+pre-compute metrics, then invoking this agent only for synthesis — reducing Sonnet
+context usage by ~25% (skips raw changelog processing).
+
 ## Steps
 
 ### Phase 1: Fetch Sprint Data
+
+<!-- Skip if pre-computed metrics loaded above -->
 
 1. `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate,parent")` — all items
 2. Filter: Stories + Tasks (skip subtasks for metrics, include for detail)
@@ -142,7 +162,7 @@ Output a Confluence-ready retrospective in this structure:
 [Only if velocity history available: "Velocity 15% above rolling avg", "Carry-over rate 2× avg — recurring pattern"]
 
 ## 🟢 What Went Well
-[Data-driven, e.g., "{{PROJECT_KEY}}-XXX completed 2 days early", "velocity above target for 2nd sprint"]
+[Data-driven, e.g., "BEP-XXX completed 2 days early", "velocity above target for 2nd sprint"]
 
 ## 🔴 What to Improve
 [Data-driven, e.g., "3 carry-overs ({{PROJECT_KEY}}-AAA, -BBB, -CCC)", "{{PROJECT_KEY}}-DDD spent 4 days blocked"]
@@ -155,7 +175,7 @@ Output a Confluence-ready retrospective in this structure:
 ## 📋 Item Summary
 | Key | Summary | Status | SP | Cycle Time | Notes |
 | --- | ------- | ------ | -- | ---------- | ----- |
-| {{PROJECT_KEY}}-XXX | [summary] | Done | 3 | 2.5 days | ✅ |
+| BEP-XXX | [summary] | Done | 3 | 2.5 days | ✅ |
 | {{PROJECT_KEY}}-YYY | [summary] | Carry-over | 5 | — | ⚠️ |
 ```
 

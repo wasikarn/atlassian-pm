@@ -236,10 +236,25 @@ Leave `Key files:` blank at this stage — it will be filled post-Phase 7 explor
 
    Both are optional/non-blocking: if either exits 1 (claude unavailable), continue with existing content.
 
-3. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
-4. If `status = "PASS"` → proceed to Phase 5 automatically
-5. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
-6. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
+3. **Quick structural pre-check (🟢 AUTO):**
+
+   ```bash
+   python3 scripts/ai/qg_quick.py --file {{artifacts_dir}}/story.json --type story
+   ```
+
+   Returns `{quick_pass, structural_issues[], content_issues[], ac_count, score_estimate, skip_full_agent}`.
+
+   - If `skip_full_agent: true` (score_estimate ≥ 95, no issues) → skip Step 4, proceed to Phase 5 directly
+   - If `structural_issues[]` not empty → apply QUIRK fixes (panelType, empty paragraphs) inline before Step 4
+   - If `quick_pass: false` AND `score_estimate < 70` → show issues to user, offer: "Fix now or proceed to full QG?"
+   - Otherwise → continue to Step 4 (full agent)
+
+   Non-blocking: if `qg_quick.py` exits 1 (claude unavailable or parse error) → skip pre-check, go straight to Step 4.
+
+4. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
+5. If `status = "PASS"` → proceed to Phase 5 automatically
+6. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
+7. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
 
 ### 5. Create Story in Jira
 
