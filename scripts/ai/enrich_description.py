@@ -36,7 +36,7 @@ def main() -> None:
     args = parser.parse_args()
 
     prompt = build_enrich_prompt(args.text, args.issue_type)
-    response = run_claude(prompt, timeout=25)
+    response = run_claude(prompt, timeout=25, model="sonnet")
     if not response:
         sys.exit(1)
 

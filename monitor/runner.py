@@ -9,13 +9,24 @@ RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _TIMEOUT = 20
 
 
-def run_claude(prompt: str, timeout: int = _TIMEOUT) -> str | None:
+def run_claude(
+    prompt: str,
+    timeout: int = _TIMEOUT,
+    model: str = "haiku",
+) -> str | None:
     if os.environ.get(RECURSION_GUARD):
         return None
     env = {**os.environ, RECURSION_GUARD: "1"}
     try:
         proc = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
+            [
+                "claude", "-p", prompt,
+                "--output-format", "json",
+                "--model", model,
+                "--max-turns", "1",
+                "--allowedTools", "",
+                "--dangerously-skip-permissions",
+            ],
             env=env, capture_output=True, text=True, timeout=timeout,
         )
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):

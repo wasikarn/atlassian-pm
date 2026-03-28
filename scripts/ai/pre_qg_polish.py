@@ -52,7 +52,7 @@ def main() -> None:
         sys.exit(1)
 
     prompt = build_polish_prompt(json.dumps(adf_data, indent=2), args.issue_type)
-    response = run_claude(prompt, timeout=30)
+    response = run_claude(prompt, timeout=30, model="sonnet")
     if not response:
         sys.exit(1)
 

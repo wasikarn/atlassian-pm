@@ -21,12 +21,17 @@ RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _CLAUDE_TIMEOUT = 15  # seconds
 
 
-def claude_call(prompt: str, timeout: int = _CLAUDE_TIMEOUT) -> str | None:
+def claude_call(
+    prompt: str,
+    timeout: int = _CLAUDE_TIMEOUT,
+    model: str = "haiku",
+) -> str | None:
     """Call `claude -p` non-interactively and return the text response.
 
     Args:
         prompt:  The prompt to send to claude.
         timeout: Subprocess timeout in seconds (default 15).
+        model:   Claude model alias — "haiku" (default), "sonnet", or "opus".
 
     Returns:
         The text response string, or None on any error.
@@ -37,7 +42,14 @@ def claude_call(prompt: str, timeout: int = _CLAUDE_TIMEOUT) -> str | None:
     env = {**os.environ, RECURSION_GUARD: "1"}
     try:
         proc = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
+            [
+                "claude", "-p", prompt,
+                "--output-format", "json",
+                "--model", model,
+                "--max-turns", "1",
+                "--allowedTools", "",
+                "--dangerously-skip-permissions",
+            ],
             env=env,
             capture_output=True,
             text=True,
