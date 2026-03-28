@@ -22,8 +22,14 @@
   },
 
   "velocity": {
+    "_comment": "Updated automatically by velocity-tracker agent and monitor/handlers/velocity_feed.py",
+    "rolling_average": 0,
+    "trend_pct": 0,
+    "std_dev": 0,
+    "last_updated_sprint": "",
+    "sprint_history": [],
     "throughput_history": [],
-    "story_points": {"avg_velocity": null, "sprints_tracked": 0, "history": []}
+    "story_points": {"avg_velocity": null, "sprints_tracked": 0, "std_dev": null, "history": []}
   },
 
   "review_cost": {
