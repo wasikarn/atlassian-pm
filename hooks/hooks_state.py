@@ -311,6 +311,23 @@ def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
     return str(sprint_id) in set(_load(session_id).get("alignment_suggested_sprints", []))
 
 
+# ── Sprint risk assessment tracking ─────────────────────────────────────────
+
+
+def risk_mark_sprint_assessed(session_id: str, sprint_id: str) -> None:
+    """Mark that risk-forecaster was run for this sprint."""
+    state = _load(session_id)
+    assessed = set(state.get("risk_assessed_sprints", []))
+    assessed.add(str(sprint_id))
+    state["risk_assessed_sprints"] = sorted(assessed)
+    _save(session_id, state)
+
+
+def risk_is_sprint_assessed(session_id: str, sprint_id: str) -> bool:
+    """Return True if risk-forecaster was already run for this sprint."""
+    return str(sprint_id) in set(_load(session_id).get("risk_assessed_sprints", []))
+
+
 # ── Skill checkpoint tracking ────────────────────────────────────────────────
 #
 # Saves issue keys created during skill workflows so they survive context
