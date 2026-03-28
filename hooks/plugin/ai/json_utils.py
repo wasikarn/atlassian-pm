@@ -84,6 +84,35 @@ CLASSIFY_SCHEMA: dict = {
 
 RATE_SCHEMA: dict = {
     "rating": {"type": str, "required": True, "choices": ["good", "fair", "poor"]},
+    "suggestion": {"type": str, "required": False},
+}
+
+# ── JSON Schemas (for --json-schema flag → structured_output) ─────────────────
+
+SCORE_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {"score": {"type": "integer", "minimum": 0, "maximum": 100}},
+    "required": ["score"],
+}
+
+CLASSIFY_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "intent": {
+            "type": "string",
+            "enum": ["bug", "story", "epic", "subtask", "task", "none"],
+        }
+    },
+    "required": ["intent"],
+}
+
+RATE_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "rating": {"type": "string", "enum": ["good", "fair", "poor"]},
+        "suggestion": {"type": "string"},
+    },
+    "required": ["rating"],
 }
 
 # ── JSON Schemas (for --json-schema flag → structured_output) ─────────────────

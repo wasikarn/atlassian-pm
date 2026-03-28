@@ -92,9 +92,37 @@ def test_check_coverage_returns_none_on_non_int_score():
         assert check_coverage(["AC1"], ["s1"]) is None
 
 
+def test_check_coverage_strips_adf_before_scoring():
+    """ADF JSON is stripped to plain text before sending to claude."""
+    adf_ac = json.dumps({
+        "type": "doc",
+        "content": [{"type": "paragraph", "content": [{"type": "text", "text": "AC1: user can login"}]}]
+    })
+    captured = {}
+
+    def fake_call_json(prompt, json_schema, **kwargs):
+        captured["prompt"] = prompt
+        return {"score": 80}
+
+    with patch("plugin.ai.ac_coverage.claude_call_json", side_effect=fake_call_json):
+        score = check_coverage([adf_ac], ["implement login"])
+
+    assert score == 80
+    # ADF markup should not appear in the prompt
+    assert '{"type":' not in captured["prompt"]
+    assert "AC1: user can login" in captured["prompt"]
+
+
 # ── path_quality ───────────────────────────────────────────────────────────────
 
-from plugin.ai.path_quality import rate_paths
+from plugin.ai.path_quality import extract_paths, rate_paths, rate_paths_with_suggestion
+
+
+def test_extract_paths_finds_quoted_files():
+    text = 'Found `src/auth/login.py` and "lib/utils.ts" in the codebase'
+    paths = extract_paths(text)
+    assert "src/auth/login.py" in paths
+    assert "lib/utils.ts" in paths
 
 
 def test_rate_paths_returns_good():
@@ -129,3 +157,34 @@ def test_rate_paths_lowercases_rating():
 def test_rate_paths_returns_none_for_unknown_rating():
     with patch("plugin.ai.path_quality.claude_call_json", return_value={"rating": "excellent"}):
         assert rate_paths(["src/foo.ts"]) is None
+
+
+def test_rate_paths_poor_includes_suggestion():
+    """When rating is poor, rate_paths_with_suggestion returns the suggestion."""
+    response = {"rating": "poor", "suggestion": "Explore src/controllers/ instead of src/"}
+    with patch("plugin.ai.path_quality.claude_call_json", return_value=response):
+        rating, suggestion = rate_paths_with_suggestion(["src/", "lib/"])
+    assert rating == "poor"
+    assert suggestion == "Explore src/controllers/ instead of src/"
+
+
+def test_rate_paths_good_no_suggestion_required():
+    """When rating is good, suggestion is None (not required)."""
+    response = {"rating": "good"}
+    with patch("plugin.ai.path_quality.claude_call_json", return_value=response):
+        rating, suggestion = rate_paths_with_suggestion(["src/auth/login.py"])
+    assert rating == "good"
+    assert suggestion is None
+
+
+def test_rate_paths_with_suggestion_returns_none_none_on_empty():
+    rating, suggestion = rate_paths_with_suggestion([])
+    assert rating is None
+    assert suggestion is None
+
+
+def test_rate_paths_with_suggestion_returns_none_none_when_unavailable():
+    with patch("plugin.ai.path_quality.claude_call_json", return_value=None):
+        rating, suggestion = rate_paths_with_suggestion(["src/"])
+    assert rating is None
+    assert suggestion is None

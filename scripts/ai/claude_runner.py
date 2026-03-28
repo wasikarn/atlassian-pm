@@ -19,13 +19,15 @@ def run_claude(
     prompt: str,
     timeout: int = _TIMEOUT,
     model: str = "haiku",
+    system_prompt: str | None = None,
 ) -> str | None:
     """Call `claude -p` and return plain text response, or None on any error.
 
     Args:
-        prompt:  The prompt to send to claude.
-        timeout: Subprocess timeout in seconds (default 20).
-        model:   Claude model alias — "haiku" (default), "sonnet", or "opus".
+        prompt:        The prompt to send to claude.
+        timeout:       Subprocess timeout in seconds (default 20).
+        model:         Claude model alias — "haiku" (default), "sonnet", or "opus".
+        system_prompt: Optional system prompt passed via --system-prompt.
     """
     if os.environ.get(RECURSION_GUARD):
         return None
@@ -42,6 +44,7 @@ def run_claude(
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",
+                *(["--system-prompt", system_prompt] if system_prompt else []),
             ],
             env=env,
             capture_output=True,
@@ -75,6 +78,7 @@ def run_claude_json(
     json_schema: dict,
     timeout: int = _TIMEOUT,
     model: str = "haiku",
+    system_prompt: str | None = None,
 ) -> dict | None:
     """Call `claude -p --json-schema` and return validated structured dict.
 
@@ -82,10 +86,11 @@ def run_claude_json(
     Eliminates manual JSON parsing and fence stripping.
 
     Args:
-        prompt:      The prompt to send to claude.
-        json_schema: JSON Schema dict — Claude's output is validated against this.
-        timeout:     Subprocess timeout in seconds (default 20).
-        model:       Claude model alias — "haiku" (default), "sonnet", or "opus".
+        prompt:        The prompt to send to claude.
+        json_schema:   JSON Schema dict — Claude's output is validated against this.
+        timeout:       Subprocess timeout in seconds (default 20).
+        model:         Claude model alias — "haiku" (default), "sonnet", or "opus".
+        system_prompt: Optional system prompt passed via --system-prompt.
     """
     if os.environ.get(RECURSION_GUARD):
         return None
@@ -103,6 +108,7 @@ def run_claude_json(
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",
+                *(["--system-prompt", system_prompt] if system_prompt else []),
             ],
             env=env,
             capture_output=True,
@@ -119,6 +125,11 @@ def run_claude_json(
         data = json.loads(proc.stdout)
     except json.JSONDecodeError:
         return None
+
+    cost = data.get("total_cost_usd", 0.0)
+    if cost:
+        import sys as _sys
+        print(f"[claude_runner] cost: ${cost:.4f}", file=_sys.stderr)
 
     if data.get("is_error"):
         return None

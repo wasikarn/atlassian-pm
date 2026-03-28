@@ -45,6 +45,25 @@ def rate_paths(paths: list[str]) -> str | None:
     return rating if rating in {"good", "fair", "poor"} else None
 
 
+def rate_paths_with_suggestion(paths: list[str]) -> tuple[str | None, str | None]:
+    """Return (rating, suggestion) tuple. suggestion is None when rating is good or unavailable."""
+    if not paths:
+        return None, None
+    paths_text = "\n".join(f"- {p}" for p in paths[:15])
+    data = claude_call_json(
+        RATE_PROMPT.format(paths=paths_text),
+        json_schema=RATE_JSON_SCHEMA,
+        timeout=10,
+    )
+    if data is None:
+        return None, None
+    rating = data.get("rating", "").lower()
+    if rating not in {"good", "fair", "poor"}:
+        return None, None
+    suggestion = data.get("suggestion") or None
+    return rating, suggestion
+
+
 def main() -> None:
     try:
         data = parse_stdin()
@@ -65,7 +84,7 @@ def main() -> None:
             allow()
             return
 
-        rating = rate_paths(paths)
+        rating, suggestion = rate_paths_with_suggestion(paths)
         if rating is None:
             allow()
             return
@@ -73,10 +92,15 @@ def main() -> None:
         log_event(_HOOK, "RATED", {"rating": rating, "path_count": len(paths)})
 
         if rating == "poor":
+            suggestion_text = (
+                f" Suggestion: {suggestion}"
+                if suggestion
+                else " Consider re-running Explore with more specific queries "
+                     "(e.g. grep for class/function names, not just directories)."
+            )
             inject_context(
                 f"AI PATH QUALITY: Explore returned {len(paths)} paths rated '{rating}'. "
-                f"Paths like {paths[:3]} are too generic. Consider re-running Explore with "
-                f"more specific queries (e.g. grep for class/function names, not just directories)."
+                f"Paths like {paths[:3]} are too generic.{suggestion_text}"
             )
     except Exception:
         allow()

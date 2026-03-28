@@ -47,13 +47,15 @@ def claude_call(
     prompt: str,
     timeout: int = _CLAUDE_TIMEOUT,
     model: str = "haiku",
+    system_prompt: str | None = None,
 ) -> str | None:
     """Call `claude -p` non-interactively and return the text response.
 
     Args:
-        prompt:  The prompt to send to claude.
-        timeout: Subprocess timeout in seconds (default 15).
-        model:   Claude model alias — "haiku" (default), "sonnet", or "opus".
+        prompt:        The prompt to send to claude.
+        timeout:       Subprocess timeout in seconds (default 15).
+        model:         Claude model alias — "haiku" (default), "sonnet", or "opus".
+        system_prompt: Optional system prompt passed via --system-prompt.
 
     Returns:
         The text response string, or None on any error.
@@ -73,6 +75,7 @@ def claude_call(
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",
+                *(["--system-prompt", system_prompt] if system_prompt else []),
             ],
             env=env,
             capture_output=True,
@@ -111,6 +114,7 @@ def claude_call_json(
     json_schema: dict,
     timeout: int = _CLAUDE_TIMEOUT,
     model: str = "haiku",
+    system_prompt: str | None = None,
 ) -> dict | None:
     """Call `claude -p --json-schema` and return validated structured dict.
 
@@ -118,10 +122,11 @@ def claude_call_json(
     field (not `result`). Eliminates manual JSON parsing and fence stripping.
 
     Args:
-        prompt:      The prompt to send to claude.
-        json_schema: JSON Schema dict — Claude's output is validated against this.
-        timeout:     Subprocess timeout in seconds (default 15).
-        model:       Claude model alias — "haiku" (default), "sonnet", or "opus".
+        prompt:        The prompt to send to claude.
+        json_schema:   JSON Schema dict — Claude's output is validated against this.
+        timeout:       Subprocess timeout in seconds (default 15).
+        model:         Claude model alias — "haiku" (default), "sonnet", or "opus".
+        system_prompt: Optional system prompt passed via --system-prompt.
 
     Returns:
         Validated dict matching the schema, or None on any error.
@@ -142,6 +147,7 @@ def claude_call_json(
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",
+                *(["--system-prompt", system_prompt] if system_prompt else []),
             ],
             env=env,
             capture_output=True,
@@ -160,6 +166,8 @@ def claude_call_json(
         data = json.loads(proc.stdout)
     except json.JSONDecodeError:
         return None
+
+    _track_cost(data.get("total_cost_usd", 0.0))
 
     if data.get("is_error"):
         return None

@@ -127,6 +127,24 @@ def test_claude_call_sets_recursion_guard_in_env():
     assert env.get(RECURSION_GUARD) == "1"
 
 
+def test_claude_call_passes_system_prompt():
+    """--system-prompt flag appears in cmd when system_prompt is provided."""
+    with patch("subprocess.run", return_value=_proc(_ok("x"))) as mock_run:
+        claude_call("prompt", system_prompt="You are a helpful assistant.")
+    cmd = mock_run.call_args[0][0]
+    assert "--system-prompt" in cmd
+    idx = cmd.index("--system-prompt")
+    assert cmd[idx + 1] == "You are a helpful assistant."
+
+
+def test_claude_call_no_system_prompt_by_default():
+    """--system-prompt flag is NOT in cmd when system_prompt is not provided."""
+    with patch("subprocess.run", return_value=_proc(_ok("x"))) as mock_run:
+        claude_call("prompt")
+    cmd = mock_run.call_args[0][0]
+    assert "--system-prompt" not in cmd
+
+
 # ── claude_call_json ───────────────────────────────────────────────────────────
 
 SCHEMA = {"type": "object", "properties": {"score": {"type": "integer"}}, "required": ["score"]}
@@ -182,3 +200,21 @@ def test_claude_call_json_respects_recursion_guard():
 def test_claude_call_json_returns_none_on_timeout():
     with patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd=[], timeout=1)):
         assert claude_call_json("prompt", SCHEMA) is None
+
+
+def test_claude_call_json_passes_system_prompt():
+    """--system-prompt flag appears in cmd when system_prompt is provided."""
+    with patch("subprocess.run", return_value=_proc(_structured({"score": 1}))) as mock_run:
+        claude_call_json("prompt", SCHEMA, system_prompt="You are a JSON scorer.")
+    cmd = mock_run.call_args[0][0]
+    assert "--system-prompt" in cmd
+    idx = cmd.index("--system-prompt")
+    assert cmd[idx + 1] == "You are a JSON scorer."
+
+
+def test_claude_call_json_no_system_prompt_by_default():
+    """--system-prompt flag is NOT in cmd when system_prompt is not provided."""
+    with patch("subprocess.run", return_value=_proc(_structured({"score": 1}))) as mock_run:
+        claude_call_json("prompt", SCHEMA)
+    cmd = mock_run.call_args[0][0]
+    assert "--system-prompt" not in cmd

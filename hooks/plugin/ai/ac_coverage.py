@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from config_loader import load_project_config
 from hooks_lib import allow, inject_context, log_event, parse_stdin
 from hooks_state import _load, _save, vs_get_coverage
 from plugin.ai.claude_call import claude_call_json
@@ -20,13 +21,44 @@ from plugin.ai.prompts import SCORE_PROMPT
 _HOOK = "ai-ac-coverage"
 
 
+def _extract_text(node) -> str:
+    """Recursively extract plain text from an ADF node."""
+    if isinstance(node, str):
+        return node
+    if isinstance(node, list):
+        return " ".join(_extract_text(n) for n in node)
+    if isinstance(node, dict):
+        if node.get("type") == "text":
+            return node.get("text", "")
+        parts = []
+        for child in node.get("content", []):
+            parts.append(_extract_text(child))
+        return " ".join(p for p in parts if p)
+    return ""
+
+
+def _strip_adf(text: str) -> str:
+    """Extract plain text from ADF JSON or return text as-is."""
+    text = text.strip()
+    if not text.startswith("{") and not text.startswith("["):
+        return text
+    try:
+        data = json.loads(text)
+        return _extract_text(data)
+    except (json.JSONDecodeError, TypeError):
+        return text
+
+
 def check_coverage(acs: list[str], subtask_summaries: list[str]) -> int | None:
     """Return coverage score 0-100, or None if unavailable."""
     if not acs or not subtask_summaries:
         return None
 
-    acs_text = "\n".join(f"- {ac}" for ac in acs[:10])
-    subtasks_text = "\n".join(f"- {s}" for s in subtask_summaries[:15])
+    clean_acs = [_strip_adf(ac) for ac in acs[:10]]
+    clean_subtasks = [_strip_adf(s) for s in subtask_summaries[:15]]
+
+    acs_text = "\n".join(f"- {ac}" for ac in clean_acs)
+    subtasks_text = "\n".join(f"- {s}" for s in clean_subtasks)
     data = claude_call_json(
         SCORE_PROMPT.format(acs=acs_text, subtasks=subtasks_text),
         json_schema=SCORE_JSON_SCHEMA,
@@ -91,7 +123,10 @@ def main() -> None:
 
         log_event(_HOOK, "SCORED", {"parent": parent_key, "score": score, "ac_count": len(acs)})
 
-        if score < 70:
+        config = load_project_config()
+        threshold = config.get("quality", {}).get("ac_coverage_threshold", 70)
+
+        if score < threshold:
             inject_context(
                 f"AI COVERAGE WARNING: {parent_key} — subtasks cover ~{score}% of ACs semantically. "
                 f"{len(acs)} ACs tracked, {len(subtask_summaries)} subtask(s) so far. "
