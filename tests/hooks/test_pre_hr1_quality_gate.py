@@ -111,8 +111,8 @@ def test_allows_when_validator_import_fails():
         json.dump({"type": "story", "description": {"version": 1, "type": "doc"}}, f)
         tmp_path = f.name
 
-    # Simulate import failure by making sys.path not include scripts
-    with patch.object(pre_hr1_quality_gate, "SCRIPTS_DIR", Path("/nonexistent")):
+    # Force ImportError even when module is already cached by marking it as unavailable
+    with patch.dict("sys.modules", {"lib.adf_validator": None}):
         result = _run({"command": f"acli jira workitem create --from-json {tmp_path}"})
     assert result == {}
 

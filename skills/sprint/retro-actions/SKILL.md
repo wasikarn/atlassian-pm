@@ -168,7 +168,7 @@ Display:
 
 | # | Key | Title | Priority | Type | Assignee Hint |
 |---|-----|-------|----------|------|---------------|
-| 1 | TP-XXX | [Retro] sprint-47: ... | High | process | tech-lead |
+| 1 | {{PROJECT_KEY}}-XXX | [Retro] sprint-47: ... | High | process | tech-lead |
 ...
 
 Total: N tasks created, M skipped (duplicates)
