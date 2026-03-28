@@ -4,8 +4,21 @@
 import contextlib
 import os
 import subprocess
+import time
 from datetime import date, datetime
 from typing import Any
+
+_last_alerted: dict[str, float] = {}
+_ALERT_COOLDOWN_SECS = 3600  # 1 hour minimum between same alert
+
+
+def _should_alert(alert_key: str) -> bool:
+    last = _last_alerted.get(alert_key, 0)
+    return (time.time() - last) >= _ALERT_COOLDOWN_SECS
+
+
+def _mark_alerted(alert_key: str) -> None:
+    _last_alerted[alert_key] = time.time()
 
 
 def _send_imessage(message: str) -> None:
@@ -30,9 +43,12 @@ def handle(board_config: dict[str, Any], issues: list[dict[str, Any]]) -> list[s
         statuses = col_config.get("statuses", [])
         count = sum(1 for i in issues if i.get("status") in statuses)
         if count > wip_max:
-            msg = f"⚠️ WIP LIMIT: {col_name} has {count}/{wip_max} issues."
-            _send_imessage(msg)
-            alerts.append(msg)
+            alert_key = f"wip:{col_name}"
+            if _should_alert(alert_key):
+                msg = f"⚠️ WIP LIMIT: {col_name} has {count}/{wip_max} issues."
+                _send_imessage(msg)
+                _mark_alerted(alert_key)
+                alerts.append(msg)
 
     for issue in issues:
         sprint_end = issue.get("sprint_end_date")
@@ -42,9 +58,12 @@ def handle(board_config: dict[str, Any], issues: list[dict[str, Any]]) -> list[s
             end = datetime.fromisoformat(sprint_end).date()
             days_left = (end - date.today()).days
             if 0 <= days_left <= 2:
-                msg = f"⏰ SPRINT ENDS in {days_left} day(s) ({end})."
-                _send_imessage(msg)
-                alerts.append(msg)
+                alert_key = "sprint_end"
+                if _should_alert(alert_key):
+                    msg = f"⏰ SPRINT ENDS in {days_left} day(s) ({end})."
+                    _send_imessage(msg)
+                    _mark_alerted(alert_key)
+                    alerts.append(msg)
                 break
         except ValueError:
             continue

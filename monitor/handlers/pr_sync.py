@@ -3,11 +3,15 @@
 
 import contextlib
 import json
+import logging
 import os
 import re
+import time
 from datetime import date
 from pathlib import Path
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 _HOOKS_LOG_DIR = Path(os.environ.get("CLAUDE_PLUGIN_DATA",
                                       str(Path.home() / ".claude"))) / "hooks-logs"
@@ -16,11 +20,23 @@ _PROCESSED_FILE = Path(os.environ.get("CLAUDE_PLUGIN_DATA",
 _ISSUE_KEY_RE = re.compile(r"\b([A-Z]+-\d+)\b")
 
 
+def _entry_ts(event_id: str) -> float:
+    """Extract timestamp from event_id, return 0.0 if not parseable."""
+    try:
+        ts_str = event_id.split("-")[0]
+        return float(ts_str)
+    except (ValueError, IndexError):
+        return 0.0
+
+
 def _load_processed() -> set[str]:
     if not _PROCESSED_FILE.exists():
         return set()
     try:
-        return set(json.loads(_PROCESSED_FILE.read_text()))
+        data = json.loads(_PROCESSED_FILE.read_text())
+        cutoff = time.time() - 48 * 3600
+        # entries are stored as "TIMESTAMP-url" — filter old ones
+        return {e for e in data if _entry_ts(e) > cutoff}
     except (json.JSONDecodeError, OSError):
         return set()
 
@@ -76,10 +92,10 @@ def handle(jira_api: Any) -> list[str]:
             )
             if done_id:
                 jira_api.transition_issue(issue_key, done_id)
+            processed.add(event["_event_id"])
             synced.append(issue_key)
-        except Exception:
-            pass
-        processed.add(event["_event_id"])
+        except Exception as e:
+            log.warning("PR sync failed for %s: %s", issue_key, e)
 
     _save_processed(processed)
     return synced

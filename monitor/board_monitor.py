@@ -15,6 +15,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 _ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_ROOT / "scripts"))
@@ -42,7 +43,7 @@ log = logging.getLogger(__name__)
 _STATE_PATH = Path.home() / ".claude" / "monitor-state.json"
 
 
-def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict:
+def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict[str, Any]:
     """Fetch all non-Done issues and return as key → fields dict.
 
     search_issues returns the full Jira search response dict; the issue list
@@ -53,7 +54,7 @@ def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict:
     start_at = 0
     page_size = 50
     jql = f"project = {project_key} AND statusCategory != Done ORDER BY updated DESC"
-    fields = "summary,status,assignee,priority"
+    fields = "summary,status,assignee,priority,sprint"
 
     try:
         while True:
@@ -67,11 +68,18 @@ def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict:
             for issue in issues:
                 key = issue.get("key", "")
                 f = issue.get("fields", {})
+                sprint_field = f.get("sprint") or f.get("customfield_10020")
+                sprint_end = None
+                if sprint_field:
+                    if isinstance(sprint_field, list):
+                        sprint_field = sprint_field[-1]  # last sprint = most recent
+                    sprint_end = sprint_field.get("endDate") if isinstance(sprint_field, dict) else None
                 result[key] = {
                     "summary": f.get("summary", ""),
                     "status": (f.get("status") or {}).get("name", ""),
                     "assignee": ((f.get("assignee") or {}).get("displayName", "")),
                     "priority": ((f.get("priority") or {}).get("name", "")),
+                    "sprint_end_date": sprint_end,
                 }
             total = response.get("total", 0)
             start_at += len(issues)
@@ -107,7 +115,10 @@ def run_cycle(
             if issue_changed.handle(change, jira):
                 log.info("Commented on %s", change["key"])
 
-        issues_list = [{"status": v["status"]} for v in new_snapshot.values()]
+        issues_list = [
+            {"status": v["status"], "sprint_end_date": v.get("sprint_end_date")}
+            for v in new_snapshot.values()
+        ]
         alerts = sprint_health.handle(board_config, issues_list)
         if alerts:
             log.info("Sent %d health alerts", len(alerts))
@@ -173,12 +184,13 @@ def main() -> None:
     while True:
         try:
             run_cycle(jira, state, board_config, project_key, dry_run=args.dry_run)
+            time.sleep(args.interval)
         except KeyboardInterrupt:
             log.info("Monitor stopped by user")
             break
         except Exception as e:
             log.error("Cycle error: %s", e)
-        time.sleep(args.interval)
+            time.sleep(args.interval)
 
 
 if __name__ == "__main__":
