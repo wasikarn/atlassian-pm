@@ -2,6 +2,7 @@
 name: pr-description-writer
 description: Generate PR description from Jira issue context and git diff. Extracts issue key from branch name, fetches story+subtask, maps changed files to scope table, produces ready-to-use PR description with AC coverage and scope validation.
 model: haiku
+effort: medium
 tools: Bash, Read, Glob, Grep, mcp__atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 12
@@ -15,9 +16,9 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
 
 ## Steps
 
-1. **Extract issue key** — parse `{{PROJECT_KEY}}-XXX` from branch name using `git branch --show-current` or from input. If no key found → return error: "No {{PROJECT_KEY}}-XXX key found in branch name. Use branch convention: feature/{{PROJECT_KEY}}-XXX-description".
+1. **Extract issue key** — parse `BEP-XXX` from branch name using `git branch --show-current` or from input. If no key found → return error: "No BEP-XXX key found in branch name. Use branch convention: feature/BEP-XXX-description".
 
-2. **Fetch issue context** — `cache_get_issue({{PROJECT_KEY}}-XXX)` → get story + subtasks. If subtask: fetch parent story too for AC context.
+2. **Fetch issue context** — `cache_get_issue(BEP-XXX)` → get story + subtasks. If subtask: fetch parent story too for AC context.
 
 3. **Get git diff** — `git diff main --name-only` (or `origin/main`) to list changed files. Also `git log main..HEAD --oneline` for commit history.
 
@@ -30,7 +31,7 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
 
 ```markdown
 ## 🎯 Jira Issue
-[{{PROJECT_KEY}}-XXX](https://{{JIRA_SITE}}/browse/BEP-XXX) — [issue summary]
+[BEP-XXX](https://{{JIRA_SITE}}/browse/BEP-XXX) — [issue summary]
 **Type:** [Subtask/Story] | **Status:** [status] | **Assignee:** [name]
 
 ## 📋 Acceptance Criteria Addressed
@@ -44,7 +45,7 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
 | CREATE | `path/to/new.ts` | ✅ Changed |
 | REF | `path/to/ref.ts` | ℹ️ Reference only |
 
-[If scope drift:] ⚠️ **Files outside declared scope:** `path/to/unexpected.ts` — consider updating {{PROJECT_KEY}}-XXX scope or splitting PR.
+[If scope drift:] ⚠️ **Files outside declared scope:** `path/to/unexpected.ts` — consider updating BEP-XXX scope or splitting PR.
 
 ## 🧪 Testing
 - [ ] [test scenario from AC]
@@ -65,4 +66,4 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
 ## Output
 
 Return the complete PR description as markdown text, ready to paste.
-Also return a one-line summary: `PR Description generated for {{PROJECT_KEY}}-XXX ([N] ACs covered, [scope drift: yes/no])`.
+Also return a one-line summary: `PR Description generated for BEP-XXX ([N] ACs covered, [scope drift: yes/no])`.

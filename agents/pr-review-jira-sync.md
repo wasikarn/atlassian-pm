@@ -2,6 +2,7 @@
 name: pr-review-jira-sync
 description: Sync Jira after PR merge. Extracts issue key from branch/title, transitions subtask to Done, posts PR link as comment, checks if all sibling subtasks are done and offers to close parent story. Enforces HR6 cache invalidation after every write.
 model: haiku
+effort: medium
 tools: Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 permissionMode: dontAsk
 maxTurns: 15
@@ -15,17 +16,17 @@ PR info: branch name, PR number, PR URL, or merge commit message (any one of the
 
 ## Steps
 
-1. **Extract issue keys** — parse `{{PROJECT_KEY}}-XXX` from branch name and/or PR title/body. If multiple keys found → process all. If none found → return: "No {{PROJECT_KEY}}-XXX key found. Please provide issue key manually."
+1. **Extract issue keys** — parse `BEP-XXX` from branch name and/or PR title/body. If multiple keys found → process all. If none found → return: "No BEP-XXX key found. Please provide issue key manually."
 
-2. **Fetch issue** — `cache_get_issue({{PROJECT_KEY}}-XXX, fields="summary,status,issuetype,parent,assignee")` for each key.
+2. **Fetch issue** — `cache_get_issue(BEP-XXX, fields="summary,status,issuetype,parent,assignee")` for each key.
 
 3. **Transition to Done** — for each subtask:
    - Check current status: if already Done → skip (note as already closed)
-   - Get available transitions: `jira_get_transitions({{PROJECT_KEY}}-XXX)` → find transition that moves toward Done
-   - `jira_transition_issue({{PROJECT_KEY}}-XXX, transition_id=<done_id>)`
-   - **HR6**: `cache_invalidate({{PROJECT_KEY}}-XXX)` immediately after
+   - Get available transitions: `jira_get_transitions(BEP-XXX)` → find transition that moves toward Done
+   - `jira_transition_issue(BEP-XXX, transition_id=<done_id>)`
+   - **HR6**: `cache_invalidate(BEP-XXX)` immediately after
 
-4. **Post PR link comment** — `jira_add_comment({{PROJECT_KEY}}-XXX, body="PR merged: [PR URL]\nCommit: [merge SHA if available]\nTransitioned to Done by pr-review-jira-sync agent.")`
+4. **Post PR link comment** — `jira_add_comment(BEP-XXX, body="PR merged: [PR URL]\nCommit: [merge SHA if available]\nTransitioned to Done by pr-review-jira-sync agent.")`
 
 5. **Check sibling completion** — for each transitioned subtask, fetch parent story:
    - `jira_search(jql: "parent = STORY-KEY", fields: "summary,status,issuetype")` (**⚠️ NEVER add ORDER BY**)
@@ -49,7 +50,7 @@ PR info: branch name, PR number, PR URL, or merge commit message (any one of the
 ## PR Sync Complete
 
 Transitioned:
-- {{PROJECT_KEY}}-XXX ([summary]): In Progress → Done ✅
+- BEP-XXX ([summary]): In Progress → Done ✅
 - {{PROJECT_KEY}}-YYY ([summary]): already Done, skipped
 
 PR comment posted: [yes/no]

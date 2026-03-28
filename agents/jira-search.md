@@ -2,6 +2,7 @@
 name: jira-search
 description: Fast Jira issue search and duplicate detection
 model: haiku
+effort: low
 tools: mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_search, mcp__atlassian-cache__cache_text_search, mcp__atlassian-cache__cache_similar_issues
 permissionMode: dontAsk
 maxTurns: 6
@@ -45,7 +46,7 @@ Found [N] matches | Showing top 5 by relevance
 
 | Key | Summary | Status | Confidence | Match Reason |
 |-----|---------|--------|------------|-------------|
-| {{PROJECT_KEY}}-XXX | [summary] | In Progress | HIGH | Same epic + keyword match |
+| BEP-XXX | [summary] | In Progress | HIGH | Same epic + keyword match |
 | {{PROJECT_KEY}}-YYY | [summary] | Done | MEDIUM | Keyword overlap, different service |
 
 Recommendation: [EXACT/HIGH match found → link existing | MEDIUM/LOW → safe to create new]

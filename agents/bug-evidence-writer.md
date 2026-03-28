@@ -2,6 +2,7 @@
 name: bug-evidence-writer
 description: Generate ADF-formatted bug ticket description from test failure evidence (screenshot, console errors, network failures, test case data). Follows the same quality standards as story-writer but specialized for bug reports.
 model: haiku
+effort: medium
 tools: Read, Write
 permissionMode: dontAsk
 maxTurns: 8

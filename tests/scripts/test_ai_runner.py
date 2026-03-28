@@ -86,6 +86,7 @@ def test_run_claude_passes_required_flags():
     assert "--tools" in cmd and "" in cmd
     assert "--max-turns" in cmd and "1" in cmd
     assert "--model" in cmd and "sonnet" in cmd
+    assert "--max-budget-usd" in cmd
     assert "--dangerously-skip-permissions" in cmd
     assert "--no-session-persistence" in cmd
 
@@ -138,6 +139,7 @@ def test_run_claude_json_passes_json_schema_flag():
     cmd = mock_run.call_args[0][0]
     assert "--json-schema" in cmd
     assert json.loads(cmd[cmd.index("--json-schema") + 1]) == SCHEMA
+    assert "--max-budget-usd" in cmd
 
 
 def test_run_claude_json_respects_recursion_guard():

@@ -2,6 +2,7 @@
 name: code-explorer
 description: Explore codebase to find real file paths and patterns
 model: haiku
+effort: medium
 tools: Read, Glob, Grep, Bash
 permissionMode: plan
 maxTurns: 12

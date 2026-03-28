@@ -2,6 +2,7 @@
 name: sprint-planner
 description: Sprint planning with capacity analysis and work distribution
 model: sonnet
+effort: high
 tools: Read, Glob, Grep, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
 skills:
   - shared-references

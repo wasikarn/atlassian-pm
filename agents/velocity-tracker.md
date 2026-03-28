@@ -2,6 +2,7 @@
 name: velocity-tracker
 description: Harvest completed sprint data (last N sprints) and update .claude/project-config-team-detail.json velocity section with rolling average, standard deviation, and trend. Enables sprint-planner to use real velocity data instead of static estimates.
 model: haiku
+effort: low
 tools: Read, Write, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues
 permissionMode: dontAsk
 maxTurns: 15

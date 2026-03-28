@@ -2,6 +2,7 @@
 name: alignment-checker
 description: Check alignment between related tickets (story-subtask-epic)
 model: sonnet
+effort: medium
 tools: Read, Glob, Grep, mcp__atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_invalidate
 maxTurns: 15
 permissionMode: dontAsk
@@ -42,7 +43,7 @@ Verify and predict alignment between related Jira tickets: Epic→Story→Subtas
 For each story AC (AC1, AC2, AC3...):
 
 - Scan subtask objectives for coverage of that AC
-- Mark: ✅ covered by {{PROJECT_KEY}}-XXX | ❌ no subtask covers this AC
+- Mark: ✅ covered by BEP-XXX | ❌ no subtask covers this AC
 
 Output the coverage matrix in the report.
 

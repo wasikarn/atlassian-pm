@@ -2,6 +2,7 @@
 name: quality-gate
 description: Validate ADF content against quality gate criteria
 model: sonnet
+effort: high
 tools: Read, Glob, Grep
 permissionMode: dontAsk
 maxTurns: 10

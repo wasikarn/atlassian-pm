@@ -11,6 +11,7 @@ import subprocess
 
 RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _TIMEOUT = 20
+_MAX_BUDGET_USD = 0.01  # monitor polls continuously — cap per analysis call
 
 
 def run_claude(
@@ -28,6 +29,7 @@ def run_claude(
                 "--output-format", "json",
                 "--model", model,
                 "--max-turns", "1",
+                "--max-budget-usd", str(_MAX_BUDGET_USD),
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",

@@ -2,6 +2,7 @@
 name: backlog-groomer
 description: Pre-sprint backlog health assessment. Accepts JQL query or epic key, fetches all To Do/Backlog stories, checks readiness criteria (has ACs, SP estimate, epic link, VS label, no unresolved blocker), groups output into Sprint-Ready / Needs AC / Blocked / Missing Estimate / Orphan categories. Also scores WSJF and flags aging items.
 model: sonnet
+effort: high
 tools: Read, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 20
@@ -14,7 +15,7 @@ Assess backlog readiness before sprint planning. Groups stories by readiness cat
 One of:
 
 - JQL query: `project = {{PROJECT_KEY}} AND status in ("To Do", "Backlog") AND issuetype = Story`
-- Epic key: `{{PROJECT_KEY}}-XXX` → auto-generates JQL for children
+- Epic key: `BEP-XXX` → auto-generates JQL for children
 - Sprint label: `vs2-coupon` → filters by label
 
 Optional: `--limit N` (default 30 stories max)
@@ -74,7 +75,7 @@ Round to 1 decimal. Higher = pull first.
 
 | Key | Summary | SP | VS Label | WSJF | Value Density | Aging? |
 |-----|---------|-----|----------|------|--------------|--------|
-| {{PROJECT_KEY}}-XXX | [summary] | 3 | vs2-coupon | 8.4 | 1.8 | — |
+| BEP-XXX | [summary] | 3 | vs2-coupon | 8.4 | 1.8 | — |
 | {{PROJECT_KEY}}-YYY | [summary] | 5 | vs2-coupon | 6.1 | 0.4 | ⚠️ low value density |
 
 ### All Sprint-Ready ([N])
@@ -113,6 +114,6 @@ Round to 1 decimal. Higher = pull first.
 |-----|---------|----------------|-------|
 
 ---
-**Summary:** [N] sprint-ready of [total]. Top WSJF: {{PROJECT_KEY}}-XXX ([score]). Fix [N] AC issues before planning.
+**Summary:** [N] sprint-ready of [total]. Top WSJF: BEP-XXX ([score]). Fix [N] AC issues before planning.
 **Next step:** → /plan-sprint (use sprint-ready list ordered by WSJF as input)
 ```

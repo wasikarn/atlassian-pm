@@ -2,6 +2,7 @@
 name: adf-surgeon
 description: Deep ADF structural repair specialist. Fixes Jira ADF issues that quality-gate flags but cannot safely auto-fix. Knows Jira-specific quirks that cause silent render failures.
 model: haiku
+effort: medium
 tools: Read, Write
 permissionMode: dontAsk
 maxTurns: 8

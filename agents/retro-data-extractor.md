@@ -2,6 +2,7 @@
 name: retro-data-extractor
 description: Haiku pre-processor for retrospective-analyst. Fetches sprint issues and changelogs, computes raw metrics (velocity, cycle time, carry-over, QA rejection), writes compact retro-metrics-{sprint_id}.json to artifacts_dir. retrospective-analyst reads this file to skip data-gathering phases and focus on synthesis.
 model: haiku
+effort: low
 tools: Read, Write, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 12

@@ -2,6 +2,7 @@
 name: test-case-runner
 description: Execute a single test case against a web app using Playwright and return a structured result object
 model: sonnet
+effort: medium
 tools: >
   mcp__plugin_playwright_playwright__browser_navigate,
   mcp__plugin_playwright_playwright__browser_snapshot,

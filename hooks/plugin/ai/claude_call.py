@@ -21,6 +21,7 @@ import subprocess
 
 RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _CLAUDE_TIMEOUT = 15  # seconds
+_MAX_BUDGET_USD = 0.01  # hooks fire on every event — cap per call
 
 
 def claude_call(
@@ -49,6 +50,7 @@ def claude_call(
                 "--output-format", "json",
                 "--model", model,
                 "--max-turns", "1",
+                "--max-budget-usd", str(_MAX_BUDGET_USD),
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",
@@ -116,6 +118,7 @@ def claude_call_json(
                 "--json-schema", json.dumps(json_schema),
                 "--model", model,
                 "--max-turns", "1",
+                "--max-budget-usd", str(_MAX_BUDGET_USD),
                 "--tools", "",
                 "--dangerously-skip-permissions",
                 "--no-session-persistence",

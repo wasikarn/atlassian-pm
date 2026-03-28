@@ -2,6 +2,7 @@
 name: spec-parser-agent
 description: Parse pre-fetched Confluence page content (ADF/HTML storage format) into structured requirements blocks — sections, personas, requirements, constraints — for spec-to-stories skill. Receives page content directly; does NOT call Confluence.
 model: haiku
+effort: medium
 tools: Read
 permissionMode: dontAsk
 maxTurns: 10
