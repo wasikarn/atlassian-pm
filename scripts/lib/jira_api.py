@@ -483,6 +483,79 @@ class JiraAPI:
         logger.error("%s: update failed (HTTP %d)", issue_key, status)
         return False, change_count
 
+    def add_comment(self, issue_key: str, body: str) -> dict[str, Any]:
+        """Add a plain-text comment to a Jira issue.
+
+        Args:
+            issue_key: Jira issue key (e.g., 'TP-123')
+            body: Comment text (plain text, converted to ADF paragraph)
+
+        Returns:
+            Created comment data from Jira API.
+
+        Raises:
+            IssueNotFoundError: If issue key doesn't exist
+            APIError: If API request fails
+        """
+        _validate_issue_key(issue_key)
+        logger.info("Adding comment to %s", issue_key)
+        payload = {
+            "body": {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [{"type": "text", "text": body}],
+                    }
+                ],
+            }
+        }
+        return self._request("POST", f"/rest/api/3/issue/{issue_key}/comment", payload)
+
+    def get_transitions(self, issue_key: str) -> list[dict[str, Any]]:
+        """Get available transitions for a Jira issue.
+
+        Args:
+            issue_key: Jira issue key (e.g., 'TP-123')
+
+        Returns:
+            List of transition dicts, each with 'id' and 'name'.
+
+        Raises:
+            IssueNotFoundError: If issue key doesn't exist
+            APIError: If API request fails
+        """
+        _validate_issue_key(issue_key)
+        logger.info("Getting transitions for %s", issue_key)
+        result = self._request("GET", f"/rest/api/3/issue/{issue_key}/transitions")
+        return result.get("transitions", [])
+
+    def transition_issue(self, issue_key: str, transition_id: str) -> int:
+        """Transition a Jira issue to a new status.
+
+        Args:
+            issue_key: Jira issue key (e.g., 'TP-123')
+            transition_id: Transition ID from get_transitions()
+
+        Returns:
+            HTTP status code (204 = success).
+
+        Raises:
+            IssueNotFoundError: If issue key doesn't exist
+            APIError: If API request fails
+        """
+        _validate_issue_key(issue_key)
+        logger.info("Transitioning %s with transition %s", issue_key, transition_id)
+        result = self._request(
+            "POST",
+            f"/rest/api/3/issue/{issue_key}/transitions",
+            {"transition": {"id": transition_id}},
+        )
+        status = result.get("_status", 204)
+        logger.info("Transitioned %s (HTTP %d)", issue_key, status)
+        return status
+
     # --- Confluence REST API ---
 
     def get_confluence_page(

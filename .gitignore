@@ -38,3 +38,6 @@ mcp-servers/atlassian-cache/.coverage
 
 # Git worktrees
 .worktrees/
+
+# Monitor runtime logs (contain live Jira URLs/data)
+monitor/logs/*.log

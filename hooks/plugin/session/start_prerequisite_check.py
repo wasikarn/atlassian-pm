@@ -34,6 +34,12 @@ if not shutil.which("qmd"):
         "   Optional install: bun install -g qmd or add bun bin to PATH."
     )
 
+# Check claude CLI available (needed for AI hooks — Phase 2+)
+if not shutil.which("claude"):
+    warnings.append(
+        "⚠️  claude CLI not found — AI hooks (Phase 2+) will be skipped. Install Claude Code to enable."
+    )
+
 # Check cache DB
 if not CACHE_DB.exists():
     warnings.append(
