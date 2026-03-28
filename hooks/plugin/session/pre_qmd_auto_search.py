@@ -76,14 +76,21 @@ _UNINDEXED_EXTENSIONS = {
     ".go", ".rb", ".php", ".java", ".c", ".cpp", ".h",
 }
 
+# Pre-compiled regexes — avoids recompilation on every hook invocation
+_RE_CAMEL_LOWER_UPPER = re.compile(r"([a-z])([A-Z])")
+_RE_ACRONYM = re.compile(r"([A-Z]+)([A-Z][a-z])")
+_RE_REGEX_SYNTAX = re.compile(r"[\\(){}[\]|^$.*+?]")
+_RE_FILE_EXT = re.compile(r"\.(\w+)$")
+_RE_WILDCARDS = re.compile(r"\*+")
+_RE_EXTENSIONS = re.compile(r"\.\w+$")
+_RE_BRACES = re.compile(r"[{}]")
+
 
 def split_identifier(s: str) -> str:
     """Split camelCase/PascalCase/snake_case/kebab-case into words."""
-    # snake_case and kebab-case
     s = s.replace("_", " ").replace("-", " ")
-    # camelCase and PascalCase: insert space before uppercase letters
-    s = re.sub(r"([a-z])([A-Z])", r"\1 \2", s)
-    s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", s)
+    s = _RE_CAMEL_LOWER_UPPER.sub(r"\1 \2", s)
+    s = _RE_ACRONYM.sub(r"\1 \2", s)
     return s.lower()
 
 
@@ -131,7 +138,7 @@ def main() -> None:
         if alpha_count < 3:
             sys.exit(0)
         # Clean regex-specific syntax for qmd search
-        query = re.sub(r"[\\(){}[\]|^$.*+?]", " ", query)
+        query = _RE_REGEX_SYNTAX.sub(" ", query)
         # Split camelCase/PascalCase/snake_case identifiers
         query = split_identifier(query)
         query = " ".join(query.split())
@@ -140,7 +147,7 @@ def main() -> None:
         pattern = tool_input.get("pattern", "")
 
         # Skip if pattern targets non-indexed file extension
-        ext_match = re.search(r"\.(\w+)$", pattern.rstrip("/"))
+        ext_match = _RE_FILE_EXT.search(pattern.rstrip("/"))
         if ext_match:
             ext = "." + ext_match.group(1)
             if ext in _UNINDEXED_EXTENSIONS:
@@ -149,9 +156,9 @@ def main() -> None:
         parts = pattern.replace("\\", "/").split("/")
         meaningful = []
         for p in parts:
-            p = re.sub(r"\*+", "", p)  # Remove wildcards
-            p = re.sub(r"\.\w+$", "", p)  # Remove file extensions
-            p = re.sub(r"[{}]", " ", p)  # Remove braces
+            p = _RE_WILDCARDS.sub("", p)   # Remove wildcards
+            p = _RE_EXTENSIONS.sub("", p)  # Remove file extensions
+            p = _RE_BRACES.sub(" ", p)     # Remove braces
             p = p.strip()
             if p and p.lower() not in SKIP_SEGMENTS and len(p) > 2:
                 meaningful.append(p)

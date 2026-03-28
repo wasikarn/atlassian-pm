@@ -12,6 +12,7 @@ import fcntl
 import functools
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -323,8 +324,6 @@ def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
 
 def skill_checkpoint_save(session_id: str, key: str, issue_type: str, parent_key: str | None = None) -> None:
     """Save a created issue checkpoint. Stores up to 10 subtasks; story/epic overwrite."""
-    import time
-
     state = _load(session_id)
     cp = state.get("skill_checkpoints", {})
     entry = {"key": key, "type": issue_type, "ts": time.time()}

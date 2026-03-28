@@ -29,7 +29,6 @@ def main() -> None:
 
     # Only intercept jira_get_issue
     if "jira_get_issue" not in data.get("tool_name", ""):
-        log_event(_HOOK, "SKIP", {"reason": "wrong_tool", "tool": data.get("tool_name", "")})
         allow()
         return
 
