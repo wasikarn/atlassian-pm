@@ -5,6 +5,11 @@ Two entry points:
     claude_call()      — returns raw text (str | None); callers parse with parse_json()
     claude_call_json() — uses --json-schema; returns validated dict | None directly
 
+Auth: intentionally NOT using --bare because this plugin runs inside a Claude Code
+session that authenticates via OAuth (Claude.ai subscription). --bare disables OAuth
+and requires ANTHROPIC_API_KEY. If migrating to a standalone daemon with an API key,
+add --bare and remove --dangerously-skip-permissions (use --allowedTools instead).
+
 Recursion guard: sets ATLASSIAN_PM_HOOK_DEPTH=1 in subprocess env.
 Any hook that checks this var on entry will skip the AI call,
 preventing infinite loops when claude -p fires a new Claude Code session.
@@ -58,7 +63,9 @@ def claude_call(
     except (FileNotFoundError, OSError):
         return None
 
-    if proc.returncode != 0 or not proc.stdout.strip():
+    # Per official docs: Claude outputs JSON to stdout even on non-zero exit.
+    # Always attempt to parse stdout; let is_error flag handle error cases.
+    if not proc.stdout.strip():
         return None
 
     try:
@@ -123,7 +130,7 @@ def claude_call_json(
     except (FileNotFoundError, OSError):
         return None
 
-    if proc.returncode != 0 or not proc.stdout.strip():
+    if not proc.stdout.strip():
         return None
 
     try:

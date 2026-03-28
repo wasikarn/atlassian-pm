@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""claude -p wrapper for monitor — same guard as scripts/ai/claude_runner.py."""
+"""claude -p wrapper for monitor — same recursion guard as scripts/ai/claude_runner.py.
+
+NOT using --bare: monitor inherits Claude Code session's OAuth credentials.
+If running as a standalone daemon with ANTHROPIC_API_KEY, add --bare flag.
+"""
 
 import json
 import os
@@ -32,7 +36,8 @@ def run_claude(
         )
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         return None
-    if proc.returncode != 0 or not proc.stdout.strip():
+    # Per official docs: Claude outputs JSON to stdout even on non-zero exit.
+    if not proc.stdout.strip():
         return None
     try:
         data = json.loads(proc.stdout)

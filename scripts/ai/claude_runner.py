@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Thin wrapper around `claude -p` for scripts/ai/ scripts.
 
-Same recursion guard as hooks/plugin/ai/claude_call.py.
+Same recursion guard and auth design as hooks/plugin/ai/claude_call.py.
+NOT using --bare: plugin runs inside Claude Code session (OAuth auth).
+--bare requires ANTHROPIC_API_KEY and disables OAuth.
 """
 
 import json
@@ -47,7 +49,8 @@ def run_claude(
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
         return None
 
-    if proc.returncode != 0 or not proc.stdout.strip():
+    # Per official docs: Claude outputs JSON to stdout even on non-zero exit.
+    if not proc.stdout.strip():
         return None
 
     try:
@@ -58,3 +61,59 @@ def run_claude(
     if data.get("is_error"):
         return None
     return data.get("result") or None
+
+
+def run_claude_json(
+    prompt: str,
+    json_schema: dict,
+    timeout: int = _TIMEOUT,
+    model: str = "haiku",
+) -> dict | None:
+    """Call `claude -p --json-schema` and return validated structured dict.
+
+    Uses Claude's native schema enforcement — output lands in `structured_output`.
+    Eliminates manual JSON parsing and fence stripping.
+
+    Args:
+        prompt:      The prompt to send to claude.
+        json_schema: JSON Schema dict — Claude's output is validated against this.
+        timeout:     Subprocess timeout in seconds (default 20).
+        model:       Claude model alias — "haiku" (default), "sonnet", or "opus".
+    """
+    if os.environ.get(RECURSION_GUARD):
+        return None
+
+    env = {**os.environ, RECURSION_GUARD: "1"}
+    try:
+        proc = subprocess.run(
+            [
+                "claude", "-p", prompt,
+                "--output-format", "json",
+                "--json-schema", json.dumps(json_schema),
+                "--model", model,
+                "--max-turns", "1",
+                "--tools", "",
+                "--dangerously-skip-permissions",
+                "--no-session-persistence",
+            ],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return None
+
+    if not proc.stdout.strip():
+        return None
+
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+
+    if data.get("is_error"):
+        return None
+
+    structured = data.get("structured_output")
+    return structured if isinstance(structured, dict) else None

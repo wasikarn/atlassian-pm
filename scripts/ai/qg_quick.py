@@ -37,8 +37,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from claude_runner import run_claude
-from json_utils import CONTENT_CHECK_SCHEMA, parse_json
+from claude_runner import run_claude_json
+from json_utils import CONTENT_CHECK_JSON_SCHEMA
 from prompts import CONTENT_CHECK_PROMPT
 
 # ── Phase 1: Pure Python structural checks ────────────────────────────────────
@@ -125,16 +125,13 @@ def content_check(adf: dict, issue_type: str) -> tuple[list[str], int, bool]:
     if not text.strip():
         return ["ADF has no readable text"], 20, False
 
-    result = run_claude(
+    data = run_claude_json(
         CONTENT_CHECK_PROMPT.format(text=text, issue_type=issue_type),
+        json_schema=CONTENT_CHECK_JSON_SCHEMA,
         timeout=12,
     )
-    if not result:
-        return [], 0, False  # non-blocking: AI unavailable → skip content check
-
-    data = parse_json(result, CONTENT_CHECK_SCHEMA)
     if data is None:
-        return [], 0, False  # bad schema → treat as unavailable
+        return [], 0, False  # non-blocking: AI unavailable or schema mismatch
 
     issues: list[str] = []
     penalty = 0

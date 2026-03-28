@@ -82,3 +82,17 @@ CONTENT_CHECK_SCHEMA: dict = {
     "ac_issues": {"type": list, "required": False},
     "language_issues": {"type": list, "required": False},
 }
+
+# ── JSON Schemas (for --json-schema flag → structured_output) ─────────────────
+
+CONTENT_CHECK_JSON_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "ac_ok": {"type": "boolean"},
+        "language_ok": {"type": "boolean"},
+        "background_ok": {"type": "boolean"},
+        "ac_issues": {"type": "array", "items": {"type": "string"}},
+        "language_issues": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["ac_ok", "language_ok", "background_ok"],
+}
