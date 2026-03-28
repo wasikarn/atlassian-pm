@@ -13,6 +13,7 @@ description: |
   Do NOT use for: sprint planning (use plan-sprint); full retrospective (use the retrospective-analyst agent)
 argument-hint: "[--sprint <id>] [--post]"
 effort: low
+memory: project
 ---
 
 # /standup-report
@@ -175,3 +176,13 @@ The Scrum Guide 2020 redefined the Daily Scrum away from the classic three-quest
 
 - [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for fetching in-progress and blocked issues
 - [Sprint Frameworks](../../../references/sprint-frameworks.md) - Anomaly detection thresholds, velocity context
+
+## Memory Usage
+
+When `memory: project` is active, track across sessions:
+
+- Issues that were In Progress in previous standup (report as "continuing" not "started")
+- Issues that moved to Done since last standup (report as "completed")
+- Blockers that have been unresolved for 2+ standups (escalate language: "still blocked")
+
+If this is the first standup (no memory), report all In Progress as current state.

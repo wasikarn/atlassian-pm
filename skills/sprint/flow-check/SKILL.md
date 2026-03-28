@@ -18,6 +18,7 @@ description: |
   Do NOT use for: sprint planning (use plan-sprint); closing a sprint (use close-sprint); standup digest (use standup-report)
 argument-hint: "[--replenish]"
 effort: low
+memory: project
 ---
 
 # /flow-check
@@ -147,3 +148,10 @@ Oldest items:
   {{PROJECT_KEY}}-42 — Admin dashboard refactor (wanchalerm) — 6 days
 → Suggest: Swarm on {{PROJECT_KEY}}-38 to unblock flow.
 ```
+
+## Memory Usage
+
+When memory is active, track:
+
+- WIP violations that occurred in previous flow checks (trend: "column X has been over WIP for 3 days")
+- Bottlenecks that persist across checks (flag as systemic, not temporary)
