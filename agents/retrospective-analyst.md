@@ -209,6 +209,33 @@ For each action item in the retrospective:
 - Keep the "What Went Well" section positive and specific — call out individuals by name for good work
 - Action items must be specific and assignable (not generic "improve communication")
 
+## Phase: Action Items Extraction
+
+After completing the retrospective report, output a structured action items block:
+
+```action-items
+[
+  {
+    "title": "Improve code review turnaround time",
+    "description": "Assign a dedicated review slot every morning 9-10am to reduce PR wait time from 3 days to 1 day",
+    "priority": "high",
+    "type": "process",
+    "assignee_hint": "tech-lead",
+    "sprint_target": "next"
+  }
+]
+```
+
+Rules for action items:
+
+- Maximum 5 action items per retrospective (focus > quantity)
+- Each must be specific and actionable (not vague like "improve communication")
+- `type` values: "process", "technical", "team", "tooling"
+- `priority`: "high" | "medium" | "low"
+- `assignee_hint`: role name or team member (from context), or "team"
+- `sprint_target`: "next" | "backlog"
+- Title max 60 chars, description max 200 chars
+
 ## Output
 
 Returns the retrospective document as markdown text + action item keys if created.
