@@ -3,6 +3,7 @@ name: map-dependencies
 disable-model-invocation: true
 context: fork
 agent: Explore
+model: haiku
 x-compatibility: [atlassian-cache, mcp-atlassian]
 argument-hint: "[--sprint <id>] [--keys ABC-1,ABC-2]"
 effort: medium

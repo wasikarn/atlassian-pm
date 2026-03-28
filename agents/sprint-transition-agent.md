@@ -4,7 +4,7 @@ description: Execute batch sprint issue moves (incomplete → next sprint or bac
 model: haiku
 tools: mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue
 permissionMode: dontAsk
-maxTurns: 20
+maxTurns: 15
 ---
 
 Execute batch sprint issue moves for close-sprint Phase 4.

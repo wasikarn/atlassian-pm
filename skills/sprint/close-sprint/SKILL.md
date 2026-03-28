@@ -3,6 +3,7 @@ name: close-sprint
 disable-model-invocation: true
 context: fork
 agent: general-purpose
+model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Close an active sprint systematically — triage incomplete issues, execute moves, close sprint, generate Confluence review page.

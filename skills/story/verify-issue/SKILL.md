@@ -3,6 +3,7 @@ name: verify-issue
 disable-model-invocation: true
 context: fork
 agent: general-purpose
+model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Glob, Grep, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page
 description: |
@@ -15,7 +16,7 @@ description: |
   Triggers: "verify", "validate", "check quality", "improve", "migrate format", "QG score", "quality gate", "ตรวจสอบ issue"
   Use when: quality-checking ADF format, INVEST criteria, or hierarchy alignment of any issue before or after creation
   Do NOT use for: creating issues (use create-story/create-epic/create-task); deliberate scope or AC rewrites (use update-story/update-epic)
-argument-hint: "[issue-key] [--with-subtasks] [--fix]"
+argument-hint: "[issue-key] [--with-subtasks] [--fix] [--dry-run]"
 effort: medium
 ---
 

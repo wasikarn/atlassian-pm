@@ -3,7 +3,7 @@ name: alignment-checker
 description: Check alignment between related tickets (story-subtask-epic)
 model: sonnet
 tools: Read, Glob, Grep, mcp__atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_invalidate
-maxTurns: 15
+maxTurns: 10
 permissionMode: dontAsk
 ---
 
