@@ -3,6 +3,7 @@ name: create-story
 disable-model-invocation: true
 context: fork
 agent: general-purpose
+model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
   Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 13-phase workflow

@@ -3,6 +3,7 @@ name: standup-report
 disable-model-invocation: true
 context: fork
 agent: Explore
+model: haiku
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Generate daily standup digest from active sprint — categorizes issues by status per assignee, flags anomalies.

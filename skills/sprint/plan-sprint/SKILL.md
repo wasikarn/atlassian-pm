@@ -3,6 +3,7 @@ name: plan-sprint
 disable-model-invocation: true
 context: fork
 agent: general-purpose
+model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
   Sprint Planning using a 9-phase workflow

@@ -5,7 +5,7 @@ model: haiku
 effort: low
 tools: Read, Write, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues
 permissionMode: dontAsk
-maxTurns: 15
+maxTurns: 8
 ---
 
 Harvest completed sprint data and update the velocity config. Keeps sprint-planner and risk-forecaster working with real numbers.

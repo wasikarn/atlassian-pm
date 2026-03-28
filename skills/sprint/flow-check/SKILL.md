@@ -3,6 +3,7 @@ name: flow-check
 disable-model-invocation: true
 context: fork
 agent: general-purpose
+model: haiku
 x-compatibility: [mcp-atlassian, atlassian-cache]
 allowed-tools:
   - mcp__mcp-atlassian__jira_search
