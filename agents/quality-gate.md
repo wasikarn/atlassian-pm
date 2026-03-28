@@ -82,31 +82,42 @@ Clearly separate:
 
 ## Output Format
 
-```text
-QG Score: XX/100 (XX%)
-Status: PASS / FAIL
-Threshold: 90%
+Always return a single JSON object — no preamble, no trailing text, no markdown fencing:
 
-Checks failed:
-
-- [check-id]: [what is wrong]
-  → Why it matters: [developer/rendering impact]
-  → Fix: [specific fix instruction]
-  → Auto-fixable: yes/no
-
-Checks warned:
-
-- [check-id]: [what to improve]
-
-Expert notes (team conventions):
-
-- [observation from memory — advisory only]
-
-Auto-fixable: [yes/no — yes only if ALL failures are structural with no content ambiguity]
+```json
+{
+  "score": 85,
+  "status": "PASS",
+  "threshold": 90,
+  "attempt": 1,
+  "checks_failed": [
+    {
+      "id": "ST3",
+      "what": "AC2 uses generic 'call API' instead of specific endpoint",
+      "why": "Gives developer no implementation path; must name actual method",
+      "fix": "Replace with 'POST /v2/coupons/redeem via CouponService.redeem()'",
+      "auto_fixable": false
+    }
+  ],
+  "checks_warned": [
+    {"id": "ST5", "note": "Thai narrative inconsistent in AC3"}
+  ],
+  "expert_notes": [
+    "Team convention: [BE] subtasks always include auth middleware AC for new routes"
+  ],
+  "auto_fixable": true
+}
 ```
 
-If FAIL and auto-fixable → apply fixes inline and re-score (max 1 auto-fix cycle internally).
-Return final score after fix attempt.
+Field rules:
+
+- `attempt`: 1 for initial score, 2 after auto-fix cycle (never exceeds 2)
+- `auto_fixable`: `true` only if ALL failures are structural with no content ambiguity
+- `checks_failed`: empty array `[]` when status is PASS
+- `status`: `"PASS"` if score ≥ 90, `"FAIL"` otherwise
+
+If FAIL and `auto_fixable: true` → apply fixes inline → re-score → return with `attempt: 2`.
+Max 1 auto-fix cycle. If still FAIL after attempt 2, return final result with `auto_fixable: false`.
 
 ## Memory
 

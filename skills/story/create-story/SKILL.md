@@ -221,10 +221,10 @@ Leave `Key files:` blank at this stage — it will be filled post-Phase 7 explor
 > **⚠️ MANDATORY:** Read `references/templates-story.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
 
 1. Generate ADF JSON → `{{artifacts_dir}}/story.json`
-2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Receives: `{score, status, checks_failed[], auto_fixable}`.
-3. If `status = PASS` (≥ 90%) → proceed to Phase 5 automatically
-4. If `status = FAIL` and `auto_fixable = yes` → apply fixes → re-invoke quality-gate (max 1 re-invoke)
-5. If still FAIL after re-invoke → escalate to user with the failed check list
+2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
+3. If `status = "PASS"` → proceed to Phase 5 automatically
+4. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
+5. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
 
 ### 5. Create Story in Jira
 
@@ -283,11 +283,33 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 **Goal:** Locate the exact file paths, patterns, and dependencies in each impacted service that the subtask designs will reference.
 **Required inputs:** `services_impacted[]` from Phase 6, service repo paths from `project-config.json`
 **Constraints:** Generic paths are REJECTED — re-explore max 2 attempts; validate all paths with Glob; launch 2-3 agents in parallel (Backend/Frontend/Shared); do NOT design subtasks without concrete file evidence
-**Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service; all paths validated and ready for Phase 7 design
+**Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service; all paths validated and ready for Phase 8 design
 
 > [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+
+Each Explore agent **must** return results using this structure (used to validate before proceeding):
+
+```text
+SERVICE: [BE|FE-Admin|FE-Web|Shared]
+CONFIDENCE: [HIGH|MEDIUM|LOW]
+FILES:
+- [full/absolute/path/to/file.ts]  # action: CREATE|MODIFY|REF
+- [full/absolute/path/to/file.ts]  # action: MODIFY
+PATTERNS: [brief description of relevant patterns found]
+DEPENDENCIES: [key imports or shared modules identified]
+```
+
+**Validation rules (apply before passing to Phase 8):**
+
+| Condition | Action |
+|---|---|
+| `CONFIDENCE: LOW` | REJECTED — re-explore this service (max 2 attempts total) |
+| Any path is a top-level glob (`src/...` without full path) | REJECTED — re-explore |
+| Any path fails `Glob` validation | REJECTED — re-explore |
+| `FILES:` section is empty | REJECTED — re-explore |
+| All services return `CONFIDENCE: HIGH` or `MEDIUM` with valid paths | ✅ Proceed to Phase 8 |
 
 ### 8. Design Sub-tasks
 

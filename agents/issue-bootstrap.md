@@ -52,11 +52,27 @@ When returning description content: extract text nodes from ADF only — do NOT 
 
 ## Output Format — BOOTSTRAP_COMPACT
 
-Always emit a `BOOTSTRAP_COMPACT` header line before the full context block:
+Always emit a `BOOTSTRAP_COMPACT` header line first as **valid JSON** (all keys quoted):
 
 ```text
-BOOTSTRAP_COMPACT: {key: "ABC-XXX", type: "Story", status: "In Progress", summary: "...", parent_key: "ABC-YYY", children_count: 3, sp: 3, start: "2026-03-15", due: "2026-03-25", ac_count: 4, labels: ["vs2-coupon", "coupon-web"]}
+BOOTSTRAP_COMPACT: {"key": "ABC-XXX", "type": "Story", "status": "In Progress", "summary": "...", "parent_key": "ABC-YYY", "children_count": 3, "sp": 3, "start": "2026-03-15", "due": "2026-03-25", "ac_count": 4, "labels": ["vs2-coupon", "coupon-web"]}
 ```
+
+Schema:
+
+| Field | Type | Notes |
+|---|---|---|
+| `key` | string | Issue key (e.g. `"{{PROJECT_KEY}}-123"`) |
+| `type` | string | `"Story"`, `"Epic"`, `"Subtask"`, `"Task"`, `"Bug"` |
+| `status` | string | Jira status name |
+| `summary` | string | Truncated to 120 chars |
+| `parent_key` | string\|null | Parent issue key, or `null` if none |
+| `children_count` | integer | 0 if no children |
+| `sp` | integer\|null | Story points, or `null` if unset |
+| `start` | string\|null | ISO date `"YYYY-MM-DD"` or `null` |
+| `due` | string\|null | ISO date `"YYYY-MM-DD"` or `null` |
+| `ac_count` | integer | Count of AC lines in description |
+| `labels` | array | String labels, empty array `[]` if none |
 
 Then the full context block:
 
