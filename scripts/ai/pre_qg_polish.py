@@ -16,29 +16,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from claude_runner import run_claude
-
-_POLISH_PROMPT = """\
-You are reviewing a Jira {issue_type} ADF JSON description before a quality gate check.
-
-Quality gate checks for:
-- At least 3 acceptance criteria in AC1:, AC2:, AC3: format
-- Background section present and non-trivial (>20 words)
-- Goals section with 2+ bullet points
-- Out of Scope section present
-- No placeholder text
-
-The content below is the current ADF JSON draft.
-<adf_draft>
-{adf}
-</adf_draft>
-
-Improve the ADF to pass these checks. Keep existing good content.
-Return ONLY the improved JSON object — no markdown fences, no preamble, no trailing text:
-{{"version": 1, "type": "doc", "content": [...]}}"""
+from prompts import POLISH_PROMPT
 
 
 def build_polish_prompt(adf_json: str, issue_type: str) -> str:
-    return _POLISH_PROMPT.format(adf=adf_json[:3000], issue_type=issue_type)
+    return POLISH_PROMPT.format(adf=adf_json[:3000], issue_type=issue_type)
 
 
 def parse_polished_adf(response: str) -> dict | None:

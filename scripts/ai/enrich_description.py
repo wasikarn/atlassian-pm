@@ -15,29 +15,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from claude_runner import run_claude
-
-_ENRICH_PROMPT = """\
-You are writing a Jira {issue_type} description in Atlassian Document Format (ADF).
-
-The content below is the user's rough description of the issue.
-<user_description>
-{text}
-</user_description>
-
-Write a complete ADF JSON document with these sections as headings:
-1. Background — why this is needed
-2. Goals — what success looks like (2-4 bullet points)
-3. Acceptance Criteria — numbered list, each starting "AC{{n}}:"
-4. Out of Scope — what this does NOT cover
-
-Return ONLY the JSON object — no markdown fences, no preamble, no trailing text:
-{{"version": 1, "type": "doc", "content": [...]}}
-
-Use ADF paragraph, heading (level 3), bulletList, orderedList nodes."""
+from prompts import ENRICH_PROMPT
 
 
 def build_enrich_prompt(text: str, issue_type: str) -> str:
-    return _ENRICH_PROMPT.format(text=text[:1000], issue_type=issue_type)
+    return ENRICH_PROMPT.format(text=text[:1000], issue_type=issue_type)
 
 
 def parse_adf_from_response(response: str) -> dict | None:

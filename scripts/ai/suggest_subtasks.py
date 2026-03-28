@@ -16,31 +16,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from claude_runner import run_claude
-
-_SUBTASK_PROMPT = """\
-You are a senior software engineer breaking down a Jira story into implementation subtasks.
-
-Story key: {story_key}
-
-The content below is the story's acceptance criteria from Jira.
-<story_acs>
-{acs}
-</story_acs>
-
-Generate a numbered list of implementation subtasks. Each subtask should:
-- Map to one or more ACs (note which AC in brackets)
-- Be completable in 1-2 days
-- Include service layer hint: [BE], [FE-Admin], [FE-Web], [Video], or [AI-Agent]
-
-Format each line as:
-N. [SERVICE] Subtask name — covers AC1, AC3
-
-List only the subtasks, no extra commentary."""
+from prompts import SUBTASK_PROMPT
 
 
 def build_subtask_prompt(story_key: str, acs: list[str]) -> str:
     acs_text = "\n".join(acs[:15])
-    return _SUBTASK_PROMPT.format(story_key=story_key, acs=acs_text)
+    return SUBTASK_PROMPT.format(story_key=story_key, acs=acs_text)
 
 
 def parse_subtasks_from_response(response: str) -> list[str]:
