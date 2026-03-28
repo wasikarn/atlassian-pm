@@ -26,6 +26,8 @@ Bug issue key flows via conversation context.
 
 ### Step 3 — Create Test Plan
 
+> **Gate:** Confirm Step 2 produced a bug issue key. If bug-triage failed or was aborted without a key, STOP and show: "bug-triage did not complete — resolve before creating a test plan."
+
 Ask: "Create a test plan for this bug?"
 → If yes: Use the Skill tool to invoke `atlassian-pm:create-testplan`
 → If no: exit after triage

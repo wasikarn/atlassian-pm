@@ -31,10 +31,14 @@ Ask: "Create epic from this blueprint?"
 
 ### Step 3 — Create Story
 
+> **Gate:** Confirm an epic key is present in conversation context (either from Step 1 existing key or Step 2 create-epic output). If no epic key, STOP and show: "No epic key available — cannot create a story without a parent epic."
+
 Ask: "Create the first story now?"
 → If yes: Use the Skill tool to invoke `atlassian-pm:create-story`
 → If no: exit
 
 ### Step 4 — Verify
+
+> **Gate:** Only proceed if create-story was invoked AND produced a story key. If story creation was skipped (user said No), run verify on the epic key instead. If create-story failed, STOP.
 
 Use the Skill tool to invoke `atlassian-pm:verify-issue` with `--with-subtasks`.

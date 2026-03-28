@@ -192,6 +192,12 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr9_alignment_suggest.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_skill_checkpoint_track.py",
+            "timeout": 5,
+            "async": true
           }
         ]
       },

@@ -19,4 +19,6 @@ Use the Skill tool to invoke `atlassian-pm:analyze-story` with `$ARGUMENTS` (iss
 
 ### Step 2 — Verify
 
+> **Gate:** Confirm Step 1 produced an analysis output (not an error). If analyze-story reported a fetch failure or missing issue, STOP — there is nothing to verify.
+
 Use the Skill tool to invoke `atlassian-pm:verify-issue` with `$ARGUMENTS --with-subtasks`.

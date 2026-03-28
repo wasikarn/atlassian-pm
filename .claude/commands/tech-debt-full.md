@@ -26,5 +26,7 @@ Ask: "Which items should I create tasks for? (list numbers, 'all', or 'none')"
 
 ### Step 3 — Create Tasks
 
+> **Gate:** Confirm Step 1 produced a list of tech debt items. If scan-tech-debt failed or returned no items, STOP. For each selected item: if create-task fails, log the failure and continue with remaining items — report all failures at the end.
+
 For each selected item, use the Skill tool to invoke `atlassian-pm:create-task`.
 (Pass each item's title and description from scan output via conversation context)

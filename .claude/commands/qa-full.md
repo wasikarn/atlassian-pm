@@ -58,6 +58,8 @@ Ask: "Test plan created (`BEP-XXXX`). Run execute-testplan against **staging** n
 
 ### Step 3 — Execute Test Plan
 
+> **Gate:** Confirm a `[QA]` subtask key is available (from Step 1 creation or Step 0 existing plan). If create-testplan failed without producing a key, STOP and show: "create-testplan did not complete — resolve before executing."
+
 Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the issue key from `$ARGUMENTS` and resolved `--env` flag.
 
 → Pass through any additional flags (`--headed`, `--rerun-failed`, `--dry-run`) from `$ARGUMENTS`.

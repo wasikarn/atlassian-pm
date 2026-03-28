@@ -308,3 +308,51 @@ def alignment_mark_sprint_suggested(session_id: str, sprint_id: str) -> None:
 def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
     """Check if alignment check was already suggested for this sprint."""
     return str(sprint_id) in set(_load(session_id).get("alignment_suggested_sprints", []))
+
+
+# ── Skill checkpoint tracking ────────────────────────────────────────────────
+#
+# Saves issue keys created during skill workflows so they survive context
+# compaction. Compact-reinject reads these and outputs them to Claude's context,
+# restoring the "what was created so far" context without any skill re-execution.
+#
+# Schema per checkpoint:
+#   {"key": "TP-123", "type": "Story", "ts": 1234567890.0}
+# For subtasks, also includes: {"parent": "TP-100"}
+
+
+def skill_checkpoint_save(session_id: str, key: str, issue_type: str, parent_key: str | None = None) -> None:
+    """Save a created issue checkpoint. Stores up to 10 subtasks; story/epic overwrite."""
+    import time
+
+    state = _load(session_id)
+    cp = state.get("skill_checkpoints", {})
+    entry = {"key": key, "type": issue_type, "ts": time.time()}
+    if parent_key:
+        entry["parent"] = parent_key
+
+    issue_type_lower = issue_type.lower()
+    if "subtask" in issue_type_lower or "sub-task" in issue_type_lower:
+        subtasks = cp.get("subtasks", [])
+        if not any(s["key"] == key for s in subtasks):
+            subtasks.append(entry)
+        cp["subtasks"] = subtasks[-10:]  # keep last 10
+    elif "epic" in issue_type_lower:
+        cp["latest_epic"] = entry
+    else:
+        cp["latest_story"] = entry
+
+    state["skill_checkpoints"] = cp
+    _save(session_id, state)
+
+
+def skill_checkpoint_get(session_id: str) -> dict:
+    """Return all skill checkpoints: {latest_story, latest_epic, subtasks:[]}."""
+    return dict(_load(session_id).get("skill_checkpoints", {}))
+
+
+def skill_checkpoint_clear(session_id: str) -> None:
+    """Clear all skill checkpoints (call when a workflow completes cleanly)."""
+    state = _load(session_id)
+    state.pop("skill_checkpoints", None)
+    _save(session_id, state)

@@ -19,6 +19,8 @@ Use the Skill tool to invoke `atlassian-pm:plan-sprint` with `$ARGUMENTS`.
 
 ### Step 2 — Map Dependencies
 
+> **Gate:** Confirm Step 1 produced a sprint plan (sprint ID and assigned issues in conversation context). If plan-sprint failed or returned no issues, STOP — there is no sprint context to map.
+
 Ask: "Map dependencies for this sprint now?"
 → If yes: Use the Skill tool to invoke `atlassian-pm:map-dependencies`
 → If no: exit after sprint planning

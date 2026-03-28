@@ -91,6 +91,27 @@ def main() -> None:
         for item in pending:
             print(f"- {item}")
 
+    # Skill checkpoints — survive compaction
+    try:
+        from hooks_state import skill_checkpoint_get
+
+        cp = skill_checkpoint_get(session_id)
+        if cp:
+            print("\n\n=== SKILL CHECKPOINTS (created this session) ===")
+            if cp.get("latest_epic"):
+                e = cp["latest_epic"]
+                print(f"- Epic created: {e['key']}")
+            if cp.get("latest_story"):
+                s = cp["latest_story"]
+                print(f"- Story created: {s['key']} (type: {s['type']})")
+            subtasks = cp.get("subtasks", [])
+            if subtasks:
+                keys = ", ".join(s["key"] for s in subtasks)
+                print(f"- Subtasks created ({len(subtasks)}): {keys}")
+            print("These keys were already written to Jira — do NOT re-create them.")
+    except Exception:
+        pass
+
 
 if __name__ == "__main__":
     main()
