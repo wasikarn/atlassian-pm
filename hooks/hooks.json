@@ -401,6 +401,11 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_hr5_pending_check.py",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_session_cost_summary.py",
+            "timeout": 5
           }
         ]
       }

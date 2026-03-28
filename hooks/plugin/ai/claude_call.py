@@ -23,6 +23,25 @@ RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _CLAUDE_TIMEOUT = 15  # seconds
 _MAX_BUDGET_USD = 0.01  # hooks fire on every event — cap per call
 
+try:
+    from hooks_state import load_state, save_state
+    _HAS_STATE = True
+except ImportError:
+    _HAS_STATE = False
+
+
+def _track_cost(cost: float) -> None:
+    """Accumulate AI call cost in session state. Never raises."""
+    if not _HAS_STATE or not cost:
+        return
+    try:
+        state = load_state()
+        state["session_ai_cost_usd"] = state.get("session_ai_cost_usd", 0.0) + cost
+        state["session_ai_calls"] = state.get("session_ai_calls", 0) + 1
+        save_state(state)
+    except Exception:
+        pass  # Never let cost tracking break the main flow
+
 
 def claude_call(
     prompt: str,
@@ -75,6 +94,7 @@ def claude_call(
     except json.JSONDecodeError:
         return None
 
+    _track_cost(data.get("total_cost_usd", 0.0))
     return extract_result(data)
 
 

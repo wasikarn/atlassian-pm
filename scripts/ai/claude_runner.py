@@ -60,6 +60,11 @@ def run_claude(
     except json.JSONDecodeError:
         return None
 
+    cost = data.get("total_cost_usd", 0.0)
+    if cost:
+        import sys as _sys
+        print(f"[claude_runner] cost: ${cost:.4f}", file=_sys.stderr)
+
     if data.get("is_error"):
         return None
     return data.get("result") or None
