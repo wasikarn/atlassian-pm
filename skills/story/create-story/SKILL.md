@@ -221,10 +221,25 @@ Leave `Key files:` blank at this stage — it will be filled post-Phase 7 explor
 > **⚠️ MANDATORY:** Read `references/templates-story.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
 
 1. Generate ADF JSON → `{{artifacts_dir}}/story.json`
-2. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
-3. If `status = "PASS"` → proceed to Phase 5 automatically
-4. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
-5. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
+
+2. **Pre-QG polish + subtask suggestions (🟢 PARALLEL):**
+
+   > **🟢 PARALLEL** — Launch both simultaneously (single Bash call via `parallel_runner.py`). They share no state: polish reads `story.json`, suggest reads ACs text from Phase 2 context.
+
+   ```bash
+   python3 scripts/ai/parallel_runner.py
+   ```
+
+   Or invoke directly as two independent Bash calls in the same message:
+   - `python3 scripts/ai/pre_qg_polish.py --file {{artifacts_dir}}/story.json --type story` → overwrites `story.json` with polished ADF
+   - `python3 scripts/ai/suggest_subtasks.py --story {{story_key_placeholder}} --acs "{{acs_text}}"` → stdout JSON array of suggested subtask summaries (store as `suggested_subtasks[]` for Phase 8 reference)
+
+   Both are optional/non-blocking: if either exits 1 (claude unavailable), continue with existing content.
+
+3. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
+4. If `status = "PASS"` → proceed to Phase 5 automatically
+5. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
+6. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
 
 ### 5. Create Story in Jira
 

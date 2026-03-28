@@ -49,8 +49,8 @@ class TestEnrichDescription(unittest.TestCase):
         self.assertIn("user needs login feature", prompt)
         self.assertIn("story", prompt.lower())
 
-    def test_parse_adf_extracts_json_block(self):
-        response = '```json\n{"version": 1, "type": "doc", "content": []}\n```'
+    def test_parse_adf_extracts_bare_json(self):
+        response = '{"version": 1, "type": "doc", "content": []}'
         result = parse_adf_from_response(response)
         self.assertIsNotNone(result)
         self.assertEqual(result["type"], "doc")
@@ -85,9 +85,9 @@ class TestPreQgPolish(unittest.TestCase):
         prompt = build_polish_prompt(json.dumps(adf), "story")
         self.assertIn('"type": "doc"', prompt)
 
-    def test_parse_polished_adf_extracts_json(self):
+    def test_parse_polished_adf_extracts_bare_json(self):
         adf = {"version": 1, "type": "doc", "content": [{"type": "paragraph"}]}
-        response = f'```json\n{json.dumps(adf)}\n```'
+        response = json.dumps(adf)
         result = parse_polished_adf(response)
         self.assertIsNotNone(result)
         self.assertEqual(result["type"], "doc")

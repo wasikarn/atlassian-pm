@@ -21,6 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import inject_context, log_event, parse_stdin
+from hooks_state import _load, _save
 
 _HOOK = "pre-prompt-skill-redirect"
 
@@ -108,6 +109,13 @@ def main() -> None:
 
     issue_type, skill_name, hint = result
     log_event(_HOOK, "REDIRECT", {"issue_type": issue_type, "skill": skill_name})
+
+    # Signal to the async AI intent_detect hook that regex already handled this
+    session_id = data.get("session_id", "")
+    if session_id:
+        state = _load(session_id)
+        state["prompt_skill_redirected"] = True
+        _save(session_id, state)
 
     inject_context(
         f"<important-reminder>SKILL REQUIRED — {issue_type.upper()} CREATION DETECTED\n"

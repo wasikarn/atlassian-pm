@@ -10,7 +10,6 @@ Exit 0: success | Exit 1: claude unavailable or parse failure
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -31,13 +30,10 @@ Write a complete ADF JSON document with these sections as headings:
 3. Acceptance Criteria — numbered list, each starting "AC{{n}}:"
 4. Out of Scope — what this does NOT cover
 
-Return ONLY a valid JSON code block in this format:
-```json
+Return ONLY the JSON object — no markdown fences, no preamble, no trailing text:
 {{"version": 1, "type": "doc", "content": [...]}}
-```
 
-Use ADF paragraph, heading (level 3), bulletList, orderedList nodes.
-Do not add any text outside the JSON block."""
+Use ADF paragraph, heading (level 3), bulletList, orderedList nodes."""
 
 
 def build_enrich_prompt(text: str, issue_type: str) -> str:
@@ -45,20 +41,11 @@ def build_enrich_prompt(text: str, issue_type: str) -> str:
 
 
 def parse_adf_from_response(response: str) -> dict | None:
-    """Extract JSON from a ```json ... ``` block or bare JSON."""
-    match = re.search(r"```json\s*(\{.*?\})\s*```", response, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(1))
-        except json.JSONDecodeError:
-            pass
-    match = re.search(r'(\{"version".*\})', response, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(1))
-        except json.JSONDecodeError:
-            pass
-    return None
+    """Parse bare JSON ADF object from response."""
+    try:
+        return json.loads(response.strip())
+    except json.JSONDecodeError:
+        return None
 
 
 def main() -> None:

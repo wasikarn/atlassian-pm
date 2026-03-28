@@ -11,7 +11,6 @@ Exit 0: success | Exit 1: unavailable
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -34,10 +33,8 @@ The content below is the current ADF JSON draft.
 </adf_draft>
 
 Improve the ADF to pass these checks. Keep existing good content.
-Return ONLY the improved ADF as a JSON code block:
-```json
-{{"version": 1, "type": "doc", "content": [...]}}
-```"""
+Return ONLY the improved JSON object — no markdown fences, no preamble, no trailing text:
+{{"version": 1, "type": "doc", "content": [...]}}"""
 
 
 def build_polish_prompt(adf_json: str, issue_type: str) -> str:
@@ -45,14 +42,11 @@ def build_polish_prompt(adf_json: str, issue_type: str) -> str:
 
 
 def parse_polished_adf(response: str) -> dict | None:
-    """Extract improved ADF from response."""
-    match = re.search(r"```json\s*(\{.*?\})\s*```", response, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(1))
-        except json.JSONDecodeError:
-            pass
-    return None
+    """Parse bare JSON ADF object from response."""
+    try:
+        return json.loads(response.strip())
+    except json.JSONDecodeError:
+        return None
 
 
 def main() -> None:

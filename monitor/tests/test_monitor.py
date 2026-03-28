@@ -77,7 +77,8 @@ class TestIssueChanged(unittest.TestCase):
     def test_posts_comment_on_note_response(self):
         from handlers.issue_changed import handle
         jira = MagicMock()
-        with patch("handlers.issue_changed.run_claude", return_value="NOTE: this is significant"):
+        with patch("handlers.issue_changed.run_claude",
+                   return_value='{"action": "comment", "text": "this is significant"}'):
             result = handle(self._make_change(), jira)
         self.assertTrue(result)
         jira.add_comment.assert_called_once()
@@ -85,7 +86,7 @@ class TestIssueChanged(unittest.TestCase):
     def test_skips_on_skip_response(self):
         from handlers.issue_changed import handle
         jira = MagicMock()
-        with patch("handlers.issue_changed.run_claude", return_value="SKIP"):
+        with patch("handlers.issue_changed.run_claude", return_value='{"action": "skip"}'):
             result = handle(self._make_change(), jira)
         self.assertFalse(result)
         jira.add_comment.assert_not_called()
