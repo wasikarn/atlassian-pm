@@ -63,5 +63,15 @@ Rating criteria:
 - poor: majority are generic directories without filenames \
   (e.g. src/, lib/, app/, controllers/) or paths with no extension
 
+Examples:
+Paths: src/controllers/auth.ts, hooks/plugin/ai/score.py, app/models/user.py
+→ {{"rating": "good"}}
+
+Paths: src/controllers/auth.ts, src/models/, controllers/
+→ {{"rating": "fair"}}
+
+Paths: src/, lib/, app/models/, controllers/
+→ {{"rating": "poor"}}
+
 Return ONLY a JSON object — no preamble, no trailing text:
 {{"rating": "<good|fair|poor>"}}"""

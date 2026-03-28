@@ -13,15 +13,20 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
 from plugin.ai.claude_call import claude_call
+from plugin.ai.json_utils import RATE_SCHEMA, parse_json
 from plugin.ai.prompts import RATE_PROMPT
 
 _HOOK = "ai-path-quality"
-_PATH_RE = re.compile(r"[`'\"]([a-zA-Z0-9_/.-]+\.[a-zA-Z]{1,5})[`'\"]")
+# Two patterns: files (require extension) and directories (trailing slash)
+_FILE_RE = re.compile(r"[`'\"]([a-zA-Z0-9_/.-]+\.[a-zA-Z]{1,5})[`'\"]")
+_DIR_RE = re.compile(r"[`'\"]([a-zA-Z0-9_/.-]*[a-zA-Z0-9_.-]+/)[`'\"]")
 
 
 def extract_paths(text: str) -> list[str]:
-    """Extract quoted file paths from text."""
-    return list(dict.fromkeys(_PATH_RE.findall(text)))[:20]
+    """Extract quoted file paths and directory paths from text."""
+    files = _FILE_RE.findall(text)
+    dirs = _DIR_RE.findall(text)
+    return list(dict.fromkeys(files + dirs))[:20]
 
 
 def rate_paths(paths: list[str]) -> str | None:
@@ -32,12 +37,10 @@ def rate_paths(paths: list[str]) -> str | None:
     result = claude_call(RATE_PROMPT.format(paths=paths_text), timeout=10)
     if not result:
         return None
-    try:
-        data = json.loads(result.strip())
-        rating = data.get("rating", "").lower()
-    except (json.JSONDecodeError, AttributeError):
+    data = parse_json(result, RATE_SCHEMA)
+    if data is None:
         return None
-    return rating if rating in ("good", "fair", "poor") else None
+    return data["rating"]  # already lowercased + validated by schema
 
 
 def main() -> None:

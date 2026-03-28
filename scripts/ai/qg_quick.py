@@ -38,8 +38,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from claude_runner import run_claude
+from json_utils import CONTENT_CHECK_SCHEMA, parse_json
 from prompts import CONTENT_CHECK_PROMPT
-
 
 # ── Phase 1: Pure Python structural checks ────────────────────────────────────
 
@@ -73,9 +73,8 @@ def _check_panels(content: list) -> list[str]:
     """Return list of structural issues for panel nodes missing panelType."""
     issues = []
     for i, node in enumerate(content):
-        if node.get("type") == "panel":
-            if not node.get("attrs", {}).get("panelType"):
-                issues.append(f"QUIRK-1: panel missing panelType at content[{i}]")
+        if node.get("type") == "panel" and not node.get("attrs", {}).get("panelType"):
+            issues.append(f"QUIRK-1: panel missing panelType at content[{i}]")
     return issues
 
 
@@ -115,44 +114,45 @@ def structural_check(adf: dict) -> tuple[list[str], int, int]:
 
 # ── Phase 2: AI content check ─────────────────────────────────────────────────
 
-def content_check(adf: dict, issue_type: str) -> tuple[list[str], int]:
-    """Run a single claude -p call. Return (content_issues, penalty)."""
+def content_check(adf: dict, issue_type: str) -> tuple[list[str], int, bool]:
+    """Run a single claude -p call. Return (content_issues, penalty, ai_checked).
+
+    ai_checked=True only when Claude returned a valid schema response.
+    ai_checked=False means AI was unavailable or returned bad JSON — callers
+    should NOT skip the full quality-gate agent when ai_checked is False.
+    """
     text = _extract_text(adf)[:2000]
     if not text.strip():
-        return ["ADF has no readable text"], 20
+        return ["ADF has no readable text"], 20, False
 
     result = run_claude(
         CONTENT_CHECK_PROMPT.format(text=text, issue_type=issue_type),
         timeout=12,
     )
     if not result:
-        return [], 0  # non-blocking: AI unavailable → skip content check
+        return [], 0, False  # non-blocking: AI unavailable → skip content check
 
-    try:
-        data = json.loads(result.strip())
-    except json.JSONDecodeError:
-        return [], 0
+    data = parse_json(result, CONTENT_CHECK_SCHEMA)
+    if data is None:
+        return [], 0, False  # bad schema → treat as unavailable
 
     issues: list[str] = []
     penalty = 0
 
-    if not data.get("ac_ok", True):
+    if not data["ac_ok"]:
         for issue in data.get("ac_issues", []):
             if issue:
                 issues.append(issue)
                 penalty += 10
 
-    if not data.get("language_ok", True):
+    if not data["language_ok"]:
         for issue in data.get("language_issues", []):
             if issue:
                 issues.append(issue)
         penalty += 5
 
-    if not data.get("background_ok", True):
-        # background already checked structurally; avoid double-counting
-        pass
-
-    return issues, penalty
+    # background already checked structurally; avoid double-counting
+    return issues, penalty, True
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -160,16 +160,21 @@ def content_check(adf: dict, issue_type: str) -> tuple[list[str], int]:
 def run_quick_check(adf: dict, issue_type: str) -> dict:
     """Run both phases and return result object."""
     structural_issues, ac_count, struct_penalty = structural_check(adf)
-    content_issues, content_penalty = content_check(adf, issue_type)
+    content_issues, content_penalty, ai_checked = content_check(adf, issue_type)
 
     total_penalty = struct_penalty + content_penalty
     score_estimate = max(0, 100 - total_penalty)
 
-    all_issues = structural_issues + content_issues
     quick_pass = len(structural_issues) == 0 and score_estimate >= 70
 
-    # Only skip full agent when ADF is very strong: no structural issues + high score
-    skip_full_agent = len(structural_issues) == 0 and len(content_issues) == 0 and score_estimate >= 95
+    # Only skip full agent when: no structural issues + high score + AI actually responded.
+    # ai_checked=False means Claude was unavailable or returned bad JSON — unsafe to skip.
+    skip_full_agent = (
+        len(structural_issues) == 0
+        and len(content_issues) == 0
+        and score_estimate >= 95
+        and ai_checked
+    )
 
     return {
         "quick_pass": quick_pass,
@@ -177,6 +182,7 @@ def run_quick_check(adf: dict, issue_type: str) -> dict:
         "content_issues": content_issues,
         "ac_count": ac_count,
         "score_estimate": score_estimate,
+        "ai_checked": ai_checked,
         "skip_full_agent": skip_full_agent,
     }
 

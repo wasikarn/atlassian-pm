@@ -16,6 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from claude_runner import run_claude
+from json_utils import ADF_SCHEMA, parse_json
 from prompts import POLISH_PROMPT
 
 
@@ -24,11 +25,8 @@ def build_polish_prompt(adf_json: str, issue_type: str) -> str:
 
 
 def parse_polished_adf(response: str) -> dict | None:
-    """Parse bare JSON ADF object from response."""
-    try:
-        return json.loads(response.strip())
-    except json.JSONDecodeError:
-        return None
+    """Parse ADF JSON object from response, stripping fences and validating schema."""
+    return parse_json(response, ADF_SCHEMA)
 
 
 def main() -> None:

@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
 from hooks_state import _load, _save, vs_get_coverage
 from plugin.ai.claude_call import claude_call
+from plugin.ai.json_utils import SCORE_SCHEMA, parse_json
 from plugin.ai.prompts import SCORE_PROMPT
 
 _HOOK = "ai-ac-coverage"
@@ -30,11 +31,10 @@ def check_coverage(acs: list[str], subtask_summaries: list[str]) -> int | None:
 
     if not result:
         return None
-    try:
-        data = json.loads(result.strip())
-        return max(0, min(100, int(data["score"])))
-    except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+    data = parse_json(result, SCORE_SCHEMA)
+    if data is None:
         return None
+    return data["score"]  # already clamped 0-100 by schema
 
 
 def main() -> None:

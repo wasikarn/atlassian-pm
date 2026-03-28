@@ -6,7 +6,6 @@ Catches Thai/English variants the regex misses.
 Exit code: 0 always.
 """
 
-import json
 import sys
 from pathlib import Path
 
@@ -14,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import allow, inject_context, log_event, parse_stdin
 from hooks_state import _load, _save
 from plugin.ai.claude_call import claude_call
+from plugin.ai.json_utils import CLASSIFY_SCHEMA, parse_json
 from plugin.ai.prompts import CLASSIFY_PROMPT
 
 _HOOK = "ai-intent-detect"
@@ -31,11 +31,10 @@ def classify_intent(prompt: str) -> str | None:
     result = claude_call(CLASSIFY_PROMPT.format(prompt=prompt[:500]), timeout=10)
     if not result:
         return None
-    try:
-        data = json.loads(result.strip())
-        classification = data.get("intent", "none").lower()
-    except (json.JSONDecodeError, AttributeError):
+    data = parse_json(result, CLASSIFY_SCHEMA)
+    if data is None:
         return None
+    classification = data["intent"]  # already lowercased + validated by schema
     return classification if classification in _SKILL_MAP else None
 
 
