@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from config_loader import load_project_config
-from hooks_lib import allow, block, log_event, parse_stdin
+from hooks_lib import allow, block, inject_context, log_event, parse_stdin
 from hooks_state import search_is_done
 
 _cfg = load_project_config()
@@ -31,7 +31,15 @@ def main() -> None:
 
     if search_is_done(session_id):
         log_event(_HOOK, "ALLOWED", {"reason": "search_done", "session_id": session_id})
-        allow()
+        summary = (data.get("tool_input") or {}).get("summary", "")
+        if summary:
+            inject_context(
+                f"Tip: For semantic duplicate detection, also run: "
+                f"cache_similar_issues(text='{summary[:100]}', limit=5)",
+                event_name="PreToolUse",
+            )
+        else:
+            allow()
         return
 
     # Subtasks are children of an existing story — dedup search not required
@@ -43,12 +51,19 @@ def main() -> None:
         return
 
     # Block: no search done yet
+    summary = tool_input.get("summary", "")
+    semantic_hint = (
+        f" Also consider semantic duplicate detection: "
+        f"cache_similar_issues(text='{summary[:80]}', limit=5)"
+        if summary
+        else ""
+    )
     log_event(_HOOK, "BLOCKED", {"reason": "no_search_done", "session_id": session_id})
     block(
         "DEDUP BLOCK: Cannot create issues without prior search in this session. "
         f"Run jira_search(jql='project = {_PROJECT_KEY} AND summary ~ \"keyword\"', "
         "fields='summary,status,issuetype', limit=10) or /jira-search-issues first. "
-        "This prevents duplicate issues."
+        f"This prevents duplicate issues.{semantic_hint}"
     )
 
 
