@@ -65,6 +65,22 @@ class TestAcCoverage(unittest.TestCase):
             score = check_coverage(["AC1"], ["subtask1"])
         self.assertEqual(score, 100)
 
+    def test_main_exits_0_when_no_parent_key(self):
+        import os
+        import subprocess
+        stdin_data = json.dumps({
+            "tool_input": {"additional_fields": {}},
+            "tool_response": {},
+            "session_id": "s1"
+        })
+        result = subprocess.run(
+            ["python3", "hooks/plugin/ai/ac_coverage.py"],
+            input=stdin_data, capture_output=True, text=True,
+            env={**os.environ, "ATLASSIAN_PM_HOOK_DEPTH": "1"},
+            cwd=str(Path(__file__).resolve().parents[2])
+        )
+        self.assertEqual(result.returncode, 0)
+
 
 class TestPathQuality(unittest.TestCase):
 
@@ -87,6 +103,35 @@ class TestPathQuality(unittest.TestCase):
     def test_skips_when_no_paths(self):
         rating = rate_paths([])
         self.assertIsNone(rating)
+
+    def test_main_exits_0_for_non_task_tool(self):
+        import os
+        import subprocess
+        stdin_data = json.dumps({"tool_name": "Read", "tool_response": "some content", "session_id": "s1"})
+        result = subprocess.run(
+            ["python3", "hooks/plugin/ai/path_quality.py"],
+            input=stdin_data, capture_output=True, text=True,
+            env={**os.environ, "ATLASSIAN_PM_HOOK_DEPTH": "1"},
+            cwd=str(Path(__file__).resolve().parents[2])
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("{}", result.stdout.strip())
+
+    def test_main_exits_0_for_task_with_poor_paths(self):
+        import os
+        import subprocess
+        stdin_data = json.dumps({
+            "tool_name": "Task",
+            "tool_response": "Found `src/` and `lib/` directories",
+            "session_id": "s1"
+        })
+        result = subprocess.run(
+            ["python3", "hooks/plugin/ai/path_quality.py"],
+            input=stdin_data, capture_output=True, text=True,
+            env={**os.environ, "ATLASSIAN_PM_HOOK_DEPTH": "1"},
+            cwd=str(Path(__file__).resolve().parents[2])
+        )
+        self.assertEqual(result.returncode, 0)
 
 
 if __name__ == "__main__":
