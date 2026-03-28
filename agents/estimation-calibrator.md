@@ -36,6 +36,7 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
    - `trend_pct` = derived from `velocity.story_points.history` slope (or `velocity.trend_pct` if present)
    - `std_dev` = `velocity.story_points.std_dev` (if present)
    If the file doesn't exist or the velocity section is missing/empty → skip velocity adjustment, proceed without it (do not error out).
+   **CLI alternative:** `Bash: python3 scripts/ai/velocity_adjust.py` outputs pre-formatted "Velocity Context:" text directly — use when the JSON parsing feels complex.
 
 2. **Semantic similarity search** — `cache_similar_issues(query=story_summary, limit=10, filters={issuetype:"Story", status:"Done"})`. If tool returns `{"error": "Embeddings not available..."}` → fall back to `cache_search` with JQL: `project = {{PROJECT_KEY}} AND issuetype = Story AND status = Done AND labels = <service_tag>` and note "semantic similarity unavailable — using keyword fallback"
 

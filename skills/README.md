@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-37 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+38 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 

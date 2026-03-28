@@ -13,6 +13,7 @@ All agents live in `agents/` as `.md` files. Invoke via Agent tool with `subagen
 | `sprint-transition-agent` | haiku | L1 | batch sprint issue moves + sprint state transitions; close-sprint Phase 4 |
 | `spec-parser-agent` | haiku | L1 | parse Confluence page → structured requirements; spec-to-stories Phase 2; tools: Read only |
 | `bug-evidence-writer` | haiku | L1 | ADF bug description from test failure evidence; execute-testplan Phase 6 + bug-triage |
+| `retro-data-extractor` | haiku | L1 | pre-processor for retrospective-analyst: fetches sprint issues + changelogs, computes raw metrics, writes compact retro-metrics-{sprint_id}.json |
 | `estimation-calibrator` | haiku | L3 | SP estimate calibration via semantic similarity + velocity trend + story-outcome carry-over rates |
 | `adf-surgeon` | haiku | L3 | deep ADF structural repair after quality-gate flags |
 | `quality-gate` | sonnet | L2 | validate ADF content; QG score ≥ 90% check |

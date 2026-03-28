@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-53 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+61 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## Directory structure
 
@@ -11,11 +11,12 @@ hooks/
 ├── config_loader.py  — project-config.json reader (cached per process)
 ├── hooks.json        — hook registry (wires hooks to Claude events)
 ├── plugin/
-│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (18 hooks)
+│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (22 hooks)
 │   ├── quality/      — ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/        — read optimization, dedup, field presets (6 hooks)
-│   └── session/      — session management, compaction, token filtering, skill telemetry (19 hooks)
-└── dev/              — developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
+│   ├── session/      — session management, compaction, token filtering, skill telemetry (21 hooks)
+│   └── ai/           — AI-pipeline hooks: intent detect, AC coverage, path quality (3 hooks)
+└── dev/              — developer workflow: DoR/DoD gates, WIP limit, PR sync (5 hooks)
 ```
 
 ## How hooks work
