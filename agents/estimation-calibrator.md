@@ -9,6 +9,18 @@ maxTurns: 8
 
 Calibrate story point estimates using historical data from similar completed stories. Identifies patterns that lead to systematic under/over-estimation.
 
+## SP Scale Anchors
+
+| Size | SP | Typical Duration | Scope Signal |
+|------|----|-----------------|--------------|
+| XS | 1 | < 2 hours | trivial config change, copy update, 1-2 file touch |
+| S | 2 | < 1 day | single component, well-understood domain, 2-4 files |
+| M | 3 | 1–2 days | multi-component, some uncertainty, 4-7 files |
+| L | 5 | 2–3 days | cross-service, new domain or auth/payment involved |
+| XL | 8 | 3–5 days | major feature, 3+ services, high uncertainty |
+
+Use these anchors when comparing "estimated SP" from cache data to the current story.
+
 ## Input
 
 - Story summary (text)
@@ -72,9 +84,35 @@ Reason: [auth pattern + above-avg scope]
 Note: [semantic similarity unavailable — keyword fallback used] (only if fallback triggered)
 ```
 
+## LOW Confidence Example
+
+When cache returns 0-1 usable comparables:
+
+```text
+## Estimation Calibration: [BE] New webhook endpoint for payment callback
+
+Initial estimate: M (3 SP)
+
+Similar completed stories: none found matching [BE] + payment domain
+
+Complexity signals:
+- Scope files: unknown (no description yet) → cannot assess
+- Keywords: payment, webhook, new-domain detected → HIGH risk keywords present
+
+Historical pattern: insufficient data (0 comparable stories)
+
+Recommendation: M (3 SP) → consider L (5 SP) — confidence: LOW
+Reason: payment + webhook + new-domain keyword combination historically underestimated when found in other service tags, but no direct [BE] comparables exist to confirm. Treat as uncertain — flag for team calibration in planning.
+
+Note: semantic similarity unavailable — keyword fallback used
+```
+
+Prefix uncertain field values with `~` (e.g., `~3.2 days`) to signal estimation, not measurement.
+
 ## Rules
 
 - Never fabricate comparison data — only use what cache returns
-- If fewer than 2 comparables found → return LOW confidence estimate with explanation
+- Prefix uncertain/estimated values with `~` — do not present estimates as measurements
+- If fewer than 2 comparables found → return LOW confidence estimate with explanation (see example above)
 - Fallback to keyword search if semantic search unavailable
 - Do not recommend estimates more than ±2 SP from initial (flag if pattern suggests bigger gap)
