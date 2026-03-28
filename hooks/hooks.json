@@ -202,7 +202,8 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/ai/ac_coverage.py",
-            "async": true
+            "async": true,
+            "timeout": 30
           }
         ]
       },
@@ -336,7 +337,8 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/ai/path_quality.py",
-            "async": true
+            "async": true,
+            "timeout": 30
           }
         ]
       },
@@ -466,7 +468,8 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/ai/intent_detect.py",
-            "async": true
+            "async": true,
+            "timeout": 30
           }
         ]
       }

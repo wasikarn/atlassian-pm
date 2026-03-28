@@ -8,9 +8,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from plugin.ai.intent_detect import classify_intent, main as intent_main
-from plugin.ai.ac_coverage import check_coverage, main as coverage_main
-from plugin.ai.path_quality import extract_paths, rate_paths, main as paths_main
+from plugin.ai.ac_coverage import check_coverage
+from plugin.ai.intent_detect import classify_intent
+from plugin.ai.intent_detect import main as intent_main
+from plugin.ai.path_quality import extract_paths, rate_paths
 
 
 class TestIntentDetect(unittest.TestCase):
@@ -37,9 +38,8 @@ class TestIntentDetect(unittest.TestCase):
 
     def test_main_exits_0_on_empty_stdin(self):
         import io
-        with patch("sys.stdin", io.StringIO("")):
-            with self.assertRaises(SystemExit) as ctx:
-                intent_main()
+        with patch("sys.stdin", io.StringIO("")), self.assertRaises(SystemExit) as ctx:
+            intent_main()
         self.assertEqual(ctx.exception.code, 0)
 
 

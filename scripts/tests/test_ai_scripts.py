@@ -3,7 +3,6 @@
 
 import json
 import os
-import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -12,8 +11,8 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ai.claude_runner import RECURSION_GUARD, run_claude
 from ai.enrich_description import build_enrich_prompt, parse_adf_from_response
-from ai.suggest_subtasks import build_subtask_prompt, parse_subtasks_from_response
 from ai.pre_qg_polish import build_polish_prompt, parse_polished_adf
+from ai.suggest_subtasks import build_subtask_prompt, parse_subtasks_from_response
 
 
 class TestClaudeRunner(unittest.TestCase):
