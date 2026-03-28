@@ -28,6 +28,7 @@ ignore = [
 ".claude/hooks/*" = ["E402"]  # hooks need sys.path.insert before imports
 "mcp-servers/atlassian-cache/server.py" = ["E402"]  # sys.path before local imports
 "scripts/*" = ["E402"]  # sys.path before local imports
+"monitor/*" = ["E402"]  # sys.path before local imports
 
 [format]
 quote-style = "double"
