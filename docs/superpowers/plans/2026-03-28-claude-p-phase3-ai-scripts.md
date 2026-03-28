@@ -285,7 +285,7 @@ Use ADF paragraph, heading (level 3), bulletList, orderedList nodes.
 Do not add any text outside the JSON block."""
 
 def build_enrich_prompt(text: str, issue_type: str) -> str:
-    return_ENRICH_PROMPT.format(text=text[:1000], issue_type=issue_type)
+    return _ENRICH_PROMPT.format(text=text[:1000], issue_type=issue_type)
 
 def parse_adf_from_response(response: str) -> Optional[dict]:
     """Extract JSON from a ```json ...``` block or bare JSON."""
