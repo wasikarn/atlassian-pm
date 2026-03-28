@@ -31,13 +31,17 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
 ## Steps
 
-1. **Semantic similarity search** — `cache_similar_issues(query=story_summary, limit=10, filters={issuetype:"Story", status:"Done"})`. If tool returns `{"error": "Embeddings not available..."}` → fall back to `cache_search` with JQL: `project = {{PROJECT_KEY}} AND issuetype = Story AND status = Done AND labels = <service_tag>` and note "semantic similarity unavailable — using keyword fallback"
+1. **Load velocity context** — `Read .claude/project-config-team-detail.json`. If the file exists and contains a `velocity` section with `story_points`, extract:
+   - `rolling_average` = `velocity.story_points.avg_velocity` (sprint average SP)
+   - `trend_pct` = derived from `velocity.story_points.history` slope (or `velocity.trend_pct` if present)
+   - `std_dev` = `velocity.story_points.std_dev` (if present)
+   If the file doesn't exist or the velocity section is missing/empty → skip velocity adjustment, proceed without it (do not error out).
 
-2. **Filter to relevant results** — keep only results where service tag matches and status = Done. Take top 5 by similarity score.
+2. **Semantic similarity search** — `cache_similar_issues(query=story_summary, limit=10, filters={issuetype:"Story", status:"Done"})`. If tool returns `{"error": "Embeddings not available..."}` → fall back to `cache_search` with JQL: `project = {{PROJECT_KEY}} AND issuetype = Story AND status = Done AND labels = <service_tag>` and note "semantic similarity unavailable — using keyword fallback"
 
-3. **Load velocity history** — `Read .claude/project-config-team-detail.json` → find `velocity.story_points.history[]`. If file doesn't exist or velocity section is missing → skip cycle time analysis, proceed with SP comparison only.
+3. **Filter to relevant results** — keep only results where service tag matches and status = Done. Take top 5 by similarity score.
 
-3b. **Load story outcome history** — Read last 200 lines of `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl` (use Bash: `tail -200 ~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl 2>/dev/null`). If file absent → skip, note "no outcome history yet". Parse JSONL and compute:
+**Step 3b — Load story outcome history** — Read last 200 lines of `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl` (use Bash: `tail -200 ~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl 2>/dev/null`). If file absent → skip, note "no outcome history yet". Parse JSONL and compute:
 
 - `assignee_carry_over_rate`: for the assigned member (if known), count `outcome=="carry_over"` / total — requires ≥5 records for this assignee
 - `issuetype_carry_over_rate`: for "Story" issuetype, count carry-overs / total — requires ≥5 records
@@ -45,8 +49,8 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
    Use these rates in Step 5 pattern detection and Step 6 adjustments.
 
-1. **Extract comparison data** from each similar story:
-   - Estimated SP (from issue fields) vs actual cycle time (from velocity history if available)
+4. **Extract comparison data** from each similar story:
+   - Estimated SP (from issue fields) vs actual cycle time (from velocity history loaded in step 1 if available)
    - Complexity signals: number of files in scope table (count CREATE + MODIFY lines in description), number of ACs
    - Keywords that correlate with under-estimation (auth, payment, integration, migration, new-service)
 
@@ -58,11 +62,15 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
 3. **Generate calibrated estimate:**
    - Base: majority SP of similar completed stories with same service tag
-   - Adjustments:
+   - Complexity adjustments:
      - +1 SP if story contains auth/payment/integration keywords AND historical pattern shows underestimation
      - +1 SP if scope file count > 5 (above avg for this service tag)
      - +1 SP if story involves new domain/service (first time touching that area)
      - −1 SP if story is clearly simpler than comparables (fewer files, fewer ACs)
+   - Velocity adjustment (only when velocity data was loaded in step 1):
+     - If `trend_pct < -5` (team slowing down): reduce final SP by 10–15% to avoid overcommitment (cap adjustment at −15%; round to nearest valid SP value: 1/2/3/5/8)
+     - If `trend_pct > +5` (team speeding up): note the trend but keep base estimate — do not inflate SP
+     - If `std_dev > rolling_average * 0.2`: add "⚠️ High variance" warning — estimates are less reliable
    - Confidence: HIGH (3+ strong comparables) / MEDIUM (1-2 comparables) / LOW (no direct comparables, using pattern only)
    - **Drift adjustment**: if `assignee_carry_over_rate` > 50% (≥5 records) → add +1 SP regardless of other signals (this person consistently underestimates); flag in output as "assignee drift detected"
    - **Service area adjustment**: if `service_tag_carry_over_rate` > 40% (≥5 records) → add +1 SP; flag as "service area pattern"
@@ -91,10 +99,29 @@ Complexity signals:
 
 Historical pattern: [BE] auth stories estimated at M → actual L in 2/3 cases (67%)
 
+Velocity Context: avg=42 SP/sprint, trend=−8% (slowing), std_dev=6.0 SP
+Velocity Adjustment: −10% applied → base 5 SP → adjusted 5 SP (nearest valid; already at boundary)
+
 Recommendation: [L / 5 SP] — confidence: [HIGH/MEDIUM/LOW]
 Reason: [auth pattern + above-avg scope]
 
 Note: [semantic similarity unavailable — keyword fallback used] (only if fallback triggered)
+```
+
+When velocity data is not available, omit the "Velocity Context" line entirely — do not print a placeholder.
+
+When `trend_pct > +5`:
+
+```text
+Velocity Context: avg=48 SP/sprint, trend=+9% (improving), std_dev=3.5 SP
+Velocity Note: team velocity improving 9% — base estimate unchanged
+```
+
+When `std_dev > rolling_average * 0.2`:
+
+```text
+Velocity Context: avg=38 SP/sprint, trend=+1%, std_dev=10.2 SP
+⚠️ High sprint variance — estimates may be less reliable
 ```
 
 ## LOW Confidence Example
