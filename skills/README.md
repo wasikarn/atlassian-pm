@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-35 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+37 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -22,6 +22,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | create-epic | `/atlassian-pm:create-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
 | update-epic | `/atlassian-pm:update-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
 | plan-release | `/atlassian-pm:plan-release` | 9 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
+| epic-health | `/atlassian-pm:epic-health` | 4 | atlassian-cache, mcp-atlassian | Epic health audit: story coverage, SP totals vs velocity, timeline feasibility, AC alignment, and missing QG verifications. |
 
 ### Story & Subtask
 
@@ -58,6 +59,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | map-dependencies | `/atlassian-pm:map-dependencies` | 5 | atlassian-cache, mcp-atlassian | Dependency graph (Mermaid), critical path (CPM), swim lane per team member, decoupling strategies. |
 | close-sprint | `/atlassian-pm:close-sprint` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Close sprint: triage incomplete issues, execute moves, close sprint, generate Confluence review page. |
 | standup-report | `/atlassian-pm:standup-report` | 4 | atlassian-cache, mcp-atlassian | Daily standup digest per assignee with anomaly detection (late starts, stale issues, overdue). Optional --post to Confluence. |
+| retro-actions | `/atlassian-pm:retro-actions` | 5 | atlassian-cache, mcp-atlassian, acli | Parse action-items block from a retrospective (Confluence page or session context) → create one Jira task per action item with sprint assignment. Use after `close-sprint` or `retrospective-analyst`. |
 | reschedule-sprint | `/atlassian-pm:reschedule-sprint` | 5 | atlassian-cache, mcp-atlassian, acli | Bulk-shift issue dates across a sprint or issue list. Always previews before executing. HR8 alignment validated. |
 | plan-sprint | `/atlassian-pm:plan-sprint` | 8 | atlassian-cache, mcp-atlassian, acli | _(Release forecasting only)_ Capacity-based sprint allocation for release planning context. Not used in Scrumban daily flow. |
 
@@ -156,6 +158,13 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 
 /atlassian-pm:close-sprint                            # close active sprint
 /atlassian-pm:close-sprint --sprint 456               # specific sprint ID
+
+/atlassian-pm:retro-actions                           # parse retro from session context
+/atlassian-pm:retro-actions --from-page 12345         # from Confluence page
+/atlassian-pm:retro-actions --sprint 456 --dry-run    # preview tasks only
+
+/atlassian-pm:epic-health {{PROJECT_KEY}}-50                       # audit specific epic
+/atlassian-pm:epic-health                             # audit all active epics
 
 /atlassian-pm:standup-report                          # today's active sprint
 /atlassian-pm:standup-report --post                   # post to Confluence

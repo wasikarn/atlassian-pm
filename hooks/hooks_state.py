@@ -253,7 +253,7 @@ def _build_qmd_collections() -> dict[str, str]:
     return result
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _get_qmd_collections() -> dict[str, str]:
     """Lazy-loaded QMD collection map. Only evaluated on first call."""
     return _build_qmd_collections()

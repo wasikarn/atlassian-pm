@@ -19,7 +19,9 @@
 | Board replenishment | `/flow-check --replenish` | N/A |
 | Dependency check | `/map-dependencies` | N/A |
 | Close sprint | `/close-sprint` → `/retrospective-analyst` | N/A |
+| Close sprint + action items | `/sprint-close-full-with-actions` (chains: close-sprint → retrospective-analyst → retro-actions) | N/A |
 | Daily standup | `/standup-report` | N/A |
+| Daily ops | `/daily-ops` (chains: standup-report → flow-check → blockers synthesis) | N/A |
 | Release planning | `/plan-release` | N/A |
 | Bulk reschedule | `/reschedule-sprint` | N/A |
 | Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
@@ -117,6 +119,8 @@ flowchart LR
 | `/flow-check` | Board config in project-config.json | WIP table + optional replenishment |
 | `/map-dependencies` | Issues with links in Jira | Dependency graph + critical path |
 | `/close-sprint` | Active sprint with issues | Closed sprint + Confluence review page |
+| `/retro-actions` | action-items block from retrospective-analyst or Confluence page | Jira tasks created per action item, linked to sprint |
+| `/epic-health` | Epic key or active epics | Coverage/SP/timeline audit report |
 | `/standup-report` | Active sprint | Digest output (optional Confluence post) |
 | `/plan-release` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
 | `/reschedule-sprint` | Issues with dates | Updated dates + HR8 alignment |

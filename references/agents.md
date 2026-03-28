@@ -13,13 +13,13 @@ All agents live in `agents/` as `.md` files. Invoke via Agent tool with `subagen
 | `sprint-transition-agent` | haiku | L1 | batch sprint issue moves + sprint state transitions; close-sprint Phase 4 |
 | `spec-parser-agent` | haiku | L1 | parse Confluence page → structured requirements; spec-to-stories Phase 2; tools: Read only |
 | `bug-evidence-writer` | haiku | L1 | ADF bug description from test failure evidence; execute-testplan Phase 6 + bug-triage |
-| `estimation-calibrator` | haiku | L3 | SP estimate calibration via semantic similarity |
+| `estimation-calibrator` | haiku | L3 | SP estimate calibration via semantic similarity + velocity trend + story-outcome carry-over rates |
 | `adf-surgeon` | haiku | L3 | deep ADF structural repair after quality-gate flags |
 | `quality-gate` | sonnet | L2 | validate ADF content; QG score ≥ 90% check |
 | `story-writer` | sonnet | L2 | generate ADF for stories + subtasks |
 | `alignment-checker` | sonnet | L2 | verify story-subtask-epic alignment |
 | `backlog-groomer` | sonnet | L2 | pre-sprint backlog health assessment |
-| `retrospective-analyst` | sonnet | L2 | data-driven sprint retrospective |
+| `retrospective-analyst` | sonnet | L2 | data-driven sprint retrospective; outputs structured action-items block for retro-actions |
 | `sprint-planner` | sonnet | L2 | capacity-based sprint allocation |
 | `risk-forecaster` | sonnet | L3 | delivery risk score before sprint starts |
 | `team-pattern-advisor` | sonnet | L3 | multi-sprint pattern analysis for team strategy |
