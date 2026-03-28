@@ -355,3 +355,20 @@ def skill_checkpoint_clear(session_id: str) -> None:
     state = _load(session_id)
     state.pop("skill_checkpoints", None)
     _save(session_id, state)
+
+
+# ── Session-level state (no session_id required) ─────────────────────────
+#
+# Convenience wrappers for global/session-agnostic state such as AI cost
+# tracking. Uses the "default" session key so data persists for the lifetime
+# of /tmp/claude-hooks-state/default.json.
+
+
+def load_state() -> dict:
+    """Load global session state (session-id-agnostic convenience wrapper)."""
+    return dict(_load("default"))
+
+
+def save_state(state: dict) -> None:
+    """Persist global session state (session-id-agnostic convenience wrapper)."""
+    _save("default", state)

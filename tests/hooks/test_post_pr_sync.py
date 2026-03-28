@@ -1,6 +1,7 @@
 """Tests for post_pr_sync.py — auto-inject Jira transition after gh pr create."""
 import io
 import json
+import re
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -9,6 +10,10 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "hooks"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "hooks" / "dev"))
 import post_pr_sync
+
+# The module computes _ISSUE_RE at import time from CLAUDE_PLUGIN_ROOT env,
+# which is empty in test environments. Patch it to a known pattern for tests.
+_TEST_ISSUE_RE = re.compile(r'\b(BEP-\d+|TP-\d+)\b', re.IGNORECASE)
 
 
 def _run(command: str, tool_response: str = "") -> dict:
@@ -20,6 +25,7 @@ def _run(command: str, tool_response: str = "") -> dict:
     buf = io.StringIO()
     with (
         patch("sys.stdin.read", return_value=json.dumps(data)),
+        patch.object(post_pr_sync, "_ISSUE_RE", _TEST_ISSUE_RE),
         redirect_stdout(buf),
     ):
         post_pr_sync.main()
