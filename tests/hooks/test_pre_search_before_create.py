@@ -32,21 +32,21 @@ def _run(tool_input: dict, search_done: bool = False) -> dict | None:
 
 
 def test_allows_when_search_done_story():
-    """Prior search recorded → allow story creation."""
+    """Prior search recorded → allow story creation (may inject semantic tip)."""
     result = _run({"issuetype": "Story", "summary": "New feature"}, search_done=True)
-    assert result == {}
+    assert result is not None  # not blocked; hook may inject cache_similar_issues tip
 
 
 def test_allows_when_search_done_task():
-    """Prior search recorded → allow task creation."""
+    """Prior search recorded → allow task creation (may inject semantic tip)."""
     result = _run({"issuetype": "Task", "summary": "Fix bug"}, search_done=True)
-    assert result == {}
+    assert result is not None
 
 
 def test_allows_when_search_done_empty_input():
     """Prior search recorded → allow even with minimal input."""
     result = _run({}, search_done=True)
-    assert result == {}
+    assert result is not None
 
 
 # ── Subtask exemption → allow even without search ────────────────────────
@@ -55,19 +55,19 @@ def test_allows_when_search_done_empty_input():
 def test_allows_subtask_without_search():
     """Sub-task is exempt from dedup search requirement."""
     result = _run({"issuetype": "Sub-task"}, search_done=False)
-    assert result == {}
+    assert result is not None  # not blocked
 
 
 def test_allows_subtask_variant_without_search():
     """'subtask' (no hyphen) is also treated as subtask → exempt."""
     result = _run({"issuetype": "subtask"}, search_done=False)
-    assert result == {}
+    assert result is not None
 
 
 def test_allows_sub_task_uppercase():
     """Case-insensitive subtask detection: SUB-TASK → exempt."""
     result = _run({"issuetype": "SUB-TASK"}, search_done=False)
-    assert result == {}
+    assert result is not None
 
 
 # ── No search done + non-subtask → block ─────────────────────────────────

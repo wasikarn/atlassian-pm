@@ -70,6 +70,12 @@ def parse_json(text: str, schema: dict | None = None) -> dict | None:
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
+# Shared with monitor/json_utils.py — keep in sync
+ANALYZE_SCHEMA: dict = {
+    "action": {"type": str, "required": True, "choices": ["skip", "comment"]},
+    "text": {"type": str, "required": False},
+}
+
 ADF_SCHEMA: dict = {
     "type": {"type": str, "required": True, "choices": ["doc"]},
     "content": {"type": list, "required": True},
