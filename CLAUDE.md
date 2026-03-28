@@ -6,12 +6,12 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `scripts/` (api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (46 hooks in `plugin/` + `dev/`) | `agents/` (20) | `.claude/commands/` (10 orchestration chains)
-**Skills layout:** 35 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `scripts/` (api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (53 hooks in `plugin/` + `dev/`) | `agents/` (23) | `.claude/commands/` (12 orchestration chains)
+**Skills layout:** 37 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
-**Skill index:** [skills/README.md](skills/README.md) — all 35 skills with phases, categories, and argument patterns.
-**Hook reference:** [hooks/README.md](hooks/README.md) — all 46 hooks, what they enforce, and how to debug them.
+**Skill index:** [skills/README.md](skills/README.md) — all 37 skills with phases, categories, and argument patterns.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all 53 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 

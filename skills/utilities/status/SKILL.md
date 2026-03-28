@@ -49,7 +49,37 @@ From sprint issues, extract:
 | Blocked | issue keys with "Blocks" link type or flag |
 | To Do (ready) | issue keys with subtasks + ACs (DoR-ready) |
 
-### Step 2 — Pending HR State
+### Step 2 — Stuck Issues
+
+Check for issues flagged by the board monitor as stuck (no status change beyond threshold):
+
+```bash
+python3 -c "
+import json, os
+from pathlib import Path
+data_dir = Path(os.environ.get('CLAUDE_PLUGIN_DATA', str(Path.home() / '.claude/plugins/data/atlassian-pm-atlassian-pm')))
+stuck_file = data_dir / 'stuck_issues.json'
+if not stuck_file.exists():
+    print('No stuck issues file — board monitor may not be running')
+else:
+    data = json.loads(stuck_file.read_text())
+    pending = data.get('pending', [])
+    surfaced = data.get('surfaced', [])
+    if pending:
+        print(f'PENDING ({len(pending)} unreviewed):')
+        for i in pending:
+            print(f'  {i[\"issue_key\"]} — {i[\"status\"]} for {i[\"age_days\"]:.1f}d: {i.get(\"summary\",\"\")}')
+    elif surfaced:
+        recent = sorted(surfaced, key=lambda x: x.get('surfaced_at',''), reverse=True)[:3]
+        print(f'Recently surfaced ({len(surfaced)} total, showing latest 3):')
+        for i in recent:
+            print(f'  {i[\"issue_key\"]} — {i[\"status\"]} for {i[\"age_days\"]:.1f}d (surfaced {i.get(\"surfaced_at\",\"\")[:10]})')
+    else:
+        print('No stuck issues detected')
+"
+```
+
+### Step 4 — Pending HR State
 
 Check session state file for unflushed HR violations:
 
@@ -85,7 +115,7 @@ except:
 "
 ```
 
-### Step 4 — Build Status Report
+### Step 5 — Build Status Report
 
 Output a structured status report:
 

@@ -1,6 +1,6 @@
 # Hooks — atlassian-pm
 
-49 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
+53 hooks enforce HR1-HR10 hard rules, prevent silent failures, and inject context automatically. Hooks are transparent — they either block with an explanation or silently enhance.
 
 ## Directory structure
 
@@ -11,10 +11,10 @@ hooks/
 ├── config_loader.py  — project-config.json reader (cached per process)
 ├── hooks.json        — hook registry (wires hooks to Claude events)
 ├── plugin/
-│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (17 hooks)
+│   ├── guards/       — HR1-HR10 enforcement: block + track hard rule violations (18 hooks)
 │   ├── quality/      — ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/        — read optimization, dedup, field presets (6 hooks)
-│   └── session/      — session management, compaction, token filtering, skill telemetry (15 hooks)
+│   └── session/      — session management, compaction, token filtering, skill telemetry (19 hooks)
 └── dev/              — developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
 ```
 
@@ -49,6 +49,8 @@ Silently improve tool calls without blocking.
 
 | Hook | When | What it does |
 |------|------|--------------|
+| `pre_sprint_risk_auto_assess.py` | PreToolUse jira_update_sprint | Reminds to run `/risk-forecaster` before activating a sprint; skips if already assessed this sprint |
+| `post_auto_subtask_suggest.py` | PostToolUse jira_create_issue | After creating a Story, injects suggestion to run subtask generation |
 | `pre_adf_structure_validate.py` | PreToolUse Bash | Validates ADF JSON structure before any write attempt |
 | `pre_event_ac_check.py` | PreToolUse Bash | Checks Event issue types have ACs before proceeding |
 | `pre_field_preset_guard.py` | jira_get_issue, jira_search | Injects recommended field presets when `fields` param is missing/minimal |
@@ -77,6 +79,8 @@ Manage state, tracking, and cross-hook coordination.
 | `post_event_model_track.py` | PostToolUse (async) | Tracks Domain Model events from Epic descriptions |
 | `stop_hr6_unflushed_check.py` | Stop | Warns on unflushed HR6 cache invalidations before session ends |
 | `stop_hr5_pending_check.py` | Stop | Checks for subtasks with unverified parent links (HR5) before session ends |
+| `stop_session_cost_summary.py` | Stop | Logs total AI claude -p call count and USD cost for the session |
+| `start_stuck_issues_notify.py` | SessionStart | Surfaces pending stuck issues from monitor queue; moves them to surfaced so they appear only once |
 | `pre_prompt_skill_redirect.py` | UserPromptSubmit | Detect bug/story/task/epic creation intent → redirect to matching skill |
 | `pre_prompt_issue_prefetch.py` | UserPromptSubmit | Pre-fetches Jira issue when user mentions {{PROJECT_KEY}}-XXX in prompt |
 | `post_hr5_parent_verify_remind.py` | jira_create_issue, jira_batch_create_issues | Reminds to verify parent link after creation |
