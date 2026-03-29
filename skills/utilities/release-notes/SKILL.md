@@ -43,10 +43,10 @@ effort: medium
 ## Phase 1 — Fetch Fix Version 🟢 AUTO
 
 1. If `--version` provided → use it.
-2. Else → `jira_get_project_versions(project_key="{{PROJECT_KEY}}")` and display released/unreleased versions for user to select.
+2. Else → `jira_get_project_versions(project_key="<project_key>")` and display released/unreleased versions for user to select.
 
 ```python
-jira_get_project_versions(project_key="{{PROJECT_KEY}}")
+jira_get_project_versions(project_key="<project_key>")
 ```
 
 Display version details:

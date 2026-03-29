@@ -59,7 +59,7 @@ def test_blocks_in_progress_with_wrong_confirmation():
 
 
 def test_confirmation_is_case_insensitive():
-    assert _run({"issue_key": "TP-1", "transition": "in progress"}, confirmed="bep-1") is not None
+    assert _run({"issue_key": "TP-1", "transition": "in progress"}, confirmed="tp-1") is not None
 
 
 def test_allows_on_empty_input():

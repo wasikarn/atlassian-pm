@@ -264,7 +264,7 @@ def detect_issue_type(data: dict, file_path: "Path | str | None" = None) -> str:
 
     Detection priority:
       1. Explicit 'type' field in data  (e.g. "Story", "Sub-task")
-      2. Filename stem                  (e.g. "bep-123-subtask.json")
+      2. Filename stem                  (e.g. "tp-123-subtask.json")
       3. Default: 'subtask'
 
     Args:

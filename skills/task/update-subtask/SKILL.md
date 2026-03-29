@@ -71,7 +71,7 @@ effort: medium
 > **⚠️ MANDATORY:** Read `references/templates-subtask.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
 
 - If file paths need updating → `Task(Explore)`
-- Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
+- Generate ADF JSON → `{{artifacts_dir}}/tp-xxx-update.json`
 - Show Before/After comparison
 - **⛔ GATE — DO NOT APPLY** without user approval of all generated changes.
 
@@ -87,7 +87,7 @@ effort: medium
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

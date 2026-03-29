@@ -99,7 +99,7 @@ Ask the user what they want to update:
 
 > **⚠️ MANDATORY:** Read `references/templates-task.md` before generating any ADF. Use `panel` nodes — NEVER use `heading` nodes in issue descriptions.
 
-Generate ADF JSON → `{{artifacts_dir}}/bep-xxx-update.json`
+Generate ADF JSON → `{{artifacts_dir}}/tp-xxx-update.json`
 
 **EDIT format (do not include projectKey, type, summary):**
 
@@ -145,7 +145,7 @@ Would you like to apply these changes?
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

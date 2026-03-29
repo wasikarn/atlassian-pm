@@ -65,13 +65,13 @@ What type of Task do you want to create?
 
 > **⚠️ MANDATORY:** Read `references/templates-task.md` before generating any ADF. All sections use `panel` ADF nodes — NEVER use `heading` nodes in task descriptions.
 
-Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
+Generate ADF JSON based on task type → `{{artifacts_dir}}/tp-xxx-task.json`
 
 **tech-debt Template:**
 
 ```json
 {
-  "projectKey": "{{PROJECT_KEY}}",
+  "projectKey": "<project_key>",
   "type": "Task",
   "summary": "[BE/FE] [Title]",
   "description": {
@@ -93,7 +93,7 @@ Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
 
 ```json
 {
-  "projectKey": "{{PROJECT_KEY}}",
+  "projectKey": "<project_key>",
   "type": "Task",
   "summary": "[Bug] [Title]",
   "description": {
@@ -115,7 +115,7 @@ Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
 
 ```json
 {
-  "projectKey": "{{PROJECT_KEY}}",
+  "projectKey": "<project_key>",
   "type": "Task",
   "summary": "[Chore] [Title]",
   "description": {
@@ -134,7 +134,7 @@ Generate ADF JSON based on task type → `{{artifacts_dir}}/bep-xxx-task.json`
 
 ```json
 {
-  "projectKey": "{{PROJECT_KEY}}",
+  "projectKey": "<project_key>",
   "type": "Task",
   "summary": "[Spike] [Title]",
   "description": {
@@ -169,7 +169,7 @@ Show preview for user to review:
 **Sections:**
 - [list of sections with emoji]
 
-**Files:** {{artifacts_dir}}/bep-xxx-task.json
+**Files:** {{artifacts_dir}}/tp-xxx-task.json
 
 Any changes needed before creating?
 ```
@@ -186,7 +186,7 @@ Any changes needed before creating?
 ### 5. Create
 
 ```bash
-acli jira workitem create --from-json {{artifacts_dir}}/bep-xxx-task.json
+acli jira workitem create --from-json {{artifacts_dir}}/tp-xxx-task.json
 ```
 
 **Capture issue key from output** for use in summary

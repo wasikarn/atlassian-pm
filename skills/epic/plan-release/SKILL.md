@@ -133,7 +133,7 @@ Out of scope: [explicitly excluded items]
 
 **⛔ GATE** — Confirm before creating Fix Version in Jira.
 
-1. `jira_create_version(project_key="{{PROJECT_KEY}}", name=release_name, release_date=target_date)`
+1. `jira_create_version(project_key="<project_key>", name=release_name, release_date=target_date)`
 2. For each epic: `jira_update_issue(key, additional_fields: {fixVersions: [{id: version_id}]})`
 3. HR6: `cache_invalidate(key)` for each linked epic (note: jira_create_version is NOT in HR6 hook matcher — call cache_invalidate manually)
 

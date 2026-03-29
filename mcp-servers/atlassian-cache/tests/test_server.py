@@ -958,7 +958,7 @@ class TestValidateIssueKey:
         with pytest.raises(ValueError, match="Invalid issue key"):
             _validate_issue_key("TP-")
         with pytest.raises(ValueError, match="Invalid issue key"):
-            _validate_issue_key("bep-123")  # lowercase
+            _validate_issue_key("tp-123")  # lowercase
 
     def test_non_string(self):
         with pytest.raises(ValueError, match="Invalid issue key"):

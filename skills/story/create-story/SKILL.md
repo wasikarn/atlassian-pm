@@ -147,7 +147,7 @@ Proceed anyway? (y = continue, n = stop and fix epic first)
 After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
 
 ```text
-MCP: cache_search_confluence(query="[story_keywords]", space_key="{{SPACE_KEY}}", limit=3)
+MCP: cache_search_confluence(query="[story_keywords]", space_key="<space_key>", limit=3)
 ```
 
 If relevant pages found → extract key sections (business rules, API contracts, constraints) and store as `domain_context`. Inject into Phase 2 Write Story as reference.
@@ -423,8 +423,8 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
 
 ```text
 # Step 1: Create shells (parallel)
-MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
-MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "<project_key>", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "<project_key>", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
 
 # Step 2: Verify parent (HR5) — DO NOT SKIP
 MCP: jira_get_issue(issue_key: "ABC-YYY", fields: "parent") → confirm parent.key = "ABC-XXX"

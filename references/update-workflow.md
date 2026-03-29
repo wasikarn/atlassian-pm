@@ -23,7 +23,7 @@ argument-hint: "[issue-key] [changes]"
 > **🟢 AUTO** — If QG passed → apply automatically. No user interaction needed.
 
 ```bash
-acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx-update.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-update.json --yes
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after apply.

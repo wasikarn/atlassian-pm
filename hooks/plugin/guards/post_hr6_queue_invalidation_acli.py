@@ -57,7 +57,7 @@ def main() -> None:
 
     keys = get_issue_keys_from_text(all_text)
     if not keys:
-        # Try uppercase extraction from filenames like tasks/bep-123.json
+        # Try uppercase extraction from filenames like tasks/tp-123.json
         keys = get_issue_keys_from_text(all_text.upper())
 
     if not keys:

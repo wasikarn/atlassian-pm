@@ -45,28 +45,28 @@ def test_ignores_gh_pr_list():
     assert _run("gh pr list") == {}
 
 
-def test_ignores_gh_pr_create_with_no_bep():
+def test_ignores_gh_pr_create_with_no_issue_key():
     assert _run("gh pr create --title 'fix typo' --body ''") == {}
 
 
-def test_detects_bep_in_title():
+def test_detects_issue_key_in_title():
     result = _run("gh pr create --title 'TP-123: add feature' --body ''")
     assert _has_context(result)
     assert "TP-123" in str(result)
 
 
-def test_detects_bep_in_branch_flag():
+def test_detects_issue_key_in_branch_flag():
     result = _run("gh pr create --head TP-456/my-branch --body ''")
     assert "TP-456" in str(result)
 
 
-def test_detects_bep_in_tool_response():
+def test_detects_issue_key_in_tool_response():
     result = _run("gh pr create --body ''", tool_response="Created PR for TP-789")
     assert "TP-789" in str(result)
 
 
-def test_bep_detection_is_case_insensitive():
-    result = _run("gh pr create --title 'bep-321 fix' --body ''")
+def test_issue_key_detection_is_case_insensitive():
+    result = _run("gh pr create --title 'tp-321 fix' --body ''")
     assert "TP-321" in str(result)
 
 

@@ -183,7 +183,7 @@ QG must be ≥ 90% before creation. HR1 enforced.
 **Create:**
 
 ```bash
-acli jira workitem create --from-json {{artifacts_dir}}/bep-xxx-bug.json
+acli jira workitem create --from-json {{artifacts_dir}}/tp-xxx-bug.json
 ```
 
 **After create:**

@@ -421,7 +421,7 @@ class TestSearchKeyNormalization:
 
     def test_case_normalized(self, cache):
         k1 = cache._search_key("Project = TP", "summary", 10)
-        k2 = cache._search_key("project = bep", "summary", 10)
+        k2 = cache._search_key("project = TP", "summary", 10)
         assert k1 == k2
 
     def test_fields_sorted(self, cache):

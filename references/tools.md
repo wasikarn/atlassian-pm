@@ -130,10 +130,10 @@ What do you need to do?
 
 ```bash
 # Create new issue
-acli jira workitem create --from-json {{artifacts_dir}}/bep-xxx.json
+acli jira workitem create --from-json {{artifacts_dir}}/tp-xxx.json
 
 # Update existing issue (requires "issues": ["ABC-XXX"] in JSON)
-acli jira workitem edit --from-json {{artifacts_dir}}/bep-xxx.json --yes
+acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx.json --yes
 
 # List issues
 acli jira workitem list --project {{PROJECT_KEY}} --limit 10

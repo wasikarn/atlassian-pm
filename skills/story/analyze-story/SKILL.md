@@ -73,7 +73,7 @@ Before investing in subtask design, verify the story is ready for analysis:
 Search for domain documentation relevant to this story using its title + AC keywords:
 
 ```text
-MCP: cache_search_confluence(query="[story_title_keywords]", space_key="{{SPACE_KEY}}", limit=3)
+MCP: cache_search_confluence(query="[story_title_keywords]", space_key="<space_key>", limit=3)
 ```
 
 If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
