@@ -239,6 +239,24 @@ def is_in_progress_transition(transition: str) -> bool:
     return any(kw in t for kw in _IN_PROGRESS_KEYWORDS)
 
 
+# ── HR rules context ───────────────────────────────────────────────────────
+
+def build_hr_rules(board_id: str = "<board_id>") -> str:
+    """Return core HR rules text for context injection.
+
+    Used by: start_compact_reinject.py, start_subagent_context.py
+    Centralises the text so both hooks stay in sync.
+    """
+    return (
+        "HARD RULES (violating = data corruption / silent failure):\n"
+        "- HR5: After MCP subtask create → verify parent with jira_get_issue(fields='parent')\n"
+        "- HR6: After ANY Jira write → cache_invalidate(issue_key, auto_refresh=true) immediately\n"
+        f"- HR7: Sprint ID NEVER hardcoded — always jira_get_sprints_from_board(board_id={board_id}, state='active')\n"
+        "- HR10: NEVER set sprint field (customfield_10020) on subtasks — inherited from parent\n"
+        "- Tool: jira_get_issue / jira_search ALWAYS require fields + limit params"
+    )
+
+
 # ── Type detection ─────────────────────────────────────────────────────────
 
 def detect_issue_type(data: dict, file_path: "Path | str | None" = None) -> str:

@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from config_loader import load_project_config
-from hooks_lib import inject_context, log_event, parse_stdin
+from hooks_lib import build_hr_rules, inject_context, log_event, parse_stdin
 from hooks_state import _load  # read-only access to session state
 
 _cfg = load_project_config()
@@ -40,13 +40,7 @@ _WRITE_CAPABLE_AGENTS = {
     "sprint-transition-agent",  # jira_update_issue
 }
 
-_HR_RULES = f"""\
-HARD RULES (violating = data corruption / silent failure):
-- HR5: After MCP subtask create → verify parent with jira_get_issue(fields='parent')
-- HR6: After ANY Jira write → cache_invalidate(issue_key, auto_refresh=true) immediately
-- HR7: Sprint ID NEVER hardcoded — always jira_get_sprints_from_board(board_id={_BOARD_ID}, state='active')
-- HR10: NEVER set sprint field (customfield_10020) on subtasks — inherited from parent
-- Tool: jira_get_issue / jira_search ALWAYS require fields + limit params"""
+_HR_RULES = build_hr_rules(board_id=_BOARD_ID)
 
 
 def main() -> None:

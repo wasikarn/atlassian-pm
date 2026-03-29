@@ -18,6 +18,16 @@ from plugin.ai.prompts import CLASSIFY_PROMPT
 
 _HOOK = "ai-intent-detect"
 
+# Quick heuristic: skip claude -p unless prompt contains at least one creation signal.
+# Covers ~80% of prompts (reads, analysis, questions) without LLM cost.
+# The regex hook (pre_prompt_skill_redirect.py) already handles explicit patterns;
+# this AI hook only catches ambiguous cases the regex misses.
+_CREATION_SIGNALS = frozenset([
+    "create", "สร้าง", "bug", "story", "epic", "task", "report",
+    "add", "new", "เพิ่ม", "defect", "issue", "ticket", "subtask",
+    "feature", "บัก", "งาน", "รายงาน",
+])
+
 _SKILL_MAP = {
     "bug":     ("atlassian-pm:bug-triage",   "bug/defect triage → severity → duplicate check → ADF → QG ≥ 90%"),
     "story":   ("atlassian-pm:create-story", "discovery → INVEST → QG ≥ 90% → subtask design"),
@@ -48,6 +58,18 @@ def main() -> None:
         prompt = data.get("prompt", "")
         if not prompt:
             sys.exit(0)
+
+        # Fast heuristic gate: skip claude -p if no creation signals present.
+        # This avoids LLM cost for ~80% of prompts (reads, questions, analysis).
+        prompt_lower = prompt.lower()
+        if len(prompt) < 10 or prompt.startswith("/"):
+            log_event(_HOOK, "SKIP", {"reason": "heuristic_short_or_slash"})
+            allow()
+            return
+        if not any(signal in prompt_lower for signal in _CREATION_SIGNALS):
+            log_event(_HOOK, "SKIP", {"reason": "heuristic_no_creation_signal"})
+            allow()
+            return
 
         # Skip AI call if the regex hook already detected and redirected this prompt
         session_id = data.get("session_id", "")

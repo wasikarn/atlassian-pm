@@ -22,6 +22,7 @@ import subprocess
 RECURSION_GUARD = "ATLASSIAN_PM_HOOK_DEPTH"
 _CLAUDE_TIMEOUT = 15  # seconds
 _MAX_BUDGET_USD = 0.01  # hooks fire on every event — cap per call
+_SESSION_AI_CAP_USD = 0.50  # max cumulative AI spend per session
 
 try:
     from hooks_state import load_state, save_state
@@ -43,6 +44,17 @@ def _track_cost(cost: float) -> None:
         pass  # Never let cost tracking break the main flow
 
 
+def _session_budget_ok() -> bool:
+    """Return False if session AI spend has exceeded the cap. Never raises."""
+    if not _HAS_STATE:
+        return True
+    try:
+        from hooks_state import load_state
+        return load_state().get("session_ai_cost_usd", 0.0) < _SESSION_AI_CAP_USD
+    except Exception:
+        return True
+
+
 def claude_call(
     prompt: str,
     timeout: int = _CLAUDE_TIMEOUT,
@@ -61,6 +73,8 @@ def claude_call(
         The text response string, or None on any error.
     """
     if os.environ.get(RECURSION_GUARD):
+        return None
+    if not _session_budget_ok():
         return None
 
     env = {**os.environ, RECURSION_GUARD: "1"}
@@ -132,6 +146,8 @@ def claude_call_json(
         Validated dict matching the schema, or None on any error.
     """
     if os.environ.get(RECURSION_GUARD):
+        return None
+    if not _session_budget_ok():
         return None
 
     env = {**os.environ, RECURSION_GUARD: "1"}

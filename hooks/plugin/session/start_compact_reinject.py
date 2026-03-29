@@ -12,25 +12,17 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import parse_stdin
+from hooks_lib import build_hr_rules, parse_stdin
 
-_REMINDERS = """
-=== POST-COMPACTION CRITICAL REMINDERS ===
-
-HARD RULES (violating = data corruption):
-- HR5: Subtask = Two-Step + Verify parent (MCP create → jira_get_issue verify → acli edit)
-- HR6: cache_invalidate(issue_key) after EVERY Jira write
-- HR7: Sprint ID = ALWAYS lookup via jira_get_sprints_from_board(), NEVER hardcode
-- HR10: NEVER set sprint (customfield_10020) on subtasks — inherits from parent
-
+_TOOL_RULES = """\
 TOOL RULES:
-- jira_get_issue / jira_search: ALWAYS use fields + limit params
 - Subtask creation: ALWAYS sequential (never parallel)
 - Cache: cache_get_issue first → fallback jira_get_issue if miss
 - Assignee: ONLY via acli (MCP silently fails)
 - Confluence macros: ONLY via update_page_storage.py (MCP corrupts XML)
-- JQL with parent: NEVER add ORDER BY (parser error)
-""".strip()
+- JQL with parent: NEVER add ORDER BY (parser error)"""
+
+_REMINDERS = "=== POST-COMPACTION CRITICAL REMINDERS ===\n\n" + build_hr_rules() + "\n\n" + _TOOL_RULES
 
 
 def main() -> None:
