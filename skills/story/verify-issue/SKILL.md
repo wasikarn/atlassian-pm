@@ -78,6 +78,20 @@ Score: ⭐⭐⭐☆☆ (per dimension, 5-point scale)
 (Subtasks already in memory from Phase 1 — no I/O needed)
 ```
 
+**Alignment Check (when --with-subtasks flag used):**
+
+After QG scoring, run alignment verification:
+
+```text
+Agent(name: "alignment-checker"): {
+  story_key: "[STORY-KEY]",
+  include_checks: ["A1", "A2", "A3", "A4", "A5", "A6"],
+  mode: "--fix" if --fix flag provided else "read-only"
+}
+```
+
+alignment-checker verifies: parent links (A1), SP consistency (A2), date range alignment (A3), AC coverage by subtasks (A4), scope drift (A5), bidirectional blocking links (A6).
+
 **Alignment checks:**
 
 | ID | Check | How to Verify | Pass Criteria |

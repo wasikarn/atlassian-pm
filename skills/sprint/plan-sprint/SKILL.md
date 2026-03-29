@@ -103,6 +103,21 @@ Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sp
 Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
+**Optional Readiness Check:** Before capacity analysis, if backlog has 10+ unplanned issues:
+
+> "📋 Run backlog health check before planning? This detects AC gaps, missing estimates, and WSJF priorities (adds ~1 min)."
+
+If user confirms:
+
+```text
+Agent(name: "backlog-groomer"): {
+  scope: "{{PROJECT_KEY}} backlog",
+  note: "Run before sprint planning to identify issues not ready for sprint commitment"
+}
+```
+
+Review backlog-groomer output: issues in "Needs AC" or "Missing Estimate" categories should NOT be committed to the sprint. Issues in "Blocked" category need resolution first.
+
 **Step 1:** Team Velocity (SP-based)
 
 ```text

@@ -7,6 +7,7 @@ tools: Read, Glob, Grep
 permissionMode: dontAsk
 maxTurns: 10
 memory: project
+color: green
 ---
 
 Validate ADF JSON content against quality gate (QG) criteria before Atlassian writes.

@@ -6,6 +6,7 @@ effort: high
 tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__atlassian-cache__cache_sprint_issues
 permissionMode: dontAsk
 maxTurns: 12
+color: yellow
 ---
 
 Forecast sprint delivery risk before the sprint starts. Receive sprint-planner output and analyze risk across 4 dimensions. Return specific mitigations, not just scores.
@@ -101,7 +102,7 @@ overall = (capacity_score × 0.30) + (complexity_score × 0.25) + (dependency_sc
 Risk levels: 0-35 = LOW 🟢 | 35-60 = MEDIUM 🟡 | 60-80 = HIGH 🟠 | 80-100 = CRITICAL 🔴
 
 1. **Identify specific risks** — for each dimension scoring >50, generate 1-3 specific named risks with:
-   - The specific item(s) involved (BEP-XXX)
+   - The specific item(s) involved ({{PROJECT_KEY}}-XXX)
    - The specific person(s) at risk
    - A concrete mitigation action
 

@@ -7,6 +7,7 @@ tools: Read, Glob, Grep, Write
 memory: project
 maxTurns: 15
 permissionMode: dontAsk
+color: blue
 skills:
   - shared-references
 ---
