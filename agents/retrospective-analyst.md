@@ -12,7 +12,7 @@ description: |
   </example>
 model: sonnet
 effort: high
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
+tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 permissionMode: dontAsk
 maxTurns: 20
 color: magenta
@@ -263,6 +263,7 @@ For each action item in the retrospective:
 - Velocity calculation: use story points if available, fall back to ticket count
 - Keep the "What Went Well" section positive and specific — call out individuals by name for good work
 - Action items must be specific and assignable (not generic "improve communication")
+- HR6: After any `jira_add_comment` or Jira write call → `cache_invalidate(issue_key)` immediately
 
 ## Phase: Action Items Extraction
 

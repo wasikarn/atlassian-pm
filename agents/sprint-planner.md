@@ -12,7 +12,7 @@ description: |
   </example>
 model: sonnet
 effort: high
-tools: Read, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
+tools: Read, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 skills:
   - shared-references
 maxTurns: 20
@@ -40,6 +40,7 @@ Before planning:
 
 - Read team capacity from `references/team-capacity.md`
 - Read sprint frameworks from `references/sprint-frameworks.md`
+- HR6: After ANY `jira_update_issue` call → `cache_invalidate(issue_key)` immediately. Stale cache corrupts subsequent planning reads.
 - HR7: ALWAYS lookup sprint ID via `jira_get_sprints_from_board()` — never hardcode
 - HR8: Subtask dates must align with parent date range
 

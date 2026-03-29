@@ -56,7 +56,7 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
 3. **Filter to relevant results** — keep only results where service tag matches and status = Done. Take top 5 by similarity score.
 
-**Step 3b — Load story outcome history** — Read last 200 lines of `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl` (use Bash: `tail -200 ~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl 2>/dev/null`). If file absent → skip, note "no outcome history yet". Parse JSONL and compute:
+**Step 3b — Load story outcome history** — Read `~/.claude/plugins/data/atlassian-pm-atlassian-pm/story-outcomes.jsonl` using the `Read` tool (use `offset` + `limit` parameters to read the last 200 lines: first check file size with a `Read` at a large offset, then read accordingly). If file absent or Read returns empty → skip, note "no outcome history yet". Parse JSONL and compute:
 
 - `assignee_carry_over_rate`: for the assigned member (if known), count `outcome=="carry_over"` / total — requires ≥5 records for this assignee
 - `issuetype_carry_over_rate`: for "Story" issuetype, count carry-overs / total — requires ≥5 records

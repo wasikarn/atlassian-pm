@@ -29,6 +29,7 @@ import asyncio
 import collections
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -62,7 +63,8 @@ logging.basicConfig(
 logger = logging.getLogger("atlassian-cache")
 
 # Claude Code MCP token limit is ~30K chars; keep well under
-MAX_RESPONSE_CHARS = 25_000
+# Configurable via env var for environments with different limits (e.g., custom MCP proxies)
+MAX_RESPONSE_CHARS = int(os.environ.get("ATLASSIAN_CACHE_MAX_RESPONSE_CHARS", "25000"))
 
 # Safety guard: max pages for sprint pagination (prevents infinite loops)
 MAX_SPRINT_PAGES = 20

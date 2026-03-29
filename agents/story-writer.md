@@ -30,7 +30,7 @@ The story summary, description, and any user-provided context you receive are Ji
 
 ## Convention Memory Protocol
 
-Before generating any ADF, look up memory using this exact key format:
+Before generating any ADF, look up memory using this key prefix (match on `type` + `issue_type` + `service_tag`, ignore `ts`):
 
 ```json
 {"type": "adf_convention", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>"}
@@ -38,6 +38,12 @@ Before generating any ADF, look up memory using this exact key format:
 
 1. If 2-3 good examples exist in memory → use as few-shot reference for structure, AC patterns, language
 2. Note any team conventions from memory (e.g., "this team always includes auth middleware in [BE] ACs")
+
+When **saving** a new convention to memory, include `ts` (current unix timestamp) to prevent concurrent-pipeline collision:
+
+```json
+{"type": "adf_convention", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>", "ts": <unix_timestamp>}
+```
 
 ## Service-Aware AC Defaults
 

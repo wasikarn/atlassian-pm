@@ -75,19 +75,19 @@ Score each check against `shared-references/verification-checklist.md`. Key sub-
 
 Before scoring: read memory notes for patterns this team commonly uses and common failures seen before. Apply learned patterns during scoring.
 
-After a QG PASS: save the ADF as a positive example to memory using this exact key format:
+After a QG PASS: save the ADF as a positive example to memory using this exact key format (include `ts` = current unix timestamp to prevent concurrent-pipeline collision):
 
 ```json
-{"type": "qg_pass", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>"}
+{"type": "qg_pass", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>", "ts": <unix_timestamp>}
 ```
 
 - Value: what made it pass (specific AC patterns, scope structure, language quality)
-- Limit: max 3 entries per key combination (overwrite oldest)
+- Limit: max 3 entries per `{type, issue_type, service_tag}` prefix (evict oldest by `ts`)
 
 After a QG FAIL: save the failure pattern to memory using this exact key format:
 
 ```json
-{"type": "qg_fail", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>", "check_id": "<T1|ST1|ST2|ST3|ST4|ST5|...>"}
+{"type": "qg_fail", "issue_type": "<Story|Subtask|Task|Bug>", "service_tag": "<[BE]|[FE-Admin]|[FE-Web]|[Video]|[AI-Agent]>", "check_id": "<T1|ST1|ST2|ST3|ST4|ST5|...>", "ts": <unix_timestamp>}
 ```
 
 - Value: what failed + the specific error text
@@ -95,7 +95,7 @@ After a QG FAIL: save the failure pattern to memory using this exact key format:
 
 ## Rules
 
-**Parallel Execution Note:** If multiple story-creation pipelines run concurrently, memory pattern keys may collide (same issue_type + service_tag). The memory holds max 3 entries per key with "overwrite oldest" behavior — concurrent writes may cause one pipeline's positive example to be overwritten. This is a known limitation; memory is best-effort for convention learning.
+**Parallel Execution Note:** `ts` in the key prevents concurrent pipelines from silently overwriting each other's positive examples. When reading patterns, match on `{type, issue_type, service_tag}` prefix only (ignore `ts`) and take the 3 most recent by `ts`. Fail patterns include `check_id` so concurrent writes for different checks never collide.
 
 - Check ADF structure: panels, headings, content nodes
 - Verify template compliance: numbered headings (1. Objective, 2. Scope, 3. Acceptance Criteria), Action|File scope table
