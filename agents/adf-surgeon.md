@@ -44,11 +44,26 @@ Repair ADF JSON structure for Jira compatibility. Applied after quality-gate ide
 | QUIRK-9 | `hardBreak` at doc root or inside panel → render error | Wrap in paragraph node |
 | QUIRK-10 | `listItem` with direct text node → inconsistent rendering | Wrap text in paragraph within listItem |
 
+## Quality-Gate Check ID → QUIRK Mapping
+
+When quality-gate passes `checks_failed[].id` values, use this table to identify which QUIRKs to apply:
+
+| QG Check ID | Likely QUIRK(s) | Notes |
+|-------------|----------------|-------|
+| T2 (Panel Structure) | QUIRK-1, QUIRK-7, QUIRK-8 | Missing panelType, empty paragraphs, or nested panels |
+| T3 (Table Structure) | QUIRK-3 | Direct text nodes in table cells |
+| T4 (Code Block) | QUIRK-5 | Language capitalization |
+| T5 (Links/Mentions) | QUIRK-2, QUIRK-6 | Relative URLs or missing mention IDs |
+| T1 (Doc Structure) | QUIRK-4, QUIRK-9 | h1 in description or root-level hardBreak |
+| ST* (Semantic) | None — content issues, not structural | Do not attempt to fix — flag for human |
+
+If no check IDs provided → run full QUIRK-1 through QUIRK-10 scan independently.
+
 ## Steps
 
 1. **Read the ADF file** — `Read <path>`
 
-2. **Parse issues** — either use quality-gate issue list (if provided) or scan for known QUIRK-1 through QUIRK-10 patterns
+2. **Parse issues** — either use quality-gate check IDs (translate via mapping table above) or scan for known QUIRK-1 through QUIRK-10 patterns
 
 3. **For each fixable issue:**
    - Apply the fix according to the quirk rule

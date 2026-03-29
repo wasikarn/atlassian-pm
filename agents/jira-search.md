@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: low
-tools: mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_search, mcp__atlassian-cache__cache_text_search, mcp__atlassian-cache__cache_similar_issues
+tools: mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__atlassian-cache__cache_text_search, mcp__atlassian-cache__cache_similar_issues
 permissionMode: dontAsk
 maxTurns: 6
 color: cyan
@@ -52,6 +52,7 @@ Run the original query AND 1-2 expanded variants. Merge results, dedup by key.
 - Always include `fields` param (e.g. `summary,status,issuetype,labels,parent`)
 - Always include `limit` param (max 20 — filter to top 5 after scoring)
 - HR2: NEVER add ORDER BY to JQL with `parent =` or `parent in`
+- **Pagination warning:** If result count equals the `limit` value (e.g., exactly 20 results), more may exist. Add a note: "⚠️ Result set may be truncated — consider narrowing search scope or increasing limit." Never silently report "no duplicates" when the result set is at the limit boundary.
 
 ## Duplicate Confidence Scoring
 

@@ -144,26 +144,30 @@ Score 4 dimensions (each 0-25 points):
 **Delivery Health (25 pts):**
 
 - velocity ≥ 90% planned: 25 pts
-- 75-89%: 15 pts
-- 60-74%: 8 pts
+- 80-89%: 20 pts
+- 70-79%: 13 pts
+- 60-69%: 8 pts
 - < 60%: 0 pts
 
 **Process Health (25 pts):**
 
 - carry-over ≤ 15%: 25 pts
-- 15-25%: 15 pts
-- > 25%: 5 pts
+- 15-20%: 18 pts
+- 20-30%: 10 pts
+- > 30%: 5 pts
 
 **Quality Health (25 pts):**
 
 - QA rejection ≤ 20%: 25 pts
-- 20-35%: 15 pts
+- 20-28%: 18 pts
+- 28-35%: 10 pts
 - > 35%: 5 pts
 
 **Flow Health (25 pts):**
 
 - avg cycle time ≤ 4 days: 25 pts
-- 4-6 days: 15 pts
+- 4-5 days: 18 pts
+- 5-6 days: 10 pts
 - > 6 days: 5 pts
 
 Total score: 0-100. 90+: Healthy | 70-89: Stable | 50-69: Needs Attention | <50: At Risk
@@ -297,9 +301,10 @@ If user confirms:
 
 ```text
 Agent(name: "team-pattern-advisor"): {
-  sprints: [list of sprint IDs analyzed],
+  board_id: <board_id from project-config.json>,
+  n_sprints: <number of closed sprints available>,
   focus: "full" | "bottlenecks" | "estimation" | "qa" | "velocity",
-  note: "Dispatch after retrospective is complete — team-pattern-advisor reads multi-sprint data independently"
+  retro_summary: "<optional: 2-3 sentence summary of current sprint retro — reduces redundant MCP calls>"
 }
 ```
 

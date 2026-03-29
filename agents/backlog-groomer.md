@@ -65,10 +65,12 @@ Do not proceed to WSJF scoring.
 ```text
 WSJF = (Business Value + Time Criticality + Risk Reduction) / Job Size
 
-BV (1-10): P1 epic=9, P2=7, P3=5; vs1=+1, vs2=+2, vs-enabler=+1; payment/revenue/security=+2; chore/tech-debt=-2
+BV (1-10): P1 epic=9, P2=7, P3=5; vs1=+1, vs2=+2, vs-enabler=+1; payment/revenue/security=+2; chore/tech-debt=-2; cap BV at 10 after all bonuses/penalties; floor BV at 1
 TC (1-10): sprint label match=8; in sprint goal=9; no signal=5
 RR (1-10): "blocker" label or blocking links=9; dependency links=7; no signals=3
 JS (1-10): XS/1SP=1, S/2SP=2, M/3SP=4, L/5SP=6, XL/8SP=8, XXL/13+SP=10; no estimate → skip
+
+**Clamping rule:** All component scores (BV, TC, RR) must be clamped to [1, 10] after calculation. JS must be clamped to [1, 10]. Never allow a component to exceed its stated range before computing WSJF.
 
 Round to 1 decimal. Higher = pull first.
 ```
@@ -83,11 +85,11 @@ Round to 1 decimal. Higher = pull first.
 
 **Note:** If all stories in scope share the same epic, BV signals are nearly identical — WSJF ranking within a single epic is less meaningful. Flag this condition: "⚠️ All items from same epic — WSJF ranking reflects TC and RR differences only."
 
-1. **Value Density** — `value_density = Business Value / Job Size`. Flag stories where value_density < 0.5 as "high effort, low value".
+1. **Step 2 — Value Density** — `value_density = Business Value / Job Size`. Flag stories where value_density < 0.5 as "high effort, low value".
 
-1. **Aging Alert** — check `created` field. If a story has been in backlog (To Do/Backlog status) for more than 21 days AND still missing SP estimate or AC → flag as "aging".
+1. **Step 3 — Aging Alert** — check `created` field. If a story has been in backlog (To Do/Backlog status) for more than 21 days AND still missing SP estimate or AC → flag as "aging".
 
-1. **Group results and output grooming report**
+1. **Step 4 — Group results and output grooming report**
 
 ## Rules
 
@@ -98,6 +100,8 @@ Round to 1 decimal. Higher = pull first.
 - SP check: `customfield_10016` must be numeric and > 0
 - Max 30 stories per run — paginate if needed with `start_at`
 - WSJF: only score Sprint-Ready stories (failed readiness = can't plan yet)
+- **Rate limit:** Jira Cloud allows ~100 req/min. When fetching >20 issues, use `cache_search` batching — avoid N individual `jira_get_issue` calls
+- **Status names:** Read `board.columns[].statuses` from `.claude/project-config.json` for "Backlog", "In Progress", "Done" equivalents — do not hardcode
 
 ## Output Format
 

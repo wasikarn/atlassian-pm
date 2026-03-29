@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
+tools: Read, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 15
 color: red
@@ -30,6 +30,10 @@ Receive from skill:
 
 - `sprint_id`: ID of the sprint being closed
 - `move_plan`: array of `{issue_key, destination: "next_sprint"|"backlog", next_sprint_id?}`
+
+## Pre-processing: Load Sprint Field ID
+
+Read `.claude/project-config.json` → extract `jira.custom_fields.sprint` as `sprint_field_id`. Use this variable in all `jira_update_issue` calls instead of the hardcoded string. If config is missing → default to `{{SPRINT_FIELD}}` and note in output.
 
 ## Pre-processing: Sort Move Plan
 
@@ -62,19 +66,19 @@ For each item in move_plan:
 2. **Move to next sprint** (destination = "next_sprint"):
 
    ```
-   jira_update_issue(issue_key, additional_fields: {{{SPRINT_FIELD}}: {id: next_sprint_id}})
-   # {{SPRINT_FIELD}} = sprint field (from project-config.json → jira.custom_fields.sprint)
+   jira_update_issue(issue_key, additional_fields: {<sprint_field_id>: {id: next_sprint_id}})
+   # sprint_field_id loaded from project-config.json → jira.custom_fields.sprint
    ```
 
 3. **Move to backlog** (destination = "backlog"):
 
    ```
-   jira_update_issue(issue_key, additional_fields: {{{SPRINT_FIELD}}: null})
+   jira_update_issue(issue_key, additional_fields: {<sprint_field_id>: null})
    ```
 
 4. **Verify** each move via `jira_get_issue(key, fields="{{SPRINT_FIELD}},status")`:
-   - next_sprint: confirm `{{SPRINT_FIELD}}.id == next_sprint_id`
-   - backlog: confirm `{{SPRINT_FIELD}}` is null
+   - next_sprint: confirm `<sprint_field_id>.id == next_sprint_id`
+   - backlog: confirm `<sprint_field_id>` is null
    - On verify fail: add to `failed[]`, continue
 
 5. **HR6 invalidate**: `cache_invalidate(issue_key)` for every successfully moved issue

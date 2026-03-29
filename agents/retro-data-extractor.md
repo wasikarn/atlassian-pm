@@ -129,12 +129,14 @@ Write to `{artifacts_dir}/retro-metrics-{sprint_id}.json`:
 - If sprint not found → output `{"error": "Sprint {id} not found"}` and exit
 - Max 12 turns — fetch efficiently, don't over-paginate
 - HR2: NEVER add ORDER BY to `parent =` JQL
+- **Rate limit:** Jira Cloud allows ~100 requests/min per user. When fetching changelogs for >15 issues, batch via `jira_batch_get_changelogs` (up to 20 per call) rather than individual `jira_get_issue` calls
+- **Status names:** Read `board.columns[].statuses` from `.claude/project-config.json` for project-specific status names — do not hardcode "In Progress", "Done", "To Do"
 
 ## Output
 
 After successfully writing `retro-metrics-{sprint_id}.json`:
 
 - Print to stdout: `RETRO_EXTRACT_DONE: {path}` (so consumers can detect completion)
-- The retrospective-analyst checks for file age < 4 hours — ensure this file is written atomically (write to temp file, then rename) to avoid partial-read race conditions
+- The retrospective-analyst checks for file age < 4 hours — write the file in a single `Write` tool call (the tool overwrites atomically from the caller's perspective)
 
 If error → print `RETRO_EXTRACT_ERROR: {message}`.

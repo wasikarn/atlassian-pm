@@ -11,7 +11,7 @@ description: |
   </commentary>
   </example>
 model: haiku
-effort: low
+effort: medium
 tools: mcp__atlassian-cache__cache_similar_issues, mcp__atlassian-cache__cache_search, Read, Bash
 permissionMode: dontAsk
 maxTurns: 8
@@ -91,6 +91,11 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
    - **Drift adjustment**: if `assignee_carry_over_rate` > 50% (≥5 records) → add +1 SP regardless of other signals (this person consistently underestimates); flag in output as "assignee drift detected"
    - **Service area adjustment**: if `service_tag_carry_over_rate` > 40% (≥5 records) → add +1 SP; flag as "service area pattern"
    - Never exceed +2 SP total from drift/area adjustments combined
+   - **Adjustment precedence** (apply in order, each step may override the previous cap):
+     1. Complexity adjustments apply first (auth/scope/new-domain/simpler signals)
+     2. Drift + service area adjustments apply after, capped at +2 SP combined
+     3. Velocity adjustment (% reduction) applies last as a multiplier on the adjusted estimate
+     4. Final result is capped at +/-3 SP from the initial estimate — if pattern suggests a larger gap, flag it but do not exceed the cap
 
 ## Output Format
 
@@ -201,7 +206,7 @@ Before using search results for calibration:
 - Prefix uncertain/estimated values with `~` — do not present estimates as measurements
 - If fewer than 2 comparables found → return LOW confidence estimate with explanation (see example above)
 - Fallback to keyword search if semantic search unavailable
-- Do not recommend estimates more than ±2 SP from initial (flag if pattern suggests bigger gap)
+- Final estimate is capped at ±3 SP from the initial estimate (see Adjustment precedence in Step 6). Flag in output if raw calibration would exceed this: "⚠️ Pattern suggests larger gap — capped at ±3 SP from initial; review manually."
 
 ## 🎓 Domain Expert Notes
 

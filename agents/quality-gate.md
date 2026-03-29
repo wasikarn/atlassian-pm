@@ -168,7 +168,8 @@ Field rules:
 - `checks_failed`: empty array `[]` when status is PASS
 - `status`: `"PASS"` if score ≥ 90, `"FAIL"` otherwise
 
-If FAIL and `auto_fixable: true` → apply fixes inline → re-score → return with `attempt: 2`.
+If FAIL and `auto_fixable: true` → describe the corrected ADF structure in `checks_failed[].fix` → re-score mentally against the corrected version → return with `attempt: 2` and updated score.
+**Note:** This agent has no Write tool — "auto-fix" means the fix instructions are embedded in the JSON output. The caller (skill or adf-surgeon) applies the actual file write.
 Max 1 auto-fix cycle. If still FAIL after attempt 2, return final result with `auto_fixable: false`.
 
 ## Memory

@@ -117,3 +117,13 @@ If generated ADF does not pass QG (score < 90%):
    `QG_FAILED: score=XX% — [list of remaining issues]`
    followed by the best-attempt ADF JSON
    (caller decides whether to escalate to user or accept partial)
+
+## Output Format
+
+Return raw ADF JSON written to `{output_path}` via `Write` tool. After writing, print one line to conversation:
+
+```text
+ADF_WRITTEN: {output_path} | QG: {score}% | {PASS|FAIL}
+```
+
+Do not wrap the ADF in any additional envelope — the caller reads the file directly.

@@ -175,6 +175,8 @@ Generated: [date]
 - Name specific people and issue types — never generic "the team should improve X"
 - Recommendations must be SMART (Specific, Measurable, Assignable, Realistic, Time-bound)
 - If velocity data unavailable → note "velocity-tracker has not been run — run /atlassian-pm:velocity-tracker first for richer analysis"
+- **Rate limit:** Fetching changelogs across 6 sprints × 20 stories = ~120 issues. Use `jira_batch_get_changelogs` (20 per call = ~6 batch calls). If total issues > 60, limit to last 3 sprints and note "rate-limit-safe mode"
+- **Status names:** Read `board.columns[].statuses` from `.claude/project-config.json` — do not hardcode status strings
 **Minimum Data Requirements:**
 
 - 3+ sprints: Full analysis across all 6 dimensions

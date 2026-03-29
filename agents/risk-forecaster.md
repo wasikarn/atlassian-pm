@@ -63,6 +63,7 @@ base_score = 50
 +15 if carry-over items > 3
 +10 if sprint_risk_multiplier < 0.80 (from sprint-planner calculation)
 −20 if all members < 75% utilization
+→ clamp: capacity_score = min(100, max(0, capacity_score))
 ```
 
 ### Complexity Risk (0-100, weight 25%)
@@ -75,6 +76,7 @@ base_score = 30
 +15 if sprint contains items spanning 3+ services
 +15 if carry_over_rate[issuetype] > 40% for any issuetype in this sprint (from story-outcomes.jsonl — historical pattern for this issue type)
 −15 if all items are P1 or P3 (clear scope, manageable size)
+→ clamp: complexity_score = min(100, max(0, complexity_score))
 ```
 
 > When a historical carry-over signal fires, name the issuetype and rate in Specific Risks output: e.g. "Story carry-over rate: 52% (11/21 historical stories) — this sprint has 4 Stories".
@@ -88,6 +90,7 @@ base_score = 20
 +15 if carry-over items block new items
 +10 if any item has external dependency (third-party API, infra change)
 −20 if all items are independent (no cross-service dependencies)
+→ clamp: dependency_score = min(100, max(0, dependency_score))
 ```
 
 **External Dependency Sub-score (within Dependency Risk):**
@@ -108,6 +111,7 @@ base_score = 30
 +15 if carry_over_rate[assignee] > 50% for any assignee in this sprint (from story-outcomes.jsonl — this person carries over more than half their stories historically)
 +10 if team has new member working in unfamiliar service area
 −20 if critical items have backup assignee with adequate skill
+→ clamp: team_score = min(100, max(0, team_score))
 ```
 
 > When a historical assignee carry-over signal fires, name the person and rate in Specific Risks: e.g. "K.Peeraya carry-over rate: 58% (7/12 stories) — assigned 3 stories this sprint".

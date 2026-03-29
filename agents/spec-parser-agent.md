@@ -112,7 +112,7 @@ Flag requirement pairs that appear to contradict each other:
 **Deduplication:**
 If two requirements share >70% word overlap → merge into one, note "(merged from N occurrences)".
 
-**Thai Deduplication Note:** Thai text has no spaces between words. The 70% word-overlap threshold applies to character n-gram overlap for Thai text (not word tokens). For Thai requirements, use character-level similarity: if two requirements share >70% of their characters in the same order → consider them duplicates. When requirements contain mixed Thai/English, split comparison: check Thai portions with character similarity, English portions with word similarity.
+**Thai Deduplication Note:** Thai text has no spaces between words — word-token overlap is unreliable. For Thai requirements, judge similarity holistically: if two requirements describe the same user need or constraint, even in different phrasing, flag them as duplicates. For mixed Thai/English requirements, check the English portions with word overlap and the Thai portions by semantic meaning. Err on the side of flagging (user can review) rather than missing a duplicate.
 
 **Coverage Gap Detection:**
 If a section heading exists but contains zero extracted requirements → flag as `"empty_sections": ["Section Name"]`.

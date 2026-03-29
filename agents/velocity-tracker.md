@@ -42,8 +42,8 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
    - Per-sprint planned SP (all items entering sprint)
    - Completion ratio: `completed_sp / planned_sp` per sprint
    - Rolling average: `avg_velocity = sum(completed_sp) / N`
-   - Standard deviation: `std_dev = sqrt(sum((sp_i - avg)^2) / N)`
-   - Trend: linear regression slope → "improving" (slope > 0.5), "declining" (slope < -0.5), "stable"
+   - Standard deviation: `std_dev = sqrt(sum((sp_i - avg)^2) / (N-1))` ← Bessel's correction (sample, not population); use N for N=1 edge case
+   - Trend: linear regression slope, normalized → `slope_pct = (slope / avg_velocity) * 100` → "improving" (slope_pct > 5%), "declining" (slope_pct < -5%), "stable"
 
 5. **Anomaly detection** — for each sprint where `|completed_sp - avg_velocity| > 1.5 * std_dev`:
    - Flag as anomaly with direction: "spike" (above avg) or "dip" (below avg)
