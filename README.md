@@ -511,14 +511,14 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 35 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
+skills/                        ← 38 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
-├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release
+├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release, epic-health
 ├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
-├── task/                      ← create-task, create-testplan, bug-triage, assign-issue, update-subtask, update-task, start-ticket, ship-to-qa
-├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint
+├── task/                      ← create-task, create-testplan, execute-testplan, bug-triage, assign-issue, update-subtask, update-task, start-ticket, ship-to-qa
+├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint, retro-actions
 ├── confluence/                ← create-doc, update-doc
-└── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts
+└── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts, status
 
 references/                    ← Docs loaded by skills on-demand (24 files)
 ├── templates.md               ← ADF templates (Epic, Story, Sub-task, Task)

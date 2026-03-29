@@ -19,6 +19,8 @@ Core config (jira fields, team roster, services, environments): @.claude/project
 Team detail (git evidence, capacity model, bus factor — load on-demand for release forecasting): `.claude/project-config-team-detail.json` _(gitignored — create from `.claude/project-config-team-detail.json.template`)_
 
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
+
+> **Config-first rule:** ALL project-specific values (project key, board ID, space key, team, services) live in `project-config.json` **only**. Never hardcode these values in skill files, agents, or hooks. Skill examples use `<project_key>` / `<space_key>` as placeholders — the actual values come from config at runtime. To switch projects or reconfigure, edit `project-config.json` — not the plugin.
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
 **Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge, commits, tags, pushes, creates GitHub release, updates plugin + copies config in one step
@@ -35,6 +37,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 
 | Category | Quick Fix |
 | --- | --- |
+| Hardcoding project/space key in skill files | WRONG — edit `.claude/project-config.json` instead; skills use `<project_key>`/`<space_key>` placeholders |
 | Set parent on existing issue | MCP/acli silently fail → use `jira_set_parent.py --issues KEY --parent EPIC` |
 | Sibling tool call errored | One parallel MCP call failed → all cancelled. Fix failing call first |
 | Mermaid / Confluence issues | See `mermaid-guide.md` + `.claude/rules/mermaid.md` + `troubleshooting.md` |
@@ -105,8 +108,6 @@ Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to s
 **Agent invocation inside skills:** When a skill phase says `Agent(name: "quality-gate")` or similar, invoke it via the Agent tool with `subagent_type: "atlassian-pm:<name>"`. Mapping: `quality-gate` → `atlassian-pm:quality-gate`, `issue-bootstrap` → `atlassian-pm:issue-bootstrap`, `story-writer` → `atlassian-pm:story-writer`, etc.
 
 **Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Full list with models, tiers, and usage context: [references/agents.md](references/agents.md)
-
-Run `/optimize-context` when CLAUDE.md feels outdated or context exceeds 15 KB.
 
 ## Efficiency
 
