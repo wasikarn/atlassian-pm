@@ -85,7 +85,6 @@ After QG scoring, run alignment verification:
 ```text
 Agent(name: "alignment-checker"): {
   story_key: "[STORY-KEY]",
-  include_checks: ["A1", "A2", "A3", "A4", "A5", "A6"],
   mode: "--fix" if --fix flag provided else "read-only"
 }
 ```

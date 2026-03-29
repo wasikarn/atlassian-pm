@@ -111,7 +111,7 @@ If user confirms:
 
 ```text
 Agent(name: "backlog-groomer"): {
-  scope: "{{PROJECT_KEY}} backlog",
+  jql: "project = {{PROJECT_KEY}} AND status in ('To Do', 'Backlog') AND issuetype = Story ORDER BY created DESC",
   note: "Run before sprint planning to identify issues not ready for sprint commitment"
 }
 ```
