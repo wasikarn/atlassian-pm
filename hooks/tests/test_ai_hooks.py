@@ -17,22 +17,22 @@ from plugin.ai.path_quality import extract_paths, rate_paths
 class TestIntentDetect(unittest.TestCase):
 
     def test_detects_bug_creation_thai(self):
-        with patch("plugin.ai.intent_detect.claude_call", return_value='{"intent": "bug"}'):
+        with patch("plugin.ai.intent_detect.claude_call_json", return_value={"intent": "bug"}):
             result = classify_intent("มีบัคใน login ต้องสร้าง ticket")
         self.assertEqual(result, "bug")
 
     def test_detects_story_creation_english(self):
-        with patch("plugin.ai.intent_detect.claude_call", return_value='{"intent": "story"}'):
+        with patch("plugin.ai.intent_detect.claude_call_json", return_value={"intent": "story"}):
             result = classify_intent("I need a user story for the checkout flow")
         self.assertEqual(result, "story")
 
     def test_returns_none_when_claude_unavailable(self):
-        with patch("plugin.ai.intent_detect.claude_call", return_value=None):
+        with patch("plugin.ai.intent_detect.claude_call_json", return_value=None):
             result = classify_intent("create a bug")
         self.assertIsNone(result)
 
     def test_returns_none_for_unrelated_prompt(self):
-        with patch("plugin.ai.intent_detect.claude_call", return_value='{"intent": "none"}'):
+        with patch("plugin.ai.intent_detect.claude_call_json", return_value={"intent": "none"}):
             result = classify_intent("what is the weather today")
         self.assertIsNone(result)
 
@@ -46,13 +46,13 @@ class TestIntentDetect(unittest.TestCase):
 class TestAcCoverage(unittest.TestCase):
 
     def test_returns_score_when_claude_responds(self):
-        with patch("plugin.ai.ac_coverage.claude_call", return_value='{"score": 72}'):
+        with patch("plugin.ai.ac_coverage.claude_call_json", return_value={"score": 72}):
             score = check_coverage(["AC1: user can login", "AC2: user can logout"],
                                    ["subtask: implement login", "subtask: implement logout"])
         self.assertEqual(score, 72)
 
     def test_returns_none_when_claude_unavailable(self):
-        with patch("plugin.ai.ac_coverage.claude_call", return_value=None):
+        with patch("plugin.ai.ac_coverage.claude_call_json", return_value=None):
             score = check_coverage(["AC1"], ["subtask1"])
         self.assertIsNone(score)
 
@@ -61,12 +61,12 @@ class TestAcCoverage(unittest.TestCase):
         self.assertIsNone(score)
 
     def test_clamps_score_0_100(self):
-        with patch("plugin.ai.ac_coverage.claude_call", return_value='{"score": 150}'):
+        with patch("plugin.ai.ac_coverage.claude_call_json", return_value={"score": 150}):
             score = check_coverage(["AC1"], ["subtask1"])
         self.assertEqual(score, 100)
 
     def test_returns_none_on_malformed_json(self):
-        with patch("plugin.ai.ac_coverage.claude_call", return_value="not json"):
+        with patch("plugin.ai.ac_coverage.claude_call_json", return_value=None):
             score = check_coverage(["AC1"], ["subtask1"])
         self.assertIsNone(score)
 
@@ -96,12 +96,12 @@ class TestPathQuality(unittest.TestCase):
         self.assertIn("lib/utils.ts", paths)
 
     def test_returns_poor_rating(self):
-        with patch("plugin.ai.path_quality.claude_call", return_value='{"rating": "poor"}'):
+        with patch("plugin.ai.path_quality.claude_call_json", return_value={"rating": "poor"}):
             rating = rate_paths(["src/", "lib/", "utils/"])
         self.assertEqual(rating, "poor")
 
     def test_returns_none_when_claude_unavailable(self):
-        with patch("plugin.ai.path_quality.claude_call", return_value=None):
+        with patch("plugin.ai.path_quality.claude_call_json", return_value=None):
             rating = rate_paths(["src/"])
         self.assertIsNone(rating)
 

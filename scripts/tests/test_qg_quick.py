@@ -92,44 +92,44 @@ class TestRunQuickCheck(unittest.TestCase):
 
     def test_strong_adf_may_skip_full_agent(self):
         # With claude unavailable (returns None), score based on structure only
-        with patch("ai.qg_quick.run_claude", return_value=None):
+        with patch("ai.qg_quick.run_claude_json", return_value=None):
             result = run_quick_check(_VALID_ADF, "story")
         self.assertTrue(result["quick_pass"])
         self.assertEqual(result["structural_issues"], [])
         self.assertGreaterEqual(result["score_estimate"], 70)
 
     def test_missing_panel_type_fails_quick(self):
-        with patch("ai.qg_quick.run_claude", return_value=None):
+        with patch("ai.qg_quick.run_claude_json", return_value=None):
             result = run_quick_check(_ADF_MISSING_PANEL_TYPE, "story")
         self.assertFalse(result["quick_pass"])
         self.assertGreater(len(result["structural_issues"]), 0)
 
     def test_content_check_reduces_score(self):
-        ai_response = json.dumps({
+        ai_response = {
             "ac_ok": False,
             "language_ok": True,
             "background_ok": True,
             "ac_issues": ["AC2 uses generic 'call API' — must name specific endpoint"],
             "language_issues": []
-        })
-        with patch("ai.qg_quick.run_claude", return_value=ai_response):
+        }
+        with patch("ai.qg_quick.run_claude_json", return_value=ai_response):
             result = run_quick_check(_VALID_ADF, "story")
         self.assertGreater(len(result["content_issues"]), 0)
         self.assertLess(result["score_estimate"], 100)
 
     def test_skip_full_agent_only_when_perfect(self):
-        ai_response = json.dumps({
+        ai_response = {
             "ac_ok": True, "language_ok": True, "background_ok": True,
             "ac_issues": [], "language_issues": []
-        })
-        with patch("ai.qg_quick.run_claude", return_value=ai_response):
+        }
+        with patch("ai.qg_quick.run_claude_json", return_value=ai_response):
             result = run_quick_check(_VALID_ADF, "story")
         self.assertTrue(result["skip_full_agent"])
         self.assertEqual(result["score_estimate"], 100)
 
     def test_ai_unavailable_is_non_blocking(self):
         """If claude unavailable, structural check still works."""
-        with patch("ai.qg_quick.run_claude", return_value=None):
+        with patch("ai.qg_quick.run_claude_json", return_value=None):
             result = run_quick_check(_VALID_ADF, "story")
         self.assertIsNotNone(result)
         self.assertIn("score_estimate", result)
