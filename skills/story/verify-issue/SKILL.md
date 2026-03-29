@@ -1,6 +1,5 @@
 ---
 name: verify-issue
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 model: sonnet

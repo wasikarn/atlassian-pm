@@ -1,6 +1,5 @@
 ---
 name: update-doc
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [mcp-confluence]
@@ -168,22 +167,21 @@ confluence_update_page(
 )
 ```
 
-**⚠️ IMPORTANT: Fix Code Blocks (mandatory if content has code blocks)**
+**⚠️ IMPORTANT: Fix Code Blocks (mandatory after every content update)**
 
-MCP markdown → Confluence will render code blocks as `<pre class="highlight">` which is incorrect.
-**You must run the fix script immediately after every create/update:**
+MCP `confluence_update_page` always renders code blocks as `<pre class="highlight">` which is incorrect.
+**Run the fix script immediately after every update — no exceptions:**
 
 ```bash
-python3 .claude/skills/scripts/api/fix_confluence_code_blocks.py \
-  --page-id [page_id]
+uv run scripts/api/fix_confluence_code_blocks.py --page-id [page_id]
 ```
 
-The script will automatically convert `<pre class="highlight">` → `<ac:structured-macro ac:name="code">`.
+The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name="code">`. Run from project root.
 
 **Option B: Find & replace**
 
 ```bash
-python3 .claude/skills/scripts/api/update_confluence_page.py \
+uv run scripts/api/update_confluence_page.py \
   --page-id [page_id] \
   --find "[old text]" \
   --replace "[new text]"
@@ -192,7 +190,7 @@ python3 .claude/skills/scripts/api/update_confluence_page.py \
 **Option C: Move page**
 
 ```bash
-python3 .claude/skills/scripts/api/move_confluence_page.py \
+uv run scripts/api/move_confluence_page.py \
   --page-id [page_id] \
   --parent-id [target_parent_id]
 ```
@@ -200,7 +198,7 @@ python3 .claude/skills/scripts/api/move_confluence_page.py \
 Batch move:
 
 ```bash
-python3 .claude/skills/scripts/api/move_confluence_page.py \
+uv run scripts/api/move_confluence_page.py \
   --page-ids [page_id1],[page_id2],[page_id3] \
   --parent-id [target_parent_id]
 ```
@@ -338,7 +336,7 @@ The mandatory Phase 2 (Fetch Current) before any write enforces the core evergre
 
 - Space: `{{PROJECT_KEY}}`
 - MCP Tool: `confluence_update_page`, `confluence_get_page`
-- Scripts: `.claude/skills/scripts/api/`
+- Scripts: `scripts/api/` (run with `uv run scripts/api/<script>.py` from project root)
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Error Handling](references/error-handling.md)
 - [Examples](references/examples.md)

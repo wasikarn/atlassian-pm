@@ -1,6 +1,5 @@
 ---
 name: execute-testplan
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [mcp-atlassian, playwright]

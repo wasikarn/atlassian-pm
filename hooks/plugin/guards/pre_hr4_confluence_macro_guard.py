@@ -49,7 +49,8 @@ def main() -> None:
             reason = (
                 f"HR4 BLOCKED: Confluence macro detected in MCP update for page {page_id}.\n"
                 f"MCP HTML-escapes macros → page renders raw XML.\n"
-                f"Use: python3 .claude/scripts/api/update_page_storage.py instead."
+                f"Fix: uv run scripts/api/update_page_storage.py --page-id {page_id} --content-file <file>\n"
+                f"     Run from project root (where scripts/ directory lives)."
             )
             block(reason)
             return

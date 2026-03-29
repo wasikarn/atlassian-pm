@@ -1,6 +1,5 @@
 ---
 name: create-epic
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 model: sonnet

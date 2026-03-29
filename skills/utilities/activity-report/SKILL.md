@@ -1,6 +1,5 @@
 ---
 name: activity-report
-disable-model-invocation: true
 context: fork
 agent: Explore
 model: haiku

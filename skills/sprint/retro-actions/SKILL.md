@@ -1,6 +1,5 @@
 ---
 name: retro-actions
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 effort: medium

@@ -1,6 +1,5 @@
 ---
 name: plan-release
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]

@@ -1,6 +1,5 @@
 ---
 name: epic-health
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 effort: medium

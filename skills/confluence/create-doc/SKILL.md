@@ -1,6 +1,5 @@
 ---
 name: create-doc
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 x-compatibility: [mcp-atlassian, mcp-confluence]
@@ -120,17 +119,16 @@ confluence_create_page(
 )
 ```
 
-**⚠️ IMPORTANT: Fix Code Blocks (mandatory if content has code blocks)**
+**⚠️ IMPORTANT: Fix Code Blocks (mandatory after every create)**
 
-MCP markdown → Confluence will render code blocks as `<pre class="highlight">` which is incorrect.
-**You must run the fix script immediately after every create/update:**
+MCP `confluence_create_page` always renders code blocks as `<pre class="highlight">` which is incorrect.
+**Run the fix script immediately after every create — no exceptions:**
 
 ```bash
-python3 .claude/skills/scripts/api/fix_confluence_code_blocks.py \
-  --page-id [created_page_id]
+uv run scripts/api/fix_confluence_code_blocks.py --page-id [created_page_id]
 ```
 
-The script will automatically convert `<pre class="highlight">` → `<ac:structured-macro ac:name="code">`.
+The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name="code">`. Run from project root.
 
 **Output:**
 
@@ -171,7 +169,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 /create-doc                             # no args — causes full interactive discovery flow
 /create-doc tech-spec "{{PROJECT_KEY}}-42 notes"   # wrong skill — Jira issue descriptions use /create-story or /create-task
 /create-doc adr "Cache Strategy"       # valid creation, but forgetting to run fix_confluence_code_blocks.py
-                                        # after if the ADR body contains code blocks (HR4 violation)
+                                        # after create — always mandatory, not optional (HR4)
 ```
 
 **Common mistakes:**
@@ -179,7 +177,7 @@ The script will automatically convert `<pre class="highlight">` → `<ac:structu
 - Omitting the template type forces a multi-step interactive prompt that wastes time — always specify `tech-spec`, `adr`, or `parent` upfront
 - Using `/create-doc` for Jira issue descriptions — this skill creates Confluence pages only; use `/create-story` or `/create-task` for Jira
 - Creating a `tech-spec` without linking it back to the related Jira epic/story via `jira_create_remote_issue_link`
-- Skipping `fix_confluence_code_blocks.py` after creation when the page contains code blocks — MCP renders them as `<pre class="highlight">` (broken), not the proper Confluence code macro
+- Skipping `fix_confluence_code_blocks.py` after creation — MCP always renders code blocks as `<pre class="highlight">` (broken); run `uv run scripts/api/fix_confluence_code_blocks.py --page-id [id]` after every create
 
 ---
 
@@ -236,7 +234,7 @@ The 3-template system (tech-spec / adr / parent) directly maps to the Diátaxis/
 
 - Space: `{{PROJECT_KEY}}`
 - MCP Tool: `confluence_create_page`
-- Scripts: `.claude/skills/scripts/api/`
+- Scripts: `scripts/api/` (run with `uv run scripts/api/<script>.py` from project root)
 - [Tech Note Template](../../../references/templates-technote.md) - Tech Note best practices
 - [Templates](references/templates.md)
 - [Examples](references/examples.md)

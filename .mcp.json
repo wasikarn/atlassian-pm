@@ -1,3 +1,16 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "atlassian-cache": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache",
+        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts"
+      }
+    }
+  }
 }

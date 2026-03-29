@@ -1,6 +1,5 @@
 ---
 name: flow-check
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 model: haiku
