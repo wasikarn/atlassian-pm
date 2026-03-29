@@ -47,7 +47,7 @@ def test_is_done_transition_substring_not_matched():
 
 def test_build_replenish_instruction_contains_required_parts():
     from plugin.session.post_done_flow_check import build_replenish_instruction
-    msg = build_replenish_instruction("BEP-42")
-    assert "BEP-42" in msg
+    msg = build_replenish_instruction("TP-42")
+    assert "TP-42" in msg
     assert "/flow-check" in msg
     assert "--replenish" in msg

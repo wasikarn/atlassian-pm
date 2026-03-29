@@ -62,7 +62,7 @@ Epic (Jira)
 
 ### 1. Identify Origin
 
-- Receive input: `BEP-XXX` (Jira key) or Confluence page ID
+- Receive input: `{{PROJECT_KEY}}-XXX` (Jira key) or Confluence page ID
 - `MCP: jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
 - Determine artifact type: Epic / Story / Sub-task
 - If Confluence page ID → `MCP: confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
@@ -83,7 +83,7 @@ Discovery algorithm:
    - per story: jira_search("parent = STORY_KEY", fields="summary,status,assignee,issuetype") → sub-tasks
    ⚠️ NEVER add ORDER BY to parent queries — causes JQL parse error
 4. Walk SIDEWAYS (Jira → Confluence):
-   - per story: confluence_search("BEP-XXX") → Tech Note
+   - per story: confluence_search("{{PROJECT_KEY}}-XXX") → Tech Note
    - epic: confluence_search(epic_title) → Epic Doc
 ```
 
@@ -179,7 +179,7 @@ Verify with `audit_confluence_pages.py --config {{artifacts_dir}}/sync-audit.jso
 
 Output: Summary table (Artifact, Action, Status) + flagged items for review.
 
-Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue BEP-XXX --with-subtasks`
+Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
 
 ---
 

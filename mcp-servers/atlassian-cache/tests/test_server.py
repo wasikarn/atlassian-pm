@@ -80,9 +80,9 @@ def mock_jira_api():
 
 class TestFormatIssueSummary:
     def test_basic(self):
-        issue = make_issue(key="BEP-1", summary="Test", status="Done", assignee="Alice", issue_type="Bug")
+        issue = make_issue(key="TP-1", summary="Test", status="Done", assignee="Alice", issue_type="Bug")
         result = _format_issue_summary(issue)
-        assert "[BEP-1]" in result
+        assert "[TP-1]" in result
         assert "Test" in result
         assert "Done" in result
         assert "Alice" in result
@@ -117,17 +117,17 @@ class TestFormatIssueSummary:
 
 class TestCompactIssue:
     def test_basic(self):
-        issue = make_issue(key="BEP-1", summary="Test", status="Done", assignee="Alice")
+        issue = make_issue(key="TP-1", summary="Test", status="Done", assignee="Alice")
         compact = _compact_issue(issue)
-        assert compact["key"] == "BEP-1"
+        assert compact["key"] == "TP-1"
         assert compact["summary"] == "Test"
         assert compact["status"] == "Done"
         assert compact["assignee"] == "Alice"
 
     def test_with_parent(self):
-        issue = make_issue(parent_key="BEP-100")
+        issue = make_issue(parent_key="TP-100")
         compact = _compact_issue(issue)
-        assert compact["parent"] == "BEP-100"
+        assert compact["parent"] == "TP-100"
 
     def test_no_parent(self):
         issue = make_issue()
@@ -145,13 +145,13 @@ class TestCompactIssue:
         issue["fields"]["assignee"] = None
         issue["fields"]["issuetype"] = "Task"
         issue["fields"]["priority"] = "High"
-        issue["fields"]["parent"] = "BEP-99"
+        issue["fields"]["parent"] = "TP-99"
         compact = _compact_issue(issue)
         assert compact["status"] == "Custom"
         assert compact["assignee"] == "Unassigned"
         assert compact["issuetype"] == "Task"
         assert compact["priority"] == "High"
-        assert compact["parent"] == "BEP-99"
+        assert compact["parent"] == "TP-99"
 
 
 # --- Response size management ---
@@ -159,7 +159,7 @@ class TestCompactIssue:
 
 class TestStripResponseNoise:
     def test_strips_noise(self):
-        data = {"self": "url", "key": "BEP-1"}
+        data = {"self": "url", "key": "TP-1"}
         result = json.loads(_strip_response_noise(json.dumps(data)))
         assert "self" not in result
 
@@ -195,7 +195,7 @@ class TestFindIssuesList:
 
 class TestPaginateResponse:
     def test_paginates_large(self):
-        issues = [make_issue(key=f"BEP-{i}") for i in range(100)]
+        issues = [make_issue(key=f"TP-{i}") for i in range(100)]
         data = {"issues": issues, "total": 100}
         big = json.dumps(data)
         assert len(big) > MAX_RESPONSE_CHARS
@@ -216,7 +216,7 @@ class TestPaginateResponse:
 
 class TestCompactResponse:
     def test_compacts(self):
-        issues = [make_issue(key=f"BEP-{i}") for i in range(20)]
+        issues = [make_issue(key=f"TP-{i}") for i in range(20)]
         data = {"issues": issues}
         big = json.dumps(data)
         result = _compact_response(big)
@@ -318,64 +318,64 @@ class TestCoerceArgs:
 class TestHandleCacheGetIssue:
     @pytest.mark.asyncio
     async def test_cache_hit(self, cache):
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1"}))
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1"}))
         assert result["source"] == "cache"
-        assert result["issue"]["key"] == "BEP-1"
+        assert result["issue"]["key"] == "TP-1"
 
     @pytest.mark.asyncio
     async def test_cache_hit_compact(self, cache):
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "compact": True}))
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "compact": True}))
         assert result["source"] == "cache"
         assert "fields" not in result["issue"]
 
     @pytest.mark.asyncio
     async def test_upstream_fetch(self, cache, mock_jira_api):
-        upstream_issue = make_issue(key="BEP-2", summary="Upstream")
+        upstream_issue = make_issue(key="TP-2", summary="Upstream")
         mock_jira_api.get_issue.return_value = upstream_issue
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-2"}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-2"}))
         assert result["source"] == "upstream"
         mock_jira_api.get_issue.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_force_refresh(self, cache, mock_jira_api):
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         mock_jira_api.get_issue.return_value = issue
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "force_refresh": True}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "force_refresh": True}))
         assert result["source"] == "upstream"
 
     @pytest.mark.asyncio
     async def test_no_upstream_stale_fallback(self, cache):
         """No API + stale data → returns stale."""
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         server.jira_api = None
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "force_refresh": True}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "force_refresh": True}))
         assert result["source"] == "stale_cache"
         assert "warning" in result
 
     @pytest.mark.asyncio
     async def test_no_upstream_no_cache(self, cache):
         server.jira_api = None
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-999"}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-999"}))
         assert "error" in result
 
     @pytest.mark.asyncio
     async def test_upstream_error_stale_fallback(self, cache, mock_jira_api):
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         mock_jira_api.get_issue.side_effect = Exception("timeout")
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "force_refresh": True}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "force_refresh": True}))
         assert result["source"] == "stale_cache"
 
     @pytest.mark.asyncio
     async def test_upstream_error_no_stale(self, cache, mock_jira_api):
         mock_jira_api.get_issue.side_effect = Exception("timeout")
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-999"}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-999"}))
         assert "error" in result
 
     @pytest.mark.asyncio
@@ -385,8 +385,8 @@ class TestHandleCacheGetIssue:
         emb.available = True
         emb.store_embedding.return_value = True
         server.embeddings = emb
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
-        await handle_cache_get_issue({"issue_key": "BEP-1"})
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1")
+        await handle_cache_get_issue({"issue_key": "TP-1"})
         emb.store_embedding.assert_called_once()
         server.embeddings = None
 
@@ -395,14 +395,14 @@ class TestHandleCacheGetIssue:
     @pytest.mark.asyncio
     async def test_lazy_hit_when_upstream_unchanged(self, cache, mock_jira_api):
         """T12: Stale cache + upstream 'updated' unchanged → serve from cache (lazy HIT)."""
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         # Simulate upstream returning the same or older 'updated' timestamp
-        cached = cache.get_issue_stale("BEP-1")
+        cached = cache.get_issue_stale("TP-1")
         cached_at_iso = cached["_cached_at_iso"]
         mock_jira_api.get_issue.return_value = {"fields": {"updated": cached_at_iso}}
         # max_age_hours=0 forces stale path
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "max_age_hours": 0}))
         assert result["source"] == "cache"
         # Should have called upstream only once (the cheap updated-field check)
         mock_jira_api.get_issue.assert_called_once()
@@ -414,16 +414,16 @@ class TestHandleCacheGetIssue:
     @pytest.mark.asyncio
     async def test_lazy_miss_when_upstream_changed(self, cache, mock_jira_api):
         """T12: Stale cache + upstream 'updated' is newer → full refresh (lazy MISS)."""
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         # First call: cheap check returns a newer upstream timestamp
         # Second call: full refresh
-        full_issue = make_issue(key="BEP-1", summary="Updated upstream")
+        full_issue = make_issue(key="TP-1", summary="Updated upstream")
         mock_jira_api.get_issue.side_effect = [
             {"fields": {"updated": "2099-12-31T23:59:59.000+0000"}},  # newer → lazy miss
             full_issue,  # full refresh
         ]
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "max_age_hours": 0}))
         assert result["source"] == "upstream"
         assert mock_jira_api.get_issue.call_count == 2
 
@@ -433,36 +433,36 @@ class TestHandleCacheGetIssue:
         # Insert a raw issue without _cached_at metadata (simulates legacy entry)
         cache.conn.execute(
             "INSERT OR REPLACE INTO issues (issue_key, summary, data, cached_at) VALUES (?, ?, ?, ?)",
-            ("BEP-1", "Legacy", '{"key": "BEP-1", "fields": {"summary": "Legacy"}}', "2000-01-01T00:00:00"),
+            ("TP-1", "Legacy", '{"key": "TP-1", "fields": {"summary": "Legacy"}}', "2000-01-01T00:00:00"),
         )
         cache.conn.commit()
-        full_issue = make_issue(key="BEP-1")
+        full_issue = make_issue(key="TP-1")
         mock_jira_api.get_issue.return_value = full_issue
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "max_age_hours": 0}))
         # Falls through to full refresh
         assert result["source"] == "upstream"
 
     @pytest.mark.asyncio
     async def test_lazy_check_error_falls_through(self, cache, mock_jira_api):
         """T12: If lazy check throws, fall through to full refresh silently."""
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
-        full_issue = make_issue(key="BEP-1", summary="Refreshed")
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
+        full_issue = make_issue(key="TP-1", summary="Refreshed")
         mock_jira_api.get_issue.side_effect = [
             Exception("network error"),  # lazy check fails
             full_issue,  # full refresh succeeds
         ]
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "max_age_hours": 0}))
         assert result["source"] == "upstream"
         assert mock_jira_api.get_issue.call_count == 2
 
     @pytest.mark.asyncio
     async def test_lazy_check_skipped_when_no_jira_api(self, cache):
         """T12: Lazy check is skipped when jira_api is None."""
-        issue = make_issue(key="BEP-1")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1")
+        cache.put_issue("TP-1", issue)
         server.jira_api = None
-        result = json.loads(await handle_cache_get_issue({"issue_key": "BEP-1", "max_age_hours": 0}))
+        result = json.loads(await handle_cache_get_issue({"issue_key": "TP-1", "max_age_hours": 0}))
         # Falls through to stale_cache path (no API available)
         assert result["source"] == "stale_cache"
 
@@ -476,31 +476,31 @@ class TestHandleCacheGetIssues:
     @pytest.mark.asyncio
     async def test_all_cached(self, cache):
         for i in range(3):
-            cache.put_issue(f"BEP-{i}", make_issue(key=f"BEP-{i}"))
-        result = json.loads(await handle_cache_get_issues({"issue_keys": ["BEP-0", "BEP-1", "BEP-2"]}))
+            cache.put_issue(f"TP-{i}", make_issue(key=f"TP-{i}"))
+        result = json.loads(await handle_cache_get_issues({"issue_keys": ["TP-0", "TP-1", "TP-2"]}))
         assert result["from_cache"] == 3
         assert result["from_upstream"] == 0
 
     @pytest.mark.asyncio
     async def test_with_upstream_fetch(self, cache, mock_jira_api):
-        cache.put_issue("BEP-1", make_issue(key="BEP-1"))
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-2")
-        result = json.loads(await handle_cache_get_issues({"issue_keys": ["BEP-1", "BEP-2"]}))
+        cache.put_issue("TP-1", make_issue(key="TP-1"))
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-2")
+        result = json.loads(await handle_cache_get_issues({"issue_keys": ["TP-1", "TP-2"]}))
         assert result["from_cache"] == 1
         assert result["from_upstream"] == 1
 
     @pytest.mark.asyncio
     async def test_compact(self, cache):
-        cache.put_issue("BEP-1", make_issue(key="BEP-1"))
-        result = json.loads(await handle_cache_get_issues({"issue_keys": ["BEP-1"], "compact": True}))
+        cache.put_issue("TP-1", make_issue(key="TP-1"))
+        result = json.loads(await handle_cache_get_issues({"issue_keys": ["TP-1"], "compact": True}))
         assert "fields" not in result["issues"][0]
 
     @pytest.mark.asyncio
     async def test_upstream_error_stale_fallback(self, cache, mock_jira_api):
-        cache.put_issue("BEP-1", make_issue(key="BEP-1"))
+        cache.put_issue("TP-1", make_issue(key="TP-1"))
         mock_jira_api.get_issue.side_effect = Exception("fail")
-        result = json.loads(await handle_cache_get_issues({"issue_keys": ["BEP-1", "BEP-2"], "force_refresh": True}))
-        # BEP-2 should fail but BEP-1 should come from stale
+        result = json.loads(await handle_cache_get_issues({"issue_keys": ["TP-1", "TP-2"], "force_refresh": True}))
+        # TP-2 should fail but TP-1 should come from stale
         assert result["total"] >= 0
 
     @pytest.mark.asyncio
@@ -508,8 +508,8 @@ class TestHandleCacheGetIssues:
         emb = MagicMock()
         emb.available = True
         server.embeddings = emb
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
-        await handle_cache_get_issues({"issue_keys": ["BEP-1"]})
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1")
+        await handle_cache_get_issues({"issue_keys": ["TP-1"]})
         emb.store_batch.assert_called()
         server.embeddings = None
 
@@ -518,14 +518,14 @@ class TestHandleCacheSearch:
     @pytest.mark.asyncio
     async def test_cache_hit(self, cache):
         data = {"issues": [make_issue()], "total": 1}
-        cache.put_search("project = BEP", "summary", 30, data)
-        result = json.loads(await handle_cache_search({"jql": "project = BEP", "fields": "summary", "limit": 30}))
+        cache.put_search("project = TP", "summary", 30, data)
+        result = json.loads(await handle_cache_search({"jql": "project = TP", "fields": "summary", "limit": 30}))
         assert result["source"] == "cache"
 
     @pytest.mark.asyncio
     async def test_upstream(self, cache, mock_jira_api):
         mock_jira_api.search_issues.return_value = {"issues": [make_issue()], "total": 1}
-        result = json.loads(await handle_cache_search({"jql": "project = BEP"}))
+        result = json.loads(await handle_cache_search({"jql": "project = TP"}))
         assert result["source"] == "upstream"
 
     @pytest.mark.asyncio
@@ -541,7 +541,7 @@ class TestHandleCacheSearch:
 
     @pytest.mark.asyncio
     async def test_pagination_offset(self, cache, mock_jira_api):
-        issues = [make_issue(key=f"BEP-{i}") for i in range(5)]
+        issues = [make_issue(key=f"TP-{i}") for i in range(5)]
         mock_jira_api.search_issues.return_value = {"issues": issues, "total": 5}
         result = json.loads(await handle_cache_search({"jql": "q", "start_at": 2}))
         assert len(result["results"]["issues"]) == 3
@@ -601,15 +601,15 @@ class TestHandleCacheSprintIssues:
     @pytest.mark.asyncio
     async def test_pagination(self, cache, mock_jira_api):
         """Test multi-page upstream fetch."""
-        page1 = {"issues": [make_issue(key=f"BEP-{i}") for i in range(50)], "total": 60}
-        page2 = {"issues": [make_issue(key=f"BEP-{i}") for i in range(50, 60)], "total": 60}
+        page1 = {"issues": [make_issue(key=f"TP-{i}") for i in range(50)], "total": 60}
+        page2 = {"issues": [make_issue(key=f"TP-{i}") for i in range(50, 60)], "total": 60}
         mock_jira_api.get_sprint_issues.side_effect = [page1, page2]
         result = json.loads(await handle_cache_sprint_issues({"sprint_id": 673}))
         assert result["results"]["total"] == 60
 
     @pytest.mark.asyncio
     async def test_response_offset(self, cache, mock_jira_api):
-        issues = [make_issue(key=f"BEP-{i}") for i in range(5)]
+        issues = [make_issue(key=f"TP-{i}") for i in range(5)]
         mock_jira_api.get_sprint_issues.return_value = {"issues": issues, "total": 5}
         result = json.loads(await handle_cache_sprint_issues({"sprint_id": 673, "start_at": 3}))
         assert len(result["results"]["issues"]) == 2
@@ -628,8 +628,8 @@ class TestHandleCacheSprintIssues:
 class TestHandleCacheTextSearch:
     @pytest.mark.asyncio
     async def test_basic(self, cache):
-        issue = make_issue(key="BEP-1", summary="coupon payment")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1", summary="coupon payment")
+        cache.put_issue("TP-1", issue)
         result = json.loads(await handle_cache_text_search({"query": "coupon"}))
         assert result["source"] == "fts5"
         assert result["count"] >= 1
@@ -654,9 +654,9 @@ class TestHandleCacheSimilarIssues:
     async def test_with_results(self, cache):
         emb = MagicMock()
         emb.available = True
-        emb.find_similar.return_value = [{"entity_id": "BEP-1", "entity_type": "jira", "distance": 0.1}]
+        emb.find_similar.return_value = [{"entity_id": "TP-1", "entity_type": "jira", "distance": 0.1}]
         server.embeddings = emb
-        cache.put_issue("BEP-1", make_issue(key="BEP-1"))
+        cache.put_issue("TP-1", make_issue(key="TP-1"))
         result = json.loads(await handle_cache_similar_issues({"query": "test"}))
         assert result["count"] == 1
         server.embeddings = None
@@ -665,7 +665,7 @@ class TestHandleCacheSimilarIssues:
     async def test_missing_cache_issue(self):
         emb = MagicMock()
         emb.available = True
-        emb.find_similar.return_value = [{"entity_id": "BEP-999", "entity_type": "jira", "distance": 0.5}]
+        emb.find_similar.return_value = [{"entity_id": "TP-999", "entity_type": "jira", "distance": 0.5}]
         server.embeddings = emb
         result = json.loads(await handle_cache_similar_issues({"query": "test"}))
         assert result["count"] == 1
@@ -682,14 +682,14 @@ class TestHandleCacheRefresh:
 
     @pytest.mark.asyncio
     async def test_refresh_issues(self, mock_jira_api):
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
-        result = json.loads(await handle_cache_refresh({"issue_keys": ["BEP-1"]}))
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1")
+        result = json.loads(await handle_cache_refresh({"issue_keys": ["TP-1"]}))
         assert result["refreshed"] == 1
 
     @pytest.mark.asyncio
     async def test_refresh_issue_error(self, mock_jira_api):
         mock_jira_api.get_issue.side_effect = Exception("fail")
-        result = json.loads(await handle_cache_refresh({"issue_keys": ["BEP-1"]}))
+        result = json.loads(await handle_cache_refresh({"issue_keys": ["TP-1"]}))
         assert result["refreshed"] == 0
 
     @pytest.mark.asyncio
@@ -709,8 +709,8 @@ class TestHandleCacheRefresh:
         emb = MagicMock()
         emb.available = True
         server.embeddings = emb
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
-        await handle_cache_refresh({"issue_keys": ["BEP-1"]})
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1")
+        await handle_cache_refresh({"issue_keys": ["TP-1"]})
         emb.store_batch.assert_called()
 
         # Sprint refresh with embeddings
@@ -740,33 +740,33 @@ class TestHandleCacheStats:
 class TestHandleCacheInvalidate:
     @pytest.mark.asyncio
     async def test_invalidate_all(self, cache):
-        cache.put_issue("BEP-1", make_issue())
+        cache.put_issue("TP-1", make_issue())
         result = json.loads(await handle_cache_invalidate({"all": True, "confirm": True}))
         assert result["invalidated"] == "all"
 
     @pytest.mark.asyncio
     async def test_invalidate_all_no_confirm(self, cache):
         """L3: invalidate_all without confirm=true returns error."""
-        cache.put_issue("BEP-1", make_issue())
+        cache.put_issue("TP-1", make_issue())
         result = json.loads(await handle_cache_invalidate({"all": True}))
         assert "error" in result
         # Issue should still exist
-        assert cache.get_issue("BEP-1") is not None
+        assert cache.get_issue("TP-1") is not None
 
     @pytest.mark.asyncio
     async def test_invalidate_issue(self, cache):
-        cache.put_issue("BEP-1", make_issue())
-        result = json.loads(await handle_cache_invalidate({"issue_key": "BEP-1"}))
-        assert result["invalidated"] == "BEP-1"
+        cache.put_issue("TP-1", make_issue())
+        result = json.loads(await handle_cache_invalidate({"issue_key": "TP-1"}))
+        assert result["invalidated"] == "TP-1"
         assert result["found"] is True
 
     @pytest.mark.asyncio
     async def test_invalidate_with_embeddings(self, cache):
         emb = MagicMock()
         server.embeddings = emb
-        cache.put_issue("BEP-1", make_issue())
-        await handle_cache_invalidate({"issue_key": "BEP-1"})
-        emb.remove_embedding.assert_called_with("BEP-1")
+        cache.put_issue("TP-1", make_issue())
+        await handle_cache_invalidate({"issue_key": "TP-1"})
+        emb.remove_embedding.assert_called_with("TP-1")
         server.embeddings = None
 
     @pytest.mark.asyncio
@@ -781,17 +781,17 @@ class TestHandleCacheInvalidate:
 
     @pytest.mark.asyncio
     async def test_auto_refresh_success(self, cache, mock_jira_api):
-        cache.put_issue("BEP-1", make_issue())
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1", summary="Refreshed")
-        result = json.loads(await handle_cache_invalidate({"issue_key": "BEP-1", "auto_refresh": True}))
+        cache.put_issue("TP-1", make_issue())
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1", summary="Refreshed")
+        result = json.loads(await handle_cache_invalidate({"issue_key": "TP-1", "auto_refresh": True}))
         assert result["auto_refreshed"] is True
         assert "issue" in result
 
     @pytest.mark.asyncio
     async def test_auto_refresh_error(self, cache, mock_jira_api):
-        cache.put_issue("BEP-1", make_issue())
+        cache.put_issue("TP-1", make_issue())
         mock_jira_api.get_issue.side_effect = Exception("fail")
-        result = json.loads(await handle_cache_invalidate({"issue_key": "BEP-1", "auto_refresh": True}))
+        result = json.loads(await handle_cache_invalidate({"issue_key": "TP-1", "auto_refresh": True}))
         assert result["auto_refreshed"] is False
         assert "auto_refresh_error" in result
 
@@ -801,9 +801,9 @@ class TestHandleCacheInvalidate:
         emb.available = True
         emb.store_embedding.return_value = True
         server.embeddings = emb
-        cache.put_issue("BEP-1", make_issue())
-        mock_jira_api.get_issue.return_value = make_issue(key="BEP-1")
-        await handle_cache_invalidate({"issue_key": "BEP-1", "auto_refresh": True})
+        cache.put_issue("TP-1", make_issue())
+        mock_jira_api.get_issue.return_value = make_issue(key="TP-1")
+        await handle_cache_invalidate({"issue_key": "TP-1", "auto_refresh": True})
         emb.remove_embedding.assert_called()
         emb.store_embedding.assert_called()
         server.embeddings = None
@@ -811,10 +811,10 @@ class TestHandleCacheInvalidate:
     @pytest.mark.asyncio
     async def test_auto_refresh_no_upstream(self, cache):
         """auto_refresh with no API should just invalidate."""
-        cache.put_issue("BEP-1", make_issue())
+        cache.put_issue("TP-1", make_issue())
         server.jira_api = None
-        result = json.loads(await handle_cache_invalidate({"issue_key": "BEP-1", "auto_refresh": True}))
-        assert result["invalidated"] == "BEP-1"
+        result = json.loads(await handle_cache_invalidate({"issue_key": "TP-1", "auto_refresh": True}))
+        assert result["invalidated"] == "TP-1"
         # Should not have auto_refreshed key since no API
         assert "auto_refreshed" not in result
 
@@ -882,8 +882,8 @@ class TestPaginateSafetyLoop:
         avg_size is low (dragged down by tiny items) → fits estimate is high (~40)
         → but issues[:40] includes the 3 huge ones → result > MAX → halving loop fires.
         """
-        huge = {"key": "BEP-0", "fields": {"summary": "s"}, "blob": "X" * 40000}
-        tiny = {"key": "BEP-1", "fields": {"summary": "s"}}
+        huge = {"key": "TP-0", "fields": {"summary": "s"}, "blob": "X" * 40000}
+        tiny = {"key": "TP-1", "fields": {"summary": "s"}}
         issues = [huge] * 3 + [tiny] * 100
         data = {"issues": issues, "total": len(issues)}
         big = json.dumps(data, ensure_ascii=False)
@@ -907,12 +907,12 @@ class TestBatchGetStaleFallback:
         Key: put_issue stores the data, then set max_age_hours=0 so get_issues_batch
         reports it as missing (expired). Upstream then fails → stale fallback.
         """
-        cache.put_issue("BEP-1", make_issue(key="BEP-1"))
+        cache.put_issue("TP-1", make_issue(key="TP-1"))
         mock_jira_api.get_issue.side_effect = Exception("timeout")
         result = json.loads(
             await handle_cache_get_issues(
                 {
-                    "issue_keys": ["BEP-1"],
+                    "issue_keys": ["TP-1"],
                     "max_age_hours": 0,  # Treat cached as expired → goes to upstream
                 }
             )
@@ -929,8 +929,8 @@ class TestSprintRefreshPagination:
     @pytest.mark.asyncio
     async def test_multi_page_refresh(self, mock_jira_api):
         """L639: Sprint refresh should paginate when total > page size."""
-        page1 = {"issues": [make_issue(key=f"BEP-{i}") for i in range(50)], "total": 75}
-        page2 = {"issues": [make_issue(key=f"BEP-{i}") for i in range(50, 75)], "total": 75}
+        page1 = {"issues": [make_issue(key=f"TP-{i}") for i in range(50)], "total": 75}
+        page2 = {"issues": [make_issue(key=f"TP-{i}") for i in range(50, 75)], "total": 75}
         mock_jira_api.get_sprint_issues.side_effect = [page1, page2]
         # Verify jira_api is set
         assert server.jira_api is mock_jira_api
@@ -946,8 +946,8 @@ class TestSprintRefreshPagination:
 
 class TestValidateIssueKey:
     def test_valid_keys(self):
-        assert _validate_issue_key("BEP-1") == "BEP-1"
-        assert _validate_issue_key("BEP-123456") == "BEP-123456"
+        assert _validate_issue_key("TP-1") == "TP-1"
+        assert _validate_issue_key("TP-123456") == "TP-123456"
         assert _validate_issue_key("PROJ-42") == "PROJ-42"
 
     def test_invalid_keys(self):
@@ -956,7 +956,7 @@ class TestValidateIssueKey:
         with pytest.raises(ValueError, match="Invalid issue key"):
             _validate_issue_key("")
         with pytest.raises(ValueError, match="Invalid issue key"):
-            _validate_issue_key("BEP-")
+            _validate_issue_key("TP-")
         with pytest.raises(ValueError, match="Invalid issue key"):
             _validate_issue_key("bep-123")  # lowercase
 
@@ -1029,8 +1029,8 @@ class TestTextSearchNoData:
 
     @pytest.mark.asyncio
     async def test_no_data_key(self, cache):
-        issue = make_issue(key="BEP-1", summary="coupon payment")
-        cache.put_issue("BEP-1", issue)
+        issue = make_issue(key="TP-1", summary="coupon payment")
+        cache.put_issue("TP-1", issue)
         result = json.loads(await handle_cache_text_search({"query": "coupon"}))
         assert "data" not in result
         assert "issues" in result
@@ -1041,13 +1041,13 @@ class TestAutoRefreshStripNoise:
 
     @pytest.mark.asyncio
     async def test_noise_stripped(self, cache, mock_jira_api):
-        cache.put_issue("BEP-1", make_issue())
-        noisy = make_issue(key="BEP-1", summary="Refreshed")
+        cache.put_issue("TP-1", make_issue())
+        noisy = make_issue(key="TP-1", summary="Refreshed")
         mock_jira_api.get_issue.return_value = noisy
         result = json.loads(
             await handle_cache_invalidate(
                 {
-                    "issue_key": "BEP-1",
+                    "issue_key": "TP-1",
                     "auto_refresh": True,
                 }
             )
@@ -1064,7 +1064,7 @@ class TestAutoRefreshStripNoise:
 def test_compact_format_for_large_lists(cache, multiple_issues):
     """Lists with 20+ issues use compact headers+rows format."""
     from server import _maybe_compact
-    issues = [{"key": f"BEP-{i}", "summary": f"Issue {i}",
+    issues = [{"key": f"TP-{i}", "summary": f"Issue {i}",
                "status": "To Do", "assignee": None, "sp": None}
               for i in range(25)]
     result = _maybe_compact(issues)
@@ -1076,7 +1076,7 @@ def test_compact_format_for_large_lists(cache, multiple_issues):
 
 def test_small_list_not_compacted():
     from server import _maybe_compact
-    issues = [{"key": f"BEP-{i}", "summary": "x"} for i in range(5)]
+    issues = [{"key": f"TP-{i}", "summary": "x"} for i in range(5)]
     result = _maybe_compact(issues)
     assert isinstance(result, list)  # unchanged
 
@@ -1084,18 +1084,18 @@ def test_small_list_not_compacted():
 def test_compact_threshold_boundary():
     from server import _maybe_compact, _COMPACT_LIST_THRESHOLD
     # Exactly at threshold — compacts
-    issues_at = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD)]
+    issues_at = [{"key": f"TP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD)]
     assert isinstance(_maybe_compact(issues_at), dict)  # compacted
     # One below threshold — stays list
-    issues_below = [{"key": f"BEP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD - 1)]
+    issues_below = [{"key": f"TP-{i}", "summary": "x"} for i in range(_COMPACT_LIST_THRESHOLD - 1)]
     assert isinstance(_maybe_compact(issues_below), list)  # unchanged
 
 
 def test_session_dedup_returns_ref_on_repeat(cache, sample_issue):
     """Second fetch of same issue within session returns compact ref."""
     from server import _mark_returned, _already_returned
-    _mark_returned("BEP-100")
-    assert _already_returned("BEP-100")
+    _mark_returned("TP-100")
+    assert _already_returned("TP-100")
 
 
 def test_confluence_tools_registered():
@@ -1295,12 +1295,12 @@ class TestPageLevelEmbedding:
         mock_api.get_confluence_page.return_value = {
             "id": "p1",
             "title": "Coupon Design Doc",
-            "space": {"key": "BEP"},
+            "space": {"key": "TP"},
             "_body_md": "## Overview\nContent",
             "version": {"number": 1, "when": "2026-01-01T00:00:00.000Z"},
             "metadata": {"labels": {"results": [{"name": "design"}, {"name": "coupon"}]}},
             "history": {"createdBy": {"displayName": "Alice"}},
-            "_links": {"webui": "/wiki/spaces/BEP/pages/p1"},
+            "_links": {"webui": "/wiki/spaces/TP/pages/p1"},
         }
 
         await handle_cache_refresh_confluence({"page_id": "p1"})
@@ -1325,12 +1325,12 @@ class TestPageLevelEmbedding:
         mock_api = MagicMock()
         server.jira_api = mock_api
         mock_api.get_confluence_page.return_value = {
-            "id": "p2", "title": "Test", "space": {"key": "BEP"},
+            "id": "p2", "title": "Test", "space": {"key": "TP"},
             "_body_md": "content",
             "version": {"number": 1, "when": "2026-01-01T00:00:00.000Z"},
             "metadata": {"labels": {"results": []}},
             "history": {"createdBy": {"displayName": "Bob"}},
-            "_links": {"webui": "/wiki/spaces/BEP/pages/p2"},
+            "_links": {"webui": "/wiki/spaces/TP/pages/p2"},
         }
         result = json.loads(await handle_cache_refresh_confluence({"page_id": "p2"}))
         assert result["status"] == "refreshed"

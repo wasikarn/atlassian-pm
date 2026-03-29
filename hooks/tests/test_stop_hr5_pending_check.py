@@ -18,6 +18,6 @@ def test_blocked_when_pending():
     """Returns ok=false with child key in reason when subtasks unverified."""
     from plugin.session.stop_hr5_pending_check import check_pending
 
-    result = check_pending(pending=[{"child": "BEP-42", "parent": "BEP-10"}, {"child": "BEP-43", "parent": "BEP-10"}])
+    result = check_pending(pending=[{"child": "TP-42", "parent": "TP-10"}, {"child": "TP-43", "parent": "TP-10"}])
     assert result["ok"] is False
-    assert "BEP-42" in result["reason"] and "BEP-43" in result["reason"]
+    assert "TP-42" in result["reason"] and "TP-43" in result["reason"]

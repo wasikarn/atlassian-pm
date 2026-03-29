@@ -11,7 +11,7 @@ def test_logs_skill_invocation():
     from plugin.session.pre_skill_usage_log import build_record
 
     record = build_record(
-        tool_input={"skill": "create-story", "args": "BEP-10"},
+        tool_input={"skill": "create-story", "args": "TP-10"},
         session_id="sess-123",
         project="atlassian-pm",
     )

@@ -21,20 +21,20 @@ Before creating anything, check if a `[QA]` sub-task already exists for the stor
 acli jira issue list --jql "parent = <issue-key> AND summary ~ \"[QA]\" AND issuetype = Sub-task" -y
 ```
 
-**If `[QA]` sub-task found** (e.g., `BEP-XXXX`):
+**If `[QA]` sub-task found** (e.g., `{{PROJECT_KEY}}-XXXX`):
 
 Present the user with 3 options:
 
-> Test plan already exists: **BEP-XXXX** — "[QA] …"
+> Test plan already exists: **{{PROJECT_KEY}}-XXXX** — "[QA] …"
 >
-> (A) **Execute existing plan** — run execute-testplan on BEP-XXXX as-is
+> (A) **Execute existing plan** — run execute-testplan on {{PROJECT_KEY}}-XXXX as-is
 > (B) **Update + execute** — update test plan for current AC, then execute
 > (C) **Create new plan** — create a fresh [QA] sub-task (use if scope changed significantly)
 
 Wait for user choice before proceeding:
 
 - **(A)** → skip to Step 3 using the existing sub-task key
-- **(B)** → invoke `atlassian-pm:create-testplan` with `--update BEP-XXXX`, then Step 3
+- **(B)** → invoke `atlassian-pm:create-testplan` with `--update {{PROJECT_KEY}}-XXXX`, then Step 3
 - **(C)** → proceed to Step 1
 
 **If no `[QA]` sub-task found** → proceed to Step 1.
@@ -46,11 +46,11 @@ Wait for user choice before proceeding:
 Use the Skill tool to invoke `atlassian-pm:create-testplan` with `$ARGUMENTS`.
 
 → Produces `[QA]` Sub-task with embedded test plan linked to the story.
-→ Wait for skill to complete and confirm `[QA]` Sub-task key (e.g., `BEP-XXXX`).
+→ Wait for skill to complete and confirm `[QA]` Sub-task key (e.g., `{{PROJECT_KEY}}-XXXX`).
 
 ### Step 2 — Confirm Execute
 
-Ask: "Test plan created (`BEP-XXXX`). Run execute-testplan against **staging** now?"
+Ask: "Test plan created (`{{PROJECT_KEY}}-XXXX`). Run execute-testplan against **staging** now?"
 
 → If yes (or no `--env` specified): proceed with `--env staging`
 → If user specifies `--env production`: warn "⚠️ Running against production — confirm?" before proceeding
@@ -60,7 +60,7 @@ Ask: "Test plan created (`BEP-XXXX`). Run execute-testplan against **staging** n
 
 > **Gate:** Confirm a `[QA]` subtask key is available (from Step 1 creation or Step 0 existing plan). If create-testplan failed without producing a key, STOP and show: "create-testplan did not complete — resolve before executing."
 
-Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the `[QA]` sub-task key confirmed in Steps 0/1 (e.g., the key from "Test plan created (`BEP-XXXX`)") and resolved `--env` flag.
+Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the `[QA]` sub-task key confirmed in Steps 0/1 (e.g., the key from "Test plan created (`{{PROJECT_KEY}}-XXXX`)") and resolved `--env` flag.
 
 → Pass through any additional flags (`--headed`, `--rerun-failed`, `--dry-run`) from `$ARGUMENTS`.
 → Results written back to Google Sheet, bugs created for failures, summary posted to Jira.

@@ -105,14 +105,14 @@ def test_v5_fts_porter_tokenizer(conn):
     conn.execute("""INSERT INTO issues
         (issue_key, summary, status, assignee, issue_type, labels, description_text, data, cached_at)
         VALUES (?,?,?,?,?,?,?,?,?)""",
-        ("BEP-1", "running tests", "To Do", "alice", "Story", "[]", "", "{}", "2026-01-01")
+        ("TP-1", "running tests", "To Do", "alice", "Story", "[]", "", "{}", "2026-01-01")
     )
     conn.commit()
     # Porter stemming: "run" should match "running"
     rows = conn.execute(
         "SELECT issue_key FROM issues_fts WHERE issues_fts MATCH 'run'"
     ).fetchall()
-    assert any(r[0] == "BEP-1" for r in rows)
+    assert any(r[0] == "TP-1" for r in rows)
 
 
 def test_v5_confluence_fts_exists(conn):

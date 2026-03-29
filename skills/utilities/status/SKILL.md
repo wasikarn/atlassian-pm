@@ -129,7 +129,7 @@ Output a structured status report:
 ### 🟡 In Progress ({{N}} issues)
 | Key | Summary | Assignee | Status |
 |-----|---------|----------|--------|
-| BEP-XXX | [summary] | [name] | In Progress |
+| {{PROJECT_KEY}}-XXX | [summary] | [name] | In Progress |
 
 ### 🟢 Ready for Review ({{N}} issues)
 [Stories/tasks in "In Review" needing review]

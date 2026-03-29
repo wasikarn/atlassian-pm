@@ -34,7 +34,7 @@ Living documentation (Nat Pryce & Steve Freeman, "Growing Object-Oriented Softwa
 | ------- | --------- | --------- |
 | Confluence page shows stale content after sync | Confluence macro-containing pages updated via MCP (HR4 violation) | Re-run Phase 7 using `update_page_storage.py` for any page with ToC, Children, or Code macros |
 | Child subtask AC conflicts with updated parent story AC | Sync executed children before parent (ordering violation) | Enforce Phase 7 topological order; re-run parent update first, then re-apply child updates |
-| Artifact graph missing Tech Notes | `confluence_search("BEP-XXX")` returned no results because the Tech Note title doesn't embed the issue key | Search by story title as fallback; manually add the issue key to the Confluence page title for future syncs |
+| Artifact graph missing Tech Notes | `confluence_search("{{PROJECT_KEY}}-XXX")` returned no results because the Tech Note title doesn't embed the issue key | Search by story title as fallback; manually add the issue key to the Confluence page title for future syncs |
 | Phase 1 gate blocks because change description is too vague | User passed only the issue key with no change description | Prompt user for specific change description before building the artifact graph; "update" is not classifiable — needs "what changed and how" |
 | Cache reads stale data after sync | HR6 `cache_invalidate` skipped for one or more writes | Run `cache_invalidate` for every key in `applied_keys[]`; re-verify with `cache_get_issue` to confirm fresh data |
 

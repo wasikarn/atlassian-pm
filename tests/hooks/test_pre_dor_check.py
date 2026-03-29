@@ -31,35 +31,35 @@ def _run(tool_input: dict, confirmed: str = "") -> dict | None:
 
 
 def test_allows_done_transition():
-    assert _run({"issue_key": "BEP-1", "transition": "Done"}) is not None
+    assert _run({"issue_key": "TP-1", "transition": "Done"}) is not None
 
 
 def test_allows_empty_transition():
-    assert _run({"issue_key": "BEP-1", "transition": ""}) is not None
+    assert _run({"issue_key": "TP-1", "transition": ""}) is not None
 
 
 def test_allows_review_transition():
-    assert _run({"issue_key": "BEP-1", "transition": "In Review"}) is not None
+    assert _run({"issue_key": "TP-1", "transition": "In Review"}) is not None
 
 
 def test_blocks_in_progress_without_confirmation():
-    assert _run({"issue_key": "BEP-1", "transition": "In Progress"}) is None
+    assert _run({"issue_key": "TP-1", "transition": "In Progress"}) is None
 
 
 def test_blocks_start_transition():
-    assert _run({"issue_key": "BEP-1", "transition": "Start"}) is None
+    assert _run({"issue_key": "TP-1", "transition": "Start"}) is None
 
 
 def test_allows_in_progress_with_correct_confirmation():
-    assert _run({"issue_key": "BEP-1", "transition": "In Progress"}, confirmed="BEP-1") is not None
+    assert _run({"issue_key": "TP-1", "transition": "In Progress"}, confirmed="TP-1") is not None
 
 
 def test_blocks_in_progress_with_wrong_confirmation():
-    assert _run({"issue_key": "BEP-1", "transition": "In Progress"}, confirmed="BEP-2") is None
+    assert _run({"issue_key": "TP-1", "transition": "In Progress"}, confirmed="TP-2") is None
 
 
 def test_confirmation_is_case_insensitive():
-    assert _run({"issue_key": "BEP-1", "transition": "in progress"}, confirmed="bep-1") is not None
+    assert _run({"issue_key": "TP-1", "transition": "in progress"}, confirmed="bep-1") is not None
 
 
 def test_allows_on_empty_input():

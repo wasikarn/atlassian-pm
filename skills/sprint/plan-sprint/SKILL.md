@@ -323,7 +323,7 @@ Status: 🟢 ≤80% | ⚠️ 80-95% | 🔴 >95%
 
 ### Items to Assign (sorted by Due Date ↑ then Priority ↑)
 | # | Key | Summary | Assignee | Skill Match | Est. Hours | Due Date | Priority | Action |
-| 1 | BEP-XXX | ... | Name | expert | 4h | Feb 10 | Highest | assign + move |
+| 1 | {{PROJECT_KEY}}-XXX | ... | Name | expert | 4h | Feb 10 | Highest | assign + move |
 
 ### Risk Summary
 | Risk | Severity | Mitigation |
@@ -356,7 +356,7 @@ Execute according to the user-approved plan (in due date + priority order):
 ```text
 # Move items to target sprint + set estimation fields (⚠️ sprint field = plain number, NOT object)
 # Story/Task: set sprint + story_points + size + dates
-MCP: jira_update_issue(issue_key="BEP-XXX", additional_fields={
+MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-XXX", additional_fields={
   "{{SPRINT_FIELD}}": 123,
   "customfield_10016": 3,                        # Story Points
   "customfield_10107": {"value": "M"},            # Size
@@ -372,7 +372,7 @@ MCP: jira_update_issue(issue_key="{{PROJECT_KEY}}-YYY", additional_fields={
 })
 
 # Assign items (⚠️ MCP assignee silent fail — use acli instead)
-Bash: acli jira workitem assign -k "BEP-XXX" -a "email@domain.com" -y
+Bash: acli jira workitem assign -k "{{PROJECT_KEY}}-XXX" -a "email@domain.com" -y
 ```
 
 > ⚠️ Sprint field uses `{{SPRINT_FIELD}}` with plain number (e.g. `123`) — do not use `{"id": 123}`
@@ -403,10 +403,10 @@ Subtask alignment: [X checked, Y fixed]
 
 ### Execution Log (ordered by Due Date ↑ then Priority ↑)
 | # | Key | Due | Priority | Action | Status |
-| 1 | BEP-XXX | Feb 10 | Highest | Assigned to Name + moved to sprint | ✅ |
+| 1 | {{PROJECT_KEY}}-XXX | Feb 10 | Highest | Assigned to Name + moved to sprint | ✅ |
 
-→ To verify: /verify-issue BEP-XXX
-→ To update a story: /update-story BEP-XXX
+→ To verify: /verify-issue {{PROJECT_KEY}}-XXX
+→ To update a story: /update-story {{PROJECT_KEY}}-XXX
 ```
 
 ## Options

@@ -13,7 +13,7 @@ import post_pr_sync
 
 # The module computes _ISSUE_RE at import time from CLAUDE_PLUGIN_ROOT env,
 # which is empty in test environments. Patch it to a known pattern for tests.
-_TEST_ISSUE_RE = re.compile(r'\b(BEP-\d+|TP-\d+)\b', re.IGNORECASE)
+_TEST_ISSUE_RE = re.compile(r'\b(TP-\d+|TP-\d+)\b', re.IGNORECASE)
 
 
 def _run(command: str, tool_response: str = "") -> dict:
@@ -50,28 +50,28 @@ def test_ignores_gh_pr_create_with_no_bep():
 
 
 def test_detects_bep_in_title():
-    result = _run("gh pr create --title 'BEP-123: add feature' --body ''")
+    result = _run("gh pr create --title 'TP-123: add feature' --body ''")
     assert _has_context(result)
-    assert "BEP-123" in str(result)
+    assert "TP-123" in str(result)
 
 
 def test_detects_bep_in_branch_flag():
-    result = _run("gh pr create --head BEP-456/my-branch --body ''")
-    assert "BEP-456" in str(result)
+    result = _run("gh pr create --head TP-456/my-branch --body ''")
+    assert "TP-456" in str(result)
 
 
 def test_detects_bep_in_tool_response():
-    result = _run("gh pr create --body ''", tool_response="Created PR for BEP-789")
-    assert "BEP-789" in str(result)
+    result = _run("gh pr create --body ''", tool_response="Created PR for TP-789")
+    assert "TP-789" in str(result)
 
 
 def test_bep_detection_is_case_insensitive():
     result = _run("gh pr create --title 'bep-321 fix' --body ''")
-    assert "BEP-321" in str(result)
+    assert "TP-321" in str(result)
 
 
 def test_context_includes_transition_instruction():
-    result = _run("gh pr create --title 'BEP-100: feat' --body ''")
+    result = _run("gh pr create --title 'TP-100: feat' --body ''")
     context = str(result)
     assert "In Review" in context
     assert "cache_invalidate" in context

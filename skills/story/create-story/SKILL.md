@@ -129,8 +129,8 @@ After receiving epic data, verify epic quality before investing in story writing
 
 ```text
 ⚠️ Epic Readiness Warning
-Epic BEP-XXX has quality gaps that may affect this story:
-  ❌ No SP estimate — consider /refine-epic BEP-XXX first
+Epic {{PROJECT_KEY}}-XXX has quality gaps that may affect this story:
+  ❌ No SP estimate — consider /refine-epic {{PROJECT_KEY}}-XXX first
   ❌ Only 1 AC defined — story ACs will be weak
 Proceed anyway? (y = continue, n = stop and fix epic first)
 ```
@@ -147,7 +147,7 @@ Proceed anyway? (y = continue, n = stop and fix epic first)
 After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
 
 ```text
-MCP: cache_search_confluence(query="[story_keywords]", space_key="BEP", limit=3)
+MCP: cache_search_confluence(query="[story_keywords]", space_key="{{SPACE_KEY}}", limit=3)
 ```
 
 If relevant pages found → extract key sections (business rules, API contracts, constraints) and store as `domain_context`. Inject into Phase 2 Write Story as reference.
@@ -423,8 +423,8 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
 
 ```text
 # Step 1: Create shells (parallel)
-MCP: jira_create_issue({project_key: "BEP", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
-MCP: jira_create_issue({project_key: "BEP", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[BE] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
+MCP: jira_create_issue({project_key: "{{PROJECT_KEY}}", summary:"[FE-Web] - ...", issue_type:"Subtask", additional_fields:{parent:{key:"ABC-XXX"}, timetracking:{originalEstimate:"4h"}}})
 
 # Step 2: Verify parent (HR5) — DO NOT SKIP
 MCP: jira_get_issue(issue_key: "ABC-YYY", fields: "parent") → confirm parent.key = "ABC-XXX"

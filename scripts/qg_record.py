@@ -6,7 +6,7 @@ Used by create-story and analyze-story skills after each Quality Gate run.
 
 Usage:
     python scripts/qg_record.py \\
-        --issue-key BEP-123 \\
+        --issue-key {{PROJECT_KEY}}-123 \\
         --type Story \\
         --score 87 \\
         --status PASS \\
@@ -31,7 +31,7 @@ QG_HISTORY = DATA_DIR / "qg-history.jsonl"
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Append a QG score record to qg-history.jsonl")
-    p.add_argument("--issue-key", required=True, help="Jira issue key (e.g. BEP-123)")
+    p.add_argument("--issue-key", required=True, help="Jira issue key (e.g. {{PROJECT_KEY}}-123)")
     p.add_argument("--type", required=True, dest="issue_type", help="Story | Subtask | Epic")
     p.add_argument("--score", required=True, type=int, help="QG score 0-100")
     p.add_argument("--status", required=True, choices=["PASS", "FAIL"])

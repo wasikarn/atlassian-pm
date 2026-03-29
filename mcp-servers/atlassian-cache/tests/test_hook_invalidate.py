@@ -14,9 +14,9 @@ def _make_db(tmp_path):
     conn.execute("CREATE TABLE searches (cache_key TEXT PRIMARY KEY, result_keys TEXT)")
     conn.execute("CREATE TABLE confluence_pages (page_id TEXT PRIMARY KEY)")
     conn.execute("CREATE TABLE confluence_sections (section_id TEXT, page_id TEXT)")
-    conn.execute("INSERT INTO issues VALUES ('BEP-99')")
+    conn.execute("INSERT INTO issues VALUES ('TP-99')")
     conn.execute("INSERT INTO confluence_pages VALUES ('P1')")
-    conn.execute("INSERT INTO searches VALUES ('k1', '[\"BEP-10\"]')")
+    conn.execute("INSERT INTO searches VALUES ('k1', '[\"TP-10\"]')")
     conn.commit()
     conn.close()
     return db
@@ -25,9 +25,9 @@ def _make_db(tmp_path):
 def test_invalidate_removes_jira_issue(tmp_path):
     db = _make_db(tmp_path)
     from hooks.plugin.cache_write_invalidate import _invalidate_db
-    _invalidate_db(db, issue_key="BEP-99")
+    _invalidate_db(db, issue_key="TP-99")
     conn = sqlite3.connect(str(db))
-    row = conn.execute("SELECT * FROM issues WHERE issue_key = 'BEP-99'").fetchone()
+    row = conn.execute("SELECT * FROM issues WHERE issue_key = 'TP-99'").fetchone()
     assert row is None
 
 
@@ -43,7 +43,7 @@ def test_invalidate_removes_confluence_page(tmp_path):
 def test_invalidate_noop_when_db_missing(tmp_path):
     """Does not raise when DB doesn't exist."""
     from hooks.plugin.cache_write_invalidate import _invalidate_db
-    _invalidate_db(tmp_path / "nonexistent.db", issue_key="BEP-1")  # should not raise
+    _invalidate_db(tmp_path / "nonexistent.db", issue_key="TP-1")  # should not raise
 
 
 def test_invalidate_noop_when_no_key(tmp_path):
@@ -53,11 +53,11 @@ def test_invalidate_noop_when_no_key(tmp_path):
 
 
 def test_invalidate_does_not_evict_other_issues_from_searches(tmp_path):
-    """BEP-1 invalidation must not evict search rows containing only BEP-10."""
+    """TP-1 invalidation must not evict search rows containing only TP-10."""
     db = _make_db(tmp_path)
     from hooks.plugin.cache_write_invalidate import _invalidate_db
-    _invalidate_db(db, issue_key="BEP-1")
+    _invalidate_db(db, issue_key="TP-1")
     conn = sqlite3.connect(str(db))
     row = conn.execute("SELECT * FROM searches WHERE cache_key = 'k1'").fetchone()
     conn.close()
-    assert row is not None  # BEP-10 row must survive BEP-1 invalidation
+    assert row is not None  # TP-10 row must survive TP-1 invalidation

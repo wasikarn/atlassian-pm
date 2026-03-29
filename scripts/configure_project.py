@@ -26,10 +26,10 @@ SKILLS_DIR = PROJECT_DIR / "skills"
 # Placeholder format: {{KEY}}
 # Default values are used as fallback when config doesn't have the key
 PLACEHOLDERS = {
-    "PROJECT_KEY": "BEP",
+    "PROJECT_KEY": "TP",
     "JIRA_SITE": "100-stars.atlassian.net",
     "CONFLUENCE_SITE": "100-stars.atlassian.net",
-    "SPACE_KEY": "BEP",
+    "SPACE_KEY": "TP",
     "START_DATE_FIELD": "{{START_DATE_FIELD}}",
     "SPRINT_FIELD": "{{SPRINT_FIELD}}",
     "BOARD_ID": 2,

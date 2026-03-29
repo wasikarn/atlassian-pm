@@ -482,7 +482,7 @@ All project-specific values live in `.claude/project-config.json` — the single
 ### Git Filter — Automatic Placeholder Conversion
 
 ```text
-Committed:    BEP-XXX   ← always placeholders
+Committed:    {{PROJECT_KEY}}-XXX   ← always placeholders
                       │
                [smudge on checkout]
                       ↓
@@ -490,7 +490,7 @@ Working tree: ABC-XXX               ← real values
                       │
                [clean on commit]
                       ↓
-Staged:       BEP-XXX   ← always placeholders
+Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 ```
 
 | Placeholder | Example |

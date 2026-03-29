@@ -103,7 +103,7 @@ class TestExtractField:
 class TestStripNoise:
     def test_strips_noise_fields(self):
         data = {
-            "key": "BEP-1",
+            "key": "TP-1",
             "self": "https://jira/...",
             "fields": {
                 "summary": "test",
@@ -112,15 +112,15 @@ class TestStripNoise:
         }
         result = strip_noise(data)
         assert "self" not in result
-        assert result["key"] == "BEP-1"
+        assert result["key"] == "TP-1"
         assert "self" not in result["fields"]["status"]
         assert "statusCategory" not in result["fields"]["status"]
         assert result["fields"]["status"]["name"] == "Done"
 
     def test_strips_from_list(self):
-        data = [{"self": "url", "key": "BEP-1"}, {"self": "url2", "name": "test"}]
+        data = [{"self": "url", "key": "TP-1"}, {"self": "url2", "name": "test"}]
         result = strip_noise(data)
-        assert result == [{"key": "BEP-1"}, {"name": "test"}]
+        assert result == [{"key": "TP-1"}, {"name": "test"}]
 
     def test_passes_through_primitives(self):
         assert strip_noise("string") == "string"
@@ -219,37 +219,37 @@ class TestPragmas:
 
 class TestIssueOperations:
     def test_put_and_get(self, cache, sample_issue):
-        cache.put_issue("BEP-100", sample_issue)
-        result = cache.get_issue("BEP-100")
+        cache.put_issue("TP-100", sample_issue)
+        result = cache.get_issue("TP-100")
         assert result is not None
         # Noise should be stripped
         assert "self" not in result
-        assert result["key"] == "BEP-100"
+        assert result["key"] == "TP-100"
 
     def test_get_miss(self, cache):
-        result = cache.get_issue("BEP-999")
+        result = cache.get_issue("TP-999")
         assert result is None
 
     def test_get_stale(self, cache, sample_issue):
         """Issue older than max_age returns None."""
-        cache.put_issue("BEP-100", sample_issue)
-        result = cache.get_issue("BEP-100", max_age_hours=0)
+        cache.put_issue("TP-100", sample_issue)
+        result = cache.get_issue("TP-100", max_age_hours=0)
         assert result is None
 
     def test_get_issue_stale(self, cache, sample_issue):
         """get_issue_stale returns regardless of age."""
-        cache.put_issue("BEP-100", sample_issue)
+        cache.put_issue("TP-100", sample_issue)
         # Even with 0 max_age, stale returns data
-        result = cache.get_issue_stale("BEP-100")
+        result = cache.get_issue_stale("TP-100")
         assert result is not None
-        assert result["key"] == "BEP-100"
+        assert result["key"] == "TP-100"
 
     def test_get_issue_stale_miss(self, cache):
         assert cache.get_issue_stale("NOPE") is None
 
     def test_put_strips_noise(self, cache, sample_issue_with_noise):
-        cache.put_issue("BEP-200", sample_issue_with_noise)
-        result = cache.get_issue("BEP-200")
+        cache.put_issue("TP-200", sample_issue_with_noise)
+        result = cache.get_issue("TP-200")
         # Should not have 'self', 'accountId', etc.
         assert "self" not in result
         fields = result.get("fields", {})
@@ -258,33 +258,33 @@ class TestIssueOperations:
 
     def test_put_with_sprint_list(self, cache):
         issue = {
-            "key": "BEP-1",
+            "key": "TP-1",
             "fields": {
                 "summary": "t",
                 "customfield_10020": [{"id": 42, "name": "S42"}],
             },
         }
-        cache.put_issue("BEP-1", issue)
-        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='BEP-1'").fetchone()
+        cache.put_issue("TP-1", issue)
+        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='TP-1'").fetchone()
         assert row[0] == 42
 
     def test_put_with_sprint_dict(self, cache):
         issue = {
-            "key": "BEP-1",
+            "key": "TP-1",
             "fields": {
                 "summary": "t",
                 "customfield_10020": {"id": 99},
             },
         }
-        cache.put_issue("BEP-1", issue)
-        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='BEP-1'").fetchone()
+        cache.put_issue("TP-1", issue)
+        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='TP-1'").fetchone()
         assert row[0] == 99
 
     def test_batch_put_with_sprint_dict(self, cache):
         """L441: put_issues_batch with sprint as dict (not list)."""
         issues = [
             {
-                "key": "BEP-1",
+                "key": "TP-1",
                 "fields": {
                     "summary": "t",
                     "customfield_10020": {"id": 88},
@@ -292,20 +292,20 @@ class TestIssueOperations:
             }
         ]
         cache.put_issues_batch(issues)
-        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='BEP-1'").fetchone()
+        row = cache.conn.execute("SELECT sprint_id FROM issues WHERE issue_key='TP-1'").fetchone()
         assert row[0] == 88
 
     def test_put_with_description_adf(self, cache, sample_issue_with_noise):
-        cache.put_issue("BEP-200", sample_issue_with_noise)
-        row = cache.conn.execute("SELECT description_text FROM issues WHERE issue_key='BEP-200'").fetchone()
+        cache.put_issue("TP-200", sample_issue_with_noise)
+        row = cache.conn.execute("SELECT description_text FROM issues WHERE issue_key='TP-200'").fetchone()
         assert row[0] == "Description text here"
 
     def test_no_accessed_at_on_read(self, cache, sample_issue):
         """P1-B: get_issue should NOT update accessed_at."""
-        cache.put_issue("BEP-100", sample_issue)
+        cache.put_issue("TP-100", sample_issue)
         # Read — should not trigger commit for accessed_at
-        cache.get_issue("BEP-100")
-        row = cache.conn.execute("SELECT accessed_at FROM issues WHERE issue_key='BEP-100'").fetchone()
+        cache.get_issue("TP-100")
+        row = cache.conn.execute("SELECT accessed_at FROM issues WHERE issue_key='TP-100'").fetchone()
         # accessed_at should be None (we stopped writing it)
         assert row[0] is None
 
@@ -318,20 +318,20 @@ class TestBatchOperations:
         count = cache.put_issues_batch(multiple_issues)
         assert count == 5
         for i in range(1, 6):
-            assert cache.get_issue(f"BEP-{i}") is not None
+            assert cache.get_issue(f"TP-{i}") is not None
 
     def test_put_issues_batch_empty(self, cache):
         assert cache.put_issues_batch([]) == 0
 
     def test_put_issues_batch_skips_no_key(self, cache):
-        issues = [{"fields": {"summary": "no key"}}, {"key": "BEP-1", "fields": {"summary": "ok"}}]
+        issues = [{"fields": {"summary": "no key"}}, {"key": "TP-1", "fields": {"summary": "ok"}}]
         assert cache.put_issues_batch(issues) == 1
 
     def test_get_issues_batch(self, cache, multiple_issues):
         cache.put_issues_batch(multiple_issues)
-        found, missing = cache.get_issues_batch(["BEP-1", "BEP-3", "BEP-999"])
+        found, missing = cache.get_issues_batch(["TP-1", "TP-3", "TP-999"])
         assert len(found) == 2
-        assert missing == ["BEP-999"]
+        assert missing == ["TP-999"]
 
     def test_get_issues_batch_empty(self, cache):
         found, missing = cache.get_issues_batch([])
@@ -340,18 +340,18 @@ class TestBatchOperations:
 
     def test_get_issues_batch_stale(self, cache, multiple_issues):
         cache.put_issues_batch(multiple_issues)
-        found, missing = cache.get_issues_batch(["BEP-1"], max_age_hours=0)
+        found, missing = cache.get_issues_batch(["TP-1"], max_age_hours=0)
         assert len(found) == 0
-        assert missing == ["BEP-1"]
+        assert missing == ["TP-1"]
 
     def test_get_issues_batch_triggers_flush(self, cache, multiple_issues):
         """Batch get should flush stats when threshold is reached."""
         cache._stat_flush_threshold = 2  # Low threshold
         cache.put_issues_batch(multiple_issues)
         # 5 hits + 1 miss = 6 buffer → triggers flush
-        found, missing = cache.get_issues_batch(["BEP-1", "BEP-2", "BEP-3", "BEP-4", "BEP-5", "BEP-999"])
+        found, missing = cache.get_issues_batch(["TP-1", "TP-2", "TP-3", "TP-4", "TP-5", "TP-999"])
         assert len(found) == 5
-        assert missing == ["BEP-999"]
+        assert missing == ["TP-999"]
         # Verify flush happened — stats in DB
         row = cache.conn.execute("SELECT value FROM cache_stats WHERE key='hits'").fetchone()
         assert row is not None and row[0] >= 5
@@ -383,8 +383,8 @@ class TestSprintOperations:
 class TestSearchCache:
     def test_put_and_get_search(self, cache, multiple_issues):
         data = {"issues": multiple_issues, "total": 5}
-        cache.put_search("project = BEP", "summary,status", 50, data)
-        result = cache.get_search("project = BEP", "summary,status", 50)
+        cache.put_search("project = TP", "summary,status", 50, data)
+        result = cache.get_search("project = TP", "summary,status", 50)
         assert result is not None
         assert result["total"] == 5
 
@@ -400,14 +400,14 @@ class TestSearchCache:
         """put_search should also cache individual issues."""
         data = {"issues": multiple_issues, "total": 5}
         cache.put_search("q", "f", 10, data)
-        assert cache.get_issue("BEP-1") is not None
+        assert cache.get_issue("TP-1") is not None
 
     def test_search_skips_no_key_issues(self, cache):
         """put_search skips issues without key field."""
-        issues = [{"fields": {"summary": "no key"}}, {"key": "BEP-1", "fields": {"summary": "ok"}}]
+        issues = [{"fields": {"summary": "no key"}}, {"key": "TP-1", "fields": {"summary": "ok"}}]
         data = {"issues": issues, "total": 2}
         cache.put_search("q2", "f", 10, data)
-        assert cache.get_issue("BEP-1") is not None
+        assert cache.get_issue("TP-1") is not None
 
 
 # --- Search Key Normalization (P1-D) ---
@@ -415,12 +415,12 @@ class TestSearchCache:
 
 class TestSearchKeyNormalization:
     def test_whitespace_normalized(self, cache):
-        k1 = cache._search_key("project =  BEP  AND  status = Done", "summary,status", 10)
-        k2 = cache._search_key("project = BEP AND status = Done", "summary,status", 10)
+        k1 = cache._search_key("project =  TP  AND  status = Done", "summary,status", 10)
+        k2 = cache._search_key("project = TP AND status = Done", "summary,status", 10)
         assert k1 == k2
 
     def test_case_normalized(self, cache):
-        k1 = cache._search_key("Project = BEP", "summary", 10)
+        k1 = cache._search_key("Project = TP", "summary", 10)
         k2 = cache._search_key("project = bep", "summary", 10)
         assert k1 == k2
 
@@ -440,7 +440,7 @@ class TestSearchKeyNormalization:
 
 class TestTextSearch:
     def test_fts_basic(self, cache, sample_issue_with_noise):
-        cache.put_issue("BEP-200", sample_issue_with_noise)
+        cache.put_issue("TP-200", sample_issue_with_noise)
         results = cache.text_search("Description")
         assert len(results) >= 1
 
@@ -464,12 +464,12 @@ class TestTextSearch:
 
 class TestInvalidation:
     def test_invalidate_issue(self, cache, sample_issue):
-        cache.put_issue("BEP-100", sample_issue)
-        assert cache.invalidate_issue("BEP-100") is True
-        assert cache.get_issue("BEP-100") is None
+        cache.put_issue("TP-100", sample_issue)
+        assert cache.invalidate_issue("TP-100") is True
+        assert cache.get_issue("TP-100") is None
 
     def test_invalidate_missing(self, cache):
-        assert cache.invalidate_issue("BEP-999") is False
+        assert cache.invalidate_issue("TP-999") is False
 
     def test_invalidate_sprint(self, cache, multiple_issues):
         for i in multiple_issues:
@@ -481,11 +481,11 @@ class TestInvalidation:
         assert cache.get_sprint(42) is None
 
     def test_invalidate_all(self, cache, sample_issue):
-        cache.put_issue("BEP-100", sample_issue)
+        cache.put_issue("TP-100", sample_issue)
         cache.put_sprint(1, {"name": "S1"})
         cache.put_search("q", "f", 10, {"issues": [], "total": 0})
         cache.invalidate_all()
-        assert cache.get_issue("BEP-100") is None
+        assert cache.get_issue("TP-100") is None
         assert cache.get_sprint(1) is None
         assert cache.get_search("q", "f", 10) is None
 
@@ -521,10 +521,10 @@ class TestPurgeStale:
 
     def test_purge_keeps_fresh(self, cache, sample_issue):
         """Fresh data should not be purged."""
-        cache.put_issue("BEP-100", sample_issue)
+        cache.put_issue("TP-100", sample_issue)
         result = cache.purge_stale()
         assert result["purged_issues"] == 0
-        assert cache.get_issue("BEP-100") is not None
+        assert cache.get_issue("TP-100") is not None
 
 
 # --- Statistics (P1-B deferred counting) ---
@@ -532,9 +532,9 @@ class TestPurgeStale:
 
 class TestStatistics:
     def test_hit_miss_counting(self, cache, sample_issue):
-        cache.put_issue("BEP-100", sample_issue)
-        cache.get_issue("BEP-100")  # hit
-        cache.get_issue("BEP-999")  # miss
+        cache.put_issue("TP-100", sample_issue)
+        cache.get_issue("TP-100")  # hit
+        cache.get_issue("TP-999")  # miss
         stats = cache.get_stats()
         assert stats["hits"] >= 1
         assert stats["misses"] >= 1
@@ -552,10 +552,10 @@ class TestStatistics:
     def test_deferred_flush(self, cache, sample_issue):
         """Stats should flush when threshold reached."""
         cache._stat_flush_threshold = 3  # Lower for testing
-        cache.put_issue("BEP-100", sample_issue)
-        cache.get_issue("BEP-100")  # hit (buffer=1)
-        cache.get_issue("BEP-999")  # miss (buffer=2)
-        cache.get_issue("BEP-100")  # hit (buffer=3 → flush)
+        cache.put_issue("TP-100", sample_issue)
+        cache.get_issue("TP-100")  # hit (buffer=1)
+        cache.get_issue("TP-999")  # miss (buffer=2)
+        cache.get_issue("TP-100")  # hit (buffer=3 → flush)
         # After flush, DB should have updated values
         row = cache.conn.execute("SELECT value FROM cache_stats WHERE key='hits'").fetchone()
         assert row[0] >= 2
@@ -570,7 +570,7 @@ class TestStatistics:
         assert "purged_searches" in stats
 
     def test_vacuum(self, cache, sample_issue):
-        cache.put_issue("BEP-100", sample_issue)
+        cache.put_issue("TP-100", sample_issue)
         cache.vacuum()  # Should not crash
 
     def test_cache_stats_includes_embedding_available(self, cache):
@@ -586,23 +586,23 @@ class TestAdaptiveTTL:
     def test_done_status(self, cache):
         from tests.conftest import make_issue
 
-        issue = make_issue(key="BEP-1", status="Done")
-        cache.put_issue("BEP-1", issue)
-        assert cache.get_adaptive_ttl("BEP-1") == 168.0
+        issue = make_issue(key="TP-1", status="Done")
+        cache.put_issue("TP-1", issue)
+        assert cache.get_adaptive_ttl("TP-1") == 168.0
 
     def test_active_status(self, cache):
         from tests.conftest import make_issue
 
-        issue = make_issue(key="BEP-2", status="In Progress")
-        cache.put_issue("BEP-2", issue)
-        assert cache.get_adaptive_ttl("BEP-2") == 6.0
+        issue = make_issue(key="TP-2", status="In Progress")
+        cache.put_issue("TP-2", issue)
+        assert cache.get_adaptive_ttl("TP-2") == 6.0
 
     def test_unknown_status(self, cache):
         from tests.conftest import make_issue
 
-        issue = make_issue(key="BEP-3", status="Custom Status")
-        cache.put_issue("BEP-3", issue)
-        assert cache.get_adaptive_ttl("BEP-3") == DEFAULT_TTL
+        issue = make_issue(key="TP-3", status="Custom Status")
+        cache.put_issue("TP-3", issue)
+        assert cache.get_adaptive_ttl("TP-3") == DEFAULT_TTL
 
     def test_not_cached(self, cache):
         assert cache.get_adaptive_ttl("NOPE") == DEFAULT_TTL
@@ -617,8 +617,8 @@ class TestClose:
         from atlassian_cache.cache import AtlassianCache
 
         c = AtlassianCache(db_path=tmp_db)
-        c.put_issue("BEP-100", sample_issue)
-        c.get_issue("BEP-100")  # hit buffered
+        c.put_issue("TP-100", sample_issue)
+        c.get_issue("TP-100")  # hit buffered
         c.close()
 
         # Re-open and check stats were persisted
@@ -645,7 +645,7 @@ class TestCheckDbSize:
         import logging
 
         c = AtlassianCache(db_path=tmp_db)
-        c.put_issue("BEP-1", sample_issue)
+        c.put_issue("TP-1", sample_issue)
         # Temporarily set limit very low to trigger
         with (
             patch("atlassian_cache.cache.MAX_DB_SIZE_MB", 0),
@@ -705,7 +705,7 @@ class TestCachedAtMetadata:
     def test_cached_issue_includes_cached_at_field(self, cache, sample_issue):
         """put_issue stores _cached_at so lazy version-check can read it."""
         cache.put_issue(sample_issue["key"], sample_issue)
-        result = cache.get_issue("BEP-100", max_age_hours=24)
+        result = cache.get_issue("TP-100", max_age_hours=24)
         assert result is not None
         assert "_cached_at" in result
         assert isinstance(result["_cached_at"], float)
@@ -714,7 +714,7 @@ class TestCachedAtMetadata:
     def test_cached_at_iso_is_string(self, cache, sample_issue):
         """_cached_at_iso is a valid ISO 8601 string."""
         cache.put_issue(sample_issue["key"], sample_issue)
-        result = cache.get_issue("BEP-100", max_age_hours=24)
+        result = cache.get_issue("TP-100", max_age_hours=24)
         assert isinstance(result["_cached_at_iso"], str)
         # Should parse as a valid datetime
         from datetime import datetime
@@ -724,7 +724,7 @@ class TestCachedAtMetadata:
     def test_lazy_version_check_skips_when_fresh(self, cache, sample_issue):
         """When cache is within TTL, no upstream API call is needed."""
         cache.put_issue(sample_issue["key"], sample_issue)
-        result = cache.get_issue("BEP-100", max_age_hours=24)
+        result = cache.get_issue("TP-100", max_age_hours=24)
         # Result is returned from cache — no API needed
         assert result is not None
 
@@ -732,7 +732,7 @@ class TestCachedAtMetadata:
         """When max_age_hours=0, cache miss triggers upstream path."""
         cache.put_issue(sample_issue["key"], sample_issue)
         # max_age=0 means TTL=0 — everything is considered stale
-        result = cache.get_issue("BEP-100", max_age_hours=0)
+        result = cache.get_issue("TP-100", max_age_hours=0)
         assert result is None  # stale — caller must fetch upstream
 
     def test_cached_at_survives_put_roundtrip(self, cache, sample_issue):
@@ -741,7 +741,7 @@ class TestCachedAtMetadata:
         before = time.time()
         cache.put_issue(sample_issue["key"], sample_issue)
         after = time.time()
-        result = cache.get_issue("BEP-100", max_age_hours=24)
+        result = cache.get_issue("TP-100", max_age_hours=24)
         assert before <= result["_cached_at"] <= after
 
 

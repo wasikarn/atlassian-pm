@@ -27,8 +27,8 @@ description: |
   Execute test cases from a Google Sheet linked to a Jira story using Playwright, then write results back and create bug tickets.
 
   Triggers:
-  - "execute testplan BEP-XXX", "run test BEP-XXX"
-  - "รัน testplan", "ทดสอบ BEP-XXX", "execute test cases"
+  - "execute testplan {{PROJECT_KEY}}-XXX", "run test {{PROJECT_KEY}}-XXX"
+  - "รัน testplan", "ทดสอบ {{PROJECT_KEY}}-XXX", "execute test cases"
   - "run QA", "QA run"
 
   Use when: QA wants to automate execution of a Google Sheet test plan linked to a Jira story and record results.
@@ -269,7 +269,7 @@ Progress display after each test:
       → Apply background color via Apps Script or cell formatting:
         pass = green (#b7e1cd), fail = red (#f4c7c3), skip = grey (#efefef), blocked = orange (#fce8b2)
    d. Click cell K (Date) → type today's date (DD/MM/YYYY)
-   e. Click cell L (Remark) → append bug key if fail (e.g., "BEP-XXXX")
+   e. Click cell L (Remark) → append bug key if fail (e.g., "{{PROJECT_KEY}}-XXXX")
 
 3. Verify changes saved (check spinner / "Saving..." text disappears)
 
@@ -293,7 +293,7 @@ Note: If Google Sheet is not editable (view-only link):
    - Group by root cause if multiple tests fail on same step
 
 2. For each failure group:
-   a. jira_search(jql: 'project=BEP AND issuetype=Bug AND text~"<description>" AND status != Done')
+   a. jira_search(jql: 'project=TP AND issuetype=Bug AND text~"<description>" AND status != Done')
       → Check for duplicate open bug (confidence: EXACT/HIGH/MEDIUM/LOW)
 
    b. If duplicate found (HIGH/EXACT):
@@ -333,7 +333,7 @@ Note: If Google Sheet is not editable (view-only link):
    | 🚫 Blocked | W |
    | **Total** | **N** |
 
-   **Bugs created:** BEP-XXXX, BEP-YYYY
+   **Bugs created:** {{PROJECT_KEY}}-XXXX, TP-YYYY
    **Sheet:** <sheet_url>
 
 4. Print final report to user

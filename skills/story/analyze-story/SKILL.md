@@ -49,7 +49,7 @@ effort: high
 
 > **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously (single message, 2 calls). Bootstrap needs only the issue key; Confluence search needs only title keywords — no dependency between them.
 
-- `Agent(name: "issue-bootstrap"): BEP-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
+- `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
 
 - Read: Narrative, ACs, Links, Epic context from bootstrap output
 
@@ -73,7 +73,7 @@ Before investing in subtask design, verify the story is ready for analysis:
 Search for domain documentation relevant to this story using its title + AC keywords:
 
 ```text
-MCP: cache_search_confluence(query="[story_title_keywords]", space_key="BEP", limit=3)
+MCP: cache_search_confluence(query="[story_title_keywords]", space_key="{{SPACE_KEY}}", limit=3)
 ```
 
 If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
@@ -205,9 +205,9 @@ MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
 **Output:** Handoff summary with subtask keys and next-step prompt
 
 ```text
-## TA Complete: [Title] (BEP-XXX)
+## TA Complete: [Title] ({{PROJECT_KEY}}-XXX)
 Sub-tasks: ABC-YYY, ABC-ZZZ
-→ Use /create-testplan BEP-XXX to continue
+→ Use /create-testplan {{PROJECT_KEY}}-XXX to continue
 ```
 
 ---
@@ -243,7 +243,7 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 
 - Passing an Epic key instead of a Story key — subtasks will be parented to the Epic directly, breaking hierarchy (HR5 will catch this but wastes a cycle).
 - Skipping or rushing through Phase 3 codebase exploration — generic file paths (e.g. `src/controllers/`) get rejected at QG; real module paths are required.
-- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue BEP-XXX --with-subtasks` first to review existing coverage.
+- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` first to review existing coverage.
 - Using `/analyze-story` when the Story doesn't exist yet — run `/create-story` instead to go through the full PO+TA combined workflow.
 
 ## 🎓 Domain Expert Notes
@@ -259,4 +259,4 @@ See [references/domain-expert.md](references/domain-expert.md)
 - [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS decomposition, patterns
 - [Tool Selection](../../../references/tools.md) - Tools, service tags, effort sizing
 - [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
-- After creation: `/verify-issue BEP-XXX --with-subtasks`
+- After creation: `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`

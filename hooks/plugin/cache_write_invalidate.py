@@ -7,7 +7,7 @@ consistency immediately after write operations.
 
 Usage:
     from hooks.plugin.cache_write_invalidate import _invalidate_db
-    _invalidate_db(db_path, issue_key="BEP-100")
+    _invalidate_db(db_path, issue_key="TP-100")
     _invalidate_db(db_path, page_id="12345")
 """
 
@@ -29,11 +29,11 @@ def _invalidate_db(
     - Neither issue_key nor page_id is provided
 
     Search rows are evicted only when they contain the exact issue_key
-    (prevents BEP-1 from evicting rows that contain only BEP-10).
+    (prevents TP-1 from evicting rows that contain only TP-10).
 
     Args:
         db_path: Path to atlassian.db SQLite file.
-        issue_key: Jira issue key to remove (e.g. "BEP-100").
+        issue_key: Jira issue key to remove (e.g. "TP-100").
         page_id: Confluence page ID to remove (e.g. "12345").
     """
     if not issue_key and not page_id:
