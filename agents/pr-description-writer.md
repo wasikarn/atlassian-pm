@@ -39,7 +39,9 @@ Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`
    - Config files (`.env.example`, `docker-compose.yml`, `k8s/`): flag as "deployment config change"
    - If any breaking change detected → add `⚠️ BREAKING CHANGE` section to PR description
 
-6. **Select and generate PR description template** based on issue type:
+6. **Select and generate PR description template** based on issue type.
+
+## Issue-Type-Aware Templates
 
 **For Subtask / Story (feature work):**
 
