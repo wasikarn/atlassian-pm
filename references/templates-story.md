@@ -15,7 +15,7 @@
 | Start Date | `{{START_DATE_FIELD}}` | `"YYYY-MM-DD"` (sprint start or planned start) | Recommended |
 | Due Date | `duedate` | `"YYYY-MM-DD"` (planned completion) | Recommended |
 
-> **Size → Story Points mapping:** Use Size Guide above. Set both fields — Size for visual, Story Points for velocity tracking.
+> **Size → Story Points mapping:** XS=1, S=2, M=3, L=5, XL=8. Set both fields — Size for visual, Story Points for velocity tracking.
 >
 > **Example:** `jira_update_issue(issue_key="ABC-XXX", additional_fields={"customfield_10016": 3, "customfield_10107": {"value": "M"}, "{{START_DATE_FIELD}}": "2026-02-10", "duedate": "2026-02-14"})`
 

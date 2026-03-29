@@ -2,12 +2,16 @@
 name: quality-gate
 description: |
   Validate ADF content against quality gate criteria.
+
+  > **⚠️ DEPRECATED for skill-invoked QG:** As of v2.3.0, all skills use `uv run scripts/api/validate_adf.py {file} --type {type} --json` directly. This agent is for **manual/ad-hoc use only** (e.g., debugging a specific ADF file outside a skill workflow).
+  > Do NOT re-introduce `Agent(name: "quality-gate")` calls in SKILL.md files — use the script instead.
+
   <example>
-  Context: create-story skill has generated ADF and needs validation before Jira write
-  user: "Create a story for user authentication"
-  assistant: "I'll use the quality-gate agent to validate the ADF content before writing to Jira."
+  Context: manual ADF validation outside a skill workflow
+  user: "Validate the ADF in /tmp/story.json"
+  assistant: "I'll use the quality-gate agent to validate the ADF content."
   <commentary>
-  quality-gate is dispatched from create-story after story-writer generates ADF — it must pass QG ≥ 90% before any Jira write (HR1).
+  For skill-invoked QG, use validate_adf.py script. This agent is for ad-hoc manual validation only.
   </commentary>
   </example>
 model: sonnet

@@ -45,7 +45,7 @@ effort: high
 | 10. QG Subtasks | `qg_score`, `passed_qg` |
 | 11. Create | `subtask_keys[]` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-compact.md](../../../references/workflow-compact.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Blueprint Handoff Check
 
@@ -522,4 +522,4 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Subtask Template](../../../references/templates-subtask.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Subtask Template](../../../references/templates-subtask.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)
