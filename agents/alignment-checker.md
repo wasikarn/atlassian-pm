@@ -49,7 +49,7 @@ If `jira_search(jql="parent = STORY-KEY")` returns 0 results:
 
 1. Fetch story: `cache_get_issue(story_key)` — get ACs, scope, parent key, subtask list
 2. Fetch parent epic: `cache_get_issue(story.parent.key)` — get epic scope, must-have list (skip if no parent)
-3. Fetch subtasks: `jira_search(jql: "parent = story_key")` — get all subtask objectives and tags (skip if subtask list already in context)
+3. Fetch subtasks: `cache_search(jql: "parent = story_key")` first, fallback to `jira_search` if cache miss — get all subtask objectives and tags (skip if subtask list already in context)
 
 **Epic with Many Children:** If epic has >50 subtasks/stories:
 

@@ -64,7 +64,7 @@ Always append at the end:
 
 From `test_case.expected`. Use bullet list.
 
-### Panel 3 — Actual Result (error / use "warning" panel type since Jira has no "error")
+### Panel 3 — Actual Result (error)
 
 From `result.actual_result`. Use bullet list.
 If `console_errors` not empty → add sub-section "Console Errors" as code block (language: "text").

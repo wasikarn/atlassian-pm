@@ -47,6 +47,7 @@ High Impact
 | -------- | ------------- | -------- |
 | To Do | 100% | Not started yet — guaranteed carry-over |
 | In Progress | 85% | May finish, but most won't make it in time |
+| Blocked | 90% | Externally blocked — cannot complete without unblocking |
 | TO FIX | 92% | Needs fixing — usually must carry over |
 | WAITING TO TEST | 55% | Depends on QA capacity |
 | TESTING | 45% | Currently being tested; has a chance to finish |

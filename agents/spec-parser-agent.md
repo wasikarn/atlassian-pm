@@ -34,9 +34,13 @@ Receive from skill: raw Confluence page body (ADF JSON string or storage format 
 
 Before processing:
 
-1. Count text nodes in the ADF/HTML: if total text length < 200 characters AND page has attachment/image references → flag as image-dominant page
+1. Validate input format: attempt to parse as JSON (ADF). If JSON parse fails and input does not start with `<` (HTML) → return early: `{"error": "unparseable_input", "message": "Input is neither valid ADF JSON nor HTML storage format. Cannot extract requirements.", "sections": [], "requirements": [], "personas": [], "constraints": []}`
 
-2. Return early with error output:
+2. Check for empty content: if total text length = 0 AND no image references → return early: `{"error": "empty_page", "message": "Page has no content.", "sections": [], "requirements": [], "personas": [], "constraints": []}`
+
+3. Count text nodes in the ADF/HTML: if total text length < 200 characters AND page has attachment/image references → flag as image-dominant page
+
+4. Return early with error output:
 
 ```json
 {
@@ -49,7 +53,7 @@ Before processing:
 }
 ```
 
-3. If text length ≥ 200 characters → proceed with normal extraction
+If none of the above conditions apply (text length ≥ 200 characters) → proceed with normal extraction.
 
 ### Phase 1: Section Map
 

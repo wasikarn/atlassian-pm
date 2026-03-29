@@ -186,23 +186,30 @@ def get_additional_fields(tool_input: dict) -> dict:
 
 
 def get_parent_key(tool_input: dict) -> str | None:
-    """Extract parent issue key from tool_input.additional_fields.
+    """Extract parent issue key from tool_input.
 
+    Checks top-level tool_input first, then additional_fields.
     Handles both formats:
       - Dict:   {"parent": {"key": "{{PROJECT_KEY}}-X"}}
       - String: {"parent": "{{PROJECT_KEY}}-X"}
 
     Returns the parent key string, or None if not present.
     """
-    additional = get_additional_fields(tool_input)
-    parent = additional.get("parent")
-    if not parent:
+    def _extract(parent: object) -> str | None:
+        if isinstance(parent, dict):
+            return parent.get("key") or parent.get("id")
+        if isinstance(parent, str):
+            return parent
         return None
-    if isinstance(parent, dict):
-        return parent.get("key") or parent.get("id")
-    if isinstance(parent, str):
-        return parent
-    return None
+
+    # Check top-level first (used by jira_create_issue)
+    top_level = _extract(tool_input.get("parent"))
+    if top_level:
+        return top_level
+
+    # Fall back to additional_fields (used by acli and some MCP patterns)
+    additional = get_additional_fields(tool_input)
+    return _extract(additional.get("parent"))
 
 
 def get_tool_response(data: dict) -> str:

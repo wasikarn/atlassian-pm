@@ -89,6 +89,7 @@ Priority order:
 |--------|------------|-----------|
 | To Do | 100% | Not started yet — guaranteed carry-over |
 | In Progress | 85% | May finish before sprint end but most carry over |
+| Blocked | 90% | Externally blocked — cannot complete without unblocking |
 | TO FIX | 92% | Needs fixing — usually won't finish in one sprint |
 | WAITING TO TEST | 55% | Depends on QA capacity; may finish if QA is available |
 | TESTING | 45% | Currently being tested; has a chance to finish in sprint |

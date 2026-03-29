@@ -48,11 +48,13 @@ Before planning:
 
 Use status-based probability model from sprint-frameworks.md:
 
-- Done/Waiting to Test: 5% carry-over probability
-- In Progress (Day ≥ 5): 40% probability
-- In Progress (Day < 5): 20% probability
-- To Do: 70% probability
+- Done / CANCELED: 0% carry-over probability
+- TESTING: 45% probability
+- WAITING TO TEST: 55% probability
+- In Progress: 85% probability
 - Blocked: 90% probability
+- TO FIX: 92% probability
+- To Do: 100% probability — not started, guaranteed carry-over
 
 High-probability (>80%) → auto-include in target sprint.
 Medium-probability (45-80%) → flag for user decision.

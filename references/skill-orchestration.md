@@ -27,7 +27,7 @@
 | Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
 | Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
 | Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
-| Release notes | `/plan-release` → `/close-sprint` → `/release-notes` | N/A |
+| Release notes | `/plan-release` → `/release-notes` | N/A |
 | Start ticket (DLC) | `/start-ticket` | pre: ticket in Jira · post: status = In Progress, AC displayed |
 | Ship to QA (DLC) | `/ship-to-qa` | pre: PR open, branch deployed · post: Jira comment posted, status = Ready for QA |
 
@@ -52,7 +52,7 @@
 | Check | Max | Applies To |
 | --- | --- | --- |
 | T1-T5 Technical | 5 | All types |
-| S1-S5 Story Quality | 6 | Story |
+| S1-S6 Story Quality | 6 | Story |
 | ST1-ST5 Subtask Quality | 5 | Sub-task |
 | QA1-QA5 QA Quality | 5 | QA Sub-task |
 | B1-B8 Blueprint Quality | 8 (or 5 for S-tier) | Blueprint (Confluence) |
@@ -127,30 +127,17 @@ flowchart LR
 | `/spec-to-stories` | Confluence page + epic | Jira User Stories linked to epic |
 | `/scan-tech-debt` | Project with tech-debt issues | Confluence priority matrix page |
 
-## Repomix Context Packs
+## Context Packs
 
-> Load shared-references as a single Repomix pack instead of 4-5 individual Read calls.
-> Packs defined in `shared-references/context-packs.json`.
+> Load shared references as a batched set instead of 4-5 individual Read calls.
+> Pack definitions in `references/context-packs.json`.
 
 ### Usage
 
 ```text
 1. Determine workflow type (story, subtask, sprint, verify, etc.)
-2. Look up pack in context-packs.json → get file list
-3. Call mcp__repomix__pack_codebase with includePatterns from pack
-4. Use read_repomix_output or grep_repomix_output for targeted lookups
-```
-
-### Example: story workflow
-
-```text
-mcp__repomix__pack_codebase(
-  directory: ".claude/skills/shared-references",
-  includePatterns: "templates.md,verification-checklist.md,vertical-slice-guide.md,writing-style.md",
-  compress: true
-)
-→ Single packed output replaces 4 Read calls
-→ Tree-sitter compression reduces tokens ~40-60%
+2. Look up pack in references/context-packs.json → get file list
+3. Read all files in the pack's file list in one message (parallel Read calls)
 ```
 
 ### When to Use Repomix vs Direct Read

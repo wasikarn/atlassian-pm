@@ -33,7 +33,7 @@ Repair ADF JSON structure for Jira compatibility. Applied after quality-gate ide
 
 | QUIRK | Problem | Fix |
 | ----- | ------- | --- |
-| QUIRK-1 | Panel missing `panelType` → blank box | Add panelType: Objective→"info", Scope→"note", AC→"success", Tech Notes→"warning" |
+| QUIRK-1 | Panel missing `panelType` → blank box | Add panelType: Objective→"info", Scope→"note", AC→"success", Tech Notes→"note" |
 | QUIRK-2 | `inlineCard` with relative URL → broken link | Expand to absolute: `https://<site>.atlassian.net/browse/KEY`. Site from `.claude/project-config.json` |
 | QUIRK-3 | Table cell with direct text node → render fail | Wrap in `{"type":"paragraph","content":[...]}` |
 | QUIRK-4 | `h1` in description overrides page heading | Downgrade to h2 (or h3 if nested) — see QUIRK-4 guard below |

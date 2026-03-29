@@ -87,7 +87,7 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
      - If `trend_pct > +5` (team speeding up): note the trend but keep base estimate — do not inflate SP
      - If `std_dev > rolling_average * 0.2`: add "⚠️ High variance" warning — estimates are less reliable
    - Confidence: HIGH (3+ strong comparables) / MEDIUM (1-2 comparables) / LOW (no direct comparables, using pattern only)
-  - **Range output** (MEDIUM or LOW): report `{low: SP-2, likely: SP, high: SP+3}` in addition to the point estimate — single point estimate implies false precision
+   - **Range output** (MEDIUM or LOW): report `{low: max(1, SP-2), likely: SP, high: SP+3}` in addition to the point estimate — single point estimate implies false precision (low is clamped to minimum 1 SP)
    - **Drift adjustment**: if `assignee_carry_over_rate` > 50% (≥5 records) → add +1 SP regardless of other signals (this person consistently underestimates); flag in output as "assignee drift detected"
    - **Service area adjustment**: if `service_tag_carry_over_rate` > 40% (≥5 records) → add +1 SP; flag as "service area pattern"
    - Never exceed +2 SP total from drift/area adjustments combined

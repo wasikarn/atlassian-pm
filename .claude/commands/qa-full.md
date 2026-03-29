@@ -60,7 +60,7 @@ Ask: "Test plan created (`BEP-XXXX`). Run execute-testplan against **staging** n
 
 > **Gate:** Confirm a `[QA]` subtask key is available (from Step 1 creation or Step 0 existing plan). If create-testplan failed without producing a key, STOP and show: "create-testplan did not complete — resolve before executing."
 
-Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the issue key from `$ARGUMENTS` and resolved `--env` flag.
+Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the `[QA]` sub-task key confirmed in Steps 0/1 (e.g., the key from "Test plan created (`BEP-XXXX`)") and resolved `--env` flag.
 
 → Pass through any additional flags (`--headed`, `--rerun-failed`, `--dry-run`) from `$ARGUMENTS`.
 → Results written back to Google Sheet, bugs created for failures, summary posted to Jira.

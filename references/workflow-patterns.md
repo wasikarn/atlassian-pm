@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | **AUTO** | 🟢 | Validate automatically. Pass → proceed. Fail → auto-fix (max 2). Still fail → escalate to user. |
 | **REVIEW** | 🟡 | Present results to user, wait for quick confirmation. Default: proceed unless user objects. |
-| **APPROVAL** | ⛔ | STOP. Wait for explicit user approval before proceeding. |
+| **GATE** | ⛔ | STOP. Wait for explicit user approval before proceeding. |
 | **ITERATE** | 🔄 | Present structured plan → ask user to annotate/approve → if annotated: revise + re-present (max 3 rounds) → if approved: proceed. |
 
 ## Phase Tracking

@@ -12,14 +12,14 @@ The Scrum Guide 2020 defines Sprint Planning as answering three questions: Why i
 | Yesterday's Weather (Scrum pattern) | Phase 2 — team velocity calculation | Plan at 80% of 3-sprint rolling average velocity; single-sprint data is noise; ±20% is the reliable precision band |
 | Definition of Ready (DoR) | Phase 4 — story readiness validation | A PBI is ready for planning only when it has: clear acceptance criteria, estimated size, no unresolved dependencies, and approved design/mockups; items failing DoR should be returned to refinement, not planned |
 | Impact/Effort Matrix (2×2) | Phase 4 — prioritization | P1 (high impact, low effort) items are the sprint's non-negotiables; P4 (low impact, high effort) items should be explicitly deferred with a written reason in Jira |
-| Focus Factor (capacity model) | Phase 2 individual capacity | Industry benchmark: 0.6–0.7 for most developers; <0.5 signals meeting overload or context switching — investigate before sprint starts |
+| Focus Factor (capacity model) | Phase 2 individual capacity | Role-specific benchmarks (team-capacity.md): Tech Lead 0.4–0.5; Senior 0.7–0.8; Mid 0.75–0.85; Junior 0.6–0.7. Below-range values signal meeting overload or context switching — investigate before sprint starts |
 | SMART Goals (Doran, 1981, *Management Review*) | Phase 7 Sprint Goal review | Applied to Sprint Goals: Specific (names the value delivered), Measurable (has a verifiable done signal), Achievable (fits capacity), Relevant (aligned to product goal/OKR), Time-bound (sprint end = immovable deadline). "Continue features" goals fail Specific — they make sprint success unmeasurable and erode team accountability |
 
 ### Key Metrics
 
 - **Team Velocity (rolling 3-sprint avg):** the primary planning input — use 80% of this as the sprint capacity ceiling to build in a safety buffer
-- **Individual Utilization %:** (assigned hours / net available hours) × 100 — healthy: 70-85%; >95% = no slack for impediments, almost always results in carry-over
-- **Carry-over Probability Score:** based on status at planning time — In Progress >80% = high carry-over likelihood; To Do <45% = genuinely new capacity
+- **Individual Utilization %:** (assigned hours / net available hours) × 100 — healthy: 70-80%; 80-95% = ⚠️ at risk; >95% = no slack for impediments, almost always results in carry-over
+- **Carry-over Probability Score:** based on status at planning time — To Do = 100% (not started, guaranteed carry-over); In Progress ≥ 85%; Blocked ≈ 90%. Items at these probabilities are auto-included in target sprint; 45-80% are flagged for user decision
 - **Bus Factor Coverage:** count of sprint items that only one person can complete — any bus factor = 1 area should have a designated backup or pairing plan before sprint starts
 - **Review Load Ratio:** (review hours / productive hours) × 100 — Tech Lead >40% signals too many direct reports to review; creates bottleneck at PR stage
 

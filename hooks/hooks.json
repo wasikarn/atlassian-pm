@@ -466,18 +466,7 @@
         ]
       }
     ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_confirm_invalidation.py",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
+    "PostToolUseFailure": [],
     "UserPromptSubmit": [
       {
         "hooks": [

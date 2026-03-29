@@ -121,7 +121,7 @@ Then the full context block:
 - Try cache first → fallback to MCP (never skip cache)
 - HR2: NEVER add ORDER BY to `parent =` or `parent in` JQL
 - If cache miss → `jira_get_issue` with preset fields (or full fields if no preset)
-- If issue not found → return error message immediately (don't retry)
+- If issue not found → return structured error immediately (don't retry): `BOOTSTRAP_ERROR: {"key": "KEY", "error": "not_found", "message": "Issue not found in Jira or cache — may be deleted or key is incorrect"}`
 - Max 8 turns — fetch efficiently, don't over-paginate
 - Linked issues: skip if more than 10 links (report count instead)
 - Description: always plain text extract, never raw ADF JSON

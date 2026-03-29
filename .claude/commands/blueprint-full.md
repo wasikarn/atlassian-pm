@@ -3,7 +3,7 @@ name: blueprint-full
 description: |
   Triggers: "blueprint full", "blueprint to epic", "full blueprint workflow", "blueprint ครบ"
   Orchestrates: blueprint → create-epic → create-story → verify-issue --with-subtasks
-  Args: auto-detected — BEP-\d+ pattern = existing epic key; otherwise = description
+  Args: auto-detected — [A-Z]+-\d+ pattern = existing epic key; otherwise = description
 model: sonnet
 context: fork
 argument-hint: "[description] or EPIC-KEY"
@@ -19,7 +19,7 @@ Orchestrates: `blueprint` → `create-epic` → `create-story` → `verify-issue
 
 Auto-detect argument type from `$ARGUMENTS`:
 
-- If matches `BEP-\d+` pattern → use as existing epic key; skip to Step 3 (epic already exists, no need to create)
+- If matches `[A-Z]+-\d+` pattern → use as existing epic key; skip to Step 3 (epic already exists, no need to create)
 - Otherwise → Use the Skill tool to invoke `atlassian-pm:blueprint` with `$ARGUMENTS`
 
 ### Step 2 — Create Epic
