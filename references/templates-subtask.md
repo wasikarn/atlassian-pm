@@ -4,40 +4,6 @@
 
 ## Subtask Best Practices
 
-**SMART Criteria:**
-
-| Criteria | Meaning | Red Flag |
-| --- | --- | --- |
-| **S**pecific | Clear what to do | "Do backend part" (vague) |
-| **M**easurable | Can tell when done | No AC or definition of done |
-| **A**chievable | One person can complete | Requires 3 people to coordinate |
-| **R**elevant | Matches parent story | Unrelated to story scope |
-| **T**ime-boxed | ≤ 1 day (4-8 hours) | Takes 3 days |
-
-**Size Guide:**
-
-| Size | Duration | Guideline |
-| --- | --- | --- |
-| XS | < 2 hours | May be too small — consider merging with another subtask |
-| S | 2-4 hours | Appropriate |
-| M | 4-8 hours (1 day) | Appropriate — upper bound |
-| L | > 1 day | Must split — too large for a subtask |
-
-**Ideal Count:** 3-10 subtasks per story (sweet spot: 5-7). < 3 → story may not need decomposition. > 10 → story too large, split with SPIDR first.
-
-**Decomposition Techniques:**
-
-| Technique | Method | Example |
-| --- | --- | --- |
-| By Layer | Split by service tag | [BE] API + [FE-Admin] UI + [QA] Test |
-| By Step | Split by workflow stage | DB migration → API endpoint → UI form → Integration test |
-| By Scenario | Split by parent AC | Happy path → Edge case → Error handling |
-| By Component | Split by module | Form component → List component → Filter component |
-
-**Rules:** Prefer vertical slice when possible | Each subtask independently completable by one person | Every subtask must have clear definition of done | Never create "leftover" or "miscellaneous" subtasks
-
-**Anti-Patterns:** Over-layering (deep hierarchy = admin overhead) | No AC (can't tell when done) | Subtask replacing story split (hiding value in subtask) | Generic paths ("fix backend files") | Copy-paste AC from parent (subtask AC should be more specific)
-
 **Jira Fields (set in Step 1 MCP create via `additional_fields`):**
 
 | Field | Jira ID | Value | Required |

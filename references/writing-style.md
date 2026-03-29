@@ -14,23 +14,7 @@
 | File paths | English | `src/pages/coupon/index.tsx` |
 | Code/Routes | English | `/api/coupons`, `getCoupons()` |
 
-### Commonly Used Transliterations
-
-| English (keep as-is) |
-| --- |
-| endpoint |
-| payload |
-| validate |
-| component |
-| service |
-| API |
-| route |
-| model |
-| schema |
-| query |
-| filter |
-| response |
-| request |
+**Keep as-is (no transliteration):** endpoint, payload, validate, component, service, API, route, model, schema, query, filter, response, request
 
 ### Correct Examples
 
@@ -50,8 +34,6 @@ When: Click "Top-up Credit Coupon"
 Then: Navigate to topup credit page
 ```
 
----
-
 ## Tone & Style
 
 > **3 Principles:** Concise (cut excess words) · Casual (talk like a teammate) · Clear (specific + testable)
@@ -61,8 +43,6 @@ Then: Navigate to topup credit page
 | The system shall render and display a total of 3 card types in accordance with the approved design specifications | Display 3 card types per design |
 | Upon successful completion of page loading, the user shall be able to observe 3 card items rendered on screen | AC1: Display - Page loads and shows 3 cards |
 | Then: Show an appropriate error | Then: Show error "Please enter an amount" |
-
----
 
 ## Scan-First Principle
 
@@ -103,8 +83,6 @@ Team will **scan before reading** — design content to be scannable in 5 second
 - Middle sections ordered by reading flow (data → plan → boundaries → criteria)
 - Emoji is optional for simple tasks (<4 sections) but recommended for complex ones
 
----
-
 ## Storytelling Principles
 
 > **Goal:** Every ticket must explain **why** before **what**
@@ -138,8 +116,6 @@ Team will **scan before reading** — design content to be scannable in 5 second
 | Technical Events in AC | "DB_INSERT_SUCCESS" in AC | Use domain language: "CouponCollected" |
 | No Event Flow | Story doesn't specify events | ⚡ optional: add command→event in AC title |
 
----
-
 ## Content Budget (per section)
 
 > Agent **must** write within this budget — if exceeded, cut or split
@@ -168,8 +144,6 @@ Team will **scan before reading** — design content to be scannable in 5 second
 | | Test Cases | max 8 cases — if >8, split QA ticket |
 
 **⚡ = optional** — section or issue type included only when needed (QA ticket not required for every story)
-
----
 
 ## ADF Formatting
 
@@ -203,8 +177,6 @@ Use bold for:
 {"type": "text", "text": "Given:", "marks": [{"type": "strong"}]}
 ```
 
----
-
 ## Summary Format
 
 ### User Story
@@ -233,22 +205,6 @@ Tags: `[BE]`, `[FE-Admin]`, `[FE-Web]`
 ```text
 [QA] - Test: [Story title or feature name]
 ```
-
----
-
-## Vertical Slice Labels
-
-> Convention from Sprint 32 — used with Jira labels for board filtering
-
-| Pattern | When to use | Example |
-| --- | --- | --- |
-| `vs{N}-{name}` | Numbered vertical slice | `vs1-skeleton`, `vs2-credit-e2e` |
-| `vs-enabler` | Shared component used by multiple slices | Side Panel, Toast |
-| `{feature}-{scope}` | Cross-cutting concern | `coupon-web`, `ad-integration` |
-
-**Rules:** Every story must have a feature label (`coupon-web`) + at least 1 VS label / 1 story may have multiple VS labels
-
----
 
 ## Common Mistakes
 

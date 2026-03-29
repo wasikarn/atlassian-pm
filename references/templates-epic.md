@@ -4,15 +4,7 @@
 
 ## Epic Best Practices
 
-**Naming:** `[Domain] — [Deliverable]` (never include version/phase e.g. "Phase 1", "v2")
-
-**Size:** 8-15 stories, 2-6 months — if spanning 3+ sprints + multi-layer scope → split
-
-**When to Split:** >15 tickets | multiple domains in one epic | can't track progress | mixed concerns
-
-**How to Split:** By user persona | By delivery layer | By ordered process (VS1→VS2) | min 5 tickets per epic
-
-**Lifecycle:** Close when done → create new Epic | Review scope every sprint planning
+**Naming:** `[Domain] — [Deliverable]` (never "Phase 1", "v2") · **Size:** 8-15 stories, 2-6 months — split if >15 tickets, multiple domains, or mixed concerns.
 
 ## Epic Template (ADF) - CREATE
 

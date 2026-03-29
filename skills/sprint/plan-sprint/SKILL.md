@@ -449,12 +449,7 @@ Subtask alignment: [X checked, Y fixed]
 
 ## References
 
-- [Team Capacity](../../../references/team-capacity.md) - Capacity formulas, skill matrix, thresholds (roster data in project-config.json)
-- [Sprint Frameworks](../../../references/sprint-frameworks.md) - RICE, Impact/Effort, carry-over model
-- [Tool Selection](../../../references/tools.md) - MCP vs acli decision rules
-- [Pre-Meeting Checklist](references/pre-meeting-checklist.md)
-- [Assignment Algorithm](references/assignment-algorithm.md)
-- [Examples](references/examples.md)
+[Team Capacity](../../../references/team-capacity.md) · [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Tool Selection](../../../references/tools.md) · [Pre-Meeting Checklist](references/pre-meeting-checklist.md) · [Assignment Algorithm](references/assignment-algorithm.md) · [Examples](references/examples.md)
 
 ## 🎓 Domain Expert Notes
 

@@ -37,7 +37,6 @@ effort: high
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
----
 
 ## Artifact Graph
 
@@ -55,7 +54,6 @@ Epic (Jira)
 └── ...
 ```
 
----
 
 ## Phases
 
@@ -152,6 +150,14 @@ Fetch full description only for artifacts with impact = UPDATE:
 
 **QG Pre-check:** Score all Jira ADF updates against `shared-references/verification-checklist.md`. If < 90% → auto-fix → re-score (max 2). Escalate if still failing.
 
+> **🟢 AUTO (validate_adf.py):**
+>
+> ```bash
+> uv run scripts/api/validate_adf.py {{artifacts_dir}}/sync-tp-*.json --type [auto-detect: epic|story|subtask|task] --json
+> ```
+>
+> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
+
 Order: Parents first → Children → Confluence
 
 **Tool selection:**
@@ -180,19 +186,16 @@ Output: Summary table (Artifact, Action, Status) + flagged items for review.
 
 Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
 
----
 
 ## Edge Cases
 
 > See [references/edge-cases.md](references/edge-cases.md) for edge case handling reference.
 
----
 
 ## When to Use
 
 > See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives.
 
----
 
 ## Examples
 
@@ -232,14 +235,7 @@ Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/
 
 See [references/domain-expert.md](references/domain-expert.md)
 
----
 
 ## References
 
-- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Templates Index](../../../references/templates.md) - Load by issue type (epic, story, subtask, task)
-- [Tool Selection](../../../references/tools.md)
-- [Verification Checklist](../../../references/verification-checklist.md)
-- [Atlassian Scripts](../../../skills/utilities/atlassian-scripts/SKILL.md)
-- [Edge Cases](references/edge-cases.md) - Edge case handling reference
-- [Decision Guide](references/decision-guide.md) - When to use this skill vs alternatives
+[ADF Core Rules](../../../references/templates-core.md) · [Templates Index](../../../references/templates.md) · [Tool Selection](../../../references/tools.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Atlassian Scripts](../../../skills/utilities/atlassian-scripts/SKILL.md) · [Edge Cases](references/edge-cases.md) · [Decision Guide](references/decision-guide.md)

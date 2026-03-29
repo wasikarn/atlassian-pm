@@ -298,7 +298,6 @@ Doctor implements the **pre-flight checklist pattern** from aviation: a complete
 - **Beyer, Murphy, Rensin, Kawahara, Thorne — *Site Reliability Engineering* (O'Reilly/Google, 2016), Chapter 17 "Testing for Reliability":** Environment validation is a form of canary testing — catching configuration drift in development prevents cascading failures in production. The SRE model: test the environment before relying on it, not after it fails.
 - **12-Factor App — Factor I "Codebase" + Factor X "Dev/prod parity" (Wiggins, 2011):** The idempotent, read-only design of doctor checks enforces dev/prod parity detection without mutating state. An operation that verifies a configuration is safe to run at any frequency; one that modifies state is not. Doctor is designed to the verification side of this boundary.
 
----
 
 ## References
 

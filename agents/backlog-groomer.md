@@ -10,11 +10,11 @@ description: |
   backlog-groomer is dispatched from plan-sprint to identify stories not ready for sprint commitment.
   </commentary>
   </example>
-model: sonnet
+model: haiku
 effort: high
 tools: Read, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
-maxTurns: 20
+maxTurns: 12
 color: green
 ---
 

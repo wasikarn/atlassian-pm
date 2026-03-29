@@ -10,7 +10,7 @@ description: |
   sprint-planner is dispatched from the plan-sprint skill to handle capacity calculation and assignment.
   </commentary>
   </example>
-model: sonnet
+model: haiku
 effort: high
 tools: Read, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 skills:

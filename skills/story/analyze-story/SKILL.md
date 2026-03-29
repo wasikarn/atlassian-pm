@@ -46,11 +46,12 @@ effort: high
 **Constraints:** HR6 — invalidate cache after any write; story must be a Story type, not Epic (wrong type creates orphan subtasks)
 **Output:** `story_data`, `epic_context`, `vs_assignment`, optional `domain_context` available in context for Phase 2
 
-> **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously (single message, 2 calls). Bootstrap needs only the issue key; Confluence search needs only title keywords — no dependency between them.
+> **🟢 PARALLEL** — Fetch issue context and Confluence docs simultaneously (single message, 3 calls). All calls are independent — no dependency between them.
+>
+> 1. `cache_get_issue(STORY-KEY)` → fallback `jira_get_issue(STORY-KEY, fields="summary,description,status,parent,subtasks,labels,customfield_10016")`
+> 2. `jira_search(jql="parent=STORY-KEY", fields="summary,status,customfield_10016", limit=20)`
 
-- `Agent(name: "issue-bootstrap"): {{PROJECT_KEY}}-XXX --depth=full` → receives story + epic + subtasks context in one pass (cache-first, no redundant MCP calls)
-
-- Read: Narrative, ACs, Links, Epic context from bootstrap output
+- Read: Narrative, ACs, Links, Epic context from issue data; if `parent` field is set, fetch epic via `cache_get_issue(EPIC-KEY)`
 
 **Story Readiness Pre-check (🟢 AUTO — runs after bootstrap, before GATE):**
 
@@ -112,8 +113,9 @@ If no relevant pages found → skip silently.
 **Constraints:** Generic paths (e.g. `src/controllers/`) are REJECTED — re-explore max 2 attempts; skip for services confirmed not impacted
 **Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service available in context for Phase 4
 
-> [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
+> Launch **1 Explore agent** scoped to all impacted services.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
+> **Shortcut:** if the user passes file paths directly, skip the Explore agent and use those paths as `file_paths[]` for Phase 4.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
 ### 4. Design Sub-tasks
@@ -166,6 +168,15 @@ If no relevant pages found → skip silently.
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+>
+> **🟢 AUTO (validate_adf.py):**
+>
+> ```bash
+> uv run scripts/api/validate_adf.py {{artifacts_dir}}/subtask-*.json --type subtask --json
+> ```
+>
+> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
+>
 > **🟢 AUTO** — After QG completes, record score: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS"`. Use parent story key (from Phase 1) as `--issue-key`.
 
 ### 7. Create Artifacts
@@ -209,15 +220,12 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 → Use /create-testplan {{PROJECT_KEY}}-XXX to continue
 ```
 
----
 
 > See [references/batch-creation.md](references/batch-creation.md) for the batch pattern when creating ≥3 sub-tasks.
 
----
 
 > See [references/examples.md](references/examples.md) for a full input/output example.
 
----
 
 ## Examples
 
@@ -249,13 +257,9 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 
 See [references/domain-expert.md](references/domain-expert.md)
 
----
 
 ## References
 
-- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Subtask Template](../../../references/templates-subtask.md) - Subtask ADF template + best practices
-- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS decomposition, patterns
-- [Tool Selection](../../../references/tools.md) - Tools, service tags, effort sizing
-- [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
-- After creation: `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
+[ADF Core Rules](../../../references/templates-core.md) · [Subtask Template](../../../references/templates-subtask.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Tool Selection](../../../references/tools.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)
+
+After creation: `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`

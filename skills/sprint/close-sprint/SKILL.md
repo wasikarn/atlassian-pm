@@ -230,11 +230,7 @@ Records velocity data for trend analysis. If velocity-tracker is not available (
 
 See [references/domain-expert.md](references/domain-expert.md)
 
----
 
 ## References
 
-- [Sprint Frameworks](../../../references/sprint-frameworks.md) - Carry-over model, velocity forecasting, DORA metrics
-- [Team Capacity](../../../references/team-capacity.md) - Capacity formulas, complexity-adjusted throughput
-- [Skill Orchestration](../../../references/skill-orchestration.md) - How close-sprint chains with retrospective-analyst
-- [Mermaid Guide](../../../references/mermaid-guide.md) - Diagrams for Confluence sprint review page
+[Sprint Frameworks](../../../references/sprint-frameworks.md) · [Team Capacity](../../../references/team-capacity.md) · [Skill Orchestration](../../../references/skill-orchestration.md) · [Mermaid Guide](../../../references/mermaid-guide.md)

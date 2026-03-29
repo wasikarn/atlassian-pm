@@ -4,9 +4,9 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
-  Multi-role debate for refining features and user stories — 4 perspectives challenge each other
-  PO (scope/value) × Tech Lead (feasibility/risk) × Engineer (implementation/effort) × QA (edge cases/testability)
-  Triggers: "refine epic", "refine feature", "team debate", "4 roles review", "debate requirements", "clarify scope", "unclear scope", "high-risk feature", "multi-role review", "ชัดเจน epic"
+  Multi-role debate for refining features and user stories — 3 perspectives challenge each other
+  PO (scope/value) × Tech Lead (feasibility/risk + implementation) × QA (edge cases/testability)
+  Triggers: "refine epic", "refine feature", "team debate", "3 roles review", "debate requirements", "clarify scope", "unclear scope", "high-risk feature", "multi-role review", "ชัดเจน epic"
   Use when: Epic or feature has unclear scope, high risk, or multi-service changes that need multi-role challenge before writing Jira artifacts
   Do NOT use for: clear-scope Epics ready to write (use create-epic directly); creating individual stories directly without a scope debate (use create-story)
 argument-hint: "[feature-description or ABC-XXX]"
@@ -15,7 +15,7 @@ effort: medium
 
 # /refine-epic
 
-**Mode:** Multi-Role Debate (2 rounds, 4 perspectives)
+**Mode:** Multi-Role Debate (1 round, 3 perspectives)
 **Output:** Refined stories + risks + estimates + test scenarios — ready for `/create-story`
 
 ## Dynamic Context
@@ -29,11 +29,10 @@ effort: medium
 | Phase | Adds to Context |
 |-------|----------------|
 | 1. Gather | `feature_input`, `epic_context`, `existing_issues[]`, `codebase_hints` |
-| 2. Propose | `po_proposal`, `tl_assessment`, `eng_approach`, `qa_scenarios` |
-| 3. Challenge | `po_revised`, `tl_verdict`, `eng_verdict`, `qa_verdict` |
-| 4. Converge | `refined_stories[]`, `risks[]`, `estimates`, `out_of_scope[]` |
-| 5. QG | `qg_passed`, `qg_fixes[]` |
-| 6. Handoff | `next_skill`, `debate_summary` |
+| 2. Propose | `po_proposal`, `tl_assessment`, `qa_scenarios` |
+| 3. Converge | `refined_stories[]`, `risks[]`, `estimates`, `out_of_scope[]` |
+| 4. QG | `qg_passed`, `qg_fixes[]` |
+| 5. Handoff | `next_skill`, `debate_summary` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels, ITERATE cycle.
 
@@ -60,27 +59,17 @@ effort: medium
 
 **⛔ GATE** — Present understanding + affected services to user. DO NOT launch debate without confirmation.
 
-### 2. Round 1: Propose (4 Parallel Agents)
+### 2. Round 1: Propose (3 Parallel Agents)
 
-Launch 4 agents **IN PARALLEL** (single message, 4 Task calls). Each proposes independently without seeing others.
+Launch 3 agents **IN PARALLEL** (single message, 3 Task calls). Each proposes independently without seeing others.
 
-**Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **PO Round 1**, **TL Round 1**, **Engineer Round 1**, **QA Round 1** sections. Substitute all `{...}` placeholders with full text before launching.
+**Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **PO Round 1**, **TL Round 1**, **QA Round 1** sections. Substitute all `{...}` placeholders with full text before launching.
 
-**🟢 AUTO** — Collect all 4 results. Proceed to Round 2.
+**🟢 AUTO** — Collect all 3 results. Proceed to convergence.
 
-### 3. Round 2: Challenge (4 Parallel Agents)
+### 3. Converge
 
-Share **ALL Round 1 outputs** to each agent. Launch 4 agents **IN PARALLEL**.
-
-Each agent now **challenges the others** based on their expertise.
-
-**Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **PO Round 2**, **TL Round 2**, **Engineer Round 2**, **QA Round 2** sections. Substitute all `{...}` placeholders with full text before launching.
-
-**🟢 AUTO** — Collect all 4 results. Proceed to convergence.
-
-### 4. Converge
-
-**Main session synthesizes** all 8 agent outputs (Round 1 + Round 2):
+**Main session synthesizes** all 3 agent outputs:
 
 #### 1. Refined Stories
 
@@ -88,26 +77,26 @@ Per story:
 
 | Section | Source |
 |---------|--------|
-| Narrative | PO revised (Round 2) |
-| ACs | PO + QA enhancements + Engineer specifics |
+| Narrative | PO proposal |
+| ACs | PO + QA enhancements + TL specifics |
 | Scope | PO + Tech Lead consensus |
-| Risks | Tech Lead + Engineer combined |
-| Estimate | SP (Tech Lead) + Hours (Engineer) |
+| Risks | Tech Lead combined |
+| Estimate | SP (Tech Lead) |
 | Test Outline | QA scenarios mapped to ACs |
 | Out of Scope | Items cut with rationale from debate |
 
 #### 2. Debate Summary Table
 
-| Topic | PO | Tech Lead | Engineer | QA | Resolution |
-|-------|----|-----------|----------|----|------------|
-| [item] | [position] | [position] | [position] | [position] | [decision] |
+| Topic | PO | Tech Lead | QA | Resolution |
+|-------|----|-----------|----|------------|
+| [item] | [position] | [position] | [position] | [decision] |
 
 Show only **disagreements and their resolutions** — skip topics where all agreed.
 
 #### 3. Consensus Checks
 
 - [ ] All roles agree on MVP scope?
-- [ ] Estimate variance < 2x between Tech Lead and Engineer?
+- [ ] Estimates cover all stories with SP assigned?
 - [ ] All critical QA edge cases addressed in ACs or explicitly excluded?
 - [ ] Dependencies and blocking order documented?
 - [ ] VS assignment validated?
@@ -117,10 +106,10 @@ If any check fails → flag to user with the disagreement.
 **🔄 ITERATE** — Present refined stories + debate summary as plan cards. Ask:
 
 - **Approve** → proceed to QG
-- **Annotate** → user specifies which story # and section to revise → re-run **only the affected role agents** (e.g., scope change → PO + Tech Lead only, not all 4) with updated context (max 2 rounds)
-- **Another debate round** → repeat full Round 2 with updated context (expensive, use sparingly)
+- **Annotate** → user specifies which story # and section to revise → re-run **only the affected role agents** (e.g., scope change → PO + Tech Lead only, not all 3) with updated context (max 1 additional round)
+- **Another debate round** → repeat full Round 1 with updated context (expensive, use sparingly)
 
-### 5. Quality Gate — Refined Stories
+### 4. Quality Gate — Refined Stories
 
 > **🟢 AUTO** — Validate refined stories before handoff. Escalate only if unfixable.
 
@@ -139,7 +128,7 @@ If any check fails → auto-fix from debate context → re-check. Escalate to us
 
 > Stories will be formatted per [templates-story.md](../../../references/templates-story.md) when passed to `/create-story`.
 
-### 6. Handoff
+### 5. Handoff
 
 ```text
 ## Feature Refined: [Title]
@@ -153,22 +142,20 @@ Key risks: [top 2-3]
 
 Present each story as a numbered plan card for user to pick creation order.
 
----
 
 ## When to Use vs Skip
 
 > See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives.
 
----
 
 ## Examples
 
 ### ✅ Good
 
 ```text
-/refine-epic "User onboarding flow with email verification"   # clear description → all 4 roles have grounded context
+/refine-epic "User onboarding flow with email verification"   # clear description → all 3 roles have grounded context
 /refine-epic {{PROJECT_KEY}}-55                                           # story/epic key → reads ACs, epic context, dedup check before debate
-/refine-epic "Payment retry logic with idempotency keys"      # high-risk, multi-service → 4-role debate catches edge cases early
+/refine-epic "Payment retry logic with idempotency keys"      # high-risk, multi-service → 3-role debate catches edge cases early
 /refine-epic {{PROJECT_KEY}}-55 "focus on edge cases for concurrent sessions"  # scoped hint directs QA + TL agents to specific risk area
 ```
 
@@ -186,13 +173,12 @@ Present each story as a numbered plan card for user to pick creation order.
 - Using refine-epic after stories already exist in Jira — the workflow produces refined story cards for `/create-story`; running it post-creation creates a parallel set of stories you then have to reconcile manually.
 - Passing a feature description so vague that Phase 1 gate blocks — "improve performance" gives no domain, no affected service, no user scenario. The gate will block; you'll spend turns just scoping the question.
 - Treating the debate summary as the final output and skipping `/create-story` — the refined stories are plan cards, not Jira issues. Nothing is in Jira until you explicitly call `/create-story`.
-- Annotating a story mid-debate without specifying which section to revise — "change story 2" forces all 4 agents to re-run; "change story 2 ACs only" re-runs PO + QA only, saving tokens.
+- Annotating a story mid-debate without specifying which section to revise — "change story 2" forces all 3 agents to re-run; "change story 2 ACs only" re-runs PO + QA only, saving tokens.
 
 ## Example
 
 > See [references/examples.md](references/examples.md) for a full Round 1 and Round 2 debate example with output stories.
 
----
 
 ## 🎓 Domain Expert Notes
 
@@ -200,12 +186,6 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 ## References
 
-- [Story Template](../../../references/templates-story.md) — Story ADF template (used by `/create-story` downstream)
-- [Writing Style](../../../references/writing-style.md) — Thai + transliteration, concise, scan-first
-- [Workflow Patterns](../../../references/workflow-patterns.md) — Gate levels, ITERATE cycle
-- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) — VS patterns, labels
-- [Verification Checklist](../../../references/verification-checklist.md) — Quality criteria
-- [Tools](../../../references/tools.md) — Jira/Confluence tool selection
-- [Decision Guide](references/decision-guide.md)
-- [Examples](references/examples.md)
-- After refinement: `/create-story` to create in Jira
+[Story Template](../../../references/templates-story.md) · [Writing Style](../../../references/writing-style.md) · [Workflow Patterns](../../../references/workflow-patterns.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools](../../../references/tools.md) · [Decision Guide](references/decision-guide.md) · [Examples](references/examples.md)
+
+After refinement: `/create-story` to create in Jira

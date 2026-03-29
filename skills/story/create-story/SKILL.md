@@ -5,9 +5,9 @@ agent: general-purpose
 model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 13-phase workflow
+  Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 12-phase workflow
 
-  Phases: Discovery → Write Story → INVEST → Create Story → Impact → Explore Codebase → Design → Alignment → Create Sub-tasks → Summary
+  Phases: Discovery → Write Story → INVEST → Create Story → Impact → Explore Codebase → Design + Estimation → Alignment → QG Subtasks → Create Sub-tasks → Summary
 
   Composite: No need to copy-paste issue keys, context preserved throughout workflow
 
@@ -40,11 +40,10 @@ effort: high
 | 5. Create Story | `story_key` (ABC-XXX) |
 | 6. Impact | `services_impacted[]`, `vs_verified` |
 | 7. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
-| 8. Design | `subtask_designs[]` |
-| 9. Estimation Calibration | `subtask_designs[]` (SP values updated) |
-| 10. Alignment | `alignment_checklist` |
-| 11. QG Subtasks | `qg_score`, `passed_qg` |
-| 12. Create | `subtask_keys[]` |
+| 8. Design + Estimation | `subtask_designs[]` (with calibrated SP) |
+| 9. Alignment | `alignment_checklist` |
+| 10. QG Subtasks | `qg_score`, `passed_qg` |
+| 11. Create | `subtask_keys[]` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
@@ -91,7 +90,14 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 **In Phase 1 (Discovery):**
 
-- ✅ ยังคง fetch epic via `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` ถ้า epic key ใน blueprint → ได้ `epic_data`
+- ✅ ยังคง fetch epic via direct MCP calls ถ้า epic key ใน blueprint → ได้ `epic_data`:
+
+  ```text
+  MCP: cache_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+  → fallback: jira_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+  MCP: jira_search(jql="parent = EPIC-KEY", fields="summary,status,issuetype", limit=10)
+  ```
+
 - ❌ ข้าม interview questions (Who/What/Why/Constraints) — มีข้อมูลจาก blueprint แล้ว
 - ❌ ข้าม VS assignment question — ใช้ `vs_label` จาก blueprint แทน
 
@@ -99,7 +105,6 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 **If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ (ถาม Who/What/Why/Constraints)
 
----
 
 ## Part A: Create Story (Phases 1-5)
 
@@ -112,7 +117,13 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 - Ask: Who? What? Why? Constraints?
   - **Story Context:** What is the user currently doing? What's difficult? (for 📍 context line)
-- If Epic exists → `Agent(name: "issue-bootstrap"): EPIC-KEY --depth=full` → receives epic context (narrative, scope, children stories). Avoids redundant MCP calls.
+- If Epic exists → direct MCP calls:
+
+  ```text
+  MCP: cache_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+  → fallback: jira_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+  MCP: jira_search(jql="parent = EPIC-KEY", fields="summary,status,issuetype", limit=10)
+  ```
 
 **Epic Readiness Pre-check (🟢 AUTO — runs after epic fetch, before GATE):**
 
@@ -141,7 +152,7 @@ Proceed anyway? (y = continue, n = stop and fix epic first)
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
 
-> **🟢 PARALLEL** — Launch `issue-bootstrap` and `cache_search_confluence` simultaneously; they have no dependency on each other. `cache_search_confluence` needs only story keywords (known from user input), not epic data.
+> **🟢 PARALLEL** — Epic MCP fetch and `cache_search_confluence` can run simultaneously; they have no dependency on each other. `cache_search_confluence` needs only story keywords (known from user input), not epic data.
 
 After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
 
@@ -251,10 +262,14 @@ Leave `Key files:` blank at this stage — it will be filled post-Phase 7 explor
 
    Non-blocking: if `qg_quick.py` exits 1 (claude unavailable or parse error) → skip pre-check, go straight to Step 4.
 
-4. **Delegate to quality-gate agent:** `Agent(name: "quality-gate")` — pass path `{{artifacts_dir}}/story.json` + issue type `story`. Returns JSON: `{score, status, threshold, attempt, checks_failed[], auto_fixable}`.
-5. If `status = "PASS"` → proceed to Phase 5 automatically
-6. If `status = "FAIL"` and `auto_fixable = true` and `attempt = 1` → apply fixes → re-invoke quality-gate (max 1 re-invoke; quality-gate returns `attempt: 2` on second call)
-7. If `status = "FAIL"` and (`auto_fixable = false` OR `attempt = 2`) → escalate to user with `checks_failed[]` list
+4. **QG Scoring (🟢 AUTO):**
+
+   ```bash
+   uv run scripts/api/validate_adf.py {{artifacts_dir}}/story.json --type story --json
+   ```
+
+   Returns `{score, status, issues[{id, status, message}]}`. Score ≥ 90 = PASS.
+   If FAIL → check `issues[]` for auto-fixable items → run `--fix` to apply → re-score. Max 1 fix cycle.
 
 ### 5. Create Story in Jira
 
@@ -312,10 +327,12 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 **Goal:** Locate the exact file paths, patterns, and dependencies in each impacted service that the subtask designs will reference.
 **Required inputs:** `services_impacted[]` from Phase 6, service repo paths from `project-config.json`
-**Constraints:** Generic paths are REJECTED — re-explore max 2 attempts; validate all paths with Glob; launch 2-3 agents in parallel (Backend/Frontend/Shared); do NOT design subtasks without concrete file evidence
+**Constraints:** Generic paths are REJECTED — re-explore max 2 attempts; validate all paths with Glob; launch **1 Explore agent** covering all impacted services; do NOT design subtasks without concrete file evidence
+
 **Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service; all paths validated and ready for Phase 8 design
 
-> [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
+> ⚡ If user has provided file paths in requirements → skip Phase 7 (add `--skip-explore` flag to command)
+> Launch 1 Explore agent covering all impacted services.
 > Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
@@ -341,12 +358,12 @@ DEPENDENCIES: [key imports or shared modules identified]
 | `FILES:` section is empty | REJECTED — re-explore |
 | All services return `CONFIDENCE: HIGH` or `MEDIUM` with valid paths | ✅ Proceed to Phase 8 |
 
-### 8. Design Sub-tasks
+### 8. Design + Estimation
 
-**Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) that the user approves before QG and creation.
+**Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) that the user approves, then calibrate SP estimates against historical data.
 **Required inputs:** `file_paths[]`, `patterns[]`, `dependencies[]` from Phase 7; `acs[]` from Phase 2
 **Constraints:** ITERATE gate — max 3 annotation rounds; major rework returns to Phase 7; 1 subtask per service boundary unless complexity warrants more; VS integrity required (no horizontal layer subtasks)
-**Output:** `subtask_designs[]` approved by user; SP calibration pending Phase 9; ready for Phase 10 alignment check
+**Output:** `subtask_designs[]` with calibrated SP values approved by user; ready for Phase 9 alignment check
 
 **Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
 
@@ -355,14 +372,8 @@ DEPENDENCIES: [key imports or shared modules identified]
 - Summary: `[TAG] - Description`
 - ACs: Thai narrative + English technical terms
 
-### 9. Estimation Calibration
 
-**Goal:** Calibrate subtask SP estimates against historical team data to reduce estimation variance.
-**Required inputs:** `subtask_designs[]` from Phase 8 (summary, service_tag, initial SP, scope file count, AC count)
-**Constraints:** AUTO — apply recommendation if confidence is HIGH or MEDIUM; skip if LOW confidence; note adjustment reason in plan card
-**Output:** `subtask_designs[]` updated with calibrated SP values and calibration notes
-
-> **🟢 AUTO + PARALLEL** — Launch all estimation-calibrator agents simultaneously — one per subtask (single message, N Task calls). Each subtask is independent. Apply recommendation if confidence is HIGH or MEDIUM; skip if LOW.
+**Estimation Calibration (🟢 AUTO + PARALLEL):** Launch all estimation-calibrator agents simultaneously — one per subtask. Apply recommendation if confidence is HIGH or MEDIUM; skip if LOW.
 
 For each subtask in the current design (all in parallel):
 
@@ -388,31 +399,37 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
   - Major rework → back to Codebase Exploration
   - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
 
-### 10. Alignment Check
+### 9. Alignment Check
 
 **Goal:** Verify that subtask ACs collectively cover all story ACs and that scope tables are consistent with codebase exploration findings.
-**Required inputs:** `subtask_designs[]` from Phase 9, `acs[]` from Phase 2, `file_paths[]` from Phase 7
+**Required inputs:** `subtask_designs[]` from Phase 8, `acs[]` from Phase 2, `file_paths[]` from Phase 7
 **Constraints:** AUTO — auto-fix misalignment; escalate only if unfixable; all story ACs must be traceable to at least one subtask AC
 **Output:** `alignment_checklist` with PASS status; subtask designs corrected and ready for QG
 
 > **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
-### 11. Quality Gate — Subtasks (MANDATORY)
+### 10. Quality Gate — Subtasks (MANDATORY)
 
 **Goal:** Ensure all subtask ADF JSON files meet ≥ 90% quality score before creating in Jira.
-**Required inputs:** `subtask_designs[]` (aligned, from Phase 10), `artifacts_dir` path
+**Required inputs:** `subtask_designs[]` (aligned, from Phase 9), `artifacts_dir` path
 **Constraints:** HR1 — NEVER create subtasks in Jira without QG ≥ 90%; AUTO — score → auto-fix → re-score; escalate only if still < 90% after 2 attempts
-**Output:** `qg_score`, `passed_qg`; subtask ADF JSON files at `{{artifacts_dir}}/subtask-*.json` ready for Phase 12
+**Output:** `qg_score`, `passed_qg`; subtask ADF JSON files at `{{artifacts_dir}}/subtask-*.json` ready for Phase 11
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
 > See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
 
-### 12. Create Sub-tasks
+For each subtask file:
+
+```bash
+uv run scripts/api/validate_adf.py {{artifacts_dir}}/subtask-*.json --type subtask --json
+```
+
+### 11. Create Sub-tasks
 
 **Goal:** Create all subtask shells in Jira, verify parent linkage, set dates/OE, and update descriptions — fully automated.
-**Required inputs:** `story_key` (parent), subtask ADF JSON files (QG PASS from Phase 11), date range from Phase 5 story fields
+**Required inputs:** `story_key` (parent), subtask ADF JSON files (QG PASS from Phase 10), date range from Phase 5 story fields
 **Constraints:** HR5 — two-step create + verify parent; HR6 — `cache_invalidate` after every write; HR8 — subtask dates within parent range; HR10 — NEVER set sprint on subtasks; HR3 — use acli for assignee; escalate only if parent verify fails after retry
 **Output:** `subtask_keys[]`; all subtasks created, parent-verified, dated, described, and QG scores recorded
 
@@ -446,12 +463,12 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask-fe.json --yes
 
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
-> **🟢 AUTO** — Record subtask QG scores to history (uses `qg_score` and `passed_qg` from Phase 11 context). For each service tag in the subtask batch: `python scripts/qg_record.py --issue-key "ABC-XXX" --type Subtask --score QG_SCORE --status PASS --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS_IF_ANY"`. Use parent story key as `--issue-key` if subtask key not yet assigned.
+> **🟢 AUTO** — Record subtask QG scores to history (uses `qg_score` and `passed_qg` from Phase 10 context). For each service tag in the subtask batch: `python scripts/qg_record.py --issue-key "ABC-XXX" --type Subtask --score QG_SCORE --status PASS --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS_IF_ANY"`. Use parent story key as `--issue-key` if subtask key not yet assigned.
 
-### 13. Summary
+### 12. Summary
 
 **Goal:** Present the completed workflow result and suggest next actions.
-**Required inputs:** `story_key`, `subtask_keys[]` from Phase 12
+**Required inputs:** `story_key`, `subtask_keys[]` from Phase 11
 **Constraints:** None
 **Output:** Completion summary with story + subtask keys and suggested follow-up commands
 
@@ -464,15 +481,12 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 
 ```
 
----
 
 > See [references/decision-guide.md](references/decision-guide.md) for when to use /create-story vs /analyze-story.
 
----
 
 > See [references/examples.md](references/examples.md) for a full input/output example.
 
----
 
 ## Examples
 
@@ -491,7 +505,7 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 /create-story {{PROJECT_KEY}}-123                    # passing existing issue key — story already exists; use /analyze-story {{PROJECT_KEY}}-123 instead
 /create-story "authentication"           # too vague → Discovery phase loops, VS assignment ambiguous, weak ACs
 /create-story "redesign entire checkout" # scope too large → INVEST Small check fails, needs epic decomposition first
-/create-story "add feature"             # no context → generic output, wastes all 13 phases; run /blueprint first for complex features
+/create-story "add feature"             # no context → generic output, wastes all 12 phases; run /blueprint first for complex features
 ```
 
 **Common mistakes:**
@@ -505,13 +519,7 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 
 See [references/domain-expert.md](references/domain-expert.md)
 
----
 
 ## References
 
-- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Story Template](../../../references/templates-story.md) - Story ADF template + best practices
-- [Subtask Template](../../../references/templates-subtask.md) - Subtask ADF template + QA
-- [Vertical Slice Guide](../../../references/vertical-slice-guide.md) - VS patterns, decomposition, labels
-- [Verification Checklist](../../../references/verification-checklist.md) - INVEST, quality checks
-- [Subtask Design Patterns](../../../references/subtask-design-patterns.md) — codebase exploration, scope format, AC specificity, alignment check, QG subtasks
+[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Subtask Template](../../../references/templates-subtask.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)

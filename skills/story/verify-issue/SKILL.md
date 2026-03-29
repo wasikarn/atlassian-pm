@@ -56,6 +56,14 @@ effort: medium
 
 Score: ⭐⭐⭐☆☆ (per dimension, 5-point scale)
 
+> **🟢 AUTO (validate_adf.py):**
+>
+> ```bash
+> uv run scripts/api/validate_adf.py {{artifacts_dir}}/[issue_key].json --type [epic|story|subtask|task] --json
+> ```
+>
+> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
+
 **Type-specific checks:**
 
 - **Story:** INVEST criteria (6 points), Narrative format, AC Given/When/Then
@@ -166,7 +174,6 @@ Updated: ABC-XXX, ABC-YYY, ABC-ZZZ
 Quality: wiki → ADF, EN → Thai
 ```
 
----
 
 ## Batch Mode
 
@@ -181,13 +188,11 @@ Quality: wiki → ADF, EN → Thai
 | ABC-YYY [BE] | 5/5 ✅ | 6/6 ✅ | — | ✅ |
 | ABC-ZZZ [FE-Web] | 5/5 ✅ | 5/6 ⚠️ | — | ⚠️ |
 
----
 
 ## Common Scenarios
 
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario, integration workflows, and a full example run.
 
----
 
 ## Examples
 
@@ -216,18 +221,12 @@ Quality: wiki → ADF, EN → Thai
 - Manually crafting JQL with `ORDER BY` inside the `parent =` clause — this causes a JQL parse error (HR2); the skill already handles search correctly, do not override it.
 - Running on a subtask key when the goal is to check the whole story hierarchy — pass the parent Story key with `--with-subtasks` instead.
 
----
 
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)
 
----
 
 ## References
 
-- [Verification Checklist](../../../references/verification-checklist.md)
-- [ADF Core Rules](../../../references/templates-core.md) - CREATE/EDIT rules, panels, styling
-- [Templates Index](../../../references/templates.md) - Load by issue type (epic, story, subtask, task)
-- [Writing Style](../../../references/writing-style.md)
-- [Scenarios](references/scenarios.md) - Command examples, integration workflows, and full example run
+[Verification Checklist](../../../references/verification-checklist.md) · [ADF Core Rules](../../../references/templates-core.md) · [Templates Index](../../../references/templates.md) · [Writing Style](../../../references/writing-style.md) · [Scenarios](references/scenarios.md)

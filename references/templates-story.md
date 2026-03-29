@@ -4,40 +4,7 @@
 
 ## Story Best Practices
 
-**Size Guide:**
-
-| Size | Duration | Hours | Guideline |
-| --- | --- | --- | --- |
-| XS | < 0.5 day | < 4h | Quick fix, config change, hotfix |
-| S | 0.5-1 day | 4-8h | Simple feature, minor change |
-| M | 1-2 days | 8-16h | Standard feature — Ideal |
-| L | 2-4 days | 16-32h | Complex feature — consider splitting |
-| XL | > 4 days | > 32h | Must split — use SPIDR |
-
-**SPIDR Splitting (Mike Cohn):**
-
-| Technique | Method | Example |
-| --- | --- | --- |
-| **S**pike | Research before split | "Spike: try Redlock for 2 days" |
-| **P**ath | Split by user path | Card payment vs Apple Pay |
-| **I**nterface | Split by device/platform | iOS vs Android vs Web |
-| **D**ata | Split by data type | Credit vs discount vs cashback |
-| **R**ules | Split by business rules | Coupon expired vs fully used vs cancelled |
-
-Additional: Workflow Steps | CRUD | User Roles | Complexity (manual vs automated) | I/O Methods (manual vs file upload vs API)
-
-**Narrative Anti-Patterns:**
-
-| Pattern | Problem | Fix |
-| --- | --- | --- |
-| Generic Persona | "As a user" — no context | Specify role + situation |
-| Solution Masking | "I want a modal" — UI solution, not goal | Write goal first, solution goes in AC |
-| Missing Why | No "So that" or restates goal | Ask "so what?" until value is clear |
-| Kitchen Sink | 1 story = 3 goals | Split with SPIDR |
-| Tech Story | "As a developer, I want to refactor..." | Use Task instead of Story (no direct user value) |
-| Copy-Paste | All stories look the same | Each story must have unique context |
-
-**AC Best Practices:** No vague ACs ("loads fast" → "loads within 2 seconds") | Each AC independently testable | Cover happy + edge + error | Don't duplicate story narrative in AC | Write AC before sprint planning
+> Split via SPIDR (Spike/Path/Interface/Data/Rules) if >5 ACs or >4 days effort. Also: Workflow Steps | CRUD | User Roles | I/O Methods.
 
 **Jira Fields (set after create via MCP `jira_update_issue`):**
 
@@ -183,22 +150,12 @@ Additional: Workflow Steps | CRUD | User Roles | Complexity (manual vs automated
 
 > **⚡ Technical Notes section is optional** — include when `domain_context` is available (Phase 1 Confluence search) or after codebase exploration (Phase 6). Skip if no relevant context exists. Update via `acli jira workitem edit --from-json` after Phase 7 if richer technical notes become available post-exploration.
 
-**AC Scenario Naming:**
+**AC Scenario Naming** (5-8 words max, read as mini-story):
 
-| Panel Type | Pattern | Example |
+| Panel | Pattern | Example |
 | --- | --- | --- |
-| success (happy) | `AC{N}: [Verb] — [Happy scenario]` | `AC1: Display — Admin sees 3 card types` |
-| warning (edge) | `AC{N}: [Verb] — [Edge scenario]` | `AC2: Validate — Required field left empty` |
-| error (error) | `AC{N}: [Verb] — [Error scenario]` | `AC3: Handle — API return 500` |
+| success | `AC{N}: [Verb] — [Happy scenario]` | `AC1: Display — Admin sees 3 card types` |
+| warning | `AC{N}: [Verb] — [Edge scenario]` | `AC2: Validate — Required field left empty` |
+| error | `AC{N}: [Verb] — [Error scenario]` | `AC3: Handle — API return 500` |
 
-⚡ **Event-based AC naming** (optional — use for domain-rich features):
-
-| Panel Type | Pattern | Example |
-| --- | --- | --- |
-| success | `AC{N}: [DomainEvent] — [Scenario]` | `AC1: CouponCollected — User successfully collects coupon` |
-| warning | `AC{N}: [Invariant] — [Scenario]` | `AC2: DuplicateBlocked — User collects duplicate` |
-| error | `AC{N}: [FailureEvent] — [Scenario]` | `AC3: CollectionFailed — Campaign expired` |
-
-> Event-based naming is best when Epic has a Domain Model section — allows AC to trace back to event catalog
-
-Scenario name: **5-8 words max**, read as mini-story — See [Storytelling Principles](writing-style.md#storytelling-principles)
+⚡ **Event-based** (use when Epic has Domain Model): `AC{N}: [DomainEvent/Invariant/FailureEvent] — [Scenario]` — e.g. `AC1: CouponCollected — User successfully collects coupon`

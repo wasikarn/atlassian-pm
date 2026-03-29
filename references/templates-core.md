@@ -95,86 +95,19 @@
 
 ## Table Styling
 
-### Header Background Colors
+Use `"attrs": {"background": "HEX"}` on `tableHeader` or `tableCell`. Same color for entire header row — do not mix colors in same row.
 
-Use the `attrs.background` attribute on `tableHeader` to add background colors:
+**ADF Pattern:** `{"type": "tableHeader", "attrs": {"background": "HEX_CODE"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Column Name"}]}]}`
 
-```json
-{"type": "tableHeader", "attrs": {"background": "#f4f5f7"}, "content": [...]}
-```
-
-### Atlassian Color Palette
-
-| Color | Hex Code | Usage |
+| Category | Hex Code | Usage |
 | --- | --- | --- |
-| Grey light | `#f4f5f7` | Header rows (default) |
-| Blue light | `#e6fcff` | Information highlight |
-| Green light | `#e3fcef` | Success/Happy path |
-| Yellow light | `#fffae6` | Warning/Edge cases |
-| Red light | `#ffebe6` | Error/Critical |
-| Purple light | `#eae6ff` | Notes/Special |
-
-Row highlighting: use `"attrs": {"background": "HEX"}` on `tableCell` (same pattern as header).
-
-## Semantic Table Headers (Colored by Category)
-
-| Category | Color | Hex Code | Usage |
-| --- | --- | --- | --- |
-| **New / Create** | 🟢 Green | `#e3fcef` | Files to be created |
-| **Modify / Change** | 🟡 Yellow | `#fffae6` | Files to be modified |
-| **Delete / Remove** | 🔴 Red | `#ffebe6` | Files to be deleted |
-| **Reference / Info** | 🟣 Purple | `#eae6ff` | Links, dependencies, notes |
-| **Requirements** | 🔵 Blue | `#deebff` | Specs, requirements |
-| **Default** | ⚪ Grey | `#f4f5f7` | Generic tables |
-
-**ADF Pattern:**
-
-```json
-{"type": "tableHeader", "attrs": {"background": "HEX_CODE"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Column Name"}]}]}
-```
-
-> Same color for entire header row — do not mix colors in same row
-
-## EDIT Template (All Issue Types)
-
-> Used with `acli jira workitem edit --from-json ... --yes`
-
-```json
-{
-  "issues": ["ABC-XXX"],
-  "description": {
-    "type": "doc",
-    "version": 1,
-    "content": [
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Section Title"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "info"},
-        "content": [
-          {"type": "paragraph", "content": [{"type": "text", "text": "Content here..."}]}
-        ]
-      }
-    ]
-  }
-}
-```
-
-**⚠️ Fields forbidden in EDIT JSON:**
-
-- ❌ `projectKey` - Error: unknown field
-- ❌ `type` - Error: unknown field
-- ❌ `summary` - Error: unknown field (use MCP `jira_update_issue` instead)
-- ❌ `parent` - Error: unknown field
-
-**Update summary/other fields (not description):**
-
-```typescript
-// Use MCP instead of acli
-jira_update_issue({
-  issue_key: "ABC-XXX",
-  fields: { summary: "New Summary" }
-})
-```
+| Default / Header | `#f4f5f7` | Generic tables, header rows |
+| New / Create | `#e3fcef` | Files to be created, happy path |
+| Modify / Warning | `#fffae6` | Files to be modified, edge cases |
+| Delete / Error | `#ffebe6` | Files to be deleted, errors |
+| Reference / Notes | `#eae6ff` | Links, dependencies, notes |
+| Requirements | `#deebff` | Specs, requirements |
+| Info highlight | `#e6fcff` | Information highlight |
 
 ## Inline Code
 
