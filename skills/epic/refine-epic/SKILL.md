@@ -40,15 +40,11 @@ effort: medium
 
 ### 1. Gather Context
 
-**Input types:**
-
 | Input | Action |
 |-------|--------|
 | Jira key (ABC-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
 | Feature text | Capture as-is |
 | Epic key | Read overview + existing children via `cache_search` |
-
-**Actions:**
 
 > **🟢 PARALLEL** — Steps 1, 2, and 3 have no dependency on each other. Launch simultaneously (single message, 3 calls): `cache_get_issue` + `cache_similar_issues` + `Task(Explore)`. Summarize only after all 3 complete.
 
@@ -141,44 +137,6 @@ Key risks: [top 2-3]
 ```
 
 Present each story as a numbered plan card for user to pick creation order.
-
-
-## When to Use vs Skip
-
-> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives.
-
-
-## Examples
-
-### ✅ Good
-
-```text
-/refine-epic "User onboarding flow with email verification"   # clear description → all 3 roles have grounded context
-/refine-epic {{PROJECT_KEY}}-55                                           # story/epic key → reads ACs, epic context, dedup check before debate
-/refine-epic "Payment retry logic with idempotency keys"      # high-risk, multi-service → 3-role debate catches edge cases early
-/refine-epic {{PROJECT_KEY}}-55 "focus on edge cases for concurrent sessions"  # scoped hint directs QA + TL agents to specific risk area
-```
-
-### ❌ Bad
-
-```text
-/refine-epic                                                  # no input → debate brief is empty, all 4 roles produce generic output
-/refine-epic "fix the login bug"                              # too vague and too small — use /create-task or just fix it directly
-/refine-epic {{PROJECT_KEY}}-55                                           # running after stories are already in Jira — debate output won't retroactively update created issues
-/refine-epic "everything in the Q2 roadmap"                   # scope too broad — refine one feature or story at a time for useful output
-```
-
-**Common mistakes:**
-
-- Using refine-epic after stories already exist in Jira — the workflow produces refined story cards for `/create-story`; running it post-creation creates a parallel set of stories you then have to reconcile manually.
-- Passing a feature description so vague that Phase 1 gate blocks — "improve performance" gives no domain, no affected service, no user scenario. The gate will block; you'll spend turns just scoping the question.
-- Treating the debate summary as the final output and skipping `/create-story` — the refined stories are plan cards, not Jira issues. Nothing is in Jira until you explicitly call `/create-story`.
-- Annotating a story mid-debate without specifying which section to revise — "change story 2" forces all 3 agents to re-run; "change story 2 ACs only" re-runs PO + QA only, saving tokens.
-
-## Example
-
-> See [references/examples.md](references/examples.md) for a full Round 1 and Round 2 debate example with output stories.
-
 
 ## 🎓 Domain Expert Notes
 
