@@ -1,18 +1,15 @@
 """Tests for monitor/handlers/intelligence_analyzer.py."""
 import json
-import os
 import sys
 import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from monitor.handlers import intelligence_analyzer as ia  # type: ignore[import-untyped]
 
 
-def _now_iso(delta_days=0):
+def _now_iso(delta_days: float = 0) -> str:
     return (datetime.now(UTC) + timedelta(days=delta_days)).isoformat()
 
 
@@ -106,7 +103,7 @@ def test_detect_stagnant_issues_no_signal_within_threshold():
     assert not any(s["signal"] == "stagnant_issue" for s in signals)
 
 
-def test_detect_stagnant_issues_uses_per_tag_override(tmp_path):
+def test_detect_stagnant_issues_uses_per_tag_override():
     thresholds = {**_DEFAULT_THRESHOLDS, "stagnant_days_override": {"[FE-Web]": 3}}
     snap = _make_snapshot({"TP-1": "In Progress"})
     snap["TP-1"]["status_since"] = _now_iso(-4)  # 4 > 3 (override)
@@ -169,7 +166,7 @@ def test_detect_carry_over_spike_requires_min_5_items(tmp_path):
     assert not any(s["signal"] == "carry_over_spike" for s in signals)
 
 
-def test_detect_sp_mismatch_fires_when_subtasks_exceed_parent(tmp_path):
+def test_detect_sp_mismatch_fires_when_subtasks_exceed_parent():
     # Parent TP-10: sp=3, In Progress since 5h ago (> grace 4h)
     # Subtasks: TP-11 sp=2, TP-12 sp=3 → sum=5 > 1.5*3=4.5
     snap = {
@@ -261,7 +258,7 @@ def test_analyze_writes_insights_json(tmp_path):
     snap["TP-1"]["status_since"] = _now_iso(-8)
 
     ia.analyze(
-        diff=[],
+        _diff=[],
         new_snapshot=snap,
         old_snapshot={},
         calibration=_DEFAULT_CALIBRATION,
@@ -283,7 +280,7 @@ def test_analyze_stop_event_prevents_write(tmp_path):
     stop.set()  # already stopped
 
     ia.analyze(
-        diff=[], new_snapshot={}, old_snapshot={},
+        _diff=[], new_snapshot={}, old_snapshot={},
         calibration=_DEFAULT_CALIBRATION,
         board_config=_BOARD_CONFIG, velocity=None,
         outcomes_path=outcomes, insights_path=insights,

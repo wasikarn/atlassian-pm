@@ -260,7 +260,7 @@ def _detect_wip_breach(
     snapshot: dict,
     board_config: dict,
     tracking: dict,
-    thresholds: dict,
+    _thresholds: dict,
     existing: list[dict] | None = None,
 ) -> list[dict]:
     """Signal: WIP-limited column exceeds limit for >2 consecutive poll cycles."""
@@ -419,7 +419,7 @@ def _detect_sp_mismatch(
 # ── Main entry ────────────────────────────────────────────────────────────────
 
 def analyze(
-    diff: list[dict],
+    _diff: list[dict],
     new_snapshot: dict,
     old_snapshot: dict,
     calibration: dict,
