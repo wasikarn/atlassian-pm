@@ -11,7 +11,6 @@ description: |
   Do NOT use for: detailed sprint planning (use plan-sprint); closing sprint (use close-sprint)
 argument-hint: ""
 effort: low
-user-invocable: true
 allowed-tools: [mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_search, Bash]
 ---
 
