@@ -81,14 +81,14 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 | `/atlassian-pm:setup` | First-time setup — installs deps, configures Jira, registers MCP |
 | `/atlassian-pm:doctor` | Health check — 10 checks, shows what's broken |
 | **Backlog** | |
-| `/atlassian-pm:vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). Each subtask includes Implementation Hints for Claude Code. |
+| `/atlassian-pm:vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
 | `/atlassian-pm:blueprint` | Multi-role feature design (5 domain experts + debate) |
 | `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
-| `/atlassian-pm:create-epic` | Create Epic + Confluence epic doc. Vibe default: fast, no interview. Add `--thorough` for RICE + annotation rounds. |
-| `/atlassian-pm:create-story` | Create User Story with subtasks. Vibe default: single-pass + Implementation Hints. Add `--thorough` for full workflow. |
-| `/atlassian-pm:analyze-story` | Analyze existing story, create subtasks + Implementation Hints. Vibe default: auto-proceed. Add `--thorough` for ITERATE. |
+| `/atlassian-pm:create-epic` | Epic + Confluence doc. `--no-doc` for Jira-only (skip Confluence). `--thorough` for RICE + annotation rounds. |
+| `/atlassian-pm:create-story` | Story + subtasks. `--no-subtasks` for story only (add subtasks later). `--thorough` for full workflow. |
+| `/atlassian-pm:analyze-story` | Explore codebase → create subtasks + Implementation Hints. `--skip-explore` when paths known. `--thorough` for ITERATE. |
 | `/atlassian-pm:create-task` | Create standalone task: tech-debt, bug, chore, spike. Vibe default: auto-detect type. |
-| `/atlassian-pm:bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign |
+| `/atlassian-pm:bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign. `--no-assign` to skip assignment gate. |
 | `/atlassian-pm:search-issues` | Dedup check before creating |
 | `/atlassian-pm:spec-to-stories` | Convert Confluence spec page → batch User Stories |
 | **Scrumban Flow** | |

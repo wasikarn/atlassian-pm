@@ -127,8 +127,8 @@ Backlog ownership, flow management, documentation, and reporting.
 | --- | --- | --- |
 | `/atlassian-pm:blueprint` | | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
 | `/atlassian-pm:refine-epic` | | 4-role debate for unclear or high-risk requirements |
-| `/atlassian-pm:create-epic` | `--thorough` | Epic + Confluence doc. Vibe default: auto-extract, skip RICE. `--thorough` for full ceremony. |
-| `/atlassian-pm:vibe-plan` | | 🚀 Idea → Epic + Stories + AI-Ready Subtasks in one shot (max 2 interactions) |
+| `/atlassian-pm:create-epic` | `--thorough` `--no-doc` | Epic + Confluence doc. Vibe default: auto-extract, skip RICE. `--no-doc` for Jira-only (skip Confluence). `--thorough` for full ceremony. |
+| `/atlassian-pm:vibe-plan` | `--dry-run` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks in one shot (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
 | `/atlassian-pm:plan-release` | | Multi-sprint release plan + Confluence page + Jira Fix Version |
 | `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create User Stories |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
@@ -151,8 +151,8 @@ Story and task authoring, DLC flow, codebase exploration, issue maintenance, and
 | --- | --- | --- |
 | `/atlassian-pm:start-ticket ABC-123` | `--force` | Read AC + transition to In Progress. WIP gate enforced. |
 | `/atlassian-pm:ship-to-qa ABC-123` | | Post PR + preview URLs to Jira + transition to Ready for QA. WIP gate enforced. |
-| `/atlassian-pm:create-story` | `--thorough` | **Recommended** — Story + Sub-tasks in one workflow. Vibe default: auto-extract + Implementation Hints. |
-| `/atlassian-pm:analyze-story ABC-123` | `--thorough` | Explore codebase → create Sub-tasks + Implementation Hints. Vibe default: auto-proceed, no ITERATE. |
+| `/atlassian-pm:create-story` | `--thorough` `--no-subtasks` | **Recommended** — Story + Sub-tasks in one workflow. Vibe default: auto-extract + Implementation Hints. `--no-subtasks` to create story only (add subtasks later via analyze-story). |
+| `/atlassian-pm:analyze-story ABC-123` | `--thorough` `--skip-explore` | Explore codebase → create Sub-tasks + Implementation Hints. Vibe default: auto-proceed, no ITERATE. `--skip-explore` when file paths already known. |
 | `/atlassian-pm:create-task` | `--thorough` | Task: `tech-debt`, `bug`, `chore`, or `spike`. Vibe default: auto-detect type. |
 | `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
 | `/atlassian-pm:update-story ABC-123` | | Edit Story — ACs, scope, description |
@@ -167,11 +167,11 @@ Story and task authoring, DLC flow, codebase exploration, issue maintenance, and
 
 Test planning, bug intake, and acceptance verification.
 
-| Skill | Description |
-| --- | --- |
-| `/atlassian-pm:create-testplan ABC-123` | Test Plan + `[QA]` Sub-tasks from Story ACs |
-| `/atlassian-pm:execute-testplan ABC-123` | Run Google Sheet test cases via Playwright → write results back → create bug tickets |
-| `/atlassian-pm:bug-triage` | Full triage: intake → P1/P2/P3 severity → dedup check → assign |
+| Skill | Flags | Description |
+| --- | --- | --- |
+| `/atlassian-pm:create-testplan ABC-123` | | Test Plan + `[QA]` Sub-tasks from Story ACs |
+| `/atlassian-pm:execute-testplan ABC-123` | | Run Google Sheet test cases via Playwright → write results back → create bug tickets |
+| `/atlassian-pm:bug-triage` | `--no-assign` | Full triage: intake → P1/P2/P3 severity → dedup check → assign. `--no-assign` to skip assignment gate. |
 
 ---
 
