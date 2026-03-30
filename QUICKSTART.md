@@ -127,16 +127,43 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 ### Workflow A: Vibe coding (fastest path)
 
+Type directly in Claude Code — no slash command needed:
+
+```text
+vibe plan "coupon redemption at checkout for logged-in users"
+
+สร้าง feature ระบบ push notification บนมือถือ
+
+แตก feature video upload พร้อม progress bar ออกเป็น tasks ให้หน่อยครับ
 ```
-# Idea → Epic + Stories + AI-Ready Subtasks in one shot
+
+Or use the fast-path command:
+
+```text
 /vibe-full "coupon redemption at checkout"
-
-# Output: Epic + 3-5 stories + subtasks with Implementation Hints
-# Each subtask: Entry Point, Pattern to Follow, Test Command
-# Team member runs: implement {{PROJECT_KEY}}-123
 ```
 
-### Workflow B: New feature from scratch
+**Output:** Epic + 3-5 stories + subtasks with Implementation Hints (entry point, pattern, test command). Team member runs: `implement {{PROJECT_KEY}}-123`
+
+### Workflow B: Analyze existing story → subtasks
+
+Type directly:
+
+```text
+วิเคราะห์ Story {{PROJECT_KEY}}-123 จากนั้นสร้าง subtasks สำหรับทีม Engineer
+
+analyze story {{PROJECT_KEY}}-456 and create implementation subtasks with hints
+
+ช่วย break down {{PROJECT_KEY}}-789 ออกเป็น subtasks พร้อม implementation hints
+```
+
+Or use the slash command:
+
+```text
+/atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX
+```
+
+### Workflow C: New feature from scratch
 
 ```
 1. /atlassian-pm:create-epic     → Epic + Confluence epic page
@@ -145,7 +172,21 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 Or use the fast-path: `/epic-full`
 
-### Workflow C: Scrumban daily flow
+### Workflow D: Bug report
+
+Type directly:
+
+```text
+bug: ผู้ใช้ checkout ไม่ได้เมื่อ coupon code มีตัวอักษรพิเศษ
+
+video player crash เมื่อ seek ไปที่ timestamp ที่ยังไม่ได้ buffer — P2
+
+bug report: API returns 500 when user has more than 50 items in cart
+```
+
+Or use the fast-path: `/bug-full`
+
+### Workflow E: Scrumban daily flow
 
 ```
 1. /atlassian-pm:flow-check           → board health + replenish Ready queue if low
@@ -153,13 +194,7 @@ Or use the fast-path: `/epic-full`
 3. /atlassian-pm:ship-to-qa {{PROJECT_KEY}}-XXX    → post PR + preview URLs + transition to Ready for QA
 ```
 
-### Workflow D: Analyze and implement a story
-
-```
-1. /atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX   → codebase exploration → implementation subtasks
-```
-
-### Workflow E: Sprint close with retrospective
+### Workflow F: Sprint close with retrospective
 
 ```
 1. /atlassian-pm:close-sprint           → triage incomplete issues
@@ -168,11 +203,19 @@ Or use the fast-path: `/epic-full`
 
 Or use the fast-path: `/sprint-close-full`
 
-### Workflow F: Verify issue quality
+### Workflow G: Verify issue quality
+
+```text
+verify {{PROJECT_KEY}}-123 --with-subtasks --fix
+
+ตรวจสอบ ticket {{PROJECT_KEY}}-456 พร้อม subtasks ทั้งหมด และ fix ที่มีปัญหา
+```
+
+Or use the slash command:
 
 ```
-1. /atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
-   flags: --fix (auto-repair), --dry-run (preview only)
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+flags: --fix (auto-repair), --dry-run (preview only)
 ```
 
 ---

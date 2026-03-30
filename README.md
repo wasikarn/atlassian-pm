@@ -206,7 +206,81 @@ Internal subagents dispatched automatically by skills and commands — not invok
 
 ## Usage Examples
 
-### Full Feature Workflow
+### Natural Language Prompts
+
+Type these directly in Claude Code — no slash command needed. Claude detects intent and invokes the right skill automatically.
+
+#### Feature Planning (vibe-plan)
+
+```text
+vibe plan "coupon redemption at checkout for logged-in users"
+
+สร้าง feature ระบบ push notification บนมือถือ
+
+แตก feature video upload พร้อม progress bar ออกเป็น tasks ให้หน่อยครับ
+
+plan feature: social login with Google OAuth — affects website + backend API
+```
+
+Each generates: Epic + Stories + AI-Ready Subtasks with Implementation Hints (entry point, pattern, test command). Max 2 interactions — one tree review, then auto-creates in Jira.
+
+#### Story Analysis (analyze-story)
+
+```text
+วิเคราะห์ Story {{PROJECT_KEY}}-123 จากนั้นสร้าง subtasks สำหรับทีม Engineer
+
+analyze story {{PROJECT_KEY}}-456 and create implementation subtasks
+
+ช่วย break down {{PROJECT_KEY}}-789 ออกเป็น subtasks พร้อม implementation hints
+
+technical analysis for {{PROJECT_KEY}}-321 — 3 services impacted: BE, Admin, Website
+```
+
+Each explores the codebase (finds real file paths + patterns) before generating subtasks. Subtasks include Implementation Hints so devs can run `implement {{PROJECT_KEY}}-XXX` directly.
+
+#### Story Creation
+
+```text
+สร้าง story: ผู้ใช้สามารถ reset password ผ่าน email ได้
+
+create story for Google SSO login — users should be able to sign in without a password
+
+สร้าง story สำหรับ feature แสดง transaction history ใน admin dashboard [FE-Admin]
+```
+
+#### Bug Report
+
+```text
+bug: ผู้ใช้ checkout ไม่ได้เมื่อ coupon code มีตัวอักษรพิเศษ
+
+video player crash เมื่อ seek ไปที่ timestamp ที่ยังไม่ได้ buffer — P2
+
+bug report: API returns 500 when user has more than 50 items in cart
+```
+
+#### Quality Check
+
+```text
+verify {{PROJECT_KEY}}-123 --with-subtasks --fix
+
+ตรวจสอบ ticket {{PROJECT_KEY}}-456 พร้อม subtasks ทั้งหมด และ fix ที่มีปัญหา
+
+check if {{PROJECT_KEY}}-789 subtasks are aligned — dry run only
+```
+
+---
+
+### Slash Command Workflows
+
+#### Full Feature (vibe path)
+
+```bash
+# Fastest: idea → AI-Ready subtasks in one shot
+/vibe-full "real-time notification system for mobile users"
+# → dedup check → Epic + Stories + subtasks → verified
+```
+
+#### Full Feature (thorough path)
 
 ```bash
 # 1. Design (multi-role debate → Confluence + backlog map)
@@ -229,7 +303,7 @@ Internal subagents dispatched automatically by skills and commands — not invok
 /atlassian-pm:verify-issue ABC-123 --with-subtasks
 ```
 
-### Unclear Requirements
+#### Unclear Requirements
 
 ```text
 # 4-role debate before writing Jira artifacts
@@ -238,7 +312,7 @@ Internal subagents dispatched automatically by skills and commands — not invok
 → Output: revised story + refined ACs → ready for /create-story
 ```
 
-### Scrumban Flow Example
+#### Scrumban Flow
 
 ```text
 # Check board health + replenish Ready queue when low
@@ -251,7 +325,7 @@ Internal subagents dispatched automatically by skills and commands — not invok
 /atlassian-pm:ship-to-qa {{PROJECT_KEY}}-123
 ```
 
-### Update with Cascade
+#### Update with Cascade
 
 ```bash
 # Story only
