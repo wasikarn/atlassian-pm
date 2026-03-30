@@ -4,13 +4,14 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Analyze User Story and create Sub-tasks + Technical Note with an 8-phase TA workflow
+  Analyze User Story and create Sub-tasks — vibe mode by default (fast, no ceremony)
   MANDATORY: Must explore codebase before creating Sub-tasks
+  Use --thorough for full review gates + annotation workflow
 
   Triggers: "analyze story", "TA", "technical analysis", "create subtasks", "break down story", "explore story", "วิเคราะห์ story"
   Use when: exploring an existing Story to design its implementation Sub-tasks (TA role). Start here when a Story is already created and needs Sub-tasks.
   Do NOT use for: creating a new Story from scratch (use create-story); updating existing Sub-tasks (use sync-artifacts).
-argument-hint: "[issue-key]"
+argument-hint: "[--thorough] [issue-key]"
 effort: high
 ---
 
@@ -18,6 +19,15 @@ effort: high
 
 **Role:** Senior Technical Analyst
 **Output:** Sub-tasks + Technical Note
+
+## Mode Selection
+
+| Flag | Behavior | User interactions |
+| --- | --- | --- |
+| *(none)* | **Vibe mode (default)** — auto-fetch story, skip REVIEW gates, single-pass design with Implementation Hints | 0 (fully automated) |
+| `--thorough` | **Thorough mode** — confirmation gates, ITERATE on subtask design (max 3 rounds), all REVIEW gates | Multiple checkpoints |
+
+> If the argument contains `--thorough`, strip the flag and treat the remaining text as the issue key. Proceed with thorough mode for all phases.
 
 ## Dynamic Context
 
@@ -79,6 +89,12 @@ MCP: cache_search_confluence(query="[story_title_keywords]", space_key="<space_k
 If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
 If no relevant pages found → skip silently.
 
+#### Vibe Mode (Default)
+
+- **No GATE** — auto-proceed after readiness pre-check passes. Show story summary briefly for traceability but do not wait for confirmation.
+
+#### --thorough Mode
+
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of story understanding.
 
 ### 2. Impact Analysis
@@ -104,7 +120,13 @@ If no relevant pages found → skip silently.
 
 **VS Verification:** Story touches all layers for e2e slice? (not layer-only)
 
-**🟡 REVIEW** — Present impact table + VS verification to user. Proceed unless user objects.
+#### Vibe Mode (Default)
+
+- **🟢 AUTO** — Generate impact table + VS verification silently. Proceed immediately.
+
+#### --thorough Mode
+
+- **🟡 REVIEW** — Present impact table + VS verification to user. Proceed unless user objects.
 
 ### 3. Codebase Exploration ⚠️ MANDATORY
 
@@ -141,6 +163,16 @@ If no relevant pages found → skip silently.
 - **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer)
 - Summary: `[TAG] - Description`
 - ACs: Thai narrative + English technical terms
+
+#### Vibe Mode (Default)
+
+- Single-pass generation — no annotation rounds
+- **Add Implementation Hints** to each subtask using `file_paths[]` and `patterns[]` from Phase 3:
+  - Entry Point, Pattern to Follow, Test Command, Related API, Dependencies
+  - See [templates-vibe.md](../../../references/templates-vibe.md) for format
+- Proceed to Alignment Check immediately
+
+#### --thorough Mode
 
 - **🔄 ITERATE** — Present subtask design as plan cards (tag, scope files, ACs, OE per subtask). Ask: Approve all / Annotate (specify subtask #) / Major rework.
   - Annotate → user specifies subtask + notes → revise ONLY annotated subtasks → re-present (max 3 rounds)
