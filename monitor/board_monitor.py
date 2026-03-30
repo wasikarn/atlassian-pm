@@ -13,7 +13,10 @@ import argparse
 import datetime
 import json
 import logging
+import os
+import signal
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -43,6 +46,17 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 _STATE_PATH = Path.home() / ".claude" / "monitor-state.json"
+_CALIBRATION_FILE = Path(
+    os.environ.get(
+        "CLAUDE_PLUGIN_DATA",
+        str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
+    )
+) / "calibration.json"
+_OUTCOMES_FILE = _CALIBRATION_FILE.parent / "story-outcomes.jsonl"
+_PID_FILE = Path.home() / ".claude" / "atlassian-pm-monitor.pid"
+
+_stop_event = threading.Event()
+_last_analyzer_thread: threading.Thread | None = None
 
 
 def _get_poll_interval(board_state: dict, config: dict) -> int:
@@ -82,7 +96,7 @@ def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict[str, Any]:
     start_at = 0
     page_size = 50
     jql = f"project = {project_key} AND statusCategory != Done ORDER BY updated DESC"
-    fields = "summary,status,assignee,priority,sprint"
+    fields = "summary,status,assignee,priority,sprint,issuetype,parent,customfield_10016"
 
     try:
         while True:
@@ -108,6 +122,9 @@ def fetch_board_snapshot(jira: JiraAPI, project_key: str) -> dict[str, Any]:
                     "assignee": ((f.get("assignee") or {}).get("displayName", "")),
                     "priority": ((f.get("priority") or {}).get("name", "")),
                     "sprint_end_date": sprint_end,
+                    "issuetype": ((f.get("issuetype") or {}).get("name", "")),
+                    "parent": ((f.get("parent") or {}).get("key")),
+                    "sp": f.get("customfield_10016") or f.get("customfield_10036"),
                 }
             total = response.get("total", 0)
             start_at += len(issues)
@@ -183,16 +200,116 @@ def run_cycle(
 
         # Enrich snapshot with status-entry timestamps before saving so stuck
         # detector can measure staleness across cycles.
+        enriched = new_snapshot  # fallback if enrichment fails
         try:
             enriched = stuck_issue_detector.enrich_snapshot_with_status_since(new_snapshot, state)
             state.save_snapshot(enriched)
         except Exception as e:
             log.error("Failed to enrich/save snapshot: %s", e)
             state.save_snapshot(new_snapshot)
+        _dispatch_analyzer(changes, enriched, old_snapshot, board_config=board_config, dry_run=dry_run)
     else:
         log.info("[DRY RUN] %d changes detected, no writes", len(changes))
         for c in changes[:5]:
             log.info("  %s: %s", c["key"], list(c.get("changed_fields", {}).keys()))
+
+
+def _load_calibration() -> dict:
+    """Load calibration.json. Returns empty dict on missing/error."""
+    try:
+        return json.loads(_CALIBRATION_FILE.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _load_velocity(root: Path) -> dict | None:
+    """Load velocity section from project-config-team-detail.json."""
+    config_path = root / ".claude" / "project-config-team-detail.json"
+    if not config_path.exists():
+        return None
+    try:
+        data = json.loads(config_path.read_text())
+        return data.get("velocity")
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _write_pid() -> None:
+    """Write current PID to lockfile. Check for stale lock first."""
+    if _PID_FILE.exists():
+        try:
+            stored_pid = int(_PID_FILE.read_text().strip())
+            os.kill(stored_pid, 0)  # 0 = liveness check only
+            log.error("Monitor already running (pid=%d). Exiting.", stored_pid)
+            sys.exit(1)
+        except (ValueError, ProcessLookupError):
+            log.warning("Stale lock detected (pid from file). Clearing.")
+        except PermissionError:
+            # PermissionError means the process IS alive (cross-user). Not stale.
+            log.error("Monitor already running (pid=%d, PermissionError). Exiting.", stored_pid)
+            sys.exit(1)
+    try:
+        _PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _PID_FILE.write_text(str(os.getpid()))
+    except OSError as e:
+        log.warning("Could not write PID file: %s", e)
+
+
+def _cleanup_pid() -> None:
+    """Delete PID file on exit."""
+    try:
+        _PID_FILE.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def _sigterm_handler(signum: int, frame: object) -> None:
+    """Handle SIGTERM: signal stop, join analyzer thread, cleanup."""
+    global _last_analyzer_thread
+    log.info("SIGTERM received — shutting down")
+    _stop_event.set()
+    if _last_analyzer_thread and _last_analyzer_thread.is_alive():
+        _last_analyzer_thread.join(timeout=3)
+    # Clean up any in-flight .tmp file
+    tmp = _CALIBRATION_FILE.parent / "insights.tmp"
+    if tmp.exists():
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+    _cleanup_pid()
+    sys.exit(0)
+
+
+def _dispatch_analyzer(
+    changes: dict,
+    snapshot: dict,
+    old_snapshot: dict,
+    *,
+    board_config: dict,
+    dry_run: bool = False,
+) -> None:
+    """Dispatch intelligence_analyzer in a daemon thread."""
+    global _last_analyzer_thread
+    if dry_run:
+        return
+    from monitor.handlers import intelligence_analyzer
+    calibration = _load_calibration()
+    velocity = _load_velocity(_ROOT)
+    t = threading.Thread(
+        target=intelligence_analyzer.analyze,
+        args=(changes, snapshot, old_snapshot),
+        kwargs={
+            "calibration": calibration,
+            "board_config": board_config,
+            "velocity": velocity,
+            "outcomes_path": _OUTCOMES_FILE,
+            "stop_event": _stop_event,
+        },
+        daemon=True,
+    )
+    t.start()
+    _last_analyzer_thread = t
 
 
 def main() -> None:
@@ -236,6 +353,9 @@ def main() -> None:
 
     state = MonitorState(_STATE_PATH)
 
+    signal.signal(signal.SIGTERM, _sigterm_handler)
+    _write_pid()
+
     board_id = config.get("jira", {}).get("board_id") or config.get("board", {}).get("kanban_board_id")
 
     log.info(
@@ -276,6 +396,7 @@ def main() -> None:
             time.sleep(interval)
         except KeyboardInterrupt:
             log.info("Monitor stopped by user")
+            _cleanup_pid()
             break
         except Exception as e:
             log.error("Cycle error: %s", e)
