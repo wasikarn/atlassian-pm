@@ -12,7 +12,7 @@ description: |
   Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "สร้าง epic"
   Use when: creating a NEW Epic from a product vision or initiative idea
   Do NOT use for: stories or subtasks (use create-story); updating an existing epic (use update-epic)
-argument-hint: "[--thorough] [epic-title]"
+argument-hint: "[--thorough | --no-doc] [epic-title]"
 effort: medium
 ---
 
@@ -27,8 +27,10 @@ effort: medium
 | --- | --- | --- |
 | *(none)* | **Vibe mode (default)** — auto-extract context, skip RICE, single-pass scope, no annotation rounds | 0–1 (only if description is ambiguous) |
 | `--thorough` | **Thorough mode** — full stakeholder interview, RICE scoring, ITERATE on scope (max 3 rounds) | Multiple checkpoints |
+| `--no-doc` | **Epic only** — skip Confluence Doc creation (Phase 5 step 1). Creates Epic in Jira only. | 0–1 |
 
 > If the argument contains `--thorough`, strip the flag and treat the remaining text as the description. Proceed with thorough mode for all phases.
+> If the argument contains `--no-doc`, strip the flag. Run all phases normally but skip Confluence doc creation in Phase 5.
 
 ## Context Object (accumulated across phases)
 
@@ -155,11 +157,11 @@ Skip interview questions in Phase 1 for information already documented.
 
 > **🟢 AUTO** — If QG passed → create automatically. No user interaction needed.
 
-1. **Epic Doc** → `MCP: confluence_create_page(space_key: "{{PROJECT_KEY}}")`
+1. **Epic Doc** → `MCP: confluence_create_page(space_key: "{{PROJECT_KEY}}")` *(skip if `--no-doc`)*
    - Include VS Map table in Epic Doc
 2. **Epic** → `acli jira workitem create --from-json {{artifacts_dir}}/epic.json`
    - Add labels: feature label + `vs-planned`
-3. **Link** Epic to Doc
+3. **Link** Epic to Doc *(skip if `--no-doc`)*
 
 > **🟢 AUTO** — HR6: `cache_invalidate(epic_key)` after create.
 
@@ -170,6 +172,15 @@ Skip interview questions in Phase 1 for information already documented.
 RICE Score: X | Stories: N planned
 Epic Doc: [link] | Epic: [link]
 → Use /create-story to continue
+```
+
+**`--no-doc` variant:**
+
+```text
+## Epic Created: [Title] ({{PROJECT_KEY}}-XXX)
+Epic: [link]  (no Confluence doc)
+→ /atlassian-pm:create-story     add stories under this epic
+→ /atlassian-pm:create-doc {{PROJECT_KEY}}-XXX   create doc later if needed
 ```
 
 
@@ -187,6 +198,8 @@ Epic Doc: [link] | Epic: [link]
 /create-epic {{PROJECT_KEY}}-45                                  # existing epic key → reads current state, prompts for update scope
 /create-epic "Multi-language subtitle support"       # after running /blueprint — picks up blueprint_backlog_map automatically
 /create-epic "Offline Download Feature"              # triggers full 5-phase workflow: discovery → RICE → scope → QG → create
+/create-epic --no-doc "Payment Refund Flow"          # epic in Jira only — skip Confluence doc
+สร้าง epic สำหรับ feature X ไม่ต้องสร้าง doc ก่อน  # natural language with --no-doc intent
 ```
 
 ### ❌ Bad

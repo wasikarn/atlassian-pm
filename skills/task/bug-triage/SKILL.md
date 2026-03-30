@@ -11,7 +11,7 @@ description: |
   Triggers: "bug triage", "triage bug", "report bug", "new bug", "bug found", "จัดการ bug", "รายงาน bug"
   Use when: triaging an incoming bug report — severity scoring, dedup check, assignment, and Jira creation
   Do NOT use for: creating a simple task (use create-task); creating a story (use create-story)
-argument-hint: "[description]"
+argument-hint: "[--no-assign] [description]"
 effort: medium
 ---
 
@@ -128,6 +128,8 @@ If no duplicate found: auto-proceed silently.
 
 
 ## Phase 4 — Assign ⛔ GATE
+
+> **Skip if `--no-assign`** — proceed directly to Phase 5 with `assignee_email = null`.
 
 Recommend assignee based on affected service tag and team skill matrix:
 

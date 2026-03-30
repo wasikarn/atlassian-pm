@@ -11,7 +11,7 @@ description: |
   Triggers: "analyze story", "TA", "technical analysis", "create subtasks", "break down story", "explore story", "วิเคราะห์ story"
   Use when: exploring an existing Story to design its implementation Sub-tasks (TA role). Start here when a Story is already created and needs Sub-tasks.
   Do NOT use for: creating a new Story from scratch (use create-story); updating existing Sub-tasks (use sync-artifacts).
-argument-hint: "[--thorough] [issue-key]"
+argument-hint: "[--thorough | --skip-explore] [issue-key]"
 effort: high
 ---
 
@@ -26,8 +26,10 @@ effort: high
 | --- | --- | --- |
 | *(none)* | **Vibe mode (default)** — auto-fetch story, skip REVIEW gates, single-pass design with Implementation Hints | 0 (fully automated) |
 | `--thorough` | **Thorough mode** — confirmation gates, ITERATE on subtask design (max 3 rounds), all REVIEW gates | Multiple checkpoints |
+| `--skip-explore` | Skip Phase 3 codebase exploration. Use when file paths are already known or passed directly in the prompt. | 0 |
 
 > If the argument contains `--thorough`, strip the flag and treat the remaining text as the issue key. Proceed with thorough mode for all phases.
+> If the argument contains `--skip-explore`, skip Phase 3 entirely. Caller must supply file paths directly in the prompt; Phase 4 Design uses those paths as `file_paths[]`.
 
 ## Dynamic Context
 

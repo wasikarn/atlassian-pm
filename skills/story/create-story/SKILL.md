@@ -15,7 +15,7 @@ description: |
   Triggers: "create story", "new story", "story + subtasks", "สร้าง story"
   Use when: creating a User Story with sub-tasks end-to-end — from discovery and INVEST check through codebase exploration, subtask design, and Jira creation
   Do NOT use for: creating standalone tasks (use create-task); creating an epic (use create-epic); refining scope before writing (use refine-epic)
-argument-hint: "[--thorough] [story-description]"
+argument-hint: "[--thorough | --no-subtasks] [story-description]"
 effort: high
 ---
 
@@ -30,8 +30,10 @@ effort: high
 | --- | --- | --- |
 | *(none)* | **Vibe mode (default)** — auto-extract context, single-pass generation, no annotation rounds | 0–1 (only if description is ambiguous) |
 | `--thorough` | **Thorough mode** — full interview gates, ITERATE annotation rounds (max 3), all REVIEW gates | Multiple checkpoints |
+| `--no-subtasks` | **Story only** — stop after Phase 5 (Create Story); skip Phases 6–11 entirely. Use when subtasks will be added later via `/analyze-story`. | 0–1 |
 
 > If the argument contains `--thorough`, strip the flag and treat the remaining text as the description. Proceed with thorough mode for all phases.
+> If the argument contains `--no-subtasks`, strip the flag and treat the remaining text as the description. Run Phases 1–5 only, then jump to Phase 12 (Summary).
 
 ## Dynamic Context
 
@@ -391,8 +393,11 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after field update.
+> **`--no-subtasks` exit point:** If `--no-subtasks` flag was passed → skip Part B entirely. Jump to Phase 12 Summary with `subtask_keys[] = []`.
 
 ## Part B: Create Sub-tasks (Phases 6-12)
+
+> **Skip entirely if `--no-subtasks`** — proceed directly to Phase 12.
 
 ---
 
@@ -648,7 +653,16 @@ Story: ABC-XXX
 Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 → /create-testplan ABC-XXX for QA
 → /verify-issue ABC-XXX --with-subtasks
+```
 
+**`--no-subtasks` variant:**
+
+```text
+## Story Created
+Story: ABC-XXX — [title]
+Sub-tasks: none (--no-subtasks)
+→ /atlassian-pm:analyze-story ABC-XXX   when ready to add subtasks
+→ /atlassian-pm:verify-issue ABC-XXX    to check story quality
 ```
 
 **Delegation View (vibe mode — show after summary):**
@@ -674,6 +688,8 @@ See [references/examples.md](references/examples.md) for a full input/output exa
 /create-story                                                        # after /blueprint output in history → picks up blueprint_backlog_map, skips interview
 /create-story "password reset via SMS OTP"                          # small, testable scope → INVEST passes cleanly
 /create-story --thorough "new payment gateway integration"          # complex feature — use thorough mode for full interview + annotation
+/create-story --no-subtasks "payment refund flow"                   # story only — add subtasks later via /analyze-story
+สร้าง story สำหรับ Google SSO ไม่ต้องสร้าง subtask ก่อน            # natural language with --no-subtasks intent
 ```
 
 ### Bad

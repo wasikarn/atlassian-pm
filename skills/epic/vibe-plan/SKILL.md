@@ -18,7 +18,7 @@ description: |
     "สร้าง epic+story", "auto-plan feature", "ต้องการสร้าง feature"
   Use when: turning a feature idea into a complete set of AI-executable Jira tickets
   Do NOT use for: updating existing issues (use update-*), creating a single story (use create-story), blueprint debate (use blueprint)
-argument-hint: '"feature description" | --epic {{PROJECT_KEY}}-XXX'
+argument-hint: '"feature description" | --epic {{PROJECT_KEY}}-XXX | --dry-run'
 effort: high
 ---
 
@@ -44,6 +44,16 @@ effort: high
 | 6. Summary | delegation view output |
 
 > **Workflow Patterns:** See [workflow-compact.md](../../../references/workflow-compact.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+
+## Flags
+
+| Flag | Behavior |
+|------|----------|
+| *(none)* | Full workflow — Understand → Decompose → Review → QG → Create All → Summary |
+| `--epic {{PROJECT_KEY}}-XXX` | Use existing epic instead of creating new one |
+| `--dry-run` | Stop after Phase 3 (Review). Show approved decomposition tree — **no Jira writes**. Use to preview plan before committing. |
+
+> If `--dry-run` → after user approves tree in Phase 3, output the full plan and stop. Skip Phases 4–5. Phase 6 shows preview summary with `(dry-run — not created)` label on all keys.
 
 ## Phases
 
