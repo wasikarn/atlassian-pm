@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HR1: Quality Gate >= 90% before Atlassian writes.
+"""HR1: Quality Gate >= threshold before Atlassian writes.
 
 PreToolUse hook for Bash tool. Intercepts acli commands that write
 ADF JSON to Jira and validates the JSON file against quality gate.
@@ -8,7 +8,10 @@ Only matches:
   acli jira workitem create --from-json <path>
   acli jira workitem edit --from-json <path>
 
-Exit codes: 0 = allow (or not an acli command), 2 = deny (QG < 90%)
+Threshold: reads vibe.qg_threshold from .claude/project-config.json
+when --vibe flag is present in the triggering command. Defaults to 90%.
+
+Exit codes: 0 = allow (or not an acli command), 2 = deny (QG < threshold)
 """
 
 import json
@@ -16,16 +19,37 @@ import sys
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
+PLUGIN_ROOT = Path(__file__).resolve().parents[3]
+SCRIPTS_DIR = PLUGIN_ROOT / "scripts"
+PROJECT_CONFIG_PATH = PLUGIN_ROOT / ".claude" / "project-config.json"
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(PLUGIN_ROOT / "hooks"))
 from hooks_lib import ACLI_FROM_JSON_RE, allow, block, detect_issue_type, log_event, parse_stdin
 
 _HOOK = "hr1-qg-before-write"
+_DEFAULT_THRESHOLD = 90.0
 
 
 def _log(level: str, data: dict) -> None:
     log_event(_HOOK, level, data)
+
+
+def _load_vibe_threshold() -> float:
+    """Read vibe.qg_threshold from project-config.json. Returns default if not found."""
+    try:
+        with open(PROJECT_CONFIG_PATH) as f:
+            config = json.load(f)
+        threshold = config.get("vibe", {}).get("qg_threshold")
+        if isinstance(threshold, (int, float)) and 0 <= threshold <= 100:
+            return float(threshold)
+    except (OSError, json.JSONDecodeError):
+        pass
+    return _DEFAULT_THRESHOLD
+
+
+def _is_vibe_mode(cmd: str) -> bool:
+    """Detect vibe mode: --vibe flag anywhere in the command."""
+    return "--vibe" in cmd.split()
 
 
 def main() -> None:
@@ -86,8 +110,12 @@ def main() -> None:
     wrapper = adf_data if fmt in ("create", "edit") else None
     issue_type = detect_issue_type(adf_data, json_path)
 
+    # Determine threshold — vibe mode uses lower threshold from config
+    vibe = _is_vibe_mode(cmd)
+    threshold = _load_vibe_threshold() if vibe else _DEFAULT_THRESHOLD
+
     # Validate
-    validator = AdfValidator()
+    validator = AdfValidator(threshold=threshold)
     report = validator.validate(adf, issue_type, wrapper)
 
     log_data = {
@@ -95,6 +123,8 @@ def main() -> None:
         "type": issue_type,
         "format": fmt,
         "score": round(report.score, 1),
+        "threshold": threshold,
+        "vibe_mode": vibe,
         "passed": report.passed,
         "session_id": data.get("session_id", ""),
     }
@@ -107,8 +137,9 @@ def main() -> None:
         issues = [f"  {c.check_id}: {c.message}" for c in report.checks if c.status.value == "fail"]
         issues_text = "\n".join(issues[:5])  # Top 5 failures
         reason = (
-            f"HR1 BLOCKED: Quality Gate {report.score:.1f}% < 90% "
-            f"(type: {issue_type}, file: {json_path.name})\n"
+            f"HR1 BLOCKED: Quality Gate {report.score:.1f}% < {threshold:.0f}% "
+            f"(type: {issue_type}, file: {json_path.name})"
+            + (" [vibe mode]" if vibe else "") + "\n"
             f"Top issues:\n{issues_text}\n"
             f"Fix the ADF JSON and re-validate before writing to Jira."
         )

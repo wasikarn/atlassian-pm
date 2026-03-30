@@ -5,13 +5,14 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create a new Jira Task with a 6-phase workflow
+  Create a new Jira Task — vibe mode by default (fast, auto-detect type)
   Supports 4 task types: tech-debt, bug, chore, spike
+  Use --thorough for full interview + review gates
 
   Triggers: "create task", "new task", "สร้าง task", "tech debt task", "add chore", "new spike"
   Use when: creating a standalone task — tech-debt, bug, chore, or spike — that is not a User Story
   Do NOT use for: User Stories (use create-story); epics (use create-epic); full bug triage with severity/dedup/assign (use bug-triage)
-argument-hint: "[type] [description]"
+argument-hint: "[--thorough] [type] [description]"
 effort: medium
 ---
 
@@ -19,6 +20,15 @@ effort: medium
 
 **Role:** Developer / Tech Lead
 **Output:** Jira Task with ADF format
+
+## Mode Selection
+
+| Flag | Behavior | User interactions |
+| --- | --- | --- |
+| *(none)* | **Vibe mode (default)** — auto-detect type from description, single-pass generation, no review gate | 0–1 (only if type is ambiguous) |
+| `--thorough` | **Thorough mode** — full interview, explicit type selection, review gate before creation | Multiple checkpoints |
+
+> If the argument contains `--thorough`, strip the flag and treat the remaining text as `[type] [description]`. Proceed with thorough mode for all phases.
 
 ## Task Types
 
@@ -33,6 +43,20 @@ effort: medium
 ## Phases
 
 ### 1. Discovery
+
+#### Vibe Mode (Default)
+
+Auto-detect task type from description keywords:
+- "fix", "bug", "broken", "error" → `bug`
+- "debt", "refactor", "cleanup", "improve" → `tech-debt`
+- "update", "maintain", "config", "dependency" → `chore`
+- "research", "investigate", "evaluate", "POC" → `spike`
+
+If type cannot be inferred → ask ONE question: "What type? (tech-debt/bug/chore/spike)"
+
+Auto-extract required details from the description argument. Proceed to Phase 2 immediately.
+
+#### --thorough Mode
 
 Ask user to gather information:
 
@@ -55,7 +79,7 @@ What type of Task do you want to create?
 | `chore` | Objective, Task list |
 | `spike` | Research question, Investigation areas |
 
-**Gate:** User provides required info
+**⛔ GATE:** User provides required info
 
 
 ### 2. Generate Template
@@ -153,6 +177,12 @@ Generate ADF JSON based on task type → `{{artifacts_dir}}/tp-xxx-task.json`
 
 
 ### 3. Review
+
+#### Vibe Mode (Default)
+
+- **No review gate** — proceed directly to Quality Gate after generation.
+
+#### --thorough Mode
 
 Show preview for user to review:
 

@@ -27,6 +27,10 @@
 | Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
 | Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
 | Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
+| Vibe: idea to tasks | `/vibe-plan` → `/verify-issue --with-subtasks` | ≥ 90% |
+| Vibe: full pipeline | `/search-issues` → `/vibe-plan` → `/verify-issue --with-subtasks` | ≥ 90% |
+| Vibe: quick story | `/create-story` (vibe default) → verify | ≥ 90% |
+| Vibe: quick epic | `/create-epic` (vibe default) → verify | ≥ 90% |
 | Release notes | `/plan-release` → `/release-notes` | N/A |
 | Start ticket (DLC) | `/start-ticket` | pre: ticket in Jira · post: status = In Progress, AC displayed |
 | Ship to QA (DLC) | `/ship-to-qa` | pre: PR open, branch deployed · post: Jira comment posted, status = Ready for QA |
@@ -36,6 +40,8 @@
 - Always `/search-issues` before creating (dedup)
 - Always `/verify-issue` after creating/editing
 - Use `/create-story` for new stories (combines PO + TA). Use `/analyze-story` only for existing stories needing subtasks
+- All creation skills default to **vibe mode** (fast, no ceremony). Use `--thorough` for full interview + gates
+- Use `/vibe-plan` for idea-to-codeable-tasks in one shot (Epic + Stories + AI-Ready Subtasks)
 
 ## HARD RULES
 
@@ -77,6 +83,7 @@ flowchart TD
     F -->|"Greenfield / Architecture\nNew domain"| G["/blueprint\n→ /create-epic → /create-story"]
     F -->|"Unclear scope\nMulti-service / High-risk"| H["/refine-epic\n→ /create-story"]
     F -->|"Clear scope\nSingle service"| I["/create-story ⭐ preferred"]
+    F -->|"Idea → codeable tasks\nOne-shot"| V["/vibe-plan 🚀"]
     F -->|"Bug / Tech-debt\nChore / Spike"| J["/create-task"]
 
     C -->|Single issue| K["/update-{type}"]
@@ -84,7 +91,7 @@ flowchart TD
     C -->|"Story + Sub-tasks sync"| M["/sync-artifacts"]
 
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
-    class E,G,H,I,J,K,L,M skill
+    class E,G,H,I,J,K,L,M,V skill
 ```
 
 ### create-story vs analyze-story?
@@ -112,6 +119,7 @@ flowchart LR
 | `/analyze-story` | Story exists | `/verify-issue --with-subtasks` >= 90% |
 | `/create-testplan` | Story exists | `/verify-issue` >= 90% |
 | `/create-task` | `/search-issues` | `/verify-issue` >= 90% |
+| `/vibe-plan` | Feature description or epic key | `/verify-issue --with-subtasks` >= 90% |
 | `/update-{type}` | Issue exists | `/verify-issue` >= 90% |
 | `/sync-artifacts` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
 | `/start-ticket` | Issue key exists in Jira | Ticket → In Progress + AC displayed |

@@ -6,12 +6,13 @@ model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create Epic + Epic Doc from product vision with a 6-phase PM workflow
+  Create Epic + Epic Doc — vibe mode by default (fast, no ceremony)
+  Use --thorough for full interview + RICE scoring + annotation workflow
 
   Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "สร้าง epic"
-  Use when: creating a NEW Epic from a product vision or initiative idea that needs RICE prioritization and a Confluence Epic doc
+  Use when: creating a NEW Epic from a product vision or initiative idea
   Do NOT use for: stories or subtasks (use create-story); updating an existing epic (use update-epic)
-argument-hint: "[epic-title]"
+argument-hint: "[--thorough] [epic-title]"
 effort: medium
 ---
 
@@ -19,6 +20,15 @@ effort: medium
 
 **Role:** Senior Product Manager
 **Output:** Epic in Jira + Epic Doc in Confluence
+
+## Mode Selection
+
+| Flag | Behavior | User interactions |
+| --- | --- | --- |
+| *(none)* | **Vibe mode (default)** — auto-extract context, skip RICE, single-pass scope, no annotation rounds | 0–1 (only if description is ambiguous) |
+| `--thorough` | **Thorough mode** — full stakeholder interview, RICE scoring, ITERATE on scope (max 3 rounds) | Multiple checkpoints |
+
+> If the argument contains `--thorough`, strip the flag and treat the remaining text as the description. Proceed with thorough mode for all phases.
 
 ## Context Object (accumulated across phases)
 
@@ -59,6 +69,17 @@ Skip interview questions in Phase 1 for information already documented.
 
 ### 1. Discovery
 
+#### Vibe Mode (Default)
+
+- Auto-extract from description + blueprint (if available):
+  - **Narrative Arc:** Infer `[Current situation] → [Problem] → [This Epic solves it by...]` from description
+  - **VS Planning:** Auto-identify vertical slices from description keywords
+- If existing docs available → read context silently
+- Ask only if description is too vague to infer problem narrative (max 1 question)
+- **No GATE** — proceed to Phase 2 immediately
+
+#### --thorough Mode
+
 - Interview stakeholder:
   - **Problem narrative:** What is the current situation? What is the problem? What happens if we don't act?
   - Target users? Business value? Success metrics?
@@ -68,6 +89,13 @@ Skip interview questions in Phase 1 for information already documented.
 - **⛔ GATE — DO NOT PROCEED** without stakeholder confirmation of problem narrative + VS planning.
 
 ### 2. RICE Prioritization
+
+#### Vibe Mode (Default)
+
+- **Skip entirely** — RICE scoring requires stakeholder data that isn't available yet. Score later when there's real usage data.
+- Proceed directly to Phase 3.
+
+#### --thorough Mode
 
 - **R**each (1-10): Number of users affected
 - **I**mpact (0.25-3): Level of impact on user
@@ -80,6 +108,17 @@ Skip interview questions in Phase 1 for information already documented.
 
 > **If `vs_stories[]` pre-populated from blueprint:** ข้าม VS derivation — ใช้ `vs_stories[]` จาก blueprint โดยตรง แสดงให้ user confirm แทน
 > **If `non_goals[]` present from blueprint:** ใช้เป็น out-of-scope items ใน scope definition (ไม่ต้องถามใหม่)
+
+#### Vibe Mode (Default)
+
+- Auto-generate scope from description + narrative arc:
+  - Identify high-level requirements
+  - Auto-select VS pattern based on description complexity
+  - Break into User Stories by VS (max 5 stories)
+  - Auto-define MVP boundary (all stories = MVP unless description implies phases)
+- **No ITERATE** — single-pass generation, proceed to QG immediately
+
+#### --thorough Mode
 
 - Identify high-level requirements
 - **VS Pattern Selection:** (see [vertical-slice-guide.md](../../../references/vertical-slice-guide.md))

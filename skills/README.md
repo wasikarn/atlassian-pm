@@ -19,7 +19,8 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | --- | --- | --- | --- | --- |
 | blueprint | `/atlassian-pm:blueprint` | 10 | atlassian-cache, mcp-atlassian | Multi-perspective blueprint via 5-role debate (PO, Domain Expert, Tech Lead, Engineer, QA). Outputs Confluence page (8 sections) + backlog map for downstream skills. Supports S/M/L tiers. |
 | refine-epic | `/atlassian-pm:refine-epic` | 5 | atlassian-cache, mcp-atlassian | 4-role debate (PO, Tech Lead, Engineer, QA) for refining existing or draft stories. 2 rounds. Outputs refined stories ready for `/create-story`. |
-| create-epic | `/atlassian-pm:create-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Includes RICE prioritization, VS planning, and blueprint handoff support. |
+| create-epic | `/atlassian-pm:create-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Create Epic + Epic Doc from product vision. Vibe mode (default): auto-extract, skip RICE+ITERATE. `--thorough` for full interview + RICE + annotation rounds. |
+| vibe-plan | `/atlassian-pm:vibe-plan` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Idea → Epic + Stories + AI-Ready Subtasks in one shot. Max 2 user interactions. Each subtask includes Implementation Hints (entry point, pattern, test command) for Claude Code execution. |
 | update-epic | `/atlassian-pm:update-epic` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Update an existing Epic (scope, RICE, success metrics, format migration). Preserves intent; gates on scope changes. |
 | plan-release | `/atlassian-pm:plan-release` | 9 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
 | epic-health | `/atlassian-pm:epic-health` | 4 | atlassian-cache, mcp-atlassian | Epic health audit: story coverage, SP totals vs velocity, timeline feasibility, AC alignment, and missing QG verifications. |
@@ -28,9 +29,9 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| create-story | `/atlassian-pm:create-story` | 11 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow: creates User Story + Sub-tasks in one session. Includes codebase exploration, INVEST validation, QG, and blueprint handoff. |
-| analyze-story | `/atlassian-pm:analyze-story` | 7 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story: parallel codebase exploration, sub-task design with TL decomposition ordering, QG, and Two-Step creation. |
-| create-task | `/atlassian-pm:create-task` | 6 | atlassian-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. |
+| create-story | `/atlassian-pm:create-story` | 11 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow. Vibe mode (default): auto-extract, single-pass, Implementation Hints in subtasks. `--thorough` for full interview + ITERATE rounds. |
+| analyze-story | `/atlassian-pm:analyze-story` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story. Vibe mode (default): auto-proceed, single-pass design + Implementation Hints. `--thorough` for full ITERATE rounds. |
+| create-task | `/atlassian-pm:create-task` | 5 | atlassian-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. Vibe mode (default): auto-detect type, skip review gate. |
 | create-testplan | `/atlassian-pm:create-testplan` | 6 | atlassian-cache, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
 | execute-testplan | `/atlassian-pm:execute-testplan` | 6 | mcp-atlassian, playwright | Execute test cases from a Google Sheet (linked via Jira Web links) using Playwright. Writes Pass/Fail/Skip results back to Sheet. Creates bug tickets with screenshot evidence for failures. |
 | bug-triage | `/atlassian-pm:bug-triage` | 6 | atlassian-cache, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
