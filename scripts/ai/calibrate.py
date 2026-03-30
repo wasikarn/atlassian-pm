@@ -15,11 +15,10 @@ Usage:
 import argparse
 import fcntl
 import json
-import math
 import os
 import re
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]

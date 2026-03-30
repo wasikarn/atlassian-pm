@@ -1,6 +1,5 @@
 """Tests for scripts/ai/calibrate.py."""
 import json
-import os
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -213,7 +212,7 @@ def test_run_calibration_writes_calibration_json(tmp_path):
     records = [_make_record("[BE]", "carry_over", age_days=i) for i in range(20)]
     outcomes = _write_outcomes(tmp_path, records)
     cal_path = tmp_path / "cal.json"
-    result = calibrate.run_calibration(
+    calibrate.run_calibration(
         outcomes_path=outcomes, calibration_path=cal_path, force=True
     )
     assert cal_path.exists()
