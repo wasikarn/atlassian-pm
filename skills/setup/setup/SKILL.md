@@ -88,8 +88,6 @@ if [ "$SKIP_CONFIG" = "true" ] && [ "$ENV_OK" = "true" ] && \
 fi
 ```
 
-If fast path triggered → skip Phases 2–5, jump to Phase 6 step 2.
-
 ## Phase 2 — Check + Auto-install
 
 Run as a **single Bash call**. Prints status for every dep — both installed and skipped. Skip if fast path triggered in Phase 1.
@@ -312,54 +310,33 @@ If **Skip for now**: print `"  figma MCP: skipped"` and continue to Phase 6.
 
 If **Yes, configure**:
 
-**Step 1.** Print token visibility warning (same as Phase 5 step 1):
+- Print token visibility warning (same text as Phase 5 §1 — token visible in chat, clear session on shared machine, never echoed back).
+- Ask: `"What is your Figma Personal Access Token?"` (Hint: Figma → Settings → Security → Personal Access Tokens). **IMPORTANT:** Never echo token back — reference as `[token collected]`.
+- Write token to `~/.config/atlassian/.figma.env` via **Write tool** (not shell echo — avoids token in shell history):
 
-```
-⚠️  Your token will be visible in this chat session.
-    Clear the conversation after setup if this is a shared machine.
-    Claude will never echo your token back in any output or summary.
-```
+  ```dotenv
+  FIGMA_API_KEY=<FIGMA_TOKEN>
+  ```
 
-**Step 2.** Ask: `"What is your Figma Personal Access Token?"`
+- Set permissions and register:
 
-- Hint: Figma → Settings → Security → Personal Access Tokens
-- **IMPORTANT:** After collecting token, NEVER echo it back. Reference as `[token collected]` if needed.
+  ```bash
+  chmod 600 "${HOME}/.config/atlassian/.figma.env"
 
-**Step 3.** Write token to env file using **Write tool** (not shell echo — avoids token in shell history):
+  claude mcp add --scope user figma -- npx -y figma-developer-mcp \
+    --env-file "${HOME}/.config/atlassian/.figma.env"
+  ```
 
-File: `~/.config/atlassian/.figma.env`
+- Verify registration:
 
-```
-FIGMA_API_KEY=<FIGMA_TOKEN>
-```
-
-**Step 4.** Set permissions and register:
-
-```bash
-chmod 600 "${HOME}/.config/atlassian/.figma.env"
-
-claude mcp add --scope user figma -- npx -y figma-developer-mcp \
-  --env-file "${HOME}/.config/atlassian/.figma.env"
-```
-
-> **Note:** `figma-developer-mcp` reads `FIGMA_API_KEY` from the env file. Token is never passed as an argv argument — consistent with Phase 5 step 3 security pattern.
-
-**Step 5.** Verify registration:
-
-```bash
-if claude mcp get figma &>/dev/null; then
-  echo "  figma MCP: registered (user scope) ✓"
-  FIGMA_NEWLY_ADDED=true
-else
-  echo "  !  figma MCP: registration may have failed — check: claude mcp list"
-fi
-```
-
-**Security properties:**
-
-- Token written to `~/.config/atlassian/.figma.env` (chmod 600) — same directory as Jira `.env`
-- Passed via `--env-file` (file path in argv, not the secret itself)
-- NEVER echo token in any output, summary, or tool call
+  ```bash
+  if claude mcp get figma &>/dev/null; then
+    echo "  figma MCP: registered (user scope) ✓"
+    FIGMA_NEWLY_ADDED=true
+  else
+    echo "  !  figma MCP: registration may have failed — check: claude mcp list"
+  fi
+  ```
 
 ## Phase 6 — Finalize + Validate
 
@@ -431,34 +408,17 @@ Print this notice if `MCP_NEWLY_ADDED=true` OR `FIGMA_NEWLY_ADDED=true`.
 
 ## Examples
 
-### ✅ Good
-
 ```text
-/setup --init                         # create ~/.atlassian-pm.yaml template (fill it in, then run /setup)
-/setup                                # config-file mode: reads ~/.atlassian-pm.yaml if filled, skips all questions
-/setup                                # first-time setup on a fresh machine — installs all deps
-/setup                                # safe to re-run after plugin reinstall (idempotent, skips done steps)
-/setup                                # run when doctor reports acli not authenticated or mcp-atlassian missing
+/setup --init    # create ~/.atlassian-pm.yaml template (fill it in, then run /setup)
+/setup           # config-file mode: reads ~/.atlassian-pm.yaml if filled, skips all questions
+/setup           # first-time setup on a fresh machine — installs all deps
 ```
 
-### ❌ Bad
+**Key mistakes to avoid:**
 
-```text
-/setup                                # don't run mid-session while a sprint planning skill is active — MCP restart will kill context
-/setup --skip-acli                    # no flags exist — setup runs all phases and skips what's already done automatically
-/setup                                # don't run just to fix board_id=0 — doctor → Phase 6 step 2 handles that without full re-setup
-/setup                                # don't run to update a single team member — edit project-config.json directly
-/setup --init                         # don't re-run --init after filling in the file — just run /setup
-```
-
-**Common mistakes:**
-
-- Not restarting Claude Code after setup completes — MCP servers registered during setup are inactive until restart, causing "tool not found" errors in all Jira skills.
-- Providing Jira site URL with `https://` prefix — setup strips it, but double-check the stored config has bare hostname format (`your-company.atlassian.net`).
-- Ignoring the API token expiry warning — Atlassian tokens expire in ≤365 days; set a calendar reminder or you'll need to re-run setup Phase 5 steps 1+2.
-- Re-running full setup to change only one thing (e.g., project key) — edit `project-config.json` directly and re-run `/doctor` to validate.
-- Filling in ~/.atlassian-pm.yaml but leaving placeholder values — setup detects placeholders and falls back to interactive mode. Check that all 5 required fields have real values.
-- Leaving credentials: section in ~/.atlassian-pm.yaml after setup — setup offers to remove it; accept the cleanup prompt to avoid leaving a plaintext token on disk.
+- Not restarting Claude Code after setup — MCP servers are inactive until restart, causing "tool not found" errors in all Jira skills.
+- Providing Jira site URL with `https://` prefix — setup strips it, but double-check stored config has bare hostname format.
+- Leaving placeholder values in `~/.atlassian-pm.yaml` — setup detects them and falls back to interactive mode; ensure all 5 required fields have real values.
 
 ## Error Handling Reference
 
