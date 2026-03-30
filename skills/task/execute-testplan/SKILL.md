@@ -52,138 +52,71 @@ effort: high
 
 ## Environment URLs
 
-Read from `.claude/project-config.json` → `environments.<env>`:
-
-- staging web: read from `environments.staging.web`
-- production web: read from `environments.production.web`
+Read from `.claude/project-config.json` → `environments.<env>`.
 
 ## Test Type Strategy
 
-| Test Type | Mode | Notes |
-| --- | --- | --- |
-| Positive | headless | Standard flow |
-| Negative | headless | Error/validation paths |
-| Edge | headless | Boundary conditions |
-| Any with OAuth popup, LINE connect | **headed** | Third-party popup requires visible browser |
-| Any with `--headed` flag | headed | Override all |
+| Test Type | Mode |
+| --- | --- |
+| Positive / Negative / Edge | headless |
+| OAuth popup, LINE connect | headed |
+| `--headed` flag | headed (override all) |
 
-Auto-detect headed requirement: if Description or Test Steps contains keywords `OAuth`, `popup`, `LINE connect`, `เชื่อมต่อ LINE`, `authorization` → switch to headed.
+Auto-detect headed: if Description or Test Steps contains `OAuth`, `popup`, `LINE connect`, `เชื่อมต่อ LINE`, `authorization` → switch to headed.
 
 ## Google Sheet Column Map
 
-| Col | Field | Read/Write |
+| Col | Field | R/W |
 | --- | --- | --- |
-| A | Test ID | Read |
-| B | Feature / Module | Read |
-| C | Description | Read |
-| D | Test Type | Read |
-| E | Precondition | Read |
-| F | Test Data | Read |
-| G | Test Steps | Read |
-| H | Expected Result | Read |
-| I | Actual Result | **Write** |
-| J | Status (`pass`/`fail`/`skip`/`blocked`) | **Write** |
-| K | Date | **Write** |
-| L | Remark | **Write** (append bug key if fail) |
+| A–H | Test ID, Feature, Description, Type, Precondition, Data, Steps, Expected | Read |
+| I | Actual Result | Write |
+| J | Status (`pass`/`fail`/`skip`/`blocked`) | Write |
+| K | Date | Write |
+| L | Remark (append bug key if fail) | Write |
 
-Metadata rows (read only): Row 1 = Project, Row 2 = Story Name, Row 3 = Create By, Row 4 = Assignee, Row 5 = Figma link.
-Header row: Row 7. Test data starts: Row 8.
+Metadata rows (read only): Row 1=Project, 2=Story Name, 3=Create By, 4=Assignee, 5=Figma. Header: Row 7. Data: Row 8+.
 
 ## Context Object
 
-| Phase | Adds to Context |
+| Phase | Adds |
 | --- | --- |
-| 1 | `issue` (ACs, summary), `sheet_url`, `remote_links` |
-| 2 | `test_cases[]` (all rows parsed), `metadata` |
+| 1 | `issue`, `sheet_url`, `remote_links` |
+| 2 | `test_cases[]`, `metadata` |
 | 3 | `env_url`, `headed_tests[]`, `estimated_time` |
-| 4 | `results[]` (per test: actual, status, screenshot_path, console_errors) |
+| 4 | `results[]` (actual, status, screenshot_path, console_errors) |
 | 5 | `sheet_updated: true` |
 | 6 | `bugs_created[]`, `summary` |
 
 ## Phase 1 — Issue & Sheet Discovery
 
-**Goal:** Fetch Jira issue context and locate the Google Sheet test plan.
-**Required inputs:** `issue_key`
-**Output:** `issue`, `sheet_url` (or fallback flag)
+> **🟢 PARALLEL** — Steps 1 and 2 run simultaneously.
 
-```text
-1. jira_get_issue(issue_key, fields="summary,description,status,labels,issuelinks")
-   → Extract: ACs, story summary, labels, linked bugs
+1. `jira_get_issue(issue_key, fields="summary,description,status,labels,issuelinks")` → extract ACs, summary, labels, linked bugs
+2. `acli jira weblink list -k "<issue_key>" -y` → find `docs.google.com` / `drive.google.com` URL
 
-2. Fetch remote/web links via Bash:
-   acli jira weblink list -k "<issue_key>" -y
-   → Search for Google Drive/Sheets URL (icon or URL contains "docs.google.com" or "drive.google.com")
-
-3. If Sheet URL found → set sheet_url, proceed to Phase 2
-   If NOT found:
-   → Warn: "ไม่พบ Google Sheet ใน Web links ของ <issue_key>"
-   → Offer options:
-     [A] Paste Sheet URL manually
-     [B] Generate test cases from ACs and create new Sheet (requires Google auth)
-     [C] Abort
-   → Wait for user choice before proceeding
-```
-
-> **🟢 PARALLEL** — Steps 1 and 2 can run simultaneously.
+If Sheet not found → offer: [A] paste URL manually · [B] generate from ACs + create Sheet · [C] abort. Wait for choice.
 
 ## Phase 2 — Sheet Parse
-
-**Goal:** Read all test cases from the Google Sheet.
-**Required inputs:** `sheet_url`
-**Constraints:** Sheet must be publicly accessible or user must be logged in to Google in the browser session.
-**Output:** `test_cases[]`, `metadata`
 
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 2: Sheet Parse Script**
 
 ## Phase 3 — Pre-flight Check
 
-**Goal:** Verify environment is reachable and confirm execution with user.
-**Required inputs:** `env_url`, `test_cases[]`
-**Output:** User confirmation, `env_reachable: bool`
-
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 3: Pre-flight Check Script**
 
 ## Phase 4 — Execute Tests
-
-**Goal:** Run each test case with Playwright; collect results and evidence.
-**Required inputs:** `test_cases[]`, `env_url`, user confirmation
-**Constraints:** OAuth/popup tests → use headed; capture screenshot on every result.
-**Output:** `results[]`
 
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 4: Execute Tests Script**
 
 ## Phase 5 — Update Google Sheet
 
-**Goal:** Write execution results back to the Google Sheet (columns I, J, K, L).
-**Required inputs:** `results[]`, `sheet_url`
-**Output:** `sheet_updated: true`
-
-```text
-1. browser_navigate(url=sheet_url)
-   → Ensure sheet is loaded and editable
-
-2. For each result in results[]:
-   a. Locate the row by Test ID (column A match)
-   b. Click cell I (Actual Result) → type actual_result text
-   c. Click cell J (Status) → type status ("pass" / "fail" / "skip" / "blocked")
-      → Apply background color via Apps Script or cell formatting:
-        pass = green (#b7e1cd), fail = red (#f4c7c3), skip = grey (#efefef), blocked = orange (#fce8b2)
-   d. Click cell K (Date) → type today's date (DD/MM/YYYY)
-   e. Click cell L (Remark) → append bug key if fail (e.g., "{{PROJECT_KEY}}-XXXX")
-
-3. Verify changes saved (check spinner / "Saving..." text disappears)
-
-4. Report: "✅ Updated X rows in Sheet"
-
-Note: If Google Sheet is not editable (view-only link):
-→ Warn user + export results as markdown table in Jira comment instead
-```
+1. `browser_navigate(url=sheet_url)` — ensure sheet is editable
+2. For each result: locate row by Test ID (col A) → write I (actual), J (status), K (date DD/MM/YYYY), L (bug key if fail)
+   - Colors: pass=#b7e1cd · fail=#f4c7c3 · skip=#efefef · blocked=#fce8b2
+3. Verify saved (spinner/Saving… disappears)
+4. If view-only → warn + export results as markdown table in Jira comment
 
 ## Phase 6 — Bug Triage & Summary
-
-**Goal:** Create Jira bug tickets for failed tests, dedup against existing bugs, post summary comment.
-**Required inputs:** `results[]` where status = fail, `issue_key`
-**Output:** `bugs_created[]`, summary comment on story
 
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 6: Bug Triage & Summary Script**
 
