@@ -106,11 +106,69 @@ jira_create_issue({
             ]}]}
           ]}
         ]
+      },
+      {"type": "rule"},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "4. 🤖 Implementation Hints"}]},
+      {
+        "type": "panel",
+        "attrs": {"panelType": "note"},
+        "content": [
+          {
+            "type": "table",
+            "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
+            "content": [
+              {"type": "tableRow", "content": [
+                {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Key"}]}]},
+                {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Value"}]}]}
+              ]},
+              {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Entry Point"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "app/Services/Feature/NewService.ts", "marks": [{"type": "code"}]}]}]}
+              ]},
+              {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Pattern to Follow"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "app/Services/Existing/ExampleService.ts (REF)", "marks": [{"type": "code"}]}]}]}
+              ]},
+              {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Test Command"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "node ace test --files \"tests/unit/services/feature*\"", "marks": [{"type": "code"}]}]}]}
+              ]},
+              {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Related API"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "POST /api/v1/feature"}]}]}
+              ]},
+              {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dependencies"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "FeatureRepository, BaseService"}]}]}
+              ]}
+            ]
+          },
+          {"type": "paragraph", "content": [
+            {"type": "text", "text": "Claude Code Prompt:", "marks": [{"type": "strong"}]}
+          ]},
+          {"type": "paragraph", "content": [
+            {"type": "text", "text": "Implement [objective] following the pattern in [Pattern to Follow]. Run [Test Command] to verify. All ACs must pass."}
+          ]}
+        ]
       }
     ]
   }
 }
 ```
+
+> **Section 4 is optional** — generate only when `--vibe` flag is used OR when codebase exploration data is available from a prior `analyze-story` run.
+
+**Row requirements:**
+
+| Row | Required |
+| --- | --- |
+| Entry Point | Yes — primary file to CREATE or MODIFY |
+| Pattern to Follow | Yes — REF file from Scope table |
+| Test Command | Yes — exact command to run tests |
+| Related API | Optional — only for BE subtasks with HTTP endpoints |
+| Dependencies | Optional — injected services/repos the new file needs |
+
+> **Why this matters:** The subtask IS the AI prompt — when a developer runs `implement TP-123` in Claude Code, Claude reads this ticket via MCP. Implementation Hints give Claude Code everything it needs to produce working code without additional prompting. No hints = generic code. Good hints = production-ready first pass.
 
 ## QA Test Case Template (ADF)
 
