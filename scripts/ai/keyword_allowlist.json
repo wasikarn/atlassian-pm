@@ -1,0 +1,11 @@
+[
+  "auth", "migration", "integration", "payment", "webhook",
+  "refactor", "performance", "cache", "search", "notification",
+  "upload", "export", "import", "report", "dashboard",
+  "analytics", "scheduler", "queue", "batch", "sync",
+  "permission", "role", "approval", "workflow", "email",
+  "video", "transcoding", "streaming", "encoding", "storage",
+  "database", "index", "query", "transaction", "constraint",
+  "deployment", "config", "environment", "logging", "monitoring",
+  "testing", "validation", "serializer", "endpoint", "middleware"
+]
