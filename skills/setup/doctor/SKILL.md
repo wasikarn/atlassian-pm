@@ -217,86 +217,14 @@ echo "✓ pass  ✗ fail  ! warning  - optional"
 
 ## Examples
 
-### ✅ Good
-
 ```text
-/doctor                               # run after initial setup to confirm everything is green
-/doctor                               # run after plugin update to catch regressions
-/doctor                               # run when Jira MCP tools suddenly return "not found"
+/doctor          # run after initial setup or plugin update to confirm green
+/doctor          # run when Jira MCP tools suddenly return "not found"
 ```
-
-### ❌ Bad
-
-```text
-/doctor --fix                         # no flags exist — doctor is read-only, it never fixes anything
-/doctor                               # running after every single code change is unnecessary overhead
-/doctor {{PROJECT_KEY}}-123                       # takes no arguments — issue keys are ignored
-```
-
-**Common mistakes:**
-
-- Expecting `/doctor` to fix broken items — it only reports status. Use `/setup` to fix failures.
-- Running it to diagnose a Jira API error mid-session — doctor checks environment (tools, venv, config), not live Jira connectivity.
-- Treating `! warning` as a blocker — warnings (e.g., missing team-detail) are optional; only `✗ fail` items block core functionality.
-- Not restarting Claude Code after `/setup` installs MCP — doctor will show mcp-atlassian as configured but tools remain inactive until restart.
-
-## Error Handling
-
-If any bash command fails entirely (e.g., `python3` not found), print `!  check skipped (python3 unavailable)` and increment WARN. Never `exit 1` — always complete all checks.
 
 ## 🎓 Domain Expert Notes
 
-### Why This Approach
-
-Doctor implements the **pre-flight checklist pattern** from aviation: a complete, ordered scan of all critical systems run before every mission, regardless of how routine the flight seems. The non-negotiable "never stop on failure" rule mirrors aviation checklists exactly — a partial check is worse than no check, because it creates false confidence about unverified items.
-
-### Industry Frameworks Used
-
-| Framework | Applied In | Why |
-| --- | --- | --- |
-| Pre-flight checklist (aviation) | All 10 checks run unconditionally | Partial results create false confidence — full picture always required |
-| Shift-left verification | Running doctor after setup/update, not after first failure | Catch environment drift before it blocks work, not during it |
-| Idempotent diagnostics | Every check is read-only with no side effects | Safe to run repeatedly in any context — no state mutation from observation |
-| Dependency graph validation | Checks ordered: acli → auth → uv → venv → MCP → config → board | Upstream failures explain downstream ones; order reveals root cause |
-| Pass/Warn/Fail/Skip severity model | `✓ ✗ ! -` output symbols | Operators need graduated response: fail = blocking, warn = degraded, skip = optional |
-
-### Key Metrics
-
-- **Time-to-green:** How long from fresh machine to all 10 checks passing — target under 5 minutes with `/setup`. Longer indicates dependency install issues.
-- **Warning-to-failure ratio:** A healthy environment has 0 fails and ≤1 warning (team-detail missing is expected). Multiple warnings signal configuration drift.
-- **Check coverage:** 10 checks across 5 layers (CLI tools, auth, Python runtime, MCP integration, project config) — gaps in any layer leave blind spots that surface as cryptic mid-session errors.
-
-### Expert Decision Criteria
-
-**When to run doctor:**
-
-- After any `/setup` or plugin reinstall — verify the new state before starting work
-- When Jira MCP tools return "not found" — most commonly venv or MCP registration issue
-- After a machine migration or macOS upgrade — PATH changes silently break `acli` and `uv`
-- Before a sprint planning session — board_id=0 causes silent failures in sprint-related skills
-
-**How to interpret results:**
-
-- `✗ fail` on acli auth → run `/setup` Phase 5 steps 1+2 only (not full setup)
-- `✗ fail` on mcp-atlassian → registered but inactive means restart needed; missing means run `/setup`
-- `! warning` on venv → doctor auto-heals this; if it fails, uv or PLUGIN_ROOT resolution is broken
-- All checks green but Jira still fails → live API connectivity issue, not environment (doctor can't test that)
-
-### Common Failure Modes
-
-| Symptom | Root Cause | Expert Fix |
-| --- | --- | --- |
-| mcp-atlassian shows `✓` but Jira tools return "not found" | MCP registered this session — tools activate only after restart | Restart Claude Code, re-run doctor |
-| venv check fails repeatedly after auto-heal attempt | `uv` installed after session start — not in PATH for this shell | Open new terminal, re-run doctor |
-| board_id = 0 warning persists | Setup was run without Phase 6 step 2 board lookup | Run `/setup` and choose board when prompted, or edit `project-config.json` directly |
-| git filters `! warning` in cache install | Plugin loaded from `~/.claude/plugins/cache/` — filters are in source repo, not cache | Expected behavior; filters only needed in source repo contributors |
-| All checks pass but `CLAUDE.md` block warning | `~/.claude/CLAUDE.md` was manually edited and block removed | Re-run `/setup` Phase 6 step 1 (`setup.sh`) to re-inject the block |
-
-### Authoritative References
-
-- **Atul Gawande, "The Checklist Manifesto" (2009):** Checklists work because they encode expert knowledge in a form that survives high-pressure situations — the same reason doctor never stops on failure.
-- **Beyer, Murphy, Rensin, Kawahara, Thorne — *Site Reliability Engineering* (O'Reilly/Google, 2016), Chapter 17 "Testing for Reliability":** Environment validation is a form of canary testing — catching configuration drift in development prevents cascading failures in production. The SRE model: test the environment before relying on it, not after it fails.
-- **12-Factor App — Factor I "Codebase" + Factor X "Dev/prod parity" (Wiggins, 2011):** The idempotent, read-only design of doctor checks enforces dev/prod parity detection without mutating state. An operation that verifies a configuration is safe to run at any frequency; one that modifies state is not. Doctor is designed to the verification side of this boundary.
+See [references/domain-expert.md](references/domain-expert.md)
 
 
 ## References
