@@ -50,7 +50,7 @@
   },
 
   "vibe": {
-    "qg_threshold": 85,
+    "qg_threshold": 90,
     "skip_rice": true,
     "skip_iterate": true,
     "implementation_hints": true
