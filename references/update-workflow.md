@@ -6,7 +6,6 @@ All 4 skills follow this 6-phase skeleton: Fetch → Identify Changes → Preser
 ## Standard Frontmatter Defaults
 
 ```yaml
-disable-model-invocation: true
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 argument-hint: "[issue-key] [changes]"
 ```

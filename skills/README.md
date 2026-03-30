@@ -105,10 +105,9 @@ Every skill lives in its own subdirectory as `SKILL.md`. The file structure:
 | `x-compatibility` | External tools required (see legend above) |
 | `allowed-tools` | Restricts which Claude tools can be called (optional) |
 | `argument-hint` | Shown as usage hint when the skill is invoked |
-| `disable-model-invocation` | If `true`, Claude must follow instructions literally |
 | `context: fork` | Runs in isolated context (does not pollute main session) |
 | `model` | Override model for this skill (e.g., `haiku` for lightweight tasks) |
-| `user-invocable: false` | Internal skill — not listed in user-facing discovery |
+| `user-invocable: false` | Internal skill — hidden from `/` menu but Claude can still auto-trigger |
 
 **Phase instructions** — numbered workflow steps after the frontmatter:
 

@@ -1,7 +1,6 @@
 ---
 name: shared-references
 user-invocable: false
-disable-model-invocation: true
 description: |
   Index of shared reference documents for Jira/Confluence content creation.
   Preloaded by agents that need template and style guidance.
