@@ -60,6 +60,7 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 | Command | Description |
 |---------|-------------|
+| `/vibe-full` | 🚀 Idea → AI-Ready tasks in one shot (dedup → vibe-plan → verify) |
 | `/story-full` | Dedup check → create story + subtasks → verify |
 | `/epic-full` | Dedup → create epic → create story → verify |
 | `/blueprint-full` | Greenfield design → epic → story → verify |
@@ -80,12 +81,13 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 | `/atlassian-pm:setup` | First-time setup — installs deps, configures Jira, registers MCP |
 | `/atlassian-pm:doctor` | Health check — 10 checks, shows what's broken |
 | **Backlog** | |
+| `/atlassian-pm:vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). Each subtask includes Implementation Hints for Claude Code. |
 | `/atlassian-pm:blueprint` | Multi-role feature design (5 domain experts + debate) |
 | `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
-| `/atlassian-pm:create-epic` | Create Epic + Confluence epic doc with RICE scoring |
-| `/atlassian-pm:create-story` | Create User Story with subtasks (main PM workflow) |
-| `/atlassian-pm:analyze-story` | Analyze existing story, create implementation subtasks |
-| `/atlassian-pm:create-task` | Create standalone task: tech-debt, bug, chore, spike |
+| `/atlassian-pm:create-epic` | Create Epic + Confluence epic doc. Vibe default: fast, no interview. Add `--thorough` for RICE + annotation rounds. |
+| `/atlassian-pm:create-story` | Create User Story with subtasks. Vibe default: single-pass + Implementation Hints. Add `--thorough` for full workflow. |
+| `/atlassian-pm:analyze-story` | Analyze existing story, create subtasks + Implementation Hints. Vibe default: auto-proceed. Add `--thorough` for ITERATE. |
+| `/atlassian-pm:create-task` | Create standalone task: tech-debt, bug, chore, spike. Vibe default: auto-detect type. |
 | `/atlassian-pm:bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign |
 | `/atlassian-pm:search-issues` | Dedup check before creating |
 | `/atlassian-pm:spec-to-stories` | Convert Confluence spec page → batch User Stories |
@@ -123,7 +125,18 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 ## Common Workflows
 
-### Workflow A: New feature from scratch
+### Workflow A: Vibe coding (fastest path)
+
+```
+# Idea → Epic + Stories + AI-Ready Subtasks in one shot
+/vibe-full "coupon redemption at checkout"
+
+# Output: Epic + 3-5 stories + subtasks with Implementation Hints
+# Each subtask: Entry Point, Pattern to Follow, Test Command
+# Team member runs: implement {{PROJECT_KEY}}-123
+```
+
+### Workflow B: New feature from scratch
 
 ```
 1. /atlassian-pm:create-epic     → Epic + Confluence epic page
@@ -132,7 +145,7 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 Or use the fast-path: `/epic-full`
 
-### Workflow B: Scrumban daily flow
+### Workflow C: Scrumban daily flow
 
 ```
 1. /atlassian-pm:flow-check           → board health + replenish Ready queue if low
@@ -140,13 +153,13 @@ Or use the fast-path: `/epic-full`
 3. /atlassian-pm:ship-to-qa {{PROJECT_KEY}}-XXX    → post PR + preview URLs + transition to Ready for QA
 ```
 
-### Workflow C: Analyze and implement a story
+### Workflow D: Analyze and implement a story
 
 ```
 1. /atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX   → codebase exploration → implementation subtasks
 ```
 
-### Workflow D: Sprint close with retrospective
+### Workflow E: Sprint close with retrospective
 
 ```
 1. /atlassian-pm:close-sprint           → triage incomplete issues
@@ -155,7 +168,7 @@ Or use the fast-path: `/epic-full`
 
 Or use the fast-path: `/sprint-close-full`
 
-### Workflow E: Verify issue quality
+### Workflow F: Verify issue quality
 
 ```
 1. /atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks

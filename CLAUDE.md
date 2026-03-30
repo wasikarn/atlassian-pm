@@ -6,11 +6,12 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (24 docs) | `scripts/` (api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (61 hooks in `plugin/` + `dev/`) | `agents/` (20) | `.claude/commands/` (12 orchestration chains)
-**Skills layout:** 38 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (25 docs) | `scripts/` (api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (61 hooks in `plugin/` + `dev/`) | `agents/` (20) | `.claude/commands/` (11 orchestration chains)
+**Skills layout:** 39 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
+**Vibe mode:** All creation skills (create-story, create-epic, analyze-story, create-task) default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Use `/vibe-plan` for idea → Epic + Stories + AI-Ready Subtasks in one shot.
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
-**Skill index:** [skills/README.md](skills/README.md) — all 38 skills with phases, categories, and argument patterns.
+**Skill index:** [skills/README.md](skills/README.md) — all 39 skills with phases, categories, and argument patterns.
 **Hook reference:** [hooks/README.md](hooks/README.md) — all 61 hooks, what they enforce, and how to debug them.
 
 ## Project Settings
@@ -44,7 +45,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 
 ## References
 
-Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scripts:** `skills/utilities/atlassian-scripts/SKILL.md` → `scripts/api/`
+Loaded on demand from `references/` (25 docs, indexed by `templates.md`). **Scripts:** `skills/utilities/atlassian-scripts/SKILL.md` → `scripts/api/`
 
 ## Core Principles
 
@@ -54,6 +55,7 @@ Loaded on demand from `references/` (24 docs, indexed by `templates.md`). **Scri
 | Phase order | Follow phases in order, never skip steps |
 | Traceability | Everything links to parent: Sub-task→Story→Epic |
 | Explore first | Prefer `Task(Explore)` before creating Sub-tasks (no explore = generic paths) |
+| Vibe default | All creation skills default to fast mode (no ceremony). Use `--thorough` for full workflow. |
 
 ### HARD RULES
 

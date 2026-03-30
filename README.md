@@ -1,6 +1,6 @@
 # atlassian-pm
 
-> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and manage Scrumban flow using natural language. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
+> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each subtask includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
 [![Version](https://img.shields.io/badge/version-2.4.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -27,7 +27,8 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 ## How It Works
 
 ```text
-⚡ Commands:  /story-full · /epic-full · /bug-full · /sprint-close-full · …  (chains skills end-to-end with confirmation gates)
+⚡ Commands:  /vibe-full · /story-full · /epic-full · /bug-full · /sprint-close-full · …  (chains skills end-to-end with confirmation gates)
+🚀 Vibe mode: /atlassian-pm:vibe-plan "feature desc"  →  Epic + Stories + AI-Ready Subtasks in one shot
    Skills:   /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
 ```
 
@@ -40,9 +41,10 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 
 ```mermaid
 flowchart TD
-    A([💬 User Intent]) --> CMD["⚡ Commands Fast-Path\n/story-full · /epic-full · /blueprint-full\n/bug-full · /sprint-plan-full · /sprint-close-full\n/release-full · /tech-debt-full · /story-analyze-full"]
+    A([💬 User Intent]) --> CMD["⚡ Commands Fast-Path\n/vibe-full · /story-full · /epic-full · /blueprint-full\n/bug-full · /sprint-plan-full · /sprint-close-full\n/release-full · /tech-debt-full · /story-analyze-full"]
     A --> B{New or Existing?}
     CMD -.->|"auto-chains skills below"| M
+    VP --> V
 
     B -->|New| C["/search-issues\ndedup check"]
     B -->|Existing| D{Edit scope?}
@@ -61,6 +63,7 @@ flowchart TD
     G -->|"Greenfield / Architecture"| H["/blueprint\nConfluence + backlog map"]
     G -->|"Unclear / High-risk"| I["/refine-epic\n4-role debate"]
     G -->|"Clear scope"| K["/create-story"]
+    G -->|"Idea → tasks\none-shot"| VP["/vibe-plan 🚀"]
     G -->|"Bug report"| BT["/bug-triage"]
     G -->|"Task / Spike"| T["/create-task"]
 
@@ -84,7 +87,7 @@ flowchart TD
     classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
     classDef cmd fill:#fef9c3,stroke:#ca8a04,color:#713f12
-    class C,E,F,AS,H,I,J,K,L,FC,ST,SQ,T,BT,TP,Q,R,SS skill
+    class C,E,F,AS,H,I,J,K,L,FC,ST,SQ,T,BT,TP,Q,R,SS,VP skill
     class V gate
     class A,M endpoint
     class CMD cmd
@@ -98,6 +101,7 @@ End-to-end orchestration chains — the fastest way to get things done. Each com
 
 | Command | Chains | Description |
 | --- | --- | --- |
+| `/vibe-full` | search-issues → vibe-plan → verify-issue --with-subtasks | Idea → AI-Ready subtasks in one shot (vibe coding) |
 | `/story-full` | search-issues → create-story → verify-issue --with-subtasks | Full story creation with dedup + quality check |
 | `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
 | `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
@@ -123,7 +127,8 @@ Backlog ownership, flow management, documentation, and reporting.
 | --- | --- | --- |
 | `/atlassian-pm:blueprint` | | 5-role debate → Confluence blueprint + backlog map (S/M/L tiers) |
 | `/atlassian-pm:refine-epic` | | 4-role debate for unclear or high-risk requirements |
-| `/atlassian-pm:create-epic` | | Epic + Confluence doc with RICE scoring |
+| `/atlassian-pm:create-epic` | `--thorough` | Epic + Confluence doc. Vibe default: auto-extract, skip RICE. `--thorough` for full ceremony. |
+| `/atlassian-pm:vibe-plan` | | 🚀 Idea → Epic + Stories + AI-Ready Subtasks in one shot (max 2 interactions) |
 | `/atlassian-pm:plan-release` | | Multi-sprint release plan + Confluence page + Jira Fix Version |
 | `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create User Stories |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
@@ -146,9 +151,9 @@ Story and task authoring, DLC flow, codebase exploration, issue maintenance, and
 | --- | --- | --- |
 | `/atlassian-pm:start-ticket ABC-123` | `--force` | Read AC + transition to In Progress. WIP gate enforced. |
 | `/atlassian-pm:ship-to-qa ABC-123` | | Post PR + preview URLs to Jira + transition to Ready for QA. WIP gate enforced. |
-| `/atlassian-pm:create-story` | | **Recommended** — Story + Sub-tasks in one workflow |
-| `/atlassian-pm:analyze-story ABC-123` | | Explore codebase → create Sub-tasks for existing Story |
-| `/atlassian-pm:create-task` | | Task: `tech-debt`, `bug`, `chore`, or `spike` |
+| `/atlassian-pm:create-story` | `--thorough` | **Recommended** — Story + Sub-tasks in one workflow. Vibe default: auto-extract + Implementation Hints. |
+| `/atlassian-pm:analyze-story ABC-123` | `--thorough` | Explore codebase → create Sub-tasks + Implementation Hints. Vibe default: auto-proceed, no ITERATE. |
+| `/atlassian-pm:create-task` | `--thorough` | Task: `tech-debt`, `bug`, `chore`, or `spike`. Vibe default: auto-detect type. |
 | `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
 | `/atlassian-pm:update-story ABC-123` | | Edit Story — ACs, scope, description |
 | `/atlassian-pm:update-epic ABC-123` | | Edit Epic — scope, RICE, metrics |
@@ -511,9 +516,9 @@ Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
 .claude/project-config.json             ← Real config (gitignored)
 config/project-config.json.template     ← Template with placeholders (tracked)
 
-skills/                        ← 38 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
+skills/                        ← 39 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
-├── epic/                      ← blueprint, refine-epic, create-epic, update-epic, plan-release, epic-health
+├── epic/                      ← blueprint, refine-epic, create-epic, vibe-plan, update-epic, plan-release, epic-health
 ├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
 ├── task/                      ← create-task, create-testplan, execute-testplan, bug-triage, assign-issue, update-subtask, update-task, start-ticket, ship-to-qa
 ├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint, retro-actions
@@ -574,7 +579,7 @@ hooks/                         ← 46 Python hook scripts
 │   └── session/               ← Session management, compaction, token filtering, skill telemetry (15 hooks)
 └── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
 
-.claude/commands/              ← 10 orchestration chains (story-full, epic-full, blueprint-full, bug-full,
+.claude/commands/              ← 11 orchestration chains (vibe-full, story-full, epic-full, blueprint-full, bug-full,
                                │  qa-full, sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full)
                                └── Each chains existing skills end-to-end with confirmation gates
 
