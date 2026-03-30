@@ -663,12 +663,20 @@ def _prune_outcomes(path: Path, keep: int = _PRUNE_KEEP) -> None:
     """Prune story-outcomes.jsonl to last `keep` lines with fcntl lock."""
     if not path.exists():
         return
+    # Read line count before acquiring lock to avoid unnecessary contention
+    try:
+        with open(path) as fh:
+            lines = fh.readlines()
+        if len(lines) <= keep:
+            return
+    except OSError:
+        return
     tmp = Path(str(path) + ".tmp")
     try:
         with open(path, "r+") as fh:
             fcntl.flock(fh, fcntl.LOCK_EX)
             try:
-                lines = fh.readlines()
+                lines = fh.readlines()  # re-read under lock (may have changed)
                 if len(lines) <= keep:
                     return
                 with open(tmp, "w", opener=lambda p, f: os.open(p, f, 0o600)) as tf:
@@ -885,7 +893,7 @@ def test_compute_adjustment_cal_adj_clamped_at_10():
         }
     }
     adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
-    assert adj["adjustment_pct"] == pytest.approx(0.0)  # no trend_adj, no negative cal_adj → 0
+    assert adj["adjustment_pct"] == pytest.approx(10.0)  # trend_adj=0, cal_adj=min(20,10)=+10 → no cancellation → 10
 
 
 def test_compute_adjustment_cal_adj_negative_when_below_baseline():
@@ -1628,8 +1636,6 @@ def _detect_carry_over_spike(
     threshold_pct = thresholds.get("carry_over_spike_pct", 0.40)
 
     for tag, recs in by_tag.items():
-        if len(recs) < 5:
-            continue
         carry_over_count = sum(1 for r in recs if r.get("outcome") == "carry_over")
         rate = carry_over_count / len(recs)
         if rate <= threshold_pct:
@@ -1639,7 +1645,12 @@ def _detect_carry_over_spike(
         if _is_dedup("carry_over_spike", dedup_key, existing):
             continue
 
-        affected = [r["issue_key"] for r in recs if r.get("outcome") == "carry_over" and r.get("issue_key")]
+        affected = [
+            r["issue_key"] for r in recs
+            if r.get("outcome") == "carry_over"
+            and r.get("issue_key")
+            and re.fullmatch(r"^[A-Z]+-\d+$", r["issue_key"])
+        ]
         signals.append(_make_signal(
             "carry_over_spike", "warning", dedup_key,
             metric_value=rate, baseline_value=threshold_pct,
@@ -1970,7 +1981,9 @@ def _write_pid() -> None:
         except (ValueError, ProcessLookupError):
             log.warning("Stale lock detected (pid from file). Clearing.")
         except PermissionError:
-            log.warning("Stale lock detected (PermissionError on kill check). Clearing.")
+            # PermissionError means the process IS alive (cross-user). Not stale.
+            log.error("Monitor already running (pid=%d, PermissionError). Exiting.", stored_pid)
+            sys.exit(1)
     try:
         _PID_FILE.parent.mkdir(parents=True, exist_ok=True)
         _PID_FILE.write_text(str(os.getpid()))
@@ -2017,7 +2030,7 @@ At the end of `run_cycle()`, after the existing `state.save_snapshot(enriched)` 
         velocity = _load_velocity(_ROOT)
         t = threading.Thread(
             target=intelligence_analyzer.analyze,
-            args=(changes, enriched if "enriched" in dir() else new_snapshot, old_snapshot),
+            args=(changes, enriched, old_snapshot),
             kwargs={
                 "calibration": calibration,
                 "board_config": board_config,
@@ -2068,6 +2081,204 @@ And wrap the main loop's `KeyboardInterrupt` handler to also cleanup:
 ```bash
 git add monitor/board_monitor.py
 git commit -m "feat(intelligence/g2): board_monitor threading, PID lockfile, SIGTERM handler"
+```
+
+---
+
+## Task 5b: board_monitor tests — TDD
+
+**Files:**
+
+- Create: `tests/monitor/test_board_monitor.py`
+
+- [ ] **Step 1: Write failing tests**
+
+Create `tests/monitor/test_board_monitor.py`:
+
+```python
+"""Tests for monitor/board_monitor.py — PID lockfile, velocity loader, SIGTERM, threading."""
+import json
+import os
+import signal
+import sys
+import threading
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "monitor"))
+import board_monitor
+
+
+# --- _write_pid ---
+
+def test_write_pid_no_existing_lock(tmp_path, monkeypatch):
+    monkeypatch.setattr(board_monitor, "_PID_FILE", tmp_path / "monitor.pid")
+    board_monitor._write_pid()
+    assert (tmp_path / "monitor.pid").read_text().strip() == str(os.getpid())
+
+
+def test_write_pid_stale_lock_cleared(tmp_path, monkeypatch):
+    pid_file = tmp_path / "monitor.pid"
+    pid_file.write_text("99999999")  # non-existent PID
+    monkeypatch.setattr(board_monitor, "_PID_FILE", pid_file)
+    board_monitor._write_pid()
+    assert pid_file.read_text().strip() == str(os.getpid())
+
+
+def test_write_pid_live_process_exits(tmp_path, monkeypatch):
+    pid_file = tmp_path / "monitor.pid"
+    pid_file.write_text(str(os.getpid()))  # current process IS alive
+    monkeypatch.setattr(board_monitor, "_PID_FILE", pid_file)
+    with pytest.raises(SystemExit) as exc:
+        board_monitor._write_pid()
+    assert exc.value.code == 1
+
+
+def test_write_pid_permission_error_exits(tmp_path, monkeypatch):
+    """PermissionError on kill means process is alive (cross-user) — must exit 1."""
+    pid_file = tmp_path / "monitor.pid"
+    pid_file.write_text("12345")
+    monkeypatch.setattr(board_monitor, "_PID_FILE", pid_file)
+    with patch("os.kill", side_effect=PermissionError):
+        with pytest.raises(SystemExit) as exc:
+            board_monitor._write_pid()
+    assert exc.value.code == 1
+
+
+# --- _load_velocity ---
+
+def test_load_velocity_returns_dict(tmp_path):
+    config = tmp_path / ".claude" / "project-config-team-detail.json"
+    config.parent.mkdir()
+    config.write_text(json.dumps({"velocity": {"rolling_average": 32, "trend_pct": -5}}))
+    result = board_monitor._load_velocity(tmp_path)
+    assert result == {"rolling_average": 32, "trend_pct": -5}
+
+
+def test_load_velocity_missing_file_returns_none(tmp_path):
+    result = board_monitor._load_velocity(tmp_path)
+    assert result is None
+
+
+def test_load_velocity_malformed_json_returns_none(tmp_path):
+    config = tmp_path / ".claude" / "project-config-team-detail.json"
+    config.parent.mkdir()
+    config.write_text("{bad json")
+    result = board_monitor._load_velocity(tmp_path)
+    assert result is None
+
+
+# --- SIGTERM handler ---
+
+def test_sigterm_handler_sets_stop_event(monkeypatch):
+    stop_event = threading.Event()
+    monkeypatch.setattr(board_monitor, "_stop_event", stop_event)
+    monkeypatch.setattr(board_monitor, "_last_analyzer_thread", None)
+    with patch.object(board_monitor, "_cleanup_pid"), \
+         patch("sys.exit"):
+        board_monitor._sigterm_handler(signal.SIGTERM, None)
+    assert stop_event.is_set()
+
+
+# --- analyzer thread dispatch in run_cycle ---
+
+def test_run_cycle_dispatches_analyzer_thread(tmp_path, monkeypatch):
+    """run_cycle should start a daemon thread for intelligence_analyzer."""
+    dispatched = []
+
+    def fake_analyze(*args, **kwargs):
+        pass
+
+    fake_module = MagicMock()
+    fake_module.analyze = fake_analyze
+
+    original_thread = threading.Thread
+
+    def capturing_thread(*args, **kwargs):
+        t = original_thread(*args, **kwargs)
+        dispatched.append(t)
+        return t
+
+    monkeypatch.setattr(threading, "Thread", capturing_thread)
+
+    # Minimal stub to exercise the dispatch path
+    with patch.dict("sys.modules", {"monitor.handlers.intelligence_analyzer": fake_module}), \
+         patch.object(board_monitor, "_load_calibration", return_value={}), \
+         patch.object(board_monitor, "_load_velocity", return_value=None), \
+         patch.object(board_monitor, "_stop_event", threading.Event()):
+        # Call internal dispatch directly (avoids full Jira API setup)
+        board_monitor._dispatch_analyzer({}, {}, {}, dry_run=False)
+
+    assert len(dispatched) == 1
+    assert dispatched[0].daemon is True
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+```bash
+python3 -m pytest tests/monitor/test_board_monitor.py -v 2>&1 | head -30
+```
+
+Expected: `ImportError` or `AttributeError` — `_dispatch_analyzer` not yet extracted.
+
+- [ ] **Step 3: Extract `_dispatch_analyzer` helper in board_monitor.py**
+
+Refactor the thread-dispatch block added in Task 5 into a named helper (makes it testable without mocking `run_cycle`):
+
+```python
+def _dispatch_analyzer(
+    changes: dict,
+    snapshot: dict,
+    old_snapshot: dict,
+    *,
+    dry_run: bool = False,
+) -> None:
+    """Dispatch intelligence_analyzer in a daemon thread."""
+    global _last_analyzer_thread
+    if dry_run:
+        return
+    from monitor.handlers import intelligence_analyzer
+    calibration = _load_calibration()
+    velocity = _load_velocity(_ROOT)
+    t = threading.Thread(
+        target=intelligence_analyzer.analyze,
+        args=(changes, snapshot, old_snapshot),
+        kwargs={
+            "calibration": calibration,
+            "board_config": board_config,
+            "velocity": velocity,
+            "outcomes_path": _OUTCOMES_FILE,
+            "stop_event": _stop_event,
+        },
+        daemon=True,
+    )
+    t.start()
+    _last_analyzer_thread = t
+```
+
+In `run_cycle()`, replace the inline dispatch block with:
+
+```python
+    _dispatch_analyzer(changes, enriched, old_snapshot, dry_run=dry_run)
+```
+
+Also update Task 5 Step 3 code block to use `_dispatch_analyzer` call.
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+```bash
+python3 -m pytest tests/monitor/test_board_monitor.py -v
+```
+
+Expected: all 9 tests PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add tests/monitor/test_board_monitor.py monitor/board_monitor.py
+git commit -m "test(intelligence/g2): board_monitor PID, velocity, SIGTERM, thread dispatch tests"
 ```
 
 ---
@@ -2298,6 +2509,7 @@ _AGENT_SCOPE: dict[str, dict] = {
     "risk-forecaster":       {"calibration": True,  "signals": True},
     "story-writer":          {"calibration": True,  "signals": False},
     "sprint-planner":        {"calibration": False, "signals": True},
+    "session":               {"calibration": True,  "signals": False},  # main SessionStart context
 }
 
 
@@ -2346,6 +2558,11 @@ def _build_calibration_block(calibration: dict) -> str:
     return "\n".join(lines)
 
 
+def _sp_pct_str(s: dict) -> str:
+    """Format baseline SP value for sp_mismatch signal display."""
+    return f"{s.get('baseline_value', 0):.0f}"
+
+
 def _build_signals_block(signals: list[dict]) -> str:
     """Build active signals block from insights.json signals list."""
     if not signals:
@@ -2382,15 +2599,11 @@ def _build_signals_block(signals: list[dict]) -> str:
             parts.append(f" {metric:.0f} SP vs mean {baseline:.0f} SP")
         elif sig == "sp_mismatch":
             if affected:
-                parts.append(f" {affected[0]} subtask_sp={metric:.0f} > {sp_pct_str(s)}")
+                parts.append(f" {affected[0]} subtask_sp={metric:.0f} > {_sp_pct_str(s)}")
 
         lines.append("".join(parts))
 
     return "\n".join(lines)
-
-
-def sp_pct_str(s: dict) -> str:
-    return f"{s.get('baseline_value', 0):.0f}"
 
 
 def _build_context(
@@ -2480,9 +2693,8 @@ def main() -> None:
     if args.subagent:
         agent_name = data.get("agent_type") or data.get("agent_name") or ""
     else:
-        # SessionStart: inject for the main session
-        # Use a synthetic "session" agent that gets both
-        agent_name = "risk-forecaster"  # session gets full context
+        # SessionStart: inject calibration stats only (no raw Jira signals in main session)
+        agent_name = "session"
 
     if not _should_inject(agent_name):
         sys.exit(0)
