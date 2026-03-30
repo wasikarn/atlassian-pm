@@ -57,59 +57,35 @@ Loaded on demand from `references/` (25 docs, indexed by `templates.md`). **Scri
 | Explore first | Prefer `Task(Explore)` before creating Sub-tasks (no explore = generic paths) |
 | Vibe default | All creation skills default to fast mode (no ceremony). Use `--thorough` for full workflow. |
 
-### HARD RULES
+### HARD RULES (hooks enforce HR2–HR10 automatically)
 
-> Hooks enforce HR2-HR10 automatically. Full definitions: `references/hr-rules.md`
+Full definitions: `references/hr-rules.md`
 
-<important if="creating or verifying issue quality before writing to Jira">
-**HR1 QG ≥ 90%:** NEVER write before QG pass. Flow: Explore→ADF→QG≥90%→MCP shell→acli edit.
-</important>
+| Rule | When | Action |
+|------|------|--------|
+| **HR1** QG ≥ 90% | Before any Jira write | `uv run scripts/api/validate_adf.py {file} --json` must score ≥ 90 |
+| **HR2** JQL ORDER BY | `parent =` / `key in` JQL | NEVER add `ORDER BY` — parser error |
+| **HR3** Assignee | Assign issue | `acli jira workitem assign -k "KEY" -a "email" -y` only — MCP silently fails |
+| **HR4** Confluence macros | ToC/Children/Code blocks | `update_page_storage.py` only — MCP corrupts XML |
+| **HR5** Subtask parent | Create subtask | MCP create → verify `parent.key` via `jira_get_issue` → acli edit if orphan |
+| **HR6** Cache invalidate | Any MCP write | `cache_invalidate(issue_key)` after every write — use `auto_refresh=true` |
+| **HR7** Sprint ID | Set `{{SPRINT_FIELD}}` | Never hardcode — `jira_get_sprints_from_board()` always |
+| **HR8** Subtask dates | Create/update subtask | Dates within parent range · SP sum ≈ parent |
+| **HR9** Desc alignment | Create/update any issue | Story ACs → subtask objectives · run `verify-issue --with-subtasks` |
+| **HR10** Subtask sprint | Create subtask | NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent |
 
-<important if="writing JQL with parent =, parent in, or key in clauses">
-**HR2 JQL parent:** NEVER add `ORDER BY` with `parent =`, `parent in`, `key in (...)` — parser error.
-</important>
+## Compact Instructions
 
-<important if="assigning issues to team members">
-**HR3 Assignee:** MCP assignee silently fails. Use `acli jira workitem assign -k "KEY" -a "email" -y`.
-</important>
-
-<important if="updating Confluence pages with macros, ToC, Children, or Code blocks">
-**HR4 Confluence macros:** MCP HTML-escapes macros → raw XML. Use `update_page_storage.py` for any page with macros.
-</important>
-
-<important if="creating subtasks or sub-tasks">
-**HR5 Subtask parent:** MCP may silently ignore parent → orphan.
-Always: MCP create → verify `parent.key` via `jira_get_issue` → `acli edit` if missing.
-</important>
-
-<important if="calling jira_update_issue, jira_create_issue, jira_transition_issue, or any Jira write tool">
-**HR6 Cache invalidate:** After ANY MCP write → `cache_invalidate(issue_key)`.
-Stale cache corrupts verify/cascade/planning reads. Use `auto_refresh=true` to save 1 round-trip.
-</important>
-
-<important if="setting sprint field or {{SPRINT_FIELD}} on any issue">
-**HR7 Sprint ID:** NEVER hardcode. Always `jira_get_sprints_from_board()`. Wrong sprint = silent failure.
-</important>
-
-<important if="creating subtasks or setting dates/story points on subtasks">
-**HR8 Subtask alignment:** Dates within parent range. SP sum ≈ parent. Misalignment → wrong burndown.
-</important>
-
-<important if="creating or updating subtasks, stories, or epics">
-**HR9 Desc alignment:** Story ACs covered by subtask objectives. Epic scope in children. Run `/atlassian-pm:verify-issue --with-subtasks` (A1-A6).
-</important>
-
-<important if="creating subtasks or setting {{SPRINT_FIELD}}">
-**HR10 Subtask sprint:** NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent. API error + cascade failure.
-</important>
+When compacting, **preserve**: issue keys created/modified · pending HR5/HR6 ops · active skill phase · sprint IDs · QG scores.
+**Discard**: verbose tool output · intermediate search results · exploration steps · full ADF bodies already written to Jira.
 
 ## Context Management
 
-**Compaction:** Preserve: modified files + issue keys · pending HR5/HR6 ops · active skill phase · sprint IDs. Two hooks handle this: `start_compact_reinject.py` (SessionStart — re-injects context when session starts from a compacted state) and `post_compact_reinject.py` (PostCompact — re-injects HR rules immediately after compaction).
+**Hooks:** `start_compact_reinject.py` (SessionStart/compact) + `post_compact_reinject.py` (PostCompact) re-inject HR rules + pending state after compaction.
 
-**Agent invocation inside skills:** When a skill phase says `Agent(name: "quality-gate")` or similar, invoke it via the Agent tool with `subagent_type: "atlassian-pm:<name>"`. Mapping: `quality-gate` → `atlassian-pm:quality-gate`, `issue-bootstrap` → `atlassian-pm:issue-bootstrap`, `story-writer` → `atlassian-pm:story-writer`, etc.
+**Agent invocation:** Skill phases that say `Agent(name: "X")` → use Agent tool with `subagent_type: "atlassian-pm:X"`. Mapping: `quality-gate`, `issue-bootstrap`, `story-writer`, etc.
 
-**Subagents:** Use `agents/` for isolated investigation — keeps main context clean. Full list with models, tiers, and usage context: [references/agents.md](references/agents.md)
+**Subagents:** `agents/` for isolated investigation — full list: [references/agents.md](references/agents.md)
 
 ## Efficiency
 

@@ -14,8 +14,7 @@ description: |
   For skill-invoked QG, use validate_adf.py script. This agent is for ad-hoc manual validation only.
   </commentary>
   </example>
-model: sonnet
-effort: high
+model: haiku
 tools: Read, Glob, Grep
 permissionMode: dontAsk
 maxTurns: 10
