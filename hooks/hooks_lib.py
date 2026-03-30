@@ -84,8 +84,12 @@ def parse_stdin() -> dict | None:
 
 
 def allow() -> None:
-    """Output empty JSON object — signals 'allow' to Claude hooks runtime."""
-    print("{}")
+    """Exit 0 with no output — signals 'allow' to Claude hooks runtime.
+
+    Note: Does not return — always raises SystemExit(0).
+    Symmetric with block() which raises SystemExit(2).
+    """
+    sys.exit(0)
 
 
 def block(reason: str) -> None:
