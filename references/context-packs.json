@@ -105,6 +105,16 @@
         "tools.md"
       ],
       "skills": ["feature-blueprint"]
+    },
+    "vibe": {
+      "description": "Vibe coding workflow — fast creation with AI-Ready subtasks",
+      "files": [
+        "templates-core.md",
+        "templates-subtask.md",
+        "templates-vibe.md",
+        "subtask-design-patterns.md"
+      ],
+      "skills": ["vibe-plan", "create-story", "analyze-story", "create-task"]
     }
   },
   "base_path": ".claude/skills/shared-references/"
