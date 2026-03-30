@@ -22,24 +22,23 @@ effort: high
 
 ## Mode Selection
 
-| Flag | Behavior | User interactions |
+| Flag | Behavior | Interactions |
 | --- | --- | --- |
-| *(none)* | **Vibe mode (default)** — auto-fetch story, skip REVIEW gates, single-pass design with Implementation Hints | 0 (fully automated) |
-| `--thorough` | **Thorough mode** — confirmation gates, ITERATE on subtask design (max 3 rounds), all REVIEW gates | Multiple checkpoints |
-| `--skip-explore` | Skip Phase 3 codebase exploration. Use when file paths are already known or passed directly in the prompt. | 0 |
+| *(none)* | **Vibe (default)** — auto-fetch, skip REVIEW gates, single-pass + Implementation Hints | 0 |
+| `--thorough` | **Thorough** — confirmation gates, ITERATE on design (max 3 rounds), all REVIEW gates | Multiple |
+| `--skip-explore` | Skip Phase 3. Caller supplies file paths directly in prompt. | 0 |
 
-> If the argument contains `--thorough`, strip the flag and treat the remaining text as the issue key. Proceed with thorough mode for all phases.
-> If the argument contains `--skip-explore`, skip Phase 3 entirely. Caller must supply file paths directly in the prompt; Phase 4 Design uses those paths as `file_paths[]`.
+> Strip `--thorough` / `--skip-explore` from the issue key before proceeding.
 
 ## Dynamic Context
 
 - **Today:** !`date +%Y-%m-%d`
 
-## Context Object (accumulated across phases)
+## Context Object
 
-| Phase | Adds to Context |
-| ----- | -------------- |
-| 1. Discovery | `story_data`, `epic_context`, `vs_assignment`, `domain_context` (optional) |
+| Phase | Adds |
+| --- | --- |
+| 1. Discovery | `story_data`, `epic_context`, `vs_assignment`, `domain_context` |
 | 2. Impact | `services_impacted[]`, `vs_verified` |
 | 3. Explore | `file_paths[]`, `patterns[]`, `dependencies[]` |
 | 4. Design | `subtask_designs[]` |
@@ -47,64 +46,44 @@ effort: high
 | 6. QG | `qg_score`, `passed_qg` |
 | 7. Create | `subtask_keys[]` |
 
-> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** [workflow-patterns.md](../../../references/workflow-patterns.md)
 
 ## Phases
 
 ### 1. Discovery
 
-**Goal:** Establish full story context (narrative, ACs, epic linkage, domain knowledge) before any design begins.
-**Required inputs:** story issue key (ask if missing); epic key resolved automatically via bootstrap
-**Constraints:** HR6 — invalidate cache after any write; story must be a Story type, not Epic (wrong type creates orphan subtasks)
-**Output:** `story_data`, `epic_context`, `vs_assignment`, optional `domain_context` available in context for Phase 2
+**Goal:** Full story context (narrative, ACs, epic linkage, domain knowledge) before design.
+**Constraints:** HR6 — invalidate cache after writes; story must be Story type (not Epic).
 
-> **🟢 PARALLEL** — Fetch issue context and Confluence docs simultaneously (single message, 3 calls). All calls are independent — no dependency between them.
->
-> 1. `cache_get_issue(STORY-KEY)` → fallback `jira_get_issue(STORY-KEY, fields="summary,description,status,parent,subtasks,labels,customfield_10016")`
+> **🟢 PARALLEL** — Single message, 2 calls:
+> 1. `cache_get_issue(STORY-KEY)` → fallback `jira_get_issue(fields="summary,description,status,parent,subtasks,labels,customfield_10016")`
 > 2. `jira_search(jql="parent=STORY-KEY", fields="summary,status,customfield_10016", limit=20)`
 
-- Read: Narrative, ACs, Links, Epic context from issue data; if `parent` field is set, fetch epic via `cache_get_issue(EPIC-KEY)`
+If `parent` set → fetch epic via `cache_get_issue(EPIC-KEY)`.
 
-**Story Readiness Pre-check (🟢 AUTO — runs after bootstrap, before GATE):**
+**Story Readiness Pre-check (🟢 AUTO):**
 
-Before investing in subtask design, verify the story is ready for analysis:
-
-| Check | Pass Condition | If Fail |
+| Check | Pass | If Fail |
 | --- | --- | --- |
-| ACs defined | Story description contains ≥ 1 AC panel | ⛔ STOP — no ACs = cannot design subtasks; suggest `/create-story` to rewrite |
-| Story type | `issuetype.name = "Story"` (not Epic, Task, Subtask) | ⛔ STOP — wrong type creates orphan subtasks |
-| Not Done | Status not in `Done / Closed / Cancelled` | ⚠️ Warn — analyzing a completed story may redo finished work |
-| Epic linked | `parent` field set | ⚠️ Warn — orphan story breaks VS traceability; suggest setting epic link |
-| No existing subtasks | `subtasks[]` is empty | ⚠️ Warn — subtasks already exist; suggest `/sync-artifacts` instead |
+| ACs defined | ≥ 1 AC panel in description | ⛔ STOP — suggest `/create-story` |
+| Story type | `issuetype.name = "Story"` | ⛔ STOP — orphan subtasks |
+| Not Done | Status not Done/Closed/Cancelled | ⚠️ Warn |
+| Epic linked | `parent` field set | ⚠️ Warn — broken VS traceability |
+| No subtasks | `subtasks[]` empty | ⚠️ Warn — suggest `/sync-artifacts` |
 
-**If ACs or story type check fails → ⛔ STOP** — show error and do not proceed to Phase 2.
-**If status / epic / subtask warnings → 🟡 REVIEW** — show warning table, continue if user confirms.
+**If ACs or type fail → ⛔ STOP.** If status/epic/subtask warn → 🟡 REVIEW, continue on confirm.
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
+`cache_search_confluence(query="[story_title_keywords]", space_key="<space_key>", limit=3)` — extract business rules/constraints into `domain_context`; skip silently if none found.
 
-Search for domain documentation relevant to this story using its title + AC keywords:
+**Mode:**
 
-```text
-MCP: cache_search_confluence(query="[story_title_keywords]", space_key="<space_key>", limit=3)
-```
-
-If relevant pages found → extract key sections (business rules, API specs, domain constraints) and store as `domain_context`. Use in Phase 3 Exploration and Phase 4 Design to ensure subtask ACs reference real business rules, not assumptions.
-If no relevant pages found → skip silently.
-
-#### Vibe Mode (Default)
-
-- **No GATE** — auto-proceed after readiness pre-check passes. Show story summary briefly for traceability but do not wait for confirmation.
-
-#### --thorough Mode
-
-- **⛔ GATE — DO NOT PROCEED** without user confirmation of story understanding.
+- **Vibe:** Auto-proceed after pre-check passes. Show brief story summary, no confirmation wait.
+- **--thorough:** ⛔ GATE — confirm story understanding before proceeding.
 
 ### 2. Impact Analysis
 
-**Goal:** Determine which services are affected and validate the story delivers a vertical slice (not a horizontal layer).
-**Required inputs:** `story_data` and `epic_context` from Phase 1
-**Constraints:** If an event consumer appears in the Event Flow but not in the Impact table, add that service before proceeding to Phase 3
-**Output:** `services_impacted[]`, `vs_verified` flag available in context for Phase 3
+**Goal:** Identify impacted services; verify vertical slice (not horizontal layer).
 
 | Service | Impact | Reason |
 | --- | --- | --- |
@@ -112,141 +91,93 @@ If no relevant pages found → skip silently.
 | Admin | ✅/❌ | [why] |
 | Website | ✅/❌ | [why] |
 
-**⚡ Event Flow (optional — include for complex domains):**
+**⚡ Event Flow (complex domains):**
 
 | Command | Event Emitted | Consumer(s) | Side Effect |
 | --- | --- | --- | --- |
-| [user action] | [DomainEvent] | [service/policy] | [state change] |
+| [action] | [DomainEvent] | [service/policy] | [state change] |
 
-> Use when story has cross-service event flow or policy trigger — helps Phase 4 subtask design be more accurate
+> If event consumer appears in Event Flow but not Impact table → add before Phase 3.
 
-**VS Verification:** Story touches all layers for e2e slice? (not layer-only)
-
-#### Vibe Mode (Default)
-
-- **🟢 AUTO** — Generate impact table + VS verification silently. Proceed immediately.
-
-#### --thorough Mode
-
-- **🟡 REVIEW** — Present impact table + VS verification to user. Proceed unless user objects.
+- **Vibe:** 🟢 AUTO — generate + proceed immediately.
+- **--thorough:** 🟡 REVIEW — present to user, proceed unless objection.
 
 ### 3. Codebase Exploration ⚠️ MANDATORY
 
-**Goal:** Discover real file paths, patterns, and dependencies for every impacted service so Phase 4 subtask ACs reference actual code, not assumptions.
-**Required inputs:** `services_impacted[]` from Phase 2; `domain_context` if available
-**Constraints:** Generic paths (e.g. `src/controllers/`) are REJECTED — re-explore max 2 attempts; skip for services confirmed not impacted
-**Output:** `file_paths[]`, `patterns[]`, `dependencies[]` per service available in context for Phase 4
+**Goal:** Discover real file paths, patterns, dependencies for every impacted service.
+**Constraints:** Generic paths (e.g. `src/controllers/`) REJECTED — re-explore max 2 attempts. Skip `--skip-explore` entirely; use caller-supplied paths as `file_paths[]`.
 
-> Launch **1 Explore agent** scoped to all impacted services.
-> Validate paths with Glob. Generic paths REJECTED. Re-explore max 2 attempts.
-> **Shortcut:** if the user passes file paths directly, skip the Explore agent and use those paths as `file_paths[]` for Phase 4.
-> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> Launch **1 Explore agent** scoped to all impacted services. Validate paths with Glob.
+> See [subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for exploration requirements, scope format, AC specificity, alignment check.
 
 ### 4. Design Sub-tasks
 
-**Goal:** Produce subtask designs with real file paths, dependency-ordered, each covering exactly one service boundary and traceable to at least one story AC.
-**Required inputs:** `file_paths[]` and `patterns[]` from Phase 3; all story ACs from Phase 1
-**Constraints:** 1 subtask per service boundary (split only if complexity warrants); subtask count target 3-6; each AC must appear in at least one subtask objective
-**Output:** `subtask_designs[]` (tag, scope files, ACs, OE) available in context for Phase 5
+**Goal:** Subtask designs with real file paths, dependency-ordered, 1 per service boundary, each AC traced.
+**Constraints:** Count target 3–6; each story AC in ≥1 subtask objective. → ADF format: [templates-subtask.md](../../../references/templates-subtask.md)
 
-**Tech Lead Decomposition — dependency ordering:**
+**Dependency order:**
 
 ```text
-1. Data layer (migration + model)   ← foundation, blocks everything
-2. Auth/OAuth (if new auth flow)    ← must exist before API validates identity
-3. Backend API (endpoints + routes) ← FE service contract depends on this
-4. Backend service/channel          ← business logic, depends on model
-5. FE service layer                 ← depends on BE API contract
-6. FE component/page                ← depends on FE service
-7. FE interactions/events           ← depends on FE component + FE service
+1. Data layer (migration + model)
+2. Auth/OAuth (if new auth flow)
+3. Backend API (endpoints + routes)
+4. Backend service/channel
+5. FE service layer
+6. FE component/page
+7. FE interactions/events
 ```
 
-- 1 sub-task per service boundary (split only if complexity warrants)
-- **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer)
-- Summary: `[TAG] - Description`
-- ACs: Thai narrative + English technical terms
+- Summary: `[TAG] - Description` · ACs: Thai narrative + English technical terms
+- **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer).
 
-#### Vibe Mode (Default)
-
-- Single-pass generation — no annotation rounds
-- **Add Implementation Hints** to each subtask using `file_paths[]` and `patterns[]` from Phase 3:
-  - Entry Point, Pattern to Follow, Test Command, Related API, Dependencies
-  - See [templates-vibe.md](../../../references/templates-vibe.md) for format
-- Proceed to Alignment Check immediately
-
-#### --thorough Mode
-
-- **🔄 ITERATE** — Present subtask design as plan cards (tag, scope files, ACs, OE per subtask). Ask: Approve all / Annotate (specify subtask #) / Major rework.
-  - Annotate → user specifies subtask + notes → revise ONLY annotated subtasks → re-present (max 3 rounds)
-  - Approve → proceed to Alignment Check
-  - Major rework → back to Codebase Exploration
-  - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
+- **Vibe:** Single-pass. Add **Implementation Hints** per subtask (Entry Point, Pattern to Follow, Test Command, Related API, Dependencies) — see [templates-vibe.md](../../../references/templates-vibe.md). Proceed to Alignment immediately.
+- **--thorough:** 🔄 ITERATE — present plan cards (tag, scope files, ACs, OE). Approve / Annotate (revise only annotated, max 3 rounds) / Major rework → back to Phase 3. See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate).
 
 ### 5. Alignment Check
 
-**Goal:** Verify that every story AC maps to at least one subtask objective and that VS integrity holds across the full subtask set.
-**Required inputs:** `subtask_designs[]` from Phase 4; story ACs from Phase 1
-**Constraints:** HR9 — story ACs must be covered by subtask objectives; auto-fix misalignment; escalate only if unfixable
-**Output:** `alignment_checklist` (pass/fail per AC) available in context for Phase 6
+**Goal:** Every story AC maps to ≥1 subtask objective; VS integrity holds.
+**Constraints:** HR9 — auto-fix misalignment; escalate only if unfixable.
 
-> **🟢 AUTO** — Verify programmatically. Auto-fix misalignment. Escalate only if unfixable.
-> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
+> **🟢 AUTO** — Verify programmatically. Auto-fix. Escalate only if unfixable.
+> See [subtask-design-patterns.md](../../../references/subtask-design-patterns.md).
 
-### 6. Quality Gate — Subtasks (MANDATORY)
+### 6. Quality Gate (MANDATORY)
 
-**Goal:** Confirm all subtask designs meet quality threshold (≥ 90%) before any Jira write occurs.
-**Required inputs:** `subtask_designs[]` from Phase 4; `alignment_checklist` from Phase 5
-**Constraints:** HR1 — NEVER create subtasks in Jira without QG ≥ 90%; auto-fix → re-score max 2 attempts; record QG score via `qg_record.py` after completion
-**Output:** `qg_score`, `passed_qg` (bool) available in context for Phase 7
+**Goal:** All subtask designs ≥ 90% before any Jira write.
+**Constraints:** HR1 — NEVER create without QG ≥ 90%; max 1 fix cycle.
 
-> **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
-> HR1: DO NOT create subtasks in Jira without QG ≥ 90%.
-> See [shared-references/subtask-design-patterns.md](../../../references/subtask-design-patterns.md) for codebase exploration requirements, scope format, AC specificity, alignment check, and QG subtasks.
->
-> **🟢 AUTO (validate_adf.py):**
->
-> ```bash
-> uv run scripts/api/validate_adf.py {{artifacts_dir}}/subtask-*.json --type subtask --json
-> ```
->
-> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
->
-> **🟢 AUTO** — After QG completes, record score: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[SERVICE_TAG]" --checks-failed "FAILED_IDS"`. Use parent story key (from Phase 1) as `--issue-key`.
+**🟢 AUTO (validate_adf.py):**
+
+```bash
+uv run scripts/api/validate_adf.py {{artifacts_dir}}/subtask-*.json --type subtask --json
+```
+
+Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → `--fix` → re-score.
+
+**🟢 AUTO** — Record: `python scripts/qg_record.py --issue-key "STORY_KEY" --type Subtask --score QG_SCORE --status PASS_OR_FAIL --service "[TAG]" --checks-failed "IDS"`
 
 ### 7. Create Artifacts
 
-**Goal:** Create all approved subtasks in Jira with correct parent linkage, estimation, and dates, then create the Technical Note if needed.
-**Required inputs:** `subtask_designs[]` from Phase 4; `passed_qg = true` from Phase 6; parent story key from Phase 1
-**Constraints:** HR5 — Two-Step: MCP create → verify parent via `jira_get_issue(fields="parent")` → acli edit if missing; HR6 — `cache_invalidate` after every write; HR3 — use acli for assignee; HR10 — NEVER set sprint on subtasks; HR8 — subtask dates within parent range
-**Output:** `subtask_keys[]` created and verified in Jira; Technical Note page URL if applicable; available in context for Phase 8
+**Goal:** Create subtasks in Jira with correct parent, estimation, dates; create Technical Note if needed.
+**Constraints:** HR5 Two-Step · HR6 cache_invalidate · HR3 acli assignee · HR10 no sprint on subtasks · HR8 dates within parent range.
 
-> **🟢 AUTO** — Create → verify parent → edit descriptions. All automated. Escalate only if parent verify fails after retry.
-> HR5: Two-Step + Verify Parent. acli does not support the `parent` field. MCP may silently ignore parent.
-> [Two-Step Subtask](../../../references/workflow-patterns.md#two-step-subtask-creation): MCP create shell → verify parent → acli edit. Batch ≥3: create all → verify all → edit all.
-> **🟢 AUTO** — HR6: `cache_invalidate(subtask_key)` after EVERY Atlassian write.
-> **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
+> **🟢 AUTO** — Create → verify parent → edit descriptions. Escalate only if parent verify fails after retry.
+> [Two-Step Subtask](../../../references/workflow-patterns.md#two-step-subtask-creation): MCP create → verify `parent.key` via `jira_get_issue` → acli edit if missing.
+> Batch ≥3: create all → verify all → edit all.
 
-**Set subtask estimation (after verify parent, before acli edit):**
-
+Set estimation after verify parent:
 ```text
-MCP: jira_update_issue(issue_key="ABC-YYY", additional_fields={
-  "timetracking": {"originalEstimate": "<N>h"},  # Original Estimate (from ⏱️ panel)
-  "{{START_DATE_FIELD}}": "YYYY-MM-DD",             # Start Date (within parent range — HR8)
-  "duedate": "YYYY-MM-DD"                        # Due Date (within parent range — HR8)
+jira_update_issue(issue_key, additional_fields={
+  "timetracking": {"originalEstimate": "<N>h"},
+  "{{START_DATE_FIELD}}": "YYYY-MM-DD",   # Start Date (HR8: within parent range)
+  "duedate": "YYYY-MM-DD"              # Due Date (HR8: within parent range)
 })
-# ⚠️ HR10: NEVER set sprint on subtasks — inherits from parent
+# ⚠️ HR10: NEVER set sprint on subtasks
 ```
 
-- Technical Note (if needed):
-  - Simple text → `MCP: confluence_create_page`
-  - With code blocks → Python script (see `.claude/skills/utilities/atlassian-scripts/SKILL.md`)
+Technical Note: simple text → `confluence_create_page` · with code blocks → Python script ([atlassian-scripts](../../utilities/atlassian-scripts/SKILL.md)).
 
 ### 8. Handoff
-
-**Goal:** Confirm completion to the user with subtask keys, links, and recommended next skill.
-**Required inputs:** `subtask_keys[]` from Phase 7; story key from Phase 1
-**Constraints:** Only display after all subtasks are verified with correct parent linkage
-**Output:** Handoff summary with subtask keys and next-step prompt
 
 ```text
 ## TA Complete: [Title] ({{PROJECT_KEY}}-XXX)
@@ -254,43 +185,26 @@ Sub-tasks: ABC-YYY, ABC-ZZZ
 → Use /create-testplan {{PROJECT_KEY}}-XXX to continue
 ```
 
-
-> See [references/batch-creation.md](references/batch-creation.md) for the batch pattern when creating ≥3 sub-tasks.
-
-
-> See [references/examples.md](references/examples.md) for a full input/output example.
-
+> Batch pattern (≥3 subtasks): [references/batch-creation.md](references/batch-creation.md)
+> Full example: [references/examples.md](references/examples.md)
 
 ## Examples
 
-### ✅ Good
-
 ```text
-/analyze-story {{PROJECT_KEY}}-123                   # existing story key → Phase 1 bootstraps from Jira, all 8 phases run correctly
-/analyze-story {{PROJECT_KEY}}-456                   # story with complex cross-service ACs → codebase exploration discovers real file paths per service
-/analyze-story {{PROJECT_KEY}}-789                   # story already has epic context → event flow table auto-populated in Phase 2
+✅ /analyze-story {{PROJECT_KEY}}-123              # story key → all 8 phases
+✅ /analyze-story {{PROJECT_KEY}}-456 --thorough  # full gates + annotation
+✅ /analyze-story {{PROJECT_KEY}}-789 --skip-explore  # caller supplies file paths
+
+❌ /analyze-story                     # no key → cannot proceed
+❌ /analyze-story {{PROJECT_KEY}}-10               # Epic key → orphan subtasks
+❌ /analyze-story "add payment"       # free text → use /create-story
 ```
 
-### ❌ Bad
-
-```text
-/analyze-story                           # no issue key → Phase 1 has nothing to bootstrap; skill cannot proceed
-/analyze-story {{PROJECT_KEY}}-10                    # passing an Epic key — analyze-story expects a Story, not an Epic; orphan subtasks will be created
-/analyze-story "add payment feature"     # free-text description instead of key — story doesn't exist yet; use /create-story instead
-/analyze-story {{PROJECT_KEY}}-123 --skip-explore   # skipping codebase exploration is not a valid flag and violates the MANDATORY explore phase
-```
-
-**Common mistakes:**
-
-- Passing an Epic key instead of a Story key — subtasks will be parented to the Epic directly, breaking hierarchy (HR5 will catch this but wastes a cycle).
-- Skipping or rushing through Phase 3 codebase exploration — generic file paths (e.g. `src/controllers/`) get rejected at QG; real module paths are required.
-- Running `/analyze-story` on a Story that already has subtasks without first checking for duplicates — results in double subtask creation; run `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` first to review existing coverage.
-- Using `/analyze-story` when the Story doesn't exist yet — run `/create-story` instead to go through the full PO+TA combined workflow.
+**Common mistakes:** Passing Epic key (HR5 catches but wastes cycle) · generic file paths rejected at QG · running on story with existing subtasks without `/verify-issue --with-subtasks` first · running when story doesn't exist yet (use `/create-story`).
 
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)
-
 
 ## References
 
