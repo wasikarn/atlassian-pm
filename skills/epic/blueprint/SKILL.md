@@ -20,12 +20,6 @@ effort: high
 **Mode:** Multi-Perspective Research + Debate (3 roles, 1 round)
 **Output:** Confluence page (8 sections) + `blueprint_backlog_map` for downstream skills
 
-## Dynamic Context
-
-- **Today:** !`date +%Y-%m-%d`
-- **Team:** @.claude/project-config.json → `team.members[]`
-- **Stack:** AdonisJS 5.9 + Effect-TS + Clean Architecture (API) · Next.js 14 + Chakra UI (Website) · Next.js 14 + Tailwind + Headless UI (Admin)
-
 ## Context Object
 
 | Phase | Adds to Context |
@@ -44,18 +38,9 @@ effort: high
 
 ## Document Structure (8 Sections)
 
-| # | Section | Owner | Audience | Non-tech reads? |
-|---|---------|-------|----------|----------------|
-| S1 | Executive Summary | Main (synthesized) | Everyone | Yes |
-| S2 | Business Case & User Scenarios | PO | Stakeholders | Yes |
-| S3 | Domain Analysis | Domain Expert | TL/Engineers | Yes (tables) |
-| S4 | Architecture & Design | Tech Lead | Engineers | No |
-| S5 | Technical Specification | Engineer | Engineers | No |
-| S6 | Risks, Edge Cases & Rabbit Holes | QA + Engineer | Everyone | Yes (risk table) |
-| S7 | Test Strategy | QA | QA/Engineers | No |
-| S8 | Delivery Plan | PO + Tech Lead | Everyone | Yes |
+S1 Executive Summary (Main) · S2 Business Case & User Scenarios (PO) · S3 Domain Analysis (TL) · S4 Architecture & Design (TL) · S5 Technical Specification (Engineer) · S6 Risks & Edge Cases (QA+Engineer) · S7 Test Strategy (QA) · S8 Delivery Plan (PO+TL)
 
-**Progressive disclosure:** Non-tech stakeholders read S1-S3, S6 risk table, S8. Engineers read all.
+Non-tech: read S1-S3, S6 risk table, S8. Engineers: read all.
 
 **Non-negotiable:**
 
@@ -75,69 +60,46 @@ effort: high
 
 ### 1. Gather Context
 
-**Goal:** Build a grounded `feature_brief` from the user's input — understand scope, affected services, and what is already known before any debate begins.
-**Required inputs:** feature description, Jira key, or Confluence page ID (ask if all missing)
-**Constraints:** Do not proceed to Phase 2 without explicit user confirmation of scope; wrong scope wastes all subsequent agent tokens
-**Output:** `feature_brief`, `existing_context{}`, `related_issues[]`, `confluence_refs[]` available in context for Phase 2
-
-**Input types:**
+Build `feature_brief` from user input — understand scope, affected services, and what is already known.
 
 | Input | Action |
 |-------|--------|
 | Feature text | Capture as-is into `feature_brief` |
-| Jira key (ABC-XXX) | `cache_get_issue` → read narrative, ACs, epic context |
-| Confluence page ID | `confluence_get_page` → read existing doc structure |
+| Jira key (ABC-XXX) | `cache_get_issue(key)` → read narrative, ACs, epic context |
+| Confluence page ID | `confluence_get_page(id)` → read existing doc structure |
 | Epic key | Read overview + existing children via `cache_search` |
 
-**Actions:**
+> **🟢 PARALLEL** — `cache_get_issue` / `confluence_get_page` + `cache_similar_issues`. Summarize after both complete.
 
-> **🟢 PARALLEL** — Steps 1 and 2 have no dependency on each other. Launch simultaneously (single message, 2 calls): `cache_get_issue` / `confluence_get_page` + `cache_similar_issues`. Summarize only after both complete.
-
-1. Read input + parent epic/page (if exists) — `cache_get_issue(key)` or `confluence_get_page(id)`
+1. Read input + parent epic/page (if exists)
 2. Dedup check: `cache_search` or `cache_similar_issues` for related blueprints/stories
-3. Summarize into `feature_brief`: what we know, what we don't, affected services (after 1–2 complete)
+3. Summarize into `feature_brief`: what we know, what we don't, affected services
 
-**⛔ GATE** — Present understanding + affected services to user. Ask:
-
-- Is this the right scope?
-- Any constraints or prior decisions I should know?
-- Any existing docs/research to incorporate?
-
-Proceeding without confirmation risks exploring the wrong scope and wasting agent tokens. Wait for explicit user approval.
+**⛔ GATE** — Present understanding + affected services to user. Ask: Is scope correct? Any constraints or prior decisions? Any existing docs to incorporate? Wait for explicit approval.
 
 ### 2. Size & Scope Decision
 
-**Goal:** Agree on tier (S/M/L), sections to generate, and debate strategy before any agent work begins.
-**Required inputs:** `feature_brief` from Phase 1; user confirmation
-**Constraints:** Tier must be user-confirmed — auto-suggest is a starting point only; S-tier skips Phases 4-5
-**Output:** `tier`, `sections_to_generate[]`, `skip_debate` (bool) available in context for Phase 3
-
-Based on `feature_brief`, determine:
-
-1. **Tier:** S / M / L (auto-suggest, user confirms)
-2. **Sections to generate:** S-tier = S1,S2,S4,S6,S8 only; M/L = all S1-S8
-3. **Debate strategy:** S-tier skips Phases 4-5 (single-pass generation); M/L runs full debate
+Agree on tier (S/M/L), sections to generate, and debate strategy before any agent work.
 
 | Signal | Suggests Tier |
 |--------|--------------|
 | Single service, well-understood domain | S |
 | Multi-service, 3-5 stories estimated | M |
 | New domain, system-level, 6+ stories | L |
-| User explicitly says "quick" or "lightweight" | S |
-| User explicitly says "thorough" or "full analysis" | L |
+| User says "quick" or "lightweight" | S |
+| User says "thorough" or "full analysis" | L |
 
-**⛔ GATE** — Confirm tier + section list with user. "This looks like a [M] feature. I'll generate [all 8 / 5] sections [with / without] multi-role debate. Approve?"
+S-tier skips Phases 4-5 (single-pass generation). M/L runs full debate.
+
+**⛔ GATE** — Confirm tier + section list. "This looks like a [M] feature. I'll generate [all 8 / 5] sections [with / without] multi-role debate. Approve?"
 
 ### 3. Codebase Exploration
 
-**Goal:** Discover real file paths, patterns, and cross-service dependencies to ground the debate in actual code rather than assumptions.
-**Required inputs:** `feature_brief` and `tier` from Phase 2; skip if S-tier with sufficient user context or purely conceptual feature
-**Constraints:** Glob-validate all file paths; generic paths REJECTED; re-explore max 2 attempts
-**Output:** `codebase_context{}` (file_paths[], patterns[], dependencies[]) available in context for Phases 4-5
+Discover real file paths, patterns, and cross-service dependencies to ground the debate in actual code.
 
 > Skip for S-tier if user provides sufficient context or feature is purely conceptual.
 
-Launch **1** `Task(Explore)` agent covering the most relevant service(s) for this feature. Focus on models, services, routes, key patterns, and cross-service boundaries as relevant.
+Launch **1** `Task(Explore)` agent on the most relevant service(s). Focus on models, services, routes, key patterns, and cross-service boundaries.
 
 **Validation:** Glob-validate all file paths. Generic paths REJECTED. Re-explore max 2 attempts.
 
@@ -145,16 +107,11 @@ Launch **1** `Task(Explore)` agent covering the most relevant service(s) for thi
 
 ### 4. Debate (3 Parallel Agents)
 
-**Goal:** Generate independent proposals for each document section from 3 specialist perspectives without cross-contamination.
-**Required inputs:** `feature_brief`, `codebase_context{}`, and `sections_to_generate[]` from prior phases; S-tier skips this phase
-**Constraints:** maxTurns per agent enforced per table — uncapped agents on complex features consume 30+ turns; substitute all `{...}` placeholders before launching
-**Output:** `po_proposal`, `tl_architecture`, `qa_risks_tests` available in context for Phase 5
-
-> S-tier: SKIP this phase. Main session generates sections in a single pass instead.
+> S-tier: SKIP this phase. Main session generates sections in a single pass.
 
 Launch 3 agents **IN PARALLEL** (single message, 3 Task calls). Each proposes independently without seeing others.
 
-**Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **Debate** section. Substitute all `{...}` placeholders with full text before launching.
+**Agent prompts:** See [references/agent-prompts.md](references/agent-prompts.md) — **Debate** section. Substitute all `{...}` placeholders before launching.
 
 | Agent | Model | Sections | Word Limit | maxTurns |
 | ------- | ------- | ---------- | ---------- | -------- |
@@ -162,39 +119,21 @@ Launch 3 agents **IN PARALLEL** (single message, 3 Task calls). Each proposes in
 | Tech Lead | sonnet | S3 + S4 + S5 + S8 partial | 1200 | 10 |
 | QA | sonnet | S6 + S7 | 600 | 8 |
 
-> **maxTurns enforcement:** Set `maxTurns` per table when launching Task agents. Uncapped agents on complex features can consume 30+ turns; these caps prevent runaway costs.
+> **maxTurns enforcement:** Set `maxTurns` per table. Uncapped agents on complex features can consume 30+ turns.
 
 **🟢 AUTO** — Collect all 3 results. Proceed to convergence.
 
 ### 5. Converge
 
-**Goal:** Synthesize all agent outputs into the final 8-section blueprint, resolve all disagreements, and get user approval before writing to Confluence.
-**Required inputs:** All debate agent outputs (or single-pass for S-tier); `sections_to_generate[]` from Phase 2
-**Constraints:** Consensus Checks must all pass; any failing check must be flagged to user; S4 must include ≥2 alternatives with rationale; ITERATE max 3 annotation rounds
-**Output:** `blueprint_sections{}` (S1-S8), `debate_summary[]`, `consensus_checks{}` available in context for Phase 6
-
-**Main session synthesizes** all agent outputs (debate round for M/L; single-pass for S):
+Synthesize agent outputs into final 8-section blueprint, resolve disagreements, get user approval.
 
 #### 5a. Blueprint Sections
 
-| Section | Source |
-|---------|--------|
-| S1 — Executive Summary | Synthesized: PO business case + TL architecture decision (1 paragraph) |
-| S2 — Business Case & User Scenarios | PO proposal |
-| S3 — Domain Analysis | TL architecture (domain entities, bounded contexts) |
-| S4 — Architecture & Design | TL architecture + alternatives table (MUST have ≥2 options) |
-| S5 — Technical Specification | TL architecture (implementation spec, endpoints, data model) |
-| S6 — Risks, Edge Cases & Rabbit Holes | QA proposal + TL risks combined, deduplicated |
-| S7 — Test Strategy | QA proposal |
-| S8 — Delivery Plan | PO + TL consensus: VS plan, story breakdown, sprint mapping, team assignment |
+S1: synthesized PO+TL (1 paragraph) · S2: PO proposal · S3: TL domain entities/bounded contexts · S4: TL architecture + alternatives table (≥2 options, required) · S5: TL implementation spec/endpoints/data model · S6: QA+TL risks combined, deduplicated · S7: QA test strategy · S8: PO+TL consensus VS plan + story breakdown + team assignment
 
-#### 5b. Debate Summary Table
+#### 5b. Debate Summary
 
-Show only **disagreements and their resolutions** — skip topics where all agreed.
-
-| Topic | PO | TL | QA | Resolution |
-|-------|----|----|-----|-----------|
-| [item] | [position] | [position] | [position] | [decision] |
+Show only disagreements + resolutions (skip agreed topics). Table: Topic | PO | TL | QA | Resolution.
 
 #### 5c. Consensus Checks
 
@@ -209,23 +148,15 @@ If any check fails → flag to user with the disagreement.
 **🔄 ITERATE** — Present blueprint as numbered section cards. Ask:
 
 - **Approve** → proceed to QG
-- **Annotate** → user specifies section # and notes → revise ONLY affected sections by re-running relevant role agents (e.g., S4 change → re-run TL only, max 3 rounds)
+- **Annotate** → user specifies section # and notes → revise ONLY affected sections (max 3 rounds)
 - **Major rework** → back to Phase 1
 
 ### 6. Quality Gate — Blueprint
 
-**Goal:** Confirm blueprint quality meets threshold (≥ 90%) before publishing to Confluence.
-**Required inputs:** `blueprint_sections{}` from Phase 5; verification-checklist.md (B1-B8 criteria)
-**Constraints:** HR1 — NEVER write to Confluence before QG ≥ 90%; auto-fix → re-score max 2 attempts; B5 generic-path failures require targeted Task(Explore) rerun
-**Output:** `qg_score`, `qg_passed`, `qg_fixes[]` available in context for Phase 7
-
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
-> HR1: Writing to Confluence before QG ≥ 90% risks publishing incomplete/inconsistent documents. Auto-fix first, escalate if still failing.
+> **HR1:** NEVER write to Confluence before QG ≥ 90%.
 
-Score against `shared-references/verification-checklist.md` — Blueprint Quality (B1-B8).
-Load the file to see full criteria before scoring. Target: ≥ 90%.
-
-**Scoring:**
+Score against `shared-references/verification-checklist.md` — Blueprint Quality (B1-B8). Target: ≥ 90%.
 
 - S-tier (5 sections): `Blueprint Quality X/5 | Overall X%` (B1+B2+B4+B6+B8)
 - M/L-tier (8 sections): `Blueprint Quality X/8 | Overall X%` (B1-B8)
@@ -233,20 +164,14 @@ Load the file to see full criteria before scoring. Target: ≥ 90%.
 **Auto-fix paths:**
 
 - B1-B4, B6-B8: auto-fix from debate context → re-check
-- B5 fail (generic paths): launch targeted `Task(Explore)` on the service with generic paths → Glob-validate → re-score
+- B5 fail (generic paths): launch targeted `Task(Explore)` → Glob-validate → re-score
 
 Max 2 auto-fix attempts. Escalate if still failing.
 
 ### 7. Write to Confluence
 
-**Goal:** Publish the approved blueprint to Confluence under the correct parent page with tier-appropriate structure.
-**Required inputs:** `blueprint_sections{}` from Phase 5; `qg_passed = true` from Phase 6; `tier` from Phase 2
-**Constraints:** HR4 — use `update_page_storage.py` for pages with macros (ToC, code blocks); L-tier: create parent before children; no cache invalidation needed (Confluence not cached)
-**Output:** `page_id` (or `page_ids[]` for L-tier), `page_url` available in context for Phase 8
-
-> **🟢 AUTO** — If Phase 7 QG passed → write automatically.
-
-**Page structure by tier:**
+> **🟢 AUTO** — If Phase 6 QG passed → write automatically.
+> **HR4:** Use `update_page_storage.py` for pages with macros (ToC, code blocks).
 
 | Tier | Structure |
 |------|-----------|
@@ -256,153 +181,56 @@ Max 2 auto-fix attempts. Escalate if still failing.
 
 **Page title:** `[Blueprint] {Feature Name}`
 
-**Confluence section format** (follows [writing-style.md](../../../references/writing-style.md) numbered section pattern):
-
-```text
-{toc:maxLevel=2}
-
-1. 📋 Executive Summary        (info panel)
-2. 💼 Business Case & User Scenarios  (info panel + scenario table)
-3. 🏗️ Domain Analysis           (tables: contexts, events, aggregates)
-4. 🔧 Architecture & Design    (info panel + alternatives table)
-5. ⚙️ Technical Specification   (tables: endpoints, data contracts, file paths)
-6. ⚠️ Risks, Edge Cases & Rabbit Holes  (warning panel + risk register)
-7. 🧪 Test Strategy             (success panel + test scenario table)
-8. 📦 Delivery Plan             (VS table + story breakdown + sprint map)
-
----
-📊 Debate Summary (note panel — disagreements only)
-🔗 References (links to Jira epic, related pages)
-```
+**Confluence section format:** `{toc:maxLevel=2}` · S1 info panel · S2 info+scenario table · S3 domain tables · S4 info+alternatives table · S5 endpoints/data tables · S6 warning panel+risk register · S7 success panel+test table · S8 VS table+sprint map · Debate Summary (note panel) · References
 
 **Creation flow:**
 
 1. `confluence_create_page` (MCP) for page creation
-2. For pages with macros (ToC, code blocks): use `update_page_storage.py`
-3. For L-tier: create parent first, then children
+2. For pages with macros: `update_page_storage.py`
+3. L-tier: create parent first, then children
 4. Link to Jira epic if exists: `jira_create_remote_issue_link`
-
-**🟢 AUTO** — After Confluence write, no cache invalidation needed (Confluence not cached).
 
 ### 8. Bridge to Backlog
 
-**Goal:** Convert the published blueprint into a structured `blueprint_backlog_map` that downstream skills (`/create-epic`, `/create-story`) can consume directly.
-**Required inputs:** `blueprint_sections{}` from Phase 5; `page_id` and `page_url` from Phase 7
-**Constraints:** Blueprint does NOT auto-create Jira issues — user triggers downstream skills manually; present conversion plan and proceed unless user objects
-**Output:** `blueprint_backlog_map{}` (stories[], spikes[], dependencies[], non_goals[]) available in context for Phase 9
+Convert published blueprint into `blueprint_backlog_map` for downstream skills.
 
 **🟡 REVIEW** — Present conversion plan to user. Proceed unless user objects.
 
-Generate `blueprint_backlog_map` from blueprint sections:
+→ ADF format: see references/templates-core.md
 
-```json
-{
-  "blueprint_page_id": "CONF-XXX",
-  "blueprint_url": "https://...",
-  "epic": {
-    "title": "[Feature Name]",
-    "source_sections": ["S2", "S8"]
-  },
-  "stories": [
-    {
-      "title": "[TAG] - Description (English Name)",
-      "narrative_hint": "From S2 scenario N",
-      "acs_hint": ["From S2 scenario + S6 edge cases"],
-      "vs_label": "vs2-...",
-      "sp_estimate": "M",
-      "priority": "MVP"
-    }
-  ],
-  "spikes": [
-    {
-      "title": "[Spike] - Open question from S6",
-      "timebox": "4h",
-      "source": "S6 open questions"
-    }
-  ],
-  "dependencies": [
-    { "from": "Story 1", "to": "Story 2", "type": "blocks" }
-  ],
-  "non_goals": ["Item from S2 non-goals"]
-}
-```
+`blueprint_backlog_map` fields: `blueprint_page_id`, `blueprint_url`, `epic{title, source_sections}`, `stories[]{title, narrative_hint, acs_hint[], vs_label, sp_estimate, priority}`, `spikes[]{title, timebox, source}`, `dependencies[]{from, to, type}`, `non_goals[]`
 
-**Conversion mapping:**
+**Conversion:** whole doc → Epic (`/create-epic`) · S2 scenarios → Stories (`/create-story`) · S6 risks/questions → Spikes (`/create-task type=spike`) · S7 → QA subtasks (`/create-testplan`) · S2 non-goals → epic exclusions · S8 dependencies → `jira_create_issue_link`
 
-| Blueprint Section | Jira Artifact | Downstream Skill |
-|---|---|---|
-| Whole doc | Epic | `/create-epic` |
-| User Scenarios (S2) | User Stories | `/create-story` |
-| Risk mitigations (S6) | Spike stories | `/create-task type=spike` |
-| Open Questions (S6) | Spike stories | `/create-task type=spike` |
-| Test Strategy (S7) | QA Sub-tasks | `/create-testplan` |
-| Non-Goals (S2) | Epic exclusions | Merged into epic desc |
-| Dependencies (S8) | Issue Links | `jira_create_issue_link` |
-
-> **Note:** Blueprint does NOT auto-create Jira issues. User triggers downstream skills manually with context from `blueprint_backlog_map`.
+> Blueprint does NOT auto-create Jira issues. User triggers downstream skills manually.
 
 ### 9. Handoff
 
-**Goal:** Deliver a clear completion summary with the Confluence URL, story count, and concrete next-step commands so the user can immediately continue with downstream skills.
-**Required inputs:** `blueprint_backlog_map{}` from Phase 8; `page_url` from Phase 7
-**Constraints:** Present stories as numbered cards for user to pick creation order; do not auto-trigger downstream skills
-**Output:** Handoff summary displayed to user; session context ready for `/create-epic` or `/create-story`
+Output: `Blueprint Complete: [Feature Name]` · Confluence URL · tier + section count · stories (MVP/deferred) · spikes · top risks · numbered story cards for creation order.
 
-```text
-## Blueprint Complete: [Feature Name]
-Confluence: [page URL]
-Tier: [S/M/L] — [N] sections generated
-Stories identified: X (Y MVP, Z deferred)
-Spikes: N open questions → spike stories
-Key risks: [top 2-3]
+Next steps: `/create-epic` → `/create-story` → `/create-task type=spike` → `/search-issues`
 
-Next steps (pick creation order):
-→ /create-epic [epic-title]     — create epic from blueprint
-→ /create-story [first-story]   — create first MVP story + subtasks
-→ /create-task type=spike       — create spike for open questions
-→ /search-issues [keywords]     — dedup check before creating
-```
-
-Present each story as a numbered card for user to pick creation order.
-
-## When to Use vs Skip
-
-> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives and comparison with /refine-epic.
-
-## S-tier Shortcut
-
-> See [references/s-tier-shortcut.md](references/s-tier-shortcut.md) for S-tier single-pass generation steps.
+> When to use vs alternatives: [references/decision-guide.md](references/decision-guide.md) · S-tier single-pass: [references/s-tier-shortcut.md](references/s-tier-shortcut.md)
 
 ## Examples
 
-### ✅ Good
-
 ```text
-/blueprint "Real-time video analytics dashboard"          # feature description seeds all 5 roles with focused context
-/blueprint {{PROJECT_KEY}}-48                                         # epic key → reads existing scope + children before debating
-/blueprint "Multi-tenant permission system" --tier L      # explicitly request full tier for new domain / system-level work
-/blueprint 12345678                                       # Confluence page ID → reads existing spec doc as input
-```
+/blueprint "Real-time video analytics dashboard"       # good: feature description
+/blueprint {{PROJECT_KEY}}-48                          # good: epic key → reads existing scope
+/blueprint "Multi-tenant permission system" --tier L   # good: new domain, explicit tier L
+/blueprint 12345678                                    # good: Confluence page ID as input
 
-### ❌ Bad
-
-```text
-/blueprint "add button to export CSV"                     # single-story scope → use /create-story directly, blueprint is overkill
-/blueprint                                                # no input → debate has no grounding, all 5 roles produce generic output
-/blueprint {{PROJECT_KEY}}-50                                         # running after Jira stories already exist defeats the purpose — blueprint informs Jira creation, not the reverse
-/blueprint "improve UX" --tier M                          # vague description forces PO + TL to guess scope; Phase 1 gate will block anyway
+/blueprint "add button to export CSV"    # bad: single-story scope → use /create-story
+/blueprint                               # bad: no input → all roles produce generic output
+/blueprint "improve UX" --tier M         # bad: vague description, Phase 1 gate will block
 ```
 
 **Common mistakes:**
 
-- Using blueprint output without feeding it to `/create-epic` — the `blueprint_backlog_map` is the handoff artifact; manually recreating stories from the Confluence page skips structured VS mapping.
-- Skipping the Phase 1 scope gate — confirming the wrong scope before debate means all 5 agents explore the wrong problem, wasting significant tokens.
-- Requesting tier L for features that are clearly 2-3 stories — L-tier spins up 3 parallel agents plus an Explore agent; use S or M unless the feature is genuinely system-level.
-- Not linking the blueprint Confluence page to the Epic after creation — `/create-epic` picks up `blueprint_page_id` from session history; starting a new session loses that handoff.
-
-## Example
-
-> See [references/examples.md](references/examples.md) for a full input/output example with debate highlights.
+- Not feeding `blueprint_backlog_map` to `/create-epic` — manually recreating stories skips VS mapping
+- Skipping Phase 1 scope gate — wrong scope wastes all agent tokens
+- Requesting tier L for 2-3 story features — S or M unless genuinely system-level
+- Not linking blueprint page to Epic after creation — `/create-epic` picks up `blueprint_page_id` from session history; new session loses handoff
 
 ## 🎓 Domain Expert Notes
 
