@@ -6,33 +6,25 @@
 
 | Engine | Syntax | Best For | Notes |
 | --- | --- | --- | --- |
-| **dagre** (default) | No config needed | Simple diagrams (<10 nodes) | Default renderer, good for linear flows |
-| **elk** | `%%{init: {"layout": "elk"}}%%` | Complex diagrams with many edges | Requires `@mermaid-js/layout-elk` — may not be available in all providers (e.g., Confluence Forge) |
+| **dagre** (default) | No config needed | Simple (<10 nodes) | Default renderer |
+| **elk** | `%%{init: {"layout": "elk"}}%%` | Complex, many edges | Requires `@mermaid-js/layout-elk` — likely unsupported on Confluence Forge |
 
-**ELK options** (via init or YAML frontmatter):
+**ELK options:**
 
 | Option | Values | Effect |
 | --- | --- | --- |
-| `mergeEdges` | `true` / `false` | Combine parallel edges between same nodes |
-| `nodePlacementStrategy` | `LINEAR_SEGMENTS` / `BRANDES_KOEPF` | Node positioning algorithm |
-| `cycleBreakingStrategy` | various | How to handle cycles |
-| `forceNodeModelOrder` | `true` / `false` | Respect declaration order for positioning |
+| `mergeEdges` | `true/false` | Combine parallel edges |
+| `nodePlacementStrategy` | `LINEAR_SEGMENTS` / `BRANDES_KOEPF` | Node positioning |
+| `cycleBreakingStrategy` | various | Handle graph cycles |
+| `forceNodeModelOrder` | `true/false` | Respect declaration order |
 
 ## Direction Control
 
-```mermaid
-flowchart TD   %% Top-Down (default)
-flowchart LR   %% Left-Right
-flowchart BT   %% Bottom-Top
-flowchart RL   %% Right-Left
-```
-
-| Pattern | Direction | Why |
-| --- | --- | --- |
-| Linear pipeline | `LR` | Reads like a timeline |
-| Hierarchy / tree | `TD` | Parent-child intuitive top-down |
-| State machine with back-edges | `LR` | Back-edges go left (cleaner than upward in TD) |
-| Sequence with fallback | `TD` | Happy path down, error branches sideways |
+| Direction | Use When |
+| --- | --- |
+| `TD` (default) | Hierarchy/tree, sequence with fallback |
+| `LR` | Linear pipeline, state machine with back-edges |
+| `BT` / `RL` | Rarely needed |
 
 ### Subgraph Direction Override
 
@@ -53,11 +45,9 @@ flowchart LR
 
 ### Strategy 1: Change Direction
 
-Switch `TD` → `LR` when back-edges cause overlap — left-going curves are cleaner than upward ones.
+Switch `TD` → `LR` — back-edges go left (cleaner than upward).
 
 ### Strategy 2: Invisible Subgraphs for Column Layout
-
-Group nodes into invisible subgraphs to force column positioning:
 
 ```mermaid
 flowchart LR
@@ -79,45 +69,24 @@ flowchart LR
 
 ### Strategy 3: Invisible Links for Spacing
 
-`~~~` creates invisible connections that influence positioning:
+`A ~~~ B` forces side-by-side positioning without rendering a visible edge.
 
 ```mermaid
 flowchart TD
     A --> B
     A --> C
-    B ~~~ C   %% invisible link forces B and C side-by-side
+    B ~~~ C   %% forces B and C side-by-side
     B --> D
     C --> D
 ```
 
 ### Strategy 4: Node Declaration Order
 
-Declare nodes in desired visual order before defining edges:
-
-```mermaid
-flowchart TD
-    A[Top]; B[Left]; C[Right]; D[Bottom]
-    A --> B & C
-    B & C --> D
-```
+Declare nodes in desired visual order before edges — dagre uses declaration order for placement.
 
 ### Strategy 5: Simplify Back-Edge Labels
 
-Shorter labels reduce visual clutter — `OFFLINE -->|"Reconnect"| ONLINE` not `|"Reconnect and synchronize data"|`.
-
-## Line Break in Node Labels
-
-| Syntax | Support |
-| --- | --- |
-| `<br/>` | All renderers (recommended) |
-| `\n` | Some renderers only |
-
-**Always use `<br/>` for Confluence** — `\n` may render as literal text.
-
-```mermaid
-A["Line 1<br/>Line 2"]   %% Good
-A["Line 1\nLine 2"]      %% Bad — may not work in Confluence
-```
+Short labels reduce curve width: `-->|"Reconnect"|` not `-->|"Reconnect and synchronize data"|`.
 
 ## Node Shapes
 
@@ -138,17 +107,25 @@ A["Line 1\nLine 2"]      %% Bad — may not work in Confluence
 | Type | Syntax | Use For |
 | --- | --- | --- |
 | Arrow | `A --> B` | Standard flow |
-| Open | `A --- B` | Association (no direction) |
+| Open | `A --- B` | Association |
 | Dotted arrow | `A -.-> B` | Optional/conditional |
-| Thick arrow | `A ==> B` | Emphasis/critical path |
-| Invisible | `A ~~~ B` | Layout control only |
-| With label | `A -->\|"text"\| B` | Labeled transition |
+| Thick arrow | `A ==> B` | Critical path |
+| Invisible | `A ~~~ B` | Layout control |
+| Labeled | `A -->\|"text"\| B` | Labeled transition |
+
+## Line Break in Labels
+
+Use `<br/>` everywhere — `\n` renders as literal text on Confluence.
+
+```mermaid
+A["Line 1<br/>Line 2"]
+```
 
 ## Edge Animation
 
-> **Confirmed working** on Confluence Forge Mermaid plugin v11.12.2 (tested Feb 21, 2026). Requires Mermaid 11.x+.
+> **Confirmed working** on Confluence Forge Mermaid plugin v11.12.2. Requires Mermaid 11.x+.
 
-Assign edge IDs with `id@` prefix. Use `animate: true` for default, `animation: fast/slow` for speed, or `classDef` for full CSS control.
+Assign IDs with `id@` prefix. `animate: true` = default speed, `animation: fast/slow` for speed, `classDef` for CSS control. Edges without IDs stay static.
 
 ```mermaid
 flowchart LR
@@ -161,36 +138,24 @@ flowchart LR
     class e3 animateEdge
 ```
 
-> **Escape commas:** Use `\,` in style values. Edges without IDs (e.g., `E --> D`) remain static.
+> **Escape commas** in style values with `\,`.
 
 ### `&` Syntax Limitation
 
-`D & E e1@--> F` assigns the edge ID to only **one** edge. Always split:
+`D & E e1@--> F` assigns the ID to only **one** edge. Always split:
 
 ```mermaid
-%% Good — both animate
 D e1@--> F
 E e2@--> F
 e1@{ animation: fast }
 e2@{ animation: fast }
 ```
 
-| Pattern | When to Animate |
-| --- | --- |
-| Data flow | Show direction of data movement (Pusher events, API calls) |
-| Critical path | Highlight the hot path |
-| Real-time events | Indicate live/streaming connections |
-| Before/After | Animate "new" edges, keep "old" static |
-
 **Test script:** `scripts/confluence/test_mermaid_animation.py`
 
 ## Styling
 
-```mermaid
-style NODE_ID fill:#color,stroke:#color,stroke-width:2px
-```
-
-### Semantic Color Palette
+`style NODE_ID fill:#color,stroke:#color,stroke-width:2px`
 
 | State | Fill | Stroke |
 | --- | --- | --- |
@@ -202,9 +167,9 @@ style NODE_ID fill:#color,stroke:#color,stroke-width:2px
 
 ## Confluence-Specific Patterns
 
-### Mermaid on Confluence (Forge Plugin)
+### Forge Plugin Requirements
 
-Requires **two elements** (see `troubleshooting.md` → "Mermaid Diagrams"):
+Requires **two elements** (details: `troubleshooting.md` → "Mermaid Diagrams"):
 
 1. **Code block** (`language=mermaid`) — diagram source
 2. **Forge `ac:adf-extension` macro** — renderer
@@ -221,7 +186,7 @@ Reference: `scripts/confluence/create_player_architecture_page.py`
 
 ### Hiding Mermaid Source Code
 
-**`collapse=true` does NOT work on Mermaid code blocks** — use the **Expand macro** instead. Forge renderer stays **outside** the Expand macro so diagram is always visible:
+**`collapse=true` does NOT work** on Mermaid code blocks. Use **Expand macro** — Forge renderer goes **outside** so diagram stays visible:
 
 ```xml
 <ac:structured-macro ac:name="expand" ac:schema-version="1">
@@ -236,32 +201,31 @@ Reference: `scripts/confluence/create_player_architecture_page.py`
 <!-- Forge ac:adf-extension here — OUTSIDE expand, always visible -->
 ```
 
-- Code blocks inside Expand macros are still counted by `guest-params > index`.
-- `mermaid_diagram()` automatically wraps code block in Expand macro. TypeScript/JSON blocks use `collapse=True` via `tracked_code_block()`.
+Blocks inside Expand still count toward `guest-params > index`. `mermaid_diagram()` auto-wraps in Expand; non-mermaid blocks use `tracked_code_block()`.
 
 > Full details: `troubleshooting.md` → "Expand/Collapse Mechanisms in Confluence"
 
-### Known Limitations on Confluence
+### Known Limitations
 
 | Feature | Status | Workaround |
 | --- | --- | --- |
-| `\n` in labels | May not work | Use `<br/>` instead |
-| ELK layout engine | Likely unsupported | Use dagre with layout tricks |
-| `%%{init: ...}%%` | Partial support | Test before relying on advanced config |
-| Large diagrams (>30 nodes) | May render slowly | Split into multiple smaller diagrams |
-| Interactive features (click) | Not supported | Use static labels with links in surrounding text |
-| **Special chars in labels** | **ALL diagram types** | `×` `±` `:` cause Forge parse error — use ASCII; `()` `_` also fail in gantt task names |
+| `\n` in labels | May not work | Use `<br/>` |
+| ELK layout engine | Likely unsupported | Use dagre + layout tricks |
+| `%%{init: ...}%%` | Partial support | Test before relying on it |
+| Large diagrams (>30 nodes) | May render slowly | Split into smaller diagrams |
+| Interactive features (click) | Not supported | Static labels only |
+| **Special chars** (`×` `±` `:`) | **ALL diagram types** | Cause Forge parse error — use ASCII; `()` `_` also fail in gantt task names |
 | **Gantt diagrams** | **Works (v11.12.2)** | Avoid `()` `_` in task names |
-| **Edge animation** | **Works (v11.12.2)** | `e1@{ animate: true }`, `animation: fast/slow`, classDef CSS confirmed |
-| Architecture diagrams | Untested | `architecture-beta` (v11.1.0+) — test before using |
-| Packet diagrams | Untested | `packet` (v11.0.0+) — test before using |
+| **Edge animation** | **Works (v11.12.2)** | `animate: true`, `animation: fast/slow`, classDef confirmed |
+| Architecture diagrams | Untested | `architecture-beta` (v11.1.0+) |
+| Packet diagrams | Untested | `packet` (v11.0.0+) |
 
-## Common Diagram Patterns
+## Common Patterns
 
 ### State Machine
 
 ```mermaid
-%% LR + invisible subgraph = column grouping; back-edges flow left naturally
+%% LR: back-edges go left; invisible subgraph = column grouping
 flowchart LR
     START(( )) --> INIT([Initial])
     subgraph STATES[" "]
@@ -274,7 +238,7 @@ flowchart LR
 ### Architecture Overview
 
 ```mermaid
-%% TD + named subgraphs per service; cross-subgraph edges flow downward
+%% TD: cross-service edges flow downward
 flowchart TD
     subgraph SVC_A["Service A"]
         A1 --> A2
@@ -285,24 +249,21 @@ flowchart TD
     A2 --> B1
 ```
 
-### Sequence-like Flow
-
-Use `sequenceDiagram` instead of flowchart for request/response patterns.
+Use `sequenceDiagram` for request/response patterns instead of flowchart.
 
 ## Anti-Patterns
 
 | Anti-Pattern | Problem | Fix |
 | --- | --- | --- |
-| Too many nodes in one diagram | Unreadable, slow render | Split into 2-3 focused diagrams |
-| Long labels on edges | Edges become wide, overlap | Short labels; detail in surrounding text |
-| `TD` with many back-edges | Upward curves cross everything | Switch to `LR` |
-| Nodes inside wrong subgraph | Cross-subgraph edges create U-turns | Move shared nodes to boundary subgraph |
-| `\n` for line breaks | May render as literal text | Always use `<br/>` |
-| Hardcoded layout with `~~~` everywhere | Fragile, breaks on content change | Use subgraphs for structural grouping first |
-| `&` syntax with edge ID (`D & E e1@--> F`) | Only one edge gets the ID | Split: `D e1@--> F` + `E e2@--> F` |
+| Too many nodes | Unreadable, slow | Split into 2-3 diagrams |
+| Long edge labels | Wide curves, overlap | Short labels; detail in text |
+| `TD` + many back-edges | Upward curves cross | Switch to `LR` |
+| Nodes in wrong subgraph | U-turn cross-edges | Move to boundary subgraph |
+| `\n` line breaks | Literal text on Confluence | Use `<br/>` |
+| `~~~` everywhere | Fragile layout | Subgraphs first |
+| `&` with edge ID | Only one edge gets ID | Split to separate edges |
 
 ## Related
 
-- Confluence Mermaid rendering: [troubleshooting.md](troubleshooting.md) → "Mermaid Diagrams" section
-- Reference implementation: `scripts/confluence/create_player_architecture_page.py`
-- Forge macro details: `troubleshooting.md` → Instance IDs table
+- `troubleshooting.md` → "Mermaid Diagrams", "Expand/Collapse Mechanisms in Confluence", Instance IDs table
+- `scripts/confluence/create_player_architecture_page.py` — reference implementation
