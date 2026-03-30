@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate ADF JSON against quality gate criteria.
 
-Enforces HR1: Quality Gate >= 90% before Atlassian writes.
+Enforces HR1: Quality Gate >= threshold before Atlassian writes.
 Supports: Story, Subtask, Epic, QA issue types.
 
 Usage:
@@ -17,9 +17,12 @@ Usage:
     # Validate subtask (EDIT format)
     python validate_adf.py tasks/subtask.json --type subtask
 
+    # Validate with lower threshold (vibe mode)
+    python validate_adf.py tasks/story.json --type story --threshold 85
+
 Exit codes:
-    0 = pass (>= 90%)
-    1 = fail (< 90%)
+    0 = pass (>= threshold)
+    1 = fail (< threshold)
     2 = error (invalid input)
 """
 
@@ -49,12 +52,13 @@ logger = logging.getLogger(__name__)
 def print_report(report: ValidationReport, verbose: bool = False) -> None:
     """Print human-readable validation report."""
     score = report.score
-    status_icon = "\u2705" if score >= 90 else "\u26a0\ufe0f" if score >= 70 else "\u274c"
+    threshold = report.threshold
+    status_icon = "\u2705" if score >= threshold else "\u26a0\ufe0f" if score >= 70 else "\u274c"
 
     print(f"\n{'=' * 60}")
     print(f"ADF Validation: {report.issue_type.upper()}")
     print(f"{'=' * 60}")
-    print(f"Score: {score:.1f}% {status_icon}")
+    print(f"Score: {score:.1f}% {status_icon} (threshold: {threshold:.0f}%)")
     print(f"Checks: {len(report.checks)} total")
 
     # Count by status
@@ -88,7 +92,7 @@ def print_report(report: ValidationReport, verbose: bool = False) -> None:
 
     print(f"{'=' * 60}")
     if report.passed:
-        print("RESULT: PASS \u2014 Quality gate met (>= 90%)")
+        print(f"RESULT: PASS \u2014 Quality gate met (>= {report.threshold:.0f}%)")
     else:
         fixable = sum(1 for c in issues if c.auto_fixable)
         if fixable:
@@ -126,6 +130,13 @@ Exit codes: 0=pass, 1=fail, 2=error
     parser.add_argument("--fix", action="store_true", help="Auto-fix and write to -fixed.json")
     parser.add_argument("--json", action="store_true", help="Output JSON report only")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show all checks")
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=90,
+        metavar="N",
+        help="QG pass threshold 0-100 (default: 90). Use 85 for vibe mode.",
+    )
 
     args = parser.parse_args()
 
@@ -151,7 +162,7 @@ Exit codes: 0=pass, 1=fail, 2=error
     wrapper = data if fmt in ("create", "edit") else None
 
     # Validate
-    validator = AdfValidator()
+    validator = AdfValidator(threshold=args.threshold)
     report = validator.validate(adf, args.type, wrapper)
 
     # JSON output mode

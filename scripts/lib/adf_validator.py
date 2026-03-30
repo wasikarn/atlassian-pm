@@ -88,6 +88,7 @@ class CheckResult:
 class ValidationReport:
     issue_type: str
     checks: list[CheckResult] = field(default_factory=list)
+    threshold: float = QG_THRESHOLD
 
     @property
     def score(self) -> float:
@@ -100,7 +101,7 @@ class ValidationReport:
 
     @property
     def passed(self) -> bool:
-        return self.score >= QG_THRESHOLD
+        return self.score >= self.threshold
 
     def to_dict(self) -> dict[str, Any]:
         counts = {"pass": 0, "warn": 0, "fail": 0}
@@ -109,7 +110,8 @@ class ValidationReport:
         return {
             "issue_type": self.issue_type,
             "score": round(self.score, 1),
-            "status": "pass" if self.score >= 90 else "warn" if self.score >= 70 else "fail",
+            "threshold": self.threshold,
+            "status": "pass" if self.score >= self.threshold else "warn" if self.score >= 70 else "fail",
             "total_checks": len(self.checks),
             "passed": counts["pass"],
             "warned": counts["warn"],
@@ -246,7 +248,13 @@ class AdfValidator:
         Epic:    T1-T5 (technical) + E1-E4 (quality)   = 9 checks
         QA:      T1-T5 (technical) + QA1-QA5 (quality) = 10 checks
         Task:    T1-T5 (technical) + TK1-TK4 (quality) = 9 checks
+
+    Args:
+        threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
     """
+
+    def __init__(self, threshold: float = QG_THRESHOLD) -> None:
+        self.threshold = threshold
 
     def _extract_sections(self, adf: dict) -> dict[str, list[dict]]:
         """Pre-extract all known sections in one pass. Returns {heading_pattern: content_nodes}."""
@@ -259,7 +267,7 @@ class AdfValidator:
         wrapper: dict | None = None,
     ) -> ValidationReport:
         """Run all applicable checks for the issue type."""
-        report = ValidationReport(issue_type=issue_type)
+        report = ValidationReport(issue_type=issue_type, threshold=self.threshold)
         _secs = self._extract_sections(adf)
 
         # Technical checks (all types)

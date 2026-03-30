@@ -49,6 +49,13 @@
     "production": {"web": "yourapp.com",            "admin": "admin.yourapp.com",            "api": "api.yourapp.com"}
   },
 
+  "vibe": {
+    "qg_threshold": 85,
+    "skip_rice": true,
+    "skip_iterate": true,
+    "implementation_hints": true
+  },
+
   "workflow": {
     "type": "scrumban",
     "replenishment_threshold": 4
