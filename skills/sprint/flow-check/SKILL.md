@@ -41,12 +41,7 @@ memory: project
 
 ## Phase 1 — Board Snapshot
 
-**Goal:** Show current WIP per column vs limits so the team can see flow state at a glance.
-**Required inputs:** Board columns config (Dynamic Context above)
-**Constraints:** Read-only — no transitions in this phase
-**Output:** WIP table with OK / WARN / FULL status per column
-
-For each column in board config run:
+For each column in board config:
 
 ```
 jira_search(
@@ -76,12 +71,9 @@ Skip Phase 1 if `--replenish` flag passed.
 
 ## Phase 2 — Replenishment Check
 
-**Goal:** Determine if the Ready queue needs items pulled from Backlog.
-**Required inputs:** Replenishment threshold from config (default 4)
-**Constraints:** Transition items only after explicit user confirmation; HR6 — cache_invalidate after each transition; WIP gate fires on each Ready transition — set CLAUDE_WIP_CONFIRMED=\<key\>:Ready after confirming count < wip_max
-**Output:** "Queue healthy" or top-5 WSJF-ranked candidates + confirmation prompt
-
 Count current Ready items (from Phase 1 or re-query if `--replenish` fast path).
+
+Transition only after explicit user confirmation · HR6: `cache_invalidate` after each transition · WIP gate fires on each Ready transition — set `CLAUDE_WIP_CONFIRMED=<key>:Ready` after confirming count < wip_max.
 
 **If Ready count ≥ threshold:**
 
@@ -117,11 +109,6 @@ For each confirmed item: `jira_transition_issue(issue_key, transition="Ready")` 
 
 
 ## Phase 3 — Bottleneck Alert
-
-**Goal:** Surface aging items in columns approaching capacity before they become hard blocks.
-**Required inputs:** Phase 1 WIP counts
-**Constraints:** Read-only — no transitions
-**Output:** Aging items in bottleneck columns with assignee + days-open
 
 Skip Phase 3 if `--replenish` flag passed.
 
