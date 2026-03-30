@@ -1,71 +1,45 @@
 # Skill Orchestration
 
-> Intent-to-skill mapping, quality gates, and decision trees.
-> Read this before creating/editing Jira issues.
+> Intent-to-skill mapping, quality gates, decision trees. Read before creating/editing Jira issues.
 
 ## Intent-to-Skill Map
 
-| Intent | Skill Chain | Gate |
-| --- | --- | --- |
-| Feature blueprint | `/blueprint` → `/create-epic` → `/create-story` → verify | ≥ 90% (Confluence) |
-| Refine feature | `/search-issues` → `/refine-epic` → `/create-story` → verify | N/A (pre-creation) |
-| Create epic | `/search-issues` → `/create-epic` → verify | ≥ 90% |
-| Create story | `/search-issues` → `/create-story` → verify | ≥ 90% |
-| Create task | `/search-issues` → `/create-task` → verify | ≥ 90% |
-| Analyze story | `/analyze-story` → verify `--with-subtasks` | ≥ 90% |
-| Test plan | `/create-testplan` → verify | ≥ 90% |
-| Update single | `/update-{epic,story,task,subtask}` → verify | ≥ 90% |
-| Update cascade | `/sync-artifacts` → verify `--with-subtasks` | ≥ 90% |
-| Board replenishment | `/flow-check --replenish` | N/A |
-| Dependency check | `/map-dependencies` | N/A |
-| Close sprint | `/close-sprint` → `/retrospective-analyst` | N/A |
-| Close sprint + action items | `/sprint-close-full-with-actions` (chains: close-sprint → retrospective-analyst → retro-actions) | N/A |
-| Daily standup | `/standup-report` | N/A |
-| Daily ops | `/daily-ops` (chains: standup-report → flow-check → blockers synthesis) | N/A |
-| Release planning | `/plan-release` | N/A |
-| Bulk reschedule | `/reschedule-sprint` | N/A |
-| Import spec | `/spec-to-stories` → `/create-story` (per story) | ≥ 90% |
-| Tech debt audit | `/scan-tech-debt` → `/create-task` (prioritized) | N/A |
-| Bug triage | `/search-issues` → `/bug-triage` → `/create-testplan` (after fix) | ≥ 90% |
-| Vibe: idea to tasks | `/vibe-plan` → `/verify-issue --with-subtasks` | ≥ 90% |
-| Vibe: full pipeline | `/search-issues` → `/vibe-plan` → `/verify-issue --with-subtasks` | ≥ 90% |
-| Vibe: quick story | `/create-story` (vibe default) → verify | ≥ 90% |
-| Vibe: quick epic | `/create-epic` (vibe default) → verify | ≥ 90% |
-| Release notes | `/plan-release` → `/release-notes` | N/A |
-| Start ticket (DLC) | `/start-ticket` | pre: ticket in Jira · post: status = In Progress, AC displayed |
-| Ship to QA (DLC) | `/ship-to-qa` | pre: PR open, branch deployed · post: Jira comment posted, status = Ready for QA |
+| Intent | Skill Chain | Gate | Pre | Post |
+|---|---|---|---|---|
+| Feature blueprint | `/blueprint`→`/create-epic`→`/create-story`→verify | ≥90% | Feature idea | Confluence page |
+| Refine feature | `/search-issues`→`/refine-epic`→`/create-story`→verify | — | search | Refined stories |
+| Create epic | `/search-issues`→`/create-epic`→verify | ≥90% | search | verify ≥90% |
+| Create story | `/search-issues`→`/create-story`→verify | ≥90% | search | verify `--with-subtasks` |
+| Create task | `/search-issues`→`/create-task`→verify | ≥90% | search | verify ≥90% |
+| Analyze story | `/analyze-story`→verify `--with-subtasks` | ≥90% | Story exists | verify `--with-subtasks` |
+| Test plan | `/create-testplan`→verify | ≥90% | Story exists | verify ≥90% |
+| Vibe: idea→tasks | `/vibe-plan`→verify `--with-subtasks` | ≥90% | Feature desc/epic | verify `--with-subtasks` |
+| Update single | `/update-{epic,story,task,subtask}`→verify | ≥90% | Issue exists | verify ≥90% |
+| Update cascade | `/sync-artifacts`→verify `--with-subtasks` | ≥90% | Artifacts changed | verify `--with-subtasks` |
+| Import spec | `/spec-to-stories`→`/create-story` | ≥90% | Confluence+epic | Stories linked to epic |
+| Bug triage | `/search-issues`→`/bug-triage`→`/create-testplan` | ≥90% | | |
+| Replenishment | `/flow-check --replenish` | | project-config.json | WIP table |
+| Dependencies | `/map-dependencies` | | Issues w/ links | Graph + critical path |
+| Epic health | `/epic-health` | | Epic key | Coverage/SP/timeline |
+| Daily ops | `/daily-ops` (standup→flow-check→blockers) | | Active sprint | Digest |
+| Close sprint | `/close-sprint`→`/retrospective-analyst` | | Active sprint | Closed + Confluence |
+| Close+actions | `/sprint-close-full-with-actions` | | Active sprint | Closed + retro tasks |
+| Retro actions | `/retro-actions` | | Action-items block | Jira tasks + sprint |
+| Release | `/plan-release`→`/release-notes` | | Epics w/ SP | Confluence + Fix Version |
+| Reschedule | `/reschedule-sprint` | | Issues w/ dates | Updated + HR8 |
+| Tech debt | `/scan-tech-debt`→`/create-task` | | | Confluence matrix |
+| Start ticket | `/start-ticket` | | Issue in Jira | In Progress + AC |
+| Ship to QA | `/ship-to-qa` | | PR open | Comment + Ready for QA |
 
-**Rules:**
+**Rules:** Search before creating · Verify after every write · `/create-story` for new (PO+TA combined); `/analyze-story` for existing (subtasks only) · All creation = **vibe mode**; `--thorough` for full workflow
 
-- Always `/search-issues` before creating (dedup)
-- Always `/verify-issue` after creating/editing
-- Use `/create-story` for new stories (combines PO + TA). Use `/analyze-story` only for existing stories needing subtasks
-- All creation skills default to **vibe mode** (fast, no ceremony). Use `--thorough` for full interview + gates
-- Use `/vibe-plan` for idea-to-codeable-tasks in one shot (Epic + Stories + AI-Ready Subtasks)
+## QG Scoring
 
-## HARD RULES
+Threshold: ≥90% pass · 70-89% auto-fix · <70% fail
 
-> Full definitions and rationale: [hr-rules.md](hr-rules.md)
+Checks: T1-T5 (all) · S1-S6 (story) · ST1-ST5 (subtask) · QA1-QA5 (QA subtask) · B1-B8/5 (blueprint) · E1-E4 (epic) · A1-A6 (`--with-subtasks`)
 
-### QG Scoring Reference
-
-| Score | Status | Action |
-| --- | --- | --- |
-| 90-100% | Pass | Send to Atlassian |
-| 70-89% | Warning | Auto-fix, then re-score |
-| < 70% | Fail | Must fix, ask user if stuck |
-
-| Check | Max | Applies To |
-| --- | --- | --- |
-| T1-T5 Technical | 5 | All types |
-| S1-S6 Story Quality | 6 | Story |
-| ST1-ST5 Subtask Quality | 5 | Sub-task |
-| QA1-QA5 QA Quality | 5 | QA Sub-task |
-| B1-B8 Blueprint Quality | 8 (or 5 for S-tier) | Blueprint (Confluence) |
-| E1-E4 Epic Quality | 4 | Epic |
-| A1-A6 Alignment | 6 | `--with-subtasks` only |
-
-Full checklist: [verification-checklist.md](verification-checklist.md)
+Checklist: [verification-checklist.md](verification-checklist.md) · HR rules: [hr-rules.md](hr-rules.md)
 
 ## Decision Trees
 
@@ -75,101 +49,34 @@ Full checklist: [verification-checklist.md](verification-checklist.md)
 flowchart TD
     A{New Requirement?} -->|Yes| B["/search-issues\ndedup check"]
     A -->|"No — Edit existing"| C{Single or Cascade?}
-
     B --> D{Duplicate found?}
     D -->|Yes| E["/update-* or /sync-artifacts"]
     D -->|No| F{Scope?}
-
-    F -->|"Greenfield / Architecture\nNew domain"| G["/blueprint\n→ /create-epic → /create-story"]
-    F -->|"Unclear scope\nMulti-service / High-risk"| H["/refine-epic\n→ /create-story"]
-    F -->|"Clear scope\nSingle service"| I["/create-story ⭐ preferred"]
-    F -->|"Idea → codeable tasks\nOne-shot"| V["/vibe-plan 🚀"]
-    F -->|"Bug / Tech-debt\nChore / Spike"| J["/create-task"]
-
+    F -->|"Greenfield / Architecture"| G["/blueprint → /create-epic → /create-story"]
+    F -->|"Unclear / Multi-service"| H["/refine-epic → /create-story"]
+    F -->|"Clear / Single service"| I["/create-story ⭐"]
+    F -->|"Idea → tasks one-shot"| V["/vibe-plan 🚀"]
+    F -->|"Bug / Tech-debt / Spike"| J["/create-task"]
     C -->|Single issue| K["/update-{type}"]
-    C -->|"Story needs new Sub-tasks"| L["/analyze-story"]
+    C -->|"Story needs Sub-tasks"| L["/analyze-story"]
     C -->|"Story + Sub-tasks sync"| M["/sync-artifacts"]
-
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     class E,G,H,I,J,K,L,M,V skill
 ```
 
 ### create-story vs analyze-story?
 
-```mermaid
-flowchart LR
-    A{Story exists in Jira?} -->|"No\nCreate from scratch"| B
-    A -->|"Yes\nNeed subtasks only"| C
-
-    B["/create-story ⭐ default\nPhases 1–10\nPO + TA combined\nOutput: Story + Sub-tasks"]
-    C["/analyze-story\nPhases 5–10\nSkips story creation\nStarts from impact analysis"]
-
-    classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
-    class B,C skill
-```
-
-## Pre/Post Conditions
-
-| Skill | Pre-condition | Post-condition |
-| --- | --- | --- |
-| `/blueprint` | Feature idea / concept | Confluence page + backlog map → `/create-epic` → `/create-story` |
-| `/refine-epic` | `/search-issues` | Refined stories → `/create-story` |
-| `/create-epic` | `/search-issues` | `/verify-issue` >= 90% |
-| `/create-story` | `/search-issues` | `/verify-issue --with-subtasks` >= 90% |
-| `/analyze-story` | Story exists | `/verify-issue --with-subtasks` >= 90% |
-| `/create-testplan` | Story exists | `/verify-issue` >= 90% |
-| `/create-task` | `/search-issues` | `/verify-issue` >= 90% |
-| `/vibe-plan` | Feature description or epic key | `/verify-issue --with-subtasks` >= 90% |
-| `/update-{type}` | Issue exists | `/verify-issue` >= 90% |
-| `/sync-artifacts` | Story/artifacts changed | `/verify-issue --with-subtasks` >= 90% |
-| `/start-ticket` | Issue key exists in Jira | Ticket → In Progress + AC displayed |
-| `/ship-to-qa` | PR open, issue In Progress | Jira comment (PR + preview URLs) + ticket → Ready for QA |
-| `/flow-check` | Board config in project-config.json | WIP table + optional replenishment |
-| `/map-dependencies` | Issues with links in Jira | Dependency graph + critical path |
-| `/close-sprint` | Active sprint with issues | Closed sprint + Confluence review page |
-| `/retro-actions` | action-items block from retrospective-analyst or Confluence page | Jira tasks created per action item, linked to sprint |
-| `/epic-health` | Epic key or active epics | Coverage/SP/timeline audit report |
-| `/standup-report` | Active sprint | Digest output (optional Confluence post) |
-| `/plan-release` | Epics with SP estimates | Confluence release plan + Jira Fix Version |
-| `/reschedule-sprint` | Issues with dates | Updated dates + HR8 alignment |
-| `/spec-to-stories` | Confluence page + epic | Jira User Stories linked to epic |
-| `/scan-tech-debt` | Project with tech-debt issues | Confluence priority matrix page |
+Story doesn't exist → `/create-story` (Phases 1–10, PO+TA combined, outputs Story+Sub-tasks)
+Story exists, need subtasks only → `/analyze-story` (Phases 5–10, skips story creation)
 
 ## Context Packs
 
-> Load shared references as a batched set instead of 4-5 individual Read calls.
-> Pack definitions in `references/context-packs.json`.
+Pack definitions: `references/context-packs.json`. Read all pack files in one parallel message.
 
-### Usage
+Packs: `story` (create/update) · `subtask` (analyze→subtasks) · `epic` · `sprint` · `verify` · `sync`
 
-```text
-1. Determine workflow type (story, subtask, sprint, verify, etc.)
-2. Look up pack in references/context-packs.json → get file list
-3. Read all files in the pack's file list in one message (parallel Read calls)
-```
-
-### When to Use Repomix vs Direct Read
-
-| Situation | Use |
-| --- | --- |
-| Need 3+ shared-references files | Repomix pack |
-| Need 1-2 specific files | Direct Read |
-| Need to search across files | `grep_repomix_output` |
-| Exploring target project codebase | Task(Explore) — Repomix insufficient |
-
-### Pack Types
-
-| Pack | Files | Use Case |
-| --- | --- | --- |
-| `story` | templates, verification, vertical-slice, writing-style | Create/update stories |
-| `subtask` | templates, verification, tools, vertical-slice | Analyze story → subtasks |
-| `epic` | templates, verification, writing-style | Create/update epics |
-| `sprint` | sprint-frameworks, team-capacity, dependency, tools | Sprint planning |
-| `verify` | jql-quick-ref, verification, templates, writing-style | Verify issue quality |
-| `sync` | templates, verification, tools, orchestration | Cascade/sync alignment |
+3+ files → pack · 1-2 → Direct Read · search → `grep_repomix_output` · codebase → Task(Explore)
 
 ## Cache Hygiene
 
-- After any MCP write (`jira_update_issue`, `jira_create_issue`) → `cache_invalidate(issue_key)`
-- After sprint manipulation → `cache_invalidate(sprint_id)`
-- Before flow-check or map-dependencies → `cache_refresh(sprint_id)` for fresh data
+MCP write → `cache_invalidate(issue_key)` · Sprint change → `cache_invalidate(sprint_id)` · Before flow-check/map-dependencies → `cache_refresh(sprint_id)`
