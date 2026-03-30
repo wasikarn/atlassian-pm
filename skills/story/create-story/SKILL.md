@@ -5,16 +5,17 @@ agent: general-purpose
 model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Create User Story + Sub-tasks in one complete workflow (PO + TA combined) with a 12-phase workflow
+  Create User Story + Sub-tasks — vibe mode by default (fast, no ceremony)
+  Use --thorough for full interview + annotation workflow
 
-  Phases: Discovery → Write Story → INVEST → Create Story → Impact → Explore Codebase → Design + Estimation → Alignment → QG Subtasks → Create Sub-tasks → Summary
+  Phases: Discovery → Write Story → INVEST → QG → Create Story → Impact → Explore Codebase → Design + Estimation → Alignment → QG Subtasks → Create Sub-tasks → Summary
 
   Composite: No need to copy-paste issue keys, context preserved throughout workflow
 
-  Triggers: "create story", "new story", "story + subtasks", "full workflow", "สร้าง story", "story ครบ"
+  Triggers: "create story", "new story", "story + subtasks", "สร้าง story"
   Use when: creating a User Story with sub-tasks end-to-end — from discovery and INVEST check through codebase exploration, subtask design, and Jira creation
   Do NOT use for: creating standalone tasks (use create-task); creating an epic (use create-epic); refining scope before writing (use refine-epic)
-argument-hint: "[story-description]"
+argument-hint: "[--thorough] [story-description]"
 effort: high
 ---
 
@@ -22,6 +23,15 @@ effort: high
 
 **Role:** PO + TA Combined
 **Output:** User Story + Sub-tasks (complete workflow)
+
+## Mode Selection
+
+| Flag | Behavior | User interactions |
+| --- | --- | --- |
+| *(none)* | **Vibe mode (default)** — auto-extract context, single-pass generation, no annotation rounds | 0–1 (only if description is ambiguous) |
+| `--thorough` | **Thorough mode** — full interview gates, ITERATE annotation rounds (max 3), all REVIEW gates | Multiple checkpoints |
+
+> If the argument contains `--thorough`, strip the flag and treat the remaining text as the description. Proceed with thorough mode for all phases.
 
 ## Dynamic Context
 
@@ -103,14 +113,62 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
 
 ดำเนินต่อ Phase 2 Write User Story โดยใช้ blueprint context เป็น draft
 
-**If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ (ถาม Who/What/Why/Constraints)
-
+**If no blueprint in history:** ดำเนิน Phase 1 Discovery ตามโหมดที่เลือก
 
 ## Part A: Create Story (Phases 1-5)
+
+---
 
 ### 1. Discovery
 
 **Goal:** Establish Epic context, domain knowledge, and user intent before writing the story.
+
+---
+
+#### Vibe Mode (Default)
+
+**Required inputs:** description argument (auto-parsed), epic key if provided in argument
+**Constraints:** Only ask a question if description < 10 words with no inferrable context; otherwise proceed automatically
+**Output:** `epic_data`, `vs_assignment`, `user_requirements`, `user_context` inferred from description
+
+**Auto-extract from argument description:**
+
+- Parse description to infer: persona, action, benefit, affected services
+- If Epic key in argument → fetch epic via MCP to enrich context
+- If description < 10 words with no context → ask ONE question: "Tell me more about this feature"
+- Otherwise → proceed directly to Phase 2 with inferred context
+- **VS Assignment:** auto-assign based on services mentioned in description (`[BE]` mentions → vs2, `[FE]` mentions → vs2, both → vs2-e2e)
+
+If Epic key provided → direct MCP calls (🟢 PARALLEL with Confluence search):
+
+```text
+MCP: cache_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+→ fallback: jira_get_issue(issue_key="EPIC-KEY", fields="summary,description,customfield_10016,status,issuetype,labels")
+MCP: jira_search(jql="parent = EPIC-KEY", fields="summary,status,issuetype", limit=10)
+```
+
+**Epic Readiness Pre-check (🟢 AUTO):** After epic fetch, run quality checks:
+
+| Check | Pass Condition | If Fail |
+| --- | --- | --- |
+| ACs defined | Epic description contains ≥ 3 AC lines or bullet points | Warn only — continue |
+| SP estimated | `customfield_10016` is set (not null/0) | Warn only — continue |
+| No blockers | No linked issues with type "Blocks" in Open/In Progress status | Warn only — continue |
+
+In vibe mode, epic quality warnings are shown but never block progress.
+
+**Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
+
+```text
+MCP: cache_search_confluence(query="[story_keywords]", space_key="<space_key>", limit=3)
+```
+
+If relevant pages found → extract key sections and store as `domain_context` for Phase 2. If not found → skip silently.
+
+---
+
+#### --thorough Mode
+
 **Required inputs:** epic_key (ask if missing), user answers to Who / What / Why / Constraints, VS assignment
 **Constraints:** GATE — do not proceed without user confirmation of requirements + VS assignment; skip interview questions if blueprint context is present
 **Output:** `epic_data`, `vs_assignment`, `user_requirements`, `user_context`, and optional `domain_context` available for Phase 2
@@ -126,8 +184,6 @@ Ask: "ต้องการสร้าง story ข้อไหน? (ระบ�
   ```
 
 **Epic Readiness Pre-check (🟢 AUTO — runs after epic fetch, before GATE):**
-
-After receiving epic data, verify epic quality before investing in story writing:
 
 | Check | Pass Condition | If Fail |
 | --- | --- | --- |
@@ -152,22 +208,52 @@ Proceed anyway? (y = continue, n = stop and fix epic first)
 
 **Confluence Domain Knowledge (🟢 AUTO — non-blocking):**
 
-> **🟢 PARALLEL** — Epic MCP fetch and `cache_search_confluence` can run simultaneously; they have no dependency on each other. `cache_search_confluence` needs only story keywords (known from user input), not epic data.
-
-After epic fetch, search for relevant domain documentation using keywords from the story description and epic title:
+> **🟢 PARALLEL** — Epic MCP fetch and `cache_search_confluence` can run simultaneously.
 
 ```text
 MCP: cache_search_confluence(query="[story_keywords]", space_key="<space_key>", limit=3)
 ```
 
-If relevant pages found → extract key sections (business rules, API contracts, constraints) and store as `domain_context`. Inject into Phase 2 Write Story as reference.
-If no relevant pages found or MCP unavailable → skip silently, continue with epic context only.
-
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of requirements + VS assignment.
+
+---
 
 ### 2. Write User Story
 
-**Goal:** Produce a well-formed story narrative, acceptance criteria, scope, and DoD that the user has approved.
+**Goal:** Produce a well-formed story narrative, acceptance criteria, scope, and DoD.
+
+---
+
+#### Vibe Mode (Default)
+
+**Required inputs:** `epic_data`, inferred `user_requirements`, `vs_assignment` from Phase 1
+**Constraints:** Single pass — generate story with best judgment, show to user as information only (no gate)
+**Output:** `story_narrative`, `acs[]`, `scope`, `dod` ready for INVEST validation
+
+```text
+📍 [User's current situation — what they're doing, what's difficult]  ⚡ optional
+As a [persona],
+I want to [action],
+So that [benefit].
+```
+
+- ⚡ **Context line:** Include when persona is new or workflow is complex — not needed for every story
+- Define ACs, Scope, DoD
+- **AC Naming:** Use `AC{N}: [Verb] — [Scenario Name]` (not just "AC1: Title")
+- **VS Check:** Story delivers e2e value? All layers touched? (not shell-only)
+
+**📐 Technical Notes (⚡ populate if `domain_context` from Phase 1 exists):**
+
+Include the optional `📐 Technical Notes` section in the story ADF when domain context is available.
+
+Leave `Key files:` blank at this stage — it will be filled post-Phase 7 exploration if needed.
+
+> Show the generated story to the user as information. Proceed immediately to Phase 3 (no approval gate).
+
+---
+
+#### --thorough Mode
+
 **Required inputs:** `epic_data`, `user_requirements`, `vs_assignment` from Phase 1
 **Constraints:** ITERATE gate — max 3 annotation rounds; if no consensus after 3 rounds escalate to `/blueprint`
 **Output:** `story_narrative`, `acs[]`, `scope`, `dod` approved and ready for INVEST validation
@@ -198,6 +284,8 @@ Leave `Key files:` blank at this stage — it will be filled post-Phase 7 explor
   - Approve → proceed to INVEST validation
   - Major rework → back to Discovery
   - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
+
+---
 
 ### 3. INVEST + VS Validation
 
@@ -304,12 +392,36 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key)` after field update.
 
-## Part B: Create Sub-tasks (Phases 6-13)
+## Part B: Create Sub-tasks (Phases 6-12)
+
+---
 
 ### 6. Impact Analysis
 
 **Goal:** Identify which services are affected by the story and confirm the VS integrity before exploring the codebase.
 **Required inputs:** `story_key`, `story_narrative`, `acs[]` from Phase 2
+
+---
+
+#### Vibe Mode (Default)
+
+**Constraints:** AUTO — infer impact from story description and VS assignment; proceed automatically
+**Output:** `services_impacted[]`, `vs_verified`
+
+| Service | Impact | Reason |
+| --- | --- | --- |
+| Backend | ✅/❌ | [why] |
+| Admin | ✅/❌ | [why] |
+| Website | ✅/❌ | [why] |
+
+**VS Verification:** Story touches all layers for e2e slice? (not layer-only)
+
+> **🟢 AUTO** — Infer services from story narrative and VS assignment. Proceed to Phase 7 automatically. Show impact table as information only.
+
+---
+
+#### --thorough Mode
+
 **Constraints:** REVIEW gate — present impact table to user and proceed unless user objects; flag shell-only anti-pattern (FE-only impact with no BE) for user confirmation
 **Output:** `services_impacted[]`, `vs_verified`; impact table approved before Phase 7 exploration begins
 
@@ -322,6 +434,8 @@ MCP: jira_update_issue(issue_key="ABC-XXX", additional_fields={
 **VS Verification:** Story touches all layers for e2e slice? (not layer-only)
 
 **🟡 REVIEW** — Present impact table + VS verification to user. Proceed unless user objects.
+
+---
 
 ### 7. Codebase Exploration ⚠️ MANDATORY
 
@@ -360,8 +474,63 @@ DEPENDENCIES: [key imports or shared modules identified]
 
 ### 8. Design + Estimation
 
-**Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) that the user approves, then calibrate SP estimates against historical data.
+**Goal:** Produce concrete subtask plan cards (tag, scope files, ACs, OE) then calibrate SP estimates against historical data.
 **Required inputs:** `file_paths[]`, `patterns[]`, `dependencies[]` from Phase 7; `acs[]` from Phase 2
+
+---
+
+#### Vibe Mode (Default)
+
+**Constraints:** Single pass — generate subtask designs with Implementation Hints populated from Phase 7 results; show designs as information only (no annotation gate)
+**Output:** `subtask_designs[]` with calibrated SP values; ready for Phase 9 alignment check
+
+**Tech Lead Decomposition — dependency ordering:** See [analyze-story/SKILL.md](../analyze-story/SKILL.md) for TL decomposition ordering.
+
+- 1 sub-task per service boundary (split only if complexity warrants)
+- **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer)
+- Summary: `[TAG] - Description`
+- ACs: Thai narrative + English technical terms
+
+**Implementation Hints (🟢 AUTO — MANDATORY in vibe mode):**
+
+Include Section 4 Implementation Hints in every subtask ADF. Populate from Phase 7 exploration results:
+
+| Field | Source |
+| --- | --- |
+| Entry Point | First CREATE file from scope table for this service |
+| Pattern to Follow | First REF file from scope table |
+| Test Command | Project's test command scoped to the new file (e.g., `node ace test --files "tests/unit/..."`) |
+| Related API | Any HTTP endpoint found in exploration (BE subtasks only) |
+| Dependencies | Key imports/services found in exploration (from REF file's constructor signature) |
+
+See [templates-vibe.md](../../../references/templates-vibe.md) for the full ADF JSON structure and Claude Code Prompt format.
+
+**Estimation Calibration (🟢 AUTO + PARALLEL):** Launch all estimation-calibrator agents simultaneously — one per subtask. Apply recommendation if confidence is HIGH or MEDIUM; skip if LOW.
+
+For each subtask in the current design (all in parallel):
+
+```text
+Agent(name: "estimation-calibrator"):
+  story_summary: [subtask summary]
+  service_tag: [BE/FE-Admin/FE-Web]
+  initial_sp: [SP from design]
+  scope_file_count: [count of CREATE+MODIFY rows in scope table]
+  ac_count: [number of ACs in subtask design]
+```
+
+If recommendation differs from initial estimate AND confidence ≥ MEDIUM:
+
+- Update subtask SP to recommended value
+- Note in plan card: "SP adjusted [M→L] based on historical pattern: [reason from calibrator]"
+
+If LOW confidence: keep initial estimate, note "insufficient historical data for calibration".
+
+> Show subtask designs to the user as information. Proceed immediately to Phase 9 (no approval gate).
+
+---
+
+#### --thorough Mode
+
 **Constraints:** ITERATE gate — max 3 annotation rounds; major rework returns to Phase 7; 1 subtask per service boundary unless complexity warrants more; VS integrity required (no horizontal layer subtasks)
 **Output:** `subtask_designs[]` with calibrated SP values approved by user; ready for Phase 9 alignment check
 
@@ -371,7 +540,6 @@ DEPENDENCIES: [key imports or shared modules identified]
 - **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer)
 - Summary: `[TAG] - Description`
 - ACs: Thai narrative + English technical terms
-
 
 **Estimation Calibration (🟢 AUTO + PARALLEL):** Launch all estimation-calibrator agents simultaneously — one per subtask. Apply recommendation if confidence is HIGH or MEDIUM; skip if LOW.
 
@@ -398,6 +566,8 @@ If LOW confidence: keep initial estimate, note "insufficient historical data for
   - Approve → proceed to Alignment Check
   - Major rework → back to Codebase Exploration
   - See [Annotation Cycle](../../../references/workflow-patterns.md#annotation-cycle-iterate-gate)
+
+---
 
 ### 9. Alignment Check
 
@@ -467,10 +637,10 @@ acli jira workitem edit --from-json {{artifacts_dir}}/subtask-fe.json --yes
 
 ### 12. Summary
 
-**Goal:** Present the completed workflow result and suggest next actions.
+**Goal:** Present the completed workflow result, delegation view, and suggest next actions.
 **Required inputs:** `story_key`, `subtask_keys[]` from Phase 11
 **Constraints:** None
-**Output:** Completion summary with story + subtask keys and suggested follow-up commands
+**Output:** Completion summary with story + subtask keys, Claude Code Prompt per subtask, and suggested follow-up commands
 
 ```text
 ## Story Full Complete
@@ -481,31 +651,38 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 
 ```
 
+**Delegation View (vibe mode — show after summary):**
 
-> See [references/decision-guide.md](references/decision-guide.md) for when to use /create-story vs /analyze-story.
+| Assignee | Subtask | Type | OE | Claude Code Prompt |
+|---|---|---|---|---|
+| [dev email] | ABC-YYY [BE] | CREATE | Nh | "Implement X following Y..." |
+| [fe email] | ABC-ZZZ [FE-Admin] | CREATE | Nh | "Implement Z following W..." |
 
+> Column source: Assignee from `project-config.json` team roster · Subtask key from Phase 11 · Claude Code Prompt verbatim from Implementation Hints note panel.
 
-> See [references/examples.md](references/examples.md) for a full input/output example.
+See [references/decision-guide.md](references/decision-guide.md) for when to use /create-story vs /analyze-story.
 
+See [references/examples.md](references/examples.md) for a full input/output example.
 
 ## Examples
 
-### ✅ Good
+### Good
 
 ```text
-/create-story "coupon redemption at checkout for logged-in users"   # clear seed → focused Discovery phase, VS assignment straightforward
-/create-story "video upload progress indicator for content creators" # persona + feature area → tight narrative, minimal interview rounds
+/create-story "coupon redemption at checkout for logged-in users"   # vibe mode — auto-extracts persona + feature, 0 questions
+/create-story "video upload progress indicator for content creators" # vibe mode — persona + feature area, straight to phases
 /create-story                                                        # after /blueprint output in history → picks up blueprint_backlog_map, skips interview
-/create-story "password reset via SMS OTP"                          # small, testable scope → INVEST passes cleanly, ≤1 sprint
+/create-story "password reset via SMS OTP"                          # small, testable scope → INVEST passes cleanly
+/create-story --thorough "new payment gateway integration"          # complex feature — use thorough mode for full interview + annotation
 ```
 
-### ❌ Bad
+### Bad
 
 ```text
 /create-story {{PROJECT_KEY}}-123                    # passing existing issue key — story already exists; use /analyze-story {{PROJECT_KEY}}-123 instead
-/create-story "authentication"           # too vague → Discovery phase loops, VS assignment ambiguous, weak ACs
+/create-story "authentication"           # too vague AND < 10 words no context → will ask ONE clarifying question
 /create-story "redesign entire checkout" # scope too large → INVEST Small check fails, needs epic decomposition first
-/create-story "add feature"             # no context → generic output, wastes all 12 phases; run /blueprint first for complex features
+/create-story "add feature"             # no context → will ask ONE clarifying question; run /blueprint first for complex features
 ```
 
 **Common mistakes:**
@@ -514,12 +691,12 @@ Sub-tasks: ABC-YYY [BE], ABC-ZZZ [FE-Admin]
 - Skipping `/blueprint` for complex features with multiple stories — without blueprint context the Discovery phase must interview from scratch every time, and VS assignment is error-prone.
 - Using `/create-story` when no epic exists and the feature spans multiple vertical slices — create the epic first (`/create-epic`) so the story has a parent and VS labels to anchor to.
 - Confusing this skill with `/analyze-story` — `/create-story` creates a brand-new story + subtasks end-to-end; `/analyze-story` works on an existing story that already has a Jira key.
+- Using `--thorough` for simple, well-described features — vibe mode produces the same quality output with less friction.
 
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)
 
-
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Subtask Template](../../../references/templates-subtask.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Subtask Template](../../../references/templates-subtask.md) · [Vibe Mode Templates](../../../references/templates-vibe.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Subtask Design Patterns](../../../references/subtask-design-patterns.md)
