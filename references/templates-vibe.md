@@ -6,7 +6,7 @@
 
 Vibe mode is **speed through less ceremony, NOT less quality.**
 
-When a developer or tech lead runs a skill with `--vibe`, the workflow skips the slow parts (discovery interviews, annotation rounds, RICE scoring) but keeps all the parts that prevent production incidents (codebase exploration, QG gating, HR rules, subtask parent verification).
+By default, every skill skips the slow parts (discovery interviews, annotation rounds, RICE scoring) but keeps all the parts that prevent production incidents (codebase exploration, QG gating, HR rules, subtask parent verification). Use `--thorough` to opt into full ceremony when the situation demands it.
 
 The core insight: **a subtask IS an AI prompt.** When someone runs `implement TP-123` in Claude Code, Claude reads the Jira ticket via MCP. If the ticket contains rich Implementation Hints, Claude Code produces production-ready code on the first pass. If it doesn't, Claude produces generic scaffolding that the developer still has to rework.
 
@@ -14,7 +14,21 @@ Vibe mode front-loads the codebase exploration that makes those hints accurate.
 
 ---
 
+## Context Engineering Rules
+
+1. **Verification-first** -- Always explore the codebase (QMD, AST grep, file reads) before writing any ADF or subtask. Guessing file paths or patterns produces hints that mislead Claude Code.
+2. **Point to pattern files** -- Every subtask must reference a concrete REF file. Abstract instructions like "follow best practices" give Claude Code nothing to anchor on.
+3. **Separate explore from implement** -- Exploration (reading code, mapping dependencies) and implementation (writing ADF, creating issues) are distinct phases. Never interleave them -- finish exploring before you start writing.
+4. **Just-in-time context** -- Load references and codebase details only when the current phase needs them. Front-loading everything wastes context window and causes compaction mid-skill.
+5. **Canonical examples over descriptions** -- When explaining a pattern, point to a working file in the codebase rather than describing the pattern in prose. The file IS the specification.
+6. **Single concern per subtask** -- Each subtask targets one file or one tightly-coupled pair (service + test). If a subtask lists 4+ CREATE files, split it -- Claude Code performs better with focused scope.
+7. **Lean descriptions, rich hints** -- Keep summary and objective short. Put the detail in Section 4 (Implementation Hints) where Claude Code actually reads it during `implement`.
+
+---
+
 ## Vibe Mode Rules
+
+> Vibe mode is the **DEFAULT** behavior for all skills. Use `--thorough` to opt into full ceremony (discovery interviews, annotation rounds, RICE scoring, review gates).
 
 | Aspect | Standard Mode | Vibe Mode |
 | --- | --- | --- |
@@ -32,7 +46,7 @@ Vibe mode front-loads the codebase exploration that makes those hints accurate.
 
 ## Implementation Hints (Section 4 ADF)
 
-Add this section to every subtask ADF when running in vibe mode. It goes after section 3 (Acceptance Criteria), separated by a `{"type": "rule"}` node.
+Add this section to every subtask ADF (default behavior). It goes after section 3 (Acceptance Criteria), separated by a `{"type": "rule"}` node.
 
 ### How to populate from codebase exploration
 
