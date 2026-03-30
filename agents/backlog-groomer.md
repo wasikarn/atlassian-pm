@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: high
-tools: Read, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
+tools: Read, Skill, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 12
 color: green
@@ -155,6 +155,15 @@ Round to 1 decimal. Higher = pull first.
 ---
 **Summary:** [N] sprint-ready of [total]. Top WSJF: {{PROJECT_KEY}}-XXX ([score]). Fix [N] AC issues before planning.
 **Next step:** → /plan-sprint (use sprint-ready list ordered by WSJF as input)
+
+### Skill Actions (if caller requests auto-fix)
+
+| Category | Skill to invoke | How |
+|----------|----------------|-----|
+| Needs AC | `atlassian-pm:analyze-story KEY` | Use Skill tool — explores codebase + creates AI-ready subtasks |
+| Orphan (no epic) | `atlassian-pm:create-epic` | Use Skill tool — creates epic and links story |
+| Needs VS Label | `atlassian-pm:update-story KEY` | Use Skill tool — adds missing VS label |
+| Missing Estimate | `atlassian-pm:analyze-story KEY` | Use Skill tool — subtask breakdown informs SP estimate |
 ```
 
 ## Story Splitting Guidance
