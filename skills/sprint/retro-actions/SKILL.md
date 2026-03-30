@@ -40,134 +40,54 @@ allowed-tools: mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cach
 
 ## Phase 1 — Discover Action Items
 
-**Goal:** Locate and parse the `action-items` JSON block from the retrospective source.
-**Required inputs:** `--from-page <id>` flag OR session context containing an `action-items` block
-**Constraints:** If neither source is available, STOP and ask user to provide a Confluence page ID or run `/retrospective-analyst` first
-**Output:** `action_items[]`, `sprint_label` available in context for Phase 2
+If `--from-page` flag: `confluence_get_page(page_id)` → extract fenced `action-items` JSON block → parse → `action_items[]`, derive `sprint_label` from page title (e.g., `retro-sprint-47`).
 
-1. If `--from-page` flag provided:
-   - `confluence_get_page(page_id)` — fetch the Confluence retro page
-   - Extract the fenced `action-items` block (JSON array between ` ```action-items ` and ` ``` `)
-   - Parse JSON → `action_items[]`
-   - Extract sprint name from page title for `sprint_label` (e.g., `retro-sprint-47`)
+Else: scan session context for most recent `action-items` fenced block → parse → `action_items[]`, derive `sprint_label` from context.
 
-2. Else — read from session context:
-   - Scan conversation context for the most recent `action-items` fenced block
-   - Parse JSON → `action_items[]`
-   - Derive `sprint_label` from sprint name if available in context (e.g., `retro-sprint-47`)
+If `--sprint` flag: use that sprint's name as `sprint_label` (overrides derived value).
 
-3. If `--sprint` flag provided → use that sprint's name as `sprint_label` (overrides derived value)
+Validate: each item must have `title`, `description`, `priority`, `type`. Reject malformed entries with warning. Display: "Found N action items from [source]".
 
-4. Validate parsed items:
-   - Each item must have `title`, `description`, `priority`, `type`
-   - Reject malformed entries and display a warning — do not silently skip
-   - Display parsed count: "Found N action items from [source]"
+If neither source available: STOP and ask user to provide a Confluence page ID or run `/retrospective-analyst` first.
 
 ## Phase 2 — Deduplicate
 
-**Goal:** Avoid creating duplicate Jira tasks for action items that already exist from a prior retro run.
-**Required inputs:** `action_items[]` from Phase 1
-**Constraints:** HR2 — JQL with `key in (...)` MUST NOT include `ORDER BY`; search by summary prefix only
-**Output:** `new_items[]` (items not already in Jira) available in context for Phase 3
+HR2 — JQL with `key in (...)` MUST NOT include `ORDER BY`.
 
-For each action item title, search Jira for an existing task with a matching summary:
+For each action item, search: `project = "{{PROJECT_KEY}}" AND issuetype = Task AND summary ~ "[Retro]" AND summary ~ "<first 40 chars>" AND created >= -30d`
 
-```jql
-project = "{{PROJECT_KEY}}" AND issuetype = Task AND summary ~ "[Retro]" AND summary ~ "<first 40 chars of title>" AND created >= -30d
-```
+- Match found → skip, note: "Skipping '[title]' — similar task exists: KEY"
+- No match → include in `new_items[]`
 
-- If a match is found → skip item, note: "Skipping '[title]' — similar task exists: KEY"
-- If no match → include in `new_items[]`
+Display: `Deduplication: N new items to create, M skipped (already exist)`
 
-Display dedup summary:
-
-```
-Deduplication: N new items to create, M skipped (already exist)
-```
-
-If `--dry-run` flag provided → STOP here, display `new_items[]` preview table and exit.
+If `--dry-run`: STOP, display `new_items[]` preview table and exit.
 
 ## Phase 3 — Create Tasks
 
-**Goal:** Create one Jira Task per deduplicated action item with ADF description and sprint label.
-**Required inputs:** `new_items[]` from Phase 2; `sprint_label` from Phase 1
-**Constraints:** HR1 — verify ADF before writing; HR6 — no cache invalidation needed (new issues have no cache entry yet)
-**Output:** `created_keys[]` available in context for Phase 4
+HR1 — verify ADF before writing. HR6 — no cache invalidation needed for new issues.
 
 For each item in `new_items[]`:
 
-1. Build ADF description:
+1. Build ADF description with info panel (`item.description`) + paragraph (`Type`, `Priority`, `Suggested Owner`, `Sprint Target` fields).
 
-```json
-{
-  "version": 1,
-  "type": "doc",
-  "content": [
-    {
-      "type": "panel",
-      "attrs": { "panelType": "info" },
-      "content": [
-        {
-          "type": "paragraph",
-          "content": [{ "type": "text", "text": "<item.description>" }]
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "content": [
-        { "type": "text", "text": "Type: ", "marks": [{ "type": "strong" }] },
-        { "type": "text", "text": "<item.type>" },
-        { "type": "hardBreak" },
-        { "type": "text", "text": "Priority: ", "marks": [{ "type": "strong" }] },
-        { "type": "text", "text": "<item.priority>" },
-        { "type": "hardBreak" },
-        { "type": "text", "text": "Suggested Owner: ", "marks": [{ "type": "strong" }] },
-        { "type": "text", "text": "<item.assignee_hint or 'team'>" },
-        { "type": "hardBreak" },
-        { "type": "text", "text": "Sprint Target: ", "marks": [{ "type": "strong" }] },
-        { "type": "text", "text": "<item.sprint_target>" }
-      ]
-    }
-  ]
-}
-```
+2. `jira_create_issue(projectKey, summary="[Retro] <sprint_label>: <item.title>", issuetype="Task", priority=<mapped>, labels=["<sprint_label>", "retro-action"], description=<ADF>)`
 
-1. `jira_create_issue`:
+3. If `--from-page`: `jira_add_comment(issue_key, "Created from retrospective action items. Source: [page title](url)")`
 
-```json
-{
-  "projectKey": "{{PROJECT_KEY}}",
-  "summary": "[Retro] <sprint_label>: <item.title>",
-  "issuetype": { "name": "Task" },
-  "priority": { "name": "<High|Medium|Low — mapped from item.priority>" },
-  "labels": ["<sprint_label>", "retro-action"],
-  "description": "<ADF from step 1>"
-}
-```
-
-1. After create → add a comment linking back to the source (if `--from-page` was used):
-   `jira_add_comment(issue_key, "Created from retrospective action items. Source: [Confluence page title](url)")`
-
-2. Append `issue_key` to `created_keys[]`
+4. Append `issue_key` to `created_keys[]`
 
 > **🟡 REVIEW** — After creating each task, display key + summary. Proceed unless user objects.
 
 ## Phase 4 — Summary
 
-**Goal:** Present a clear summary table of all created tasks for the user to review and assign.
-**Required inputs:** `created_keys[]` from Phase 3
-**Constraints:** None — display only, no writes
-**Output:** Summary table shown; next-step suggestions provided
-
-Display:
+Display table of created tasks:
 
 ```
 ## Retro Action Items — Created
 
 | # | Key | Title | Priority | Type | Assignee Hint |
 |---|-----|-------|----------|------|---------------|
-| 1 | {{PROJECT_KEY}}-XXX | [Retro] sprint-47: ... | High | process | tech-lead |
 ...
 
 Total: N tasks created, M skipped (duplicates)
@@ -180,8 +100,6 @@ Next steps:
 
 ## Examples
 
-### Good
-
 ```text
 /retro-actions                                   # parse action-items block from session context
 /retro-actions --from-page 12345678              # from Confluence retro page ID
@@ -189,22 +107,10 @@ Next steps:
 /retro-actions --sprint 47                       # override sprint label
 ```
 
-### Bad
-
-```text
-/retro-actions                                   # ❌ run before /retrospective-analyst — no action-items block in context
-/retro-actions --from-page 12345678              # ❌ page has no action-items block — Phase 1 will fail to parse
-```
-
-**Common mistakes:**
-
-- Running before `/retrospective-analyst` — the action-items block must exist in context or on a Confluence page
-- Not verifying the `sprint_label` — a wrong label pollutes the Jira board filter for that sprint
-- Skipping `--dry-run` on first run — always preview before writing to Jira on a new sprint
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Skill Orchestration](../../../references/skill-orchestration.md) · [Templates Core](../../../references/templates-core.md) · [HR Rules](../../../references/hr-rules.md)

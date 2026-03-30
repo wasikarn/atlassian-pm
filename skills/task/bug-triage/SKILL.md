@@ -39,132 +39,46 @@ effort: medium
 
 ## Phase 1 — Bug Intake ⛔ GATE
 
-Collect all required information before proceeding.
+If description provided as argument: use as `bug_summary`, ask for remaining fields.
 
-**If description provided as argument:** use it as `bug_summary` and ask for remaining fields.
+Collect: Summary · Reproduction Steps (numbered) · Environment (service+version+env) · Observed Behavior · Expected Behavior · Affected User · Frequency · Attachments (optional)
 
-**Collect:**
-
-| Field | Question |
-| --- | --- |
-| Summary | One-line description of the bug |
-| Reproduction Steps | Step-by-step to reproduce (numbered list) |
-| Environment | Service + version + environment (staging/production) |
-| Observed Behavior | What actually happens |
-| Expected Behavior | What should happen |
-| Affected User | Who is impacted (all users / specific role / specific ID) |
-| Frequency | Always / Intermittent / One-time |
-| Attachments | Screenshot or log reference (optional) |
-
-Display collected intake:
-
-```
-## Bug Report
-
-**Summary:** [bug_summary]
-**Environment:** [environment]
-**Frequency:** [frequency]
-**Affected:** [affected_user]
-
-**Reproduction Steps:**
-
-1. [step 1]
-2. [step 2]
-...
-
-**Observed:** [observed]
-**Expected:** [expected]
-
-```
-
-**Gate:** Confirm intake is complete and accurate before scoring.
+Display collected intake as a `## Bug Report` block with all fields, then confirm before scoring.
 
 
 ## Phase 2 — Severity Scoring 🟡 REVIEW
 
-Score bug severity using this matrix:
-
 | Severity | Criteria | Response Time |
 | --- | --- | --- |
 | **P1 — Critical** | Data loss · security breach · system down · payment failure · all users blocked | Immediate |
-| **P2 — Major** | Key feature broken · significant UX degradation · partial data issue · majority of users affected | Next sprint |
+| **P2 — Major** | Key feature broken · significant UX degradation · partial data issue · majority affected | Next sprint |
 | **P3 — Minor** | Cosmetic · edge case · workaround exists · rare frequency | Backlog |
 
-Display scoring decision:
-
-```
-## Severity Assessment
-
-**Severity:** [P1/P2/P3] — [label]
-**Rationale:** [why this severity was chosen]
-**Response:** [response time expectation]
-
-```
-
-Present to user — auto-proceed unless user objects (🟡 REVIEW).
+Display `## Severity Assessment` with P1/P2/P3, rationale, and response time. Auto-proceed unless user objects.
 
 
 ## Phase 3 — Duplicate Check 🟢 AUTO
 
-Search for existing bugs before creating a new one.
+1. `cache_search(query="[bug_summary]", limit=5)`
+2. `jira_search(jql="project = {{PROJECT_KEY}} AND issuetype = Task AND text ~ '[keywords]'", fields="summary,status,assignee")`
 
-1. Run `cache_search(query="[bug_summary]", limit=5)` for semantic matches
-2. Run `jira_search(jql="project = {{PROJECT_KEY}} AND issuetype = Task AND text ~ '[keywords]' ORDER BY created DESC", fields="summary,status,assignee")` with extracted keywords
-
-If duplicate found:
-
-```
-⚠️ Possible duplicate detected: [KEY] — [summary] ([status])
-Link: https://{{JIRA_SITE}}/browse/[KEY]
-
-Options:
-
-  1. Link to existing issue (add comment with new repro steps)
-  2. Create as separate issue (different root cause or environment)
-
-```
-
-If no duplicate found: auto-proceed silently.
+If duplicate found: show key, summary, status, link — offer (1) link to existing or (2) create separate. If none found: auto-proceed silently.
 
 
 ## Phase 4 — Assign ⛔ GATE
 
 > **Skip if `--no-assign`** — proceed directly to Phase 5 with `assignee_email = null`.
 
-Recommend assignee based on affected service tag and team skill matrix:
-
-```
-## Assignment Recommendation
-
-**Affected Service:** [service tag: BE/FE-Admin/FE-Web/Video]
-**Recommended Assignee:** [name] — [role] ([rationale])
-**Fallback:** [alternative name]
-
-```
-
-Wait for user to confirm or override assignee. Record `assignee_email` from `team.members[]`.
+Recommend assignee based on affected service tag and team skill matrix. Show `## Assignment Recommendation` with recommended + fallback. Wait for user confirmation. Record `assignee_email` from `team.members[]`.
 
 
 ## Phase 5 — Create Jira Task 🟢 AUTO
 
-Generate ADF JSON for bug task, then create via acli.
-
 **Summary format:** `[Bug][P1/P2/P3] [bug_summary]`
 
-**ADF structure** (use `templates-task.md` bug template):
+**ADF structure** (use `templates-task.md` bug template): Bug Description (error panel) · Reproduction Steps (numbered) · Expected vs Actual (table) · Environment (note panel) · Affected Users · Attachments · Fix Criteria (success panel)
 
-```
-🐛 Bug Description (panel: error)
-🔄 Reproduction Steps (numbered list)
-📊 Expected vs Actual (table: 2 columns)
-🌍 Environment (panel: note)
-👥 Affected Users (inline)
-📎 Attachments (if any)
-✅ Fix Criteria (panel: success)
-
-```
-
-**Quality Gate:** T1–T5 technical checks + bug-specific checks:
+**Quality Gate** — T1–T5 + bug-specific:
 
 | Check | Criterion |
 | --- | --- |
@@ -174,34 +88,17 @@ Generate ADF JSON for bug task, then create via acli.
 | B4 | Environment field is filled |
 | B5 | Fix criteria are testable and specific |
 
-QG must be ≥ 90% before creation. HR1 enforced.
+QG ≥ 90% before creation. HR1 enforced.
 
-> **🟢 AUTO (validate_adf.py):**
->
-> ```bash
-> uv run scripts/api/validate_adf.py {{artifacts_dir}}/tp-xxx-bug.json --type task --json
-> ```
->
-> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
-
-**Create:**
+> **🟢 AUTO (validate_adf.py):** `uv run scripts/api/validate_adf.py {{artifacts_dir}}/tp-xxx-bug.json --type task --json` — score ≥ 90 = PASS; if FAIL → apply `--fix` → re-score (max 1 cycle).
 
 ```bash
 acli jira workitem create --from-json {{artifacts_dir}}/tp-xxx-bug.json
-```
-
-**After create:**
-
-```bash
 # HR3: assign via acli (MCP assignee silently fails)
 acli jira workitem assign -k "[issue_key]" -a "[assignee_email]" -y
 ```
 
-Add severity label:
-
-```python
-jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] | ["P2"] | ["P3"]})
-```
+`jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"|"P2"|"P3"]})`
 
 > **HR6:** `cache_invalidate(issue_key)` after each write.
 
@@ -222,38 +119,6 @@ jira_update_issue(issue_key="[issue_key]", additional_fields={"labels": ["P1"] |
 → Use /create-testplan [KEY] to create QA verification subtask after fix
 ```
 
-
-## Common Scenarios
-
-> See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
-
-
-## Examples
-
-### ✅ Good
-
-```text
-/bug-triage                                                        # start interactive intake from scratch
-/bug-triage "Upload fails silently after selecting a file > 10MB"  # pre-fills summary, agent collects remaining fields
-/bug-triage "Payment confirmation email not sent in production"     # clear, actionable summary for P1 candidate
-/bug-triage "Admin user list shows wrong pagination count"          # scoped description → fast severity scoring
-```
-
-### ❌ Bad
-
-```text
-/create-task bug "Upload broken"           # skips severity scoring, duplicate check, and assignee recommendation — use /bug-triage
-/bug-triage "It's broken"                  # intake too vague; agent cannot score severity without repro steps and environment
-/bug-triage "{{PROJECT_KEY}}-99"                       # passing an issue key makes no sense here — triage creates a new ticket
-/bug-triage "CSS misaligned on mobile"     # cosmetic P3 does not need full triage workflow — /create-task bug is sufficient
-```
-
-**Common mistakes:**
-
-- Using `/create-task bug` when the bug needs severity scoring (P1/P2/P3), duplicate check, and smart assignee recommendation — those phases only exist in `/bug-triage`
-- Skipping Phase 1 confirmation before proceeding to scoring — all intake fields (repro steps, environment, frequency, affected users) must be complete; incomplete intake produces wrong severity
-- Assigning a P1 Critical bug directly to a junior developer without flagging for senior review — Phase 4 recommendation logic accounts for skill level
-- Not checking for duplicates (Phase 3 is mandatory before creation) — creating duplicate tickets wastes sprint capacity and splits the fix effort
 
 ## References
 

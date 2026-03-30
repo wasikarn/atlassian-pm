@@ -60,9 +60,9 @@ Epic (Jira)
 ### 1. Identify Origin
 
 - Receive input: `{{PROJECT_KEY}}-XXX` (Jira key) or Confluence page ID
-- `MCP: jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
+- `jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
 - Determine artifact type: Epic / Story / Sub-task
-- If Confluence page ID → `MCP: confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
+- If Confluence page ID → `confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of starting artifact + description of what changed.
 
 ### 2. Build Artifact Graph
@@ -74,21 +74,18 @@ Discovery algorithm:
 2. Walk UP:
    - if Sub-task → parent_story = issue.parent
    - if Story → parent_epic = issue.parent
-   - if Sub-task → parent_epic = story.parent
 3. Walk DOWN:
    - jira_search("parent = EPIC_KEY AND issuetype = Story", fields="summary,status,issuetype,parent") → stories
    - per story: jira_search("parent = STORY_KEY", fields="summary,status,assignee,issuetype") → sub-tasks
-   ⚠️ NEVER add ORDER BY to parent queries — causes JQL parse error
+   ⚠️ NEVER add ORDER BY to parent queries — JQL parse error (HR2)
 4. Walk SIDEWAYS (Jira → Confluence):
    - per story: confluence_search("{{PROJECT_KEY}}-XXX") → Tech Note
    - epic: confluence_search(epic_title) → Epic Doc
 ```
 
-**Token optimization:** fetch only `fields="summary,status,issuetype,parent"` (no description)
+Fetch only `fields="summary,status,issuetype,parent"` (no description). Output: inventory table (Type, Key/ID, Title, Status).
 
-Output: inventory table (Type, Key/ID, Title, Status) for all discovered artifacts.
-
-**🟡 REVIEW** — Present artifact graph + scope options. User selects: Full / Jira-only / Confluence-only / Selective. Proceed with user's selection.
+**🟡 REVIEW** — Present artifact graph + scope options. User selects: Full / Jira-only / Confluence-only / Selective.
 
 ### 3. Detect Changes
 
@@ -96,14 +93,9 @@ User describes changes, then classify:
 
 | Change Type | Impact Level |
 | --- | --- |
-| Format only | LOW |
-| Clarify wording | LOW |
-| Add AC | MEDIUM |
-| Modify AC | MEDIUM |
-| Remove AC | HIGH |
-| Change scope | HIGH |
-| Technical detail change | MEDIUM |
-| Business value change | HIGH |
+| Format only / Clarify wording | LOW |
+| Add AC / Modify AC / Technical detail | MEDIUM |
+| Remove AC / Change scope / Business value | HIGH |
 
 **⛔ GATE — DO NOT PROCEED** without user confirmation of change classification.
 
@@ -111,35 +103,24 @@ User describes changes, then classify:
 
 Map changes → affected artifacts table (Artifact, Impact, Reason).
 
-Impact types: `ORIGIN` (starting point) / `UPDATE` (will sync) / `FLAG` (review only) / `NO CHANGE`
+Impact types: `ORIGIN` / `UPDATE` / `FLAG` / `NO CHANGE`
 Directions: DOWN (parent→child) / UP (child→parent) / SIDEWAYS (Jira↔Confluence)
 
-**🟡 REVIEW** — Present impact table + sync plan to user. Proceed unless user objects.
+**🟡 REVIEW** — Present impact table + sync plan. Proceed unless user objects.
 
 ### 5. Codebase Exploration (conditional)
 
 > **🟢 AUTO** — Run only if scope changed or new file paths needed. Skip if format-only. Validate paths with Glob.
 
-- Run only when: scope changed / need new file paths / new sub-task needed
-- [Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL.
-- **Skip** if format-only / wording-only / technical detail change. Validate paths with Glob. Generic paths REJECTED.
+[Parallel Explore](../../../references/workflow-patterns.md#parallel-explore): Launch 2-3 agents (Backend/Frontend/Shared) IN PARALLEL. Generic paths REJECTED.
 
 ### 6. Generate Sync Updates
 
 Fetch full description only for artifacts with impact = UPDATE:
 
-**Per Jira issue:**
+**Per Jira issue:** `jira_get_issue(issue_key, fields="summary,description")` → generate ADF JSON → `{{artifacts_dir}}/sync-tp-xxx.json` → show before/after.
 
-- `MCP: jira_get_issue(issue_key, fields="summary,description")`
-- Generate ADF JSON → `{{artifacts_dir}}/sync-tp-xxx.json`
-- Show before/after comparison
-
-**Per Confluence page:**
-
-- `MCP: confluence_get_page(page_id)`
-- If surgical (text replace) → prepare find/replace pairs
-- If section update → generate new markdown section
-- If full rewrite → generate full content → `{{artifacts_dir}}/sync-page-xxx.md`
+**Per Confluence page:** `confluence_get_page(page_id)` → surgical find/replace pairs, section update, or full rewrite → `{{artifacts_dir}}/sync-page-xxx.md`
 
 **⛔ GATE — DO NOT EXECUTE** any sync without user approval of ALL generated updates.
 
@@ -148,92 +129,31 @@ Fetch full description only for artifacts with impact = UPDATE:
 > **🟢 AUTO** — QG check → execute in order → cache invalidate. Escalate only on failure.
 > HR1: Score all Jira ADF updates before execution. QG ≥ 90% required.
 
-**QG Pre-check:** Score all Jira ADF updates against `shared-references/verification-checklist.md`. If < 90% → auto-fix → re-score (max 2). Escalate if still failing.
-
-> **🟢 AUTO (validate_adf.py):**
->
-> ```bash
-> uv run scripts/api/validate_adf.py {{artifacts_dir}}/sync-tp-*.json --type [auto-detect: epic|story|subtask|task] --json
-> ```
->
-> Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
+```bash
+uv run scripts/api/validate_adf.py {{artifacts_dir}}/sync-tp-*.json --type [auto-detect] --json
+# Score ≥ 90 = PASS. If FAIL → check issues[].fix_hint → --fix → re-score. Max 1 fix cycle.
+```
 
 Order: Parents first → Children → Confluence
-
-**Tool selection:**
 
 | Change Type | Jira Tool | Confluence Tool |
 | --- | --- | --- |
 | Rewrite description | `acli --from-json` (ADF) | `create_confluence_page.py --page-id` |
-| Text replacement | `update_jira_description.py` (surgical) | `update_confluence_page.py --find --replace` |
+| Text replacement | `update_jira_description.py` | `update_confluence_page.py --find --replace` |
 | Fields only | MCP `jira_update_issue` | — |
 | Code blocks/macros | — | `update_page_storage.py` |
 
-File pattern: `{{artifacts_dir}}/sync-tp-{type}.json` (Jira) / `{{artifacts_dir}}/sync-page-xxx.md` (Confluence)
-
-> **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after EVERY Atlassian write.
-> **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
-> **🟢 AUTO** — HR4: Confluence pages with macros → use `update_page_storage.py` (never MCP).
-> **🟢 AUTO** — HR5: New subtasks must use Two-Step + Verify Parent.
+> **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after EVERY write · HR3: assignee via `acli jira workitem assign` · HR4: Confluence macros → `update_page_storage.py` · HR5: New subtasks → Two-Step + Verify Parent.
 
 ### 8. Verify & Report
 
 > **🟢 AUTO** — Verify all artifacts automatically. Report results.
 
-Verify with `audit_confluence_pages.py --config {{artifacts_dir}}/sync-audit.json`
+`audit_confluence_pages.py --config {{artifacts_dir}}/sync-audit.json`
 
-Output: Summary table (Artifact, Action, Status) + flagged items for review.
+Output: Summary table (Artifact, Action, Status) + flagged items.
 
 Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
-
-
-## Edge Cases
-
-> See [references/edge-cases.md](references/edge-cases.md) for edge case handling reference.
-
-
-## When to Use
-
-> See [references/decision-guide.md](references/decision-guide.md) for when to use this skill vs alternatives.
-
-
-## Examples
-
-### ✅ Good
-
-```text
-/sync-artifacts {{PROJECT_KEY}}-123 "AC3 updated — added rate limit constraint: max 3 redemptions per user"
-# origin story key + precise change description → Phase 3 classifies as MEDIUM, cascades to subtasks + Confluence Tech Note
-
-/sync-artifacts {{PROJECT_KEY}}-10 "epic scope narrowed: removed loyalty points integration from must-have list"
-# epic key + scope change → HIGH impact, cascades DOWN to all child stories and subtasks
-
-/sync-artifacts 98765432 "updated API response schema in Tech Note — added pagination fields"
-# Confluence page ID → Phase 1 pivots to Jira via embedded {{PROJECT_KEY}} keys, syncs affected subtask descriptions
-
-/sync-artifacts {{PROJECT_KEY}}-456 "fix typo in AC2 wording, no logic change"
-# LOW impact change → Phase 5 codebase exploration skipped automatically, only wording updated
-```
-
-### ❌ Bad
-
-```text
-/sync-artifacts {{PROJECT_KEY}}-123                          # missing change description → Phase 1 gate blocks; agent cannot classify or plan sync
-/sync-artifacts                                   # no origin artifact → Phase 1 cannot build artifact graph at all
-/sync-artifacts {{PROJECT_KEY}}-123 "update description"     # too vague → Phase 3 cannot determine impact level or which artifacts to update
-/sync-artifacts {{PROJECT_KEY}}-123 "fix AC"                 # use /verify-issue {{PROJECT_KEY}}-123 --fix instead — sync-artifacts is for cascading changes, not single-issue fixes
-```
-
-**Common mistakes:**
-
-- Using `/sync-artifacts` for a single issue update — if only one issue needs editing, use `/verify-issue --fix` or `acli` directly; sync-artifacts is designed for cascading changes across the full artifact graph.
-- Omitting the change description from the argument — Phase 1 has a hard gate that requires knowing what changed before building the artifact graph; without it the skill stops immediately.
-- Providing a vague change description like "update" or "fix things" — Phase 3 change classification cannot determine impact level (LOW/MEDIUM/HIGH), so the sync plan will be over- or under-scoped.
-- Forgetting that Confluence page IDs (not page titles) are the correct identifier — passing a page title causes Phase 1 to fail when pivoting to Jira.
-
-## 🎓 Domain Expert Notes
-
-See [references/domain-expert.md](references/domain-expert.md)
 
 
 ## References
