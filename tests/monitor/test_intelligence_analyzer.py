@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from monitor.handlers import intelligence_analyzer as ia  # type: ignore[import-untyped]
 
 
-def _now_iso(delta_days: float = 0) -> str:
+def _now_iso(delta_days: float = 0.0) -> str:
     return (datetime.now(UTC) + timedelta(days=delta_days)).isoformat()
 
 
@@ -258,7 +258,7 @@ def test_analyze_writes_insights_json(tmp_path):
     snap["TP-1"]["status_since"] = _now_iso(-8)
 
     ia.analyze(
-        _diff=[],
+        diff=[],
         new_snapshot=snap,
         old_snapshot={},
         calibration=_DEFAULT_CALIBRATION,
@@ -280,7 +280,7 @@ def test_analyze_stop_event_prevents_write(tmp_path):
     stop.set()  # already stopped
 
     ia.analyze(
-        _diff=[], new_snapshot={}, old_snapshot={},
+        diff=[], new_snapshot={}, old_snapshot={},
         calibration=_DEFAULT_CALIBRATION,
         board_config=_BOARD_CONFIG, velocity=None,
         outcomes_path=outcomes, insights_path=insights,
