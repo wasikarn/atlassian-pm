@@ -52,6 +52,11 @@ _PROJECT_NOISE = {"self", "avatarUrls", "projectTypeKey", "simplified",
                   "style", "isPrivate", "properties", "entityId",
                   "uuid", "projectCategory"}
 
+# Max chars to keep from description text in search results (list mode).
+# Full ADF description objects can be 2,000–8,000 bytes per issue;
+# list views only need a short summary — full description available via jira_get_issue.
+_MAX_DESC_SEARCH_CHARS = 300
+
 
 # ── Cleaners ────────────────────────────────────────────────────────────────
 
@@ -91,7 +96,46 @@ def _clean_project(obj: object) -> object:
     return {k: v for k, v in obj.items() if k not in _PROJECT_NOISE}
 
 
-def _clean_fields(fields: dict) -> dict:
+def _extract_adf_text(node: object, limit: int = _MAX_DESC_SEARCH_CHARS) -> str:
+    """Recursively extract plain text from an ADF node tree, up to limit chars."""
+    if not isinstance(node, dict):
+        return ""
+    if node.get("type") == "text":
+        return node.get("text", "")
+    parts: list[str] = []
+    total = 0
+    for child in node.get("content", []):
+        text = _extract_adf_text(child, limit - total)
+        parts.append(text)
+        total += len(text)
+        if total >= limit:
+            break
+    return "".join(parts)
+
+
+def _truncate_description(desc: object) -> object:
+    """Replace a full ADF description object with a short text summary.
+
+    Used for search results (list mode) where the full ADF body wastes 2–8K
+    tokens per issue. Callers that need the full description should use
+    jira_get_issue directly.
+    """
+    if desc is None:
+        return None
+    if isinstance(desc, dict):
+        text = _extract_adf_text(desc).strip()[:_MAX_DESC_SEARCH_CHARS]
+        if not text:
+            return None
+        suffix = "…" if len(text) == _MAX_DESC_SEARCH_CHARS else ""
+        return {"_summary": text + suffix}
+    if isinstance(desc, str):
+        trimmed = desc.strip()[:_MAX_DESC_SEARCH_CHARS]
+        suffix = "…" if len(trimmed) == _MAX_DESC_SEARCH_CHARS else ""
+        return trimmed + suffix
+    return None
+
+
+def _clean_fields(fields: dict, truncate_desc: bool = False) -> dict:
     result = {k: v for k, v in fields.items() if k not in _FIELD_NOISE}
     for person_field in ("assignee", "reporter", "creator"):
         if person_field in result:
@@ -104,15 +148,21 @@ def _clean_fields(fields: dict) -> dict:
         result["priority"] = _clean_priority(result["priority"])
     if "project" in result:
         result["project"] = _clean_project(result["project"])
+    if truncate_desc and "description" in result:
+        truncated = _truncate_description(result["description"])
+        if truncated is None:
+            del result["description"]
+        else:
+            result["description"] = truncated
     return result
 
 
-def _clean_issue(issue: object) -> object:
+def _clean_issue(issue: object, truncate_desc: bool = False) -> object:
     if not isinstance(issue, dict):
         return issue
     result = {k: v for k, v in issue.items() if k not in _TOP_NOISE}
     if isinstance(result.get("fields"), dict):
-        result["fields"] = _clean_fields(result["fields"])
+        result["fields"] = _clean_fields(result["fields"], truncate_desc=truncate_desc)
     return result
 
 
@@ -157,10 +207,10 @@ def main() -> None:
     before = _size(response)
 
     if is_get and isinstance(response, dict):
-        filtered = _clean_issue(response)
+        filtered = _clean_issue(response, truncate_desc=False)
     elif is_search and isinstance(response, dict) and "issues" in response:
         filtered = {
-            k: ([_clean_issue(i) for i in v] if k == "issues" else v)
+            k: ([_clean_issue(i, truncate_desc=True) for i in v] if k == "issues" else v)
             for k, v in response.items()
             if k not in {"expand", "warningMessages"}
         }
