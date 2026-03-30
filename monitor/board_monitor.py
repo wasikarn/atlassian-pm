@@ -237,6 +237,7 @@ def _load_velocity(root: Path) -> dict | None:
 def _write_pid() -> None:
     """Write current PID to lockfile. Check for stale lock first."""
     if _PID_FILE.exists():
+        stored_pid = 0
         try:
             stored_pid = int(_PID_FILE.read_text().strip())
             os.kill(stored_pid, 0)  # 0 = liveness check only
@@ -282,7 +283,7 @@ def _sigterm_handler(signum: int, frame: object) -> None:
 
 
 def _dispatch_analyzer(
-    changes: dict,
+    changes: list[dict],
     snapshot: dict,
     old_snapshot: dict,
     *,
@@ -293,7 +294,7 @@ def _dispatch_analyzer(
     global _last_analyzer_thread
     if dry_run:
         return
-    from monitor.handlers import intelligence_analyzer
+    from monitor.handlers import intelligence_analyzer  # type: ignore[import-not-at-top]
     calibration = _load_calibration()
     velocity = _load_velocity(_ROOT)
     t = threading.Thread(

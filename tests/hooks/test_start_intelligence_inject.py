@@ -3,10 +3,6 @@ import json
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-
-import pytest
-
 _HOOK_DIR = Path(__file__).resolve().parents[2] / "hooks" / "plugin" / "session"
 sys.path.insert(0, str(_HOOK_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "hooks"))
@@ -94,7 +90,7 @@ def test_build_calibration_block_includes_high_confidence(tmp_path):
     assert "carry_over=40%" in block
 
 
-def test_build_calibration_block_skips_low_confidence(tmp_path):
+def test_build_calibration_block_skips_low_confidence():
     cal = _make_calibration(service_tags={
         "[BE]": {"carry_over_rate": 0.50, "n": 4, "confidence": "low",
                  "decay_weight": 0.9, "keyword_risk": {}}
@@ -103,7 +99,7 @@ def test_build_calibration_block_skips_low_confidence(tmp_path):
     assert "[BE]" not in block
 
 
-def test_build_calibration_block_excludes_note_field(tmp_path):
+def test_build_calibration_block_excludes_note_field():
     cal = _make_calibration(service_tags={
         "[BE]": {
             "carry_over_rate": 0.30, "n": 20, "confidence": "high",
@@ -117,7 +113,7 @@ def test_build_calibration_block_excludes_note_field(tmp_path):
 
 # ── _build_signals_block ───────────────────────────────────────────────────────
 
-def test_build_signals_block_formats_carry_over_spike(tmp_path):
+def test_build_signals_block_formats_carry_over_spike():
     insights = _make_insights()
     signals = insights["signals"]
     block = hook._build_signals_block(signals)

@@ -12,7 +12,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -95,7 +95,6 @@ def _build_signals_block(signals: list[dict]) -> str:
     if not signals:
         return ""
     lines = [f"Active Signals ({len(signals)}):"]
-    now = datetime.now(UTC)
 
     for s in signals:
         sig = s.get("signal", "?")
