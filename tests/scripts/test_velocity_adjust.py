@@ -184,3 +184,90 @@ def test_format_context_no_note_no_extra_lines():
     lines = output.strip().splitlines()
     assert len(lines) == 1
     assert lines[0].startswith("Velocity Context:")
+
+
+# ── compute_adjustment — calibration path ─────────────────────────────────────
+
+def test_compute_adjustment_cal_adj_adds_to_trend_when_above_baseline():
+    # carry_over_rate=0.40, baseline=0.20 → raw_cal=(0.40-0.20)*50=10 → cal_adj=10
+    velocity = {"rolling_average": 40, "trend_pct": -8, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.20,
+        "service_tags": {
+            "[BE]": {"carry_over_rate": 0.40, "n": 20, "confidence": "high"}
+        }
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    # trend_adj = -8*0.5 = -4, cal_adj = +10 → but cancellation floor applies
+    # trend_adj < 0 and cal_adj > 0 → cap cal_adj at abs(-4)*0.5 = 2
+    # total = -4 + 2 = -2
+    assert adj["adjustment_pct"] == pytest.approx(-2.0)
+
+
+def test_compute_adjustment_cal_adj_clamped_at_10():
+    # carry_over_rate=0.50, baseline=0.10 → raw=(0.50-0.10)*50=20 → clamped to 10
+    velocity = {"rolling_average": 40, "trend_pct": 0, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.10,
+        "service_tags": {
+            "[BE]": {"carry_over_rate": 0.50, "n": 20, "confidence": "high"}
+        }
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    assert adj["adjustment_pct"] == pytest.approx(10.0)  # trend_adj=0, cal_adj=min(20,10)=+10 → no cancellation → 10
+
+
+def test_compute_adjustment_cal_adj_negative_when_below_baseline():
+    # carry_over_rate=0.10, baseline=0.30 → raw=(0.10-0.30)*50=-10 → cal_adj=-10
+    velocity = {"rolling_average": 40, "trend_pct": 0, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.30,
+        "service_tags": {
+            "[BE]": {"carry_over_rate": 0.10, "n": 20, "confidence": "high"}
+        }
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    # trend_adj=0, cal_adj=-10, total=-10 → clamped to -10 (within ±20)
+    assert adj["adjustment_pct"] == pytest.approx(-10.0)
+
+
+def test_compute_adjustment_cal_adj_zero_for_low_confidence():
+    velocity = {"rolling_average": 40, "trend_pct": 0, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.20,
+        "service_tags": {
+            "[BE]": {"carry_over_rate": 0.50, "n": 6, "confidence": "low"}
+        }
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    assert adj["adjustment_pct"] == 0.0
+
+
+def test_compute_adjustment_cal_adj_zero_when_tag_not_in_calibration():
+    velocity = {"rolling_average": 40, "trend_pct": -8, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.20,
+        "service_tags": {}
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    # Only trend_adj applies: max(-8*0.5, -15) = -4
+    assert adj["adjustment_pct"] == pytest.approx(-4.0)
+
+
+def test_compute_adjustment_absent_calibration_passthrough():
+    velocity = {"rolling_average": 40, "trend_pct": -8, "std_dev": 4}
+    adj = compute_adjustment(velocity, calibration=None, service_tag="[BE]")
+    assert adj["adjustment_pct"] == pytest.approx(-4.0)
+
+
+def test_compute_adjustment_combined_cap_at_minus_20():
+    # trend_adj=-15 (cap), cal_adj=-10 → total=-25 → clamped to -20
+    velocity = {"rolling_average": 40, "trend_pct": -40, "std_dev": 4}
+    calibration = {
+        "team_carry_over_baseline": 0.30,
+        "service_tags": {
+            "[BE]": {"carry_over_rate": 0.10, "n": 20, "confidence": "high"}
+        }
+    }
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag="[BE]")
+    assert adj["adjustment_pct"] == pytest.approx(-20.0)

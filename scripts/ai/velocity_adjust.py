@@ -35,8 +35,29 @@ def load_velocity(config_path: Path | None = None) -> dict | None:
         return None
 
 
-def compute_adjustment(velocity: dict) -> dict:
-    """Compute SP adjustment factor from velocity data."""
+def load_calibration_data(data_dir: Path | None = None) -> dict | None:
+    """Load calibration.json from CLAUDE_PLUGIN_DATA. Returns None on error."""
+    import os
+    if data_dir is None:
+        data_dir = Path(
+            os.environ.get(
+                "CLAUDE_PLUGIN_DATA",
+                str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
+            )
+        )
+    cal_path = data_dir / "calibration.json"
+    try:
+        return json.loads(cal_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def compute_adjustment(
+    velocity: dict,
+    calibration: dict | None = None,
+    service_tag: str | None = None,
+) -> dict:
+    """Compute SP adjustment factor from velocity data + optional calibration signal."""
     # Support both velocity-tracker schema (story_points.avg_velocity) and
     # flat schema (rolling_average) for forward/backward compatibility.
     story_points = velocity.get("story_points", {})
@@ -52,16 +73,30 @@ def compute_adjustment(velocity: dict) -> dict:
         or 0
     )
 
-    adjustment_pct = 0
+    # Trend adjustment (unchanged from original)
+    trend_adj = 0.0
     note = ""
-
     if trend_pct < -5:
-        # Team slowing — reduce estimate to avoid overcommit
-        adjustment_pct = max(trend_pct * 0.5, -15)  # cap at -15%
+        trend_adj = max(trend_pct * 0.5, -15)
         note = f"team velocity declining {abs(trend_pct):.0f}%"
     elif trend_pct > 5:
         note = f"team velocity improving {trend_pct:.0f}%"
 
+    # Calibration adjustment
+    cal_adj = 0.0
+    if calibration and service_tag:
+        tag_data = calibration.get("service_tags", {}).get(service_tag, {})
+        if tag_data.get("confidence") in ("high", "medium"):
+            rate = tag_data["carry_over_rate"]
+            baseline = calibration.get("team_carry_over_baseline", 0.20)
+            raw_cal = (rate - baseline) * 50
+            cal_adj = max(min(raw_cal, 10.0), -10.0)  # symmetric clamp ±10
+
+    # Signal cancellation floor: if trend improving carry-over risk, cap cal_adj
+    if trend_adj < 0 and cal_adj > 0:
+        cal_adj = min(cal_adj, abs(trend_adj) * 0.5)
+
+    adjustment_pct = max(min(trend_adj + cal_adj, 20.0), -20.0)
     high_variance = std_dev > avg * 0.2 if avg > 0 else False
 
     return {
@@ -103,13 +138,21 @@ def main() -> None:
         default=None,
         help="Path to project-config-team-detail.json (auto-discovered if omitted)",
     )
+    parser.add_argument(
+        "--service-tag",
+        type=str,
+        default=None,
+        help="Service tag for calibration lookup (e.g. [BE])",
+    )
     args = parser.parse_args()
 
     velocity = load_velocity(args.config)
     if velocity is None:
         # No data available — silent exit
         sys.exit(0)
-    adj = compute_adjustment(velocity)
+
+    calibration = load_calibration_data()
+    adj = compute_adjustment(velocity, calibration=calibration, service_tag=args.service_tag)
     print(format_context(adj))
 
 
