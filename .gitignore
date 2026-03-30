@@ -41,3 +41,7 @@ mcp-servers/atlassian-cache/.coverage
 
 # Monitor runtime logs (contain live Jira URLs/data)
 monitor/logs/*.log
+
+# Intelligence engine outputs (contain project-specific data, not for version control)
+calibration.json
+insights.json
