@@ -4,17 +4,21 @@ context: fork
 agent: general-purpose
 model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
+allowed-tools: Read, Bash, Agent, Skill, Write, Glob, Grep, TodoWrite, mcp__mcp-atlassian__jira_create_issue, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_text_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
   Feature → Epic + Stories + AI-Ready Subtasks in one command.
   Maximum 2 user interactions (decomposition review + optional annotation).
 
   The fastest path from idea to delegatable, AI-executable work items.
-  Each subtask is a self-contained prompt: team member runs `implement TP-XXX` in Claude Code.
+  Each subtask is a self-contained prompt: team member runs `implement {{PROJECT_KEY}}-XXX` in Claude Code.
 
-  Triggers: "vibe plan", "vibe-plan", "plan feature", "feature to tasks", "วางแผน feature", "แตก feature"
+  Triggers: "vibe plan", "vibe-plan", "plan feature", "feature to tasks", "idea to tasks",
+    "วางแผน feature", "แตก feature", "feature ครบ", "สร้าง feature", "break down feature",
+    "one-shot plan", "feature breakdown", "create feature tasks", "implement feature",
+    "สร้าง epic+story", "auto-plan feature", "ต้องการสร้าง feature"
   Use when: turning a feature idea into a complete set of AI-executable Jira tickets
   Do NOT use for: updating existing issues (use update-*), creating a single story (use create-story), blueprint debate (use blueprint)
-argument-hint: '"feature description" | --epic TP-XXX'
+argument-hint: '"feature description" | --epic {{PROJECT_KEY}}-XXX'
 effort: high
 ---
 
@@ -68,8 +72,10 @@ effort: high
 
 **Step 2 — Search duplicates:**
 
+> **🟢 AUTO** — Use search-issues skill for dedup (handles cache + semantic search in one call).
+
 ```text
-MCP: cache_text_search(query="[feature keywords extracted from description]", limit=5)
+Use the Skill tool to invoke `atlassian-pm:search-issues` with feature keywords from description.
 ```
 
 If duplicates found → show warning but don't block. Continue.
@@ -259,7 +265,7 @@ Capture `story_key`. Then set parent to epic:
 uv run scripts/api/jira_set_parent.py --issues STORY-KEY --parent EPIC-KEY
 ```
 
-Set fields via MCP: SP (`customfield_10016`), size (`customfield_10107`), dates (`customfield_10015`, `duedate`), labels.
+Set fields via MCP: SP (`customfield_10016`), size (`customfield_10107`), dates (`{{START_DATE_FIELD}}`, `duedate`), labels.
 
 > **🟢 AUTO** — HR6: `cache_invalidate(story_key, auto_refresh=true)` after each story create.
 
@@ -289,13 +295,13 @@ acli jira workitem edit --from-json {{artifacts_dir}}/vibe-plan/subtask-N-M.json
 
 # Step 4: Set dates (HR8 — within parent range)
 MCP: jira_update_issue(issue_key="SUBTASK-KEY", additional_fields={
-  "customfield_10015": "YYYY-MM-DD",
+  "{{START_DATE_FIELD}}": "YYYY-MM-DD",
   "duedate": "YYYY-MM-DD",
   "timetracking": {"originalEstimate": "Nh"}
 })
 
 # HR6: cache_invalidate after every write
-# HR10: NEVER set customfield_10020 (sprint) on subtasks
+# HR10: NEVER set {{SPRINT_FIELD}} (sprint) on subtasks
 ```
 
 > **🟢 AUTO** — HR6: `cache_invalidate(subtask_key, auto_refresh=true)` after EVERY write.
