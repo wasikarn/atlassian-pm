@@ -10,11 +10,10 @@ description: |
   story-writer generates ADF JSON using service-aware AC defaults, convention memory, and a self-critique pass before returning.
   </commentary>
   </example>
-model: sonnet
-effort: high
+model: haiku
 tools: Read, Write
 memory: project
-maxTurns: 15
+maxTurns: 10
 permissionMode: dontAsk
 color: blue
 skills:

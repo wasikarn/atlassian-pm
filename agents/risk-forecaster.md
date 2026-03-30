@@ -11,7 +11,6 @@ description: |
   </commentary>
   </example>
 model: sonnet
-effort: high
 tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__atlassian-cache__cache_sprint_issues
 permissionMode: dontAsk
 maxTurns: 12
