@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import ACLI_FROM_JSON_RE as ACLI_RE, log_event, parse_stdin
+from hooks_lib import ACLI_FROM_JSON_RE as ACLI_RE, inject_context, log_event, parse_stdin
 from hooks_state import event_get_all_events
 
 _HOOK = "event-ac-check"
@@ -70,10 +70,11 @@ def main() -> None:
     unknown = [e for e in ac_events if e not in known_events]
     if unknown:
         log_event(_HOOK, "WARN", {"unknown_events": unknown, "session_id": session_id})
-        print(
+        inject_context(
             f"⚠️ Event-AC consistency: {', '.join(unknown)} not in Domain Model catalog.\n"
             f"Known events: {', '.join(sorted(known_events))}\n"
-            f"If new events, update parent Epic's Domain Model section."
+            f"If new events, update parent Epic's Domain Model section.",
+            event_name="PreToolUse",
         )
     else:
         log_event(_HOOK, "ALLOWED", {"ac_events": ac_events, "session_id": session_id})
