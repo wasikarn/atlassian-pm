@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type, log_event, parse_stdin
+from hooks_lib import ACLI_FROM_JSON_RE, detect_issue_type, inject_context, log_event, parse_stdin
 
 _HOOK = "adf-structure-validate"
 
@@ -115,9 +115,12 @@ def main() -> None:
         sys.exit(2)
 
     if issue_type != "task" and not has_panel(content):
-        # Warning only — print to stdout, exit 0
+        # Warning only — inject context (stdout must be JSON for PreToolUse hooks)
         log_event(_HOOK, "WARN", {"issue_type": issue_type, "reason": "no_panel", "session_id": session_id})
-        print(f"⚠️ ADF structure ({issue_type}): No panel found. Templates require panels (info/success/warning/error).")
+        inject_context(
+            f"⚠️ ADF structure ({issue_type}): No panel found. Templates require panels (info/success/warning/error).",
+            event_name="PreToolUse",
+        )
     else:
         log_event(_HOOK, "ALLOWED", {"issue_type": issue_type, "session_id": session_id})
 

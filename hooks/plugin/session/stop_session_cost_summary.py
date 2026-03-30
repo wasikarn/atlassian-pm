@@ -11,12 +11,11 @@ try:
     cost = state.get("session_ai_cost_usd", 0.0)
     calls = state.get("session_ai_calls", 0)
     if calls > 0:
-        # Inject into context so user sees it
-        from hooks_lib import inject_context
-        inject_context(
+        # Print to stderr — Stop hook does not support hookSpecificOutput/additionalContext
+        print(
             f"Session AI usage: {calls} call{'s' if calls != 1 else ''} · "
             f"${cost:.4f} total cost",
-            event_name="Stop",
+            file=sys.stderr,
         )
 except Exception:
     pass  # Never fail the session stop
