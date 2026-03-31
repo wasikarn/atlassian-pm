@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.7] - 2026-03-31
+
+### Fixed
+
+- `atlassian-cache` MCP registration — restored to official `.mcp.json` plugin pattern using `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` variables (confirmed supported per Claude Code plugin docs). Previous workaround (`setup.sh` writing to `~/.claude.json`) was non-standard and broke for users who installed the plugin without running setup manually.
+- Added `mcp-servers/atlassian-cache/run.sh` — portable `uv` locator that checks `PATH` first, then common per-user install locations (`~/.local/bin`, `~/.cargo/bin`, `/opt/homebrew/bin`), fixing "uv not found" in MCP server subprocess environments.
+- Removed `~/.claude.json` manipulation from `setup.sh` — venv installation is still performed by setup; MCP registration is now automatic via `.mcp.json`.
+
 ## [2.6.6] - 2026-03-31
 
 ### Fixed
 
-- `atlassian-cache` MCP server duplicate warning ("skipped — same command/URL") on every startup — root cause: Claude Code loads `.mcp.json` from both marketplace and cache dirs; both had the server config. Fix: registration moved to `setup.sh` which writes to `~/.claude.json` (user-scoped, stable across upgrades) and clears all plugin `.mcp.json` files.
+- `atlassian-cache` MCP server duplicate warning ("skipped — same command/URL") — root cause: Claude Code loads `.mcp.json` from both marketplace and cache dirs. `bump-version.sh` now clears the marketplace `.mcp.json` after each release so only the cache dir copy remains active.
 
 ## [2.6.5] - 2026-03-31
 

@@ -37,7 +37,9 @@ Open **Settings → Extensions → Add marketplace**, enter `wasikarn/atlassian-
 /atlassian-pm:setup
 ```
 
-Setup configures: acli auth · mcp-atlassian MCP server · `~/.config/atlassian/.env` · git smudge/clean filters · atlassian-cache SQLite server
+Setup configures: acli auth · mcp-atlassian MCP server · `~/.config/atlassian/.env` · git smudge/clean filters · atlassian-cache venv (deps)
+
+The `atlassian-cache` MCP server starts **automatically** when the plugin loads — no manual registration needed. Setup only installs the Python venv that the server depends on.
 
 > Claude Code must be **restarted once** after setup to activate the MCP server.
 
@@ -278,7 +280,7 @@ Skills invoke these automatically. Listed here for reference:
 |---------|-----|
 | `acli not found` | `brew install acli` then re-run `/atlassian-pm:setup` |
 | MCP tools not found | Restart Claude Code after running `/atlassian-pm:setup` |
-| `atlassian-cache: Failed to connect` | Re-run `/atlassian-pm:setup` after any plugin update — venv must be rebuilt |
+| `atlassian-cache: Failed to connect` | Run `/atlassian-pm:setup` to install the venv. After any plugin update, re-run setup to rebuild it. |
 | QG keeps failing | Run `/atlassian-pm:verify-issue KEY --fix` |
 | Stale issue data | Cache auto-invalidates after writes; force with `cache_invalidate(key)` |
 | Subtask has wrong parent | Enforced by HR5: MCP create → verify parent → acli edit |
