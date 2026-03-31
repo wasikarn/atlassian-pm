@@ -147,6 +147,16 @@ If velocity-tracker not available → skip and note in Phase 8 summary.
 > ```
 >
 > Build `JSON_ARRAY` from Phase 1 `issue_list`: `key`, `summary`, `status`, `sp` (customfield\_10016), `assignee` (displayName), `issuetype` (name), `labels`. Include all sprint issues (done and incomplete).
+>
+> Then spawn calibration update in the background (non-blocking):
+>
+> ```bash
+> nohup uv run scripts/ai/calibrate.py > /dev/null 2>> ~/.claude/plugins/data/atlassian-pm-atlassian-pm/calibrate.log &
+> ```
+>
+> Print `[calibration scheduled in background]` and continue immediately — do NOT wait for it to finish.
+>
+> If calibrate skips (< 10 new records or < 7 days since last run), it exits on its own — not a blocker.
 
 🟡 REVIEW: Display:
 
