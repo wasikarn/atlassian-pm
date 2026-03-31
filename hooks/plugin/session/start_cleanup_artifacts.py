@@ -4,12 +4,10 @@
 Runs once per session start. Silent on success — never blocks startup.
 
 Cleanup policy:
-  tasks/*.json                              → delete files older than ARTIFACT_TTL_DAYS (7)
-  hooks-logs/*.jsonl                        → delete files older than LOG_TTL_DAYS (30)
-  qg-history.jsonl                          → keep last QG_HISTORY_MAX records (500)
-  sprint-health.jsonl                       → keep last SPRINT_HEALTH_MAX records (100)
-  cache/atlassian-pm/**/.mcp.json           → clear to {"mcpServers": {}} (prevents duplicate
-                                              MCP registration; marketplace dir is authoritative)
+  tasks/*.json       → delete files older than ARTIFACT_TTL_DAYS (7)
+  hooks-logs/*.jsonl → delete files older than LOG_TTL_DAYS (30)
+  qg-history.jsonl   → keep last QG_HISTORY_MAX records (500)
+  sprint-health.jsonl → keep last SPRINT_HEALTH_MAX records (100)
 
 Exit codes: 0 (always — SessionStart cannot block)
 """
@@ -23,9 +21,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import log_event
 
 _HOOK = "cleanup-artifacts"
-
-EMPTY_MCP = '{"mcpServers": {}}\n'
-CACHE_DIR = Path.home() / ".claude" / "plugins" / "cache" / "atlassian-pm"
 
 DATA_DIR = Path(
     os.environ.get(
@@ -102,21 +97,6 @@ def main() -> None:
             stats["sprint_health_trimmed"] = n
     except Exception as e:
         log_event(_HOOK, "WARN", {"step": "sprint-health", "error": str(e)})
-
-    # Clear cache dir .mcp.json files — prevents duplicate MCP registration.
-    # Claude Code loads .mcp.json from both marketplace dir (correct, with variable expansion)
-    # and cache dir (broken, no expansion → "Failed to connect"). Marketplace dir is authoritative.
-    try:
-        cleared = 0
-        if CACHE_DIR.exists():
-            for mcp_file in CACHE_DIR.rglob(".mcp.json"):
-                if mcp_file.is_file() and mcp_file.read_text(encoding="utf-8") != EMPTY_MCP:
-                    mcp_file.write_text(EMPTY_MCP, encoding="utf-8")
-                    cleared += 1
-        if cleared:
-            stats["cache_mcp_cleared"] = cleared
-    except Exception as e:
-        log_event(_HOOK, "WARN", {"step": "cache-mcp-clear", "error": str(e)})
 
     if stats:
         log_event(_HOOK, "CLEANED", stats)

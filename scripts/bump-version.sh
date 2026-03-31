@@ -177,23 +177,6 @@ info "Refreshing marketplace cache..."
 claude plugin marketplace update atlassian-pm 2>&1 | grep -E "✔|✘|Error" || true
 ok "Marketplace refreshed"
 
-# Claude Code loads .mcp.json from BOTH the marketplace dir AND the cache dir.
-# Marketplace dir: ${CLAUDE_PLUGIN_ROOT} expanded, server gets plugin:atlassian-pm: prefix ✓
-# Cache dir: variables NOT expanded, no prefix → duplicate "Failed to connect" entry ✗
-# Fix: clear ALL cache dir .mcp.json files so only marketplace dir registers the server.
-# Poll up to 10s for the new version cache dir to appear (download is async after marketplace update).
-CACHE_BASE="$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm"
-CACHE_MCP="$CACHE_BASE/$NEW_VERSION/.mcp.json"
-for _wait in {1..10}; do
-  [[ -f "$CACHE_MCP" ]] && break
-  sleep 1
-done
-# Clear all cached versions (belt-and-suspenders: handles leftover old versions too)
-for mcp_file in "$CACHE_BASE"/*/.mcp.json "$CACHE_BASE"/.mcp.json; do
-  [[ -f "$mcp_file" ]] && echo '{"mcpServers": {}}' > "$mcp_file"
-done
-ok "Cleared cache dir .mcp.json files (prevents duplicate registration)"
-
 
 # Backup config for future reinstall recovery (read by setup skill Phase 0)
 if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then

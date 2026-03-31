@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.14] - 2026-03-31
+
+### Fixed
+
+- Removed incorrect cache dir `.mcp.json` clearing from `bump-version.sh` and `SessionStart` hook — these were based on a wrong assumption. Correct behavior is full server config in source `.mcp.json` (same as all other working plugins like `claude-mem`); Claude Code handles de-duplication when `${CLAUDE_PLUGIN_ROOT}` expands correctly in cache context.
+
 ## [2.6.13] - 2026-03-31
 
 ### Fixed
