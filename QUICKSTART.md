@@ -278,6 +278,7 @@ Skills invoke these automatically. Listed here for reference:
 |---------|-----|
 | `acli not found` | `brew install acli` then re-run `/atlassian-pm:setup` |
 | MCP tools not found | Restart Claude Code after running `/atlassian-pm:setup` |
+| `atlassian-cache: Failed to connect` | Re-run `/atlassian-pm:setup` after any plugin update — venv must be rebuilt |
 | QG keeps failing | Run `/atlassian-pm:verify-issue KEY --fix` |
 | Stale issue data | Cache auto-invalidates after writes; force with `cache_invalidate(key)` |
 | Subtask has wrong parent | Enforced by HR5: MCP create → verify parent → acli edit |

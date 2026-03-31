@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-03-31
+
+### Fixed
+
+- `.mcp.json` — add `UV_PROJECT_ENVIRONMENT=${CLAUDE_PLUGIN_DATA}/venv` so the atlassian-cache MCP server uses the pre-installed venv from `/atlassian-pm:setup` instead of creating a new one on each restart. Fixes "Failed to connect" on plugin install/update.
+
 ## [1.8.0] - 2026-03-25
 
 ### Added

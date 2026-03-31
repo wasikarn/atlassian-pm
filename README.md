@@ -20,6 +20,7 @@ Describe what you need in plain English (or Thai) — Claude explores your codeb
 
 Claude will ask for your Jira site, project key, and board ID — then configure everything automatically.
 
+> **After plugin updates:** re-run `/atlassian-pm:setup` to rebuild the MCP server venv. Skipping this causes "atlassian-cache: Failed to connect" at startup.
 > Requires Claude Code with plugin support. If `/plugin install` is unavailable, see [Manual Installation](#manual-installation).
 
 ---
