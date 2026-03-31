@@ -143,18 +143,18 @@ def main() -> None:
     if plugin_root:
         calibrate_path = Path(plugin_root) / "scripts" / "ai" / "calibrate.py"
         if calibrate_path.exists():
-            log_path = Path(os.environ.get(
-                "CLAUDE_PLUGIN_DATA",
-                str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
-            )) / "calibrate.log"
-            log_fd = open(log_path, "a")
-            subprocess.Popen(
-                [sys.executable, str(calibrate_path)],
-                start_new_session=True,
-                stdout=subprocess.DEVNULL,
-                stderr=log_fd,
-            )
-            log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
+            log_path = DATA_DIR / "calibrate.log"
+            try:
+                log_fd = open(log_path, "a")
+                subprocess.Popen(
+                    [sys.executable, str(calibrate_path)],
+                    start_new_session=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=log_fd,
+                )
+                log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
+            except OSError:
+                pass  # Spawn is fire-and-forget — never crash main()
 
 
 if __name__ == "__main__":
