@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.8] - 2026-03-31
+
+### Fixed
+
+- `atlassian-cache` MCP server "Failed to connect" — root cause: Claude Code reads `.mcp.json` from the **marketplace dir** only (not cache). Only marketplace-loaded servers get the `plugin:` namespace and `${CLAUDE_PLUGIN_ROOT}` expansion. `bump-version.sh` was incorrectly clearing the marketplace `.mcp.json` after every release, breaking the server for all users.
+- `bump-version.sh`: removed marketplace `.mcp.json` clearing step. Cache `.mcp.json` files remain empty to avoid duplicate registration.
+
 ## [2.6.7] - 2026-03-31
 
 ### Fixed
