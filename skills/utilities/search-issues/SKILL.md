@@ -89,7 +89,6 @@ Found: 5 issues
 
 If no semantic matches above threshold → omit the section entirely.
 
-
 ## Filter Options
 
 | Flag | Example |
@@ -102,11 +101,9 @@ If no semantic matches above threshold → omit the section entirely.
 | `--children` | `ABC-XXX --children` |
 | `--jql` | `--jql "custom query"` |
 
-
 ## Use Cases
 
 > See [references/use-cases.md](references/use-cases.md) for example commands by use case.
-
 
 ## Examples
 
@@ -137,12 +134,10 @@ If no semantic matches above threshold → omit the section entirely.
 - Treating search results as a sprint planning tool — `/search-issues` surfaces issues but does not evaluate capacity or priority; use `/plan-sprint` for planning decisions
 - Not running `/search-issues` before `/create-story` or `/create-task` — the semantic similarity check catches near-duplicates that exact JQL misses
 
-
 ## References
 
 - [references/use-cases.md](references/use-cases.md) — example commands by use case
 - [JQL Quick Reference](../../../references/jql-quick-ref.md)
-
 
 ## 🎓 Domain Expert Notes
 

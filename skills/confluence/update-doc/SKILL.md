@@ -30,7 +30,6 @@ effort: medium
 | `replace` | Find and replace text | Batch text changes |
 | `move` | Move to different parent | Reorganize hierarchy |
 
-
 ## Phases
 
 ### 1. Discovery
@@ -71,7 +70,6 @@ Which parent page do you want to move it under?
 
 **Gate:** Page identified + Update type determined
 
-
 ### 2. Fetch Current
 
 Retrieve current content:
@@ -92,7 +90,6 @@ confluence_get_page(
 - Last updated
 
 **Gate:** Current content retrieved
-
 
 ### 3. Generate Updates
 
@@ -128,7 +125,6 @@ Generate updated content based on update type:
 
 **Gate:** Updated content generated (or move target identified)
 
-
 ### 4. Review
 
 Show preview for user to review:
@@ -148,7 +144,6 @@ Would you like to proceed?
 ```
 
 **Gate:** User approves changes
-
 
 ### 5. Update
 
@@ -210,7 +205,6 @@ uv run scripts/api/move_confluence_page.py \
 🔗 [View in Confluence](URL)
 ```
 
-
 ## Decision Flow
 
 ```text
@@ -232,16 +226,13 @@ Update type?
                                 (MANDATORY post-step)
 ```
 
-
 ## Common Scenarios
 
 > See [references/examples.md](references/examples.md) for common command and tool examples.
 
-
 ## Error Handling
 
 > See [references/error-handling.md](references/error-handling.md) for error causes and solutions.
-
 
 ## Examples
 
@@ -272,10 +263,10 @@ Update type?
 - Skipping Phase 2 (Fetch Current) and generating new content blind — sections not in the user's request get dropped
 - Forgetting to run `fix_confluence_code_blocks.py` after a content update that includes code blocks — same HR4 rendering bug as creation
 
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 Space: `{{PROJECT_KEY}}` · MCP: `confluence_update_page`, `confluence_get_page` · Scripts: `scripts/api/`

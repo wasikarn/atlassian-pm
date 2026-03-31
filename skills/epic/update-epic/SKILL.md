@@ -107,7 +107,6 @@ Changes: [list]
 → Review stories: ABC-YYY, ABC-ZZZ
 ```
 
-
 ## Examples
 
 ### ✅ Good
@@ -140,6 +139,7 @@ Changes: [list]
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [Update Workflow Patterns](../../../references/update-workflow.md) · [ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Tool Selection](../../../references/tools.md)

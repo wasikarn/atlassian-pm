@@ -120,7 +120,7 @@ class TestPathQuality(unittest.TestCase):
             cwd=str(Path(__file__).resolve().parents[2])
         )
         self.assertEqual(result.returncode, 0)
-        self.assertIn("{}", result.stdout.strip())
+        self.assertEqual(result.stdout.strip(), "")
 
     def test_main_exits_0_for_task_with_poor_paths(self):
         import os

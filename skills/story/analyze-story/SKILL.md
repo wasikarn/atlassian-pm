@@ -56,6 +56,7 @@ effort: high
 **Constraints:** HR6 — invalidate cache after writes; story must be Story type (not Epic).
 
 > **🟢 PARALLEL** — Single message, 2 calls:
+>
 > 1. `cache_get_issue(STORY-KEY)` → fallback `jira_get_issue(fields="summary,description,status,parent,subtasks,labels,customfield_10016")`
 > 2. `jira_search(jql="parent=STORY-KEY", fields="summary,status,customfield_10016", limit=20)`
 
@@ -166,6 +167,7 @@ Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → `--fix` → re-sc
 > Batch ≥3: create all → verify all → edit all.
 
 Set estimation after verify parent:
+
 ```text
 jira_update_issue(issue_key, additional_fields={
   "timetracking": {"originalEstimate": "<N>h"},

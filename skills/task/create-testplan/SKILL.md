@@ -111,7 +111,6 @@ Coverage: X ACs → Y test scenarios (100%)
 → /verify-issue ABC-QQQ to verify
 ```
 
-
 ## Common Errors & Fixes
 
 | Error | Cause | Fix |
@@ -124,7 +123,6 @@ Coverage: X ACs → Y test scenarios (100%)
 
 1. **Create** with MCP `jira_create_issue` (supports parent via additional_fields)
 2. **Edit** with `acli --from-json` (add ADF description)
-
 
 > See [references/examples.md](references/examples.md) for input/output examples.
 

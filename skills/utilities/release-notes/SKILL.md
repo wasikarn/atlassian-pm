@@ -37,7 +37,6 @@ effort: medium
 | 5. Publish | `confluence_page_url` |
 | 6. Summary | Done |
 
-
 ## Phase 1 — Fetch Fix Version 🟢 AUTO
 
 1. If `--version` provided → use it.
@@ -56,7 +55,6 @@ Display version details:
 **Release Date:** [date]
 **Status:** [Released / Unreleased]
 ```
-
 
 ## Phase 2 — Fetch Issues in Version 🟢 AUTO
 
@@ -87,7 +85,6 @@ Bug Fixes:    [N] issues
 Improvements: [N] issues
 Other:        [N] issues
 ```
-
 
 ## Phase 3 — Draft Release Notes 🟡 REVIEW
 
@@ -141,7 +138,6 @@ Focus on user-facing impact. Avoid technical jargon.]
 
 Display draft for review. 🟡 REVIEW — user can request edits before publishing.
 
-
 ## Phase 4 — Publish to Confluence 🟢 AUTO (after approval)
 
 If `--dry-run`: display full draft and stop.
@@ -157,7 +153,6 @@ confluence_create_page(
 
 If parent page not found → create at space root.
 
-
 ## Phase 5 — Link Back to Jira Version 🟢 AUTO
 
 Add remote link from Jira Fix Version to Confluence page:
@@ -169,7 +164,6 @@ jira_add_comment(
     comment=f"Release notes published: [confluence_page_url]"
 )
 ```
-
 
 ## Phase 6 — Summary
 
@@ -188,7 +182,6 @@ jira_add_comment(
 → Use /plan-release for planning future versions
 ```
 
-
 ## Flags
 
 | Flag | Behavior |
@@ -196,11 +189,9 @@ jira_add_comment(
 | `--version <key>` | Specify Fix Version key (e.g. `v2.3.0`) |
 | `--dry-run` | Generate and display draft without publishing |
 
-
 ## Common Scenarios
 
 > See [references/usage-guide.md](references/usage-guide.md) for common scenario commands.
-
 
 ## Examples
 
@@ -232,13 +223,11 @@ jira_add_comment(
 - Using a sprint name as the `--version` value — Fix Version keys follow the project versioning scheme (e.g. `v2.3.0`), not sprint names; use `/close-sprint` for sprint-based summaries
 - Using this skill instead of `/close-sprint` for sprint review reporting — `/close-sprint` generates the retrospective and sprint review; `/release-notes` generates stakeholder-facing release documentation tied to a Fix Version
 
-
 ## References
 
 [usage-guide.md](references/usage-guide.md) · [Confluence Templates](../../../references/templates-core.md) · [Tools Reference](../../../references/tools.md)
 
 Chain from: `/plan-release` → `/close-sprint` → `/release-notes`
-
 
 ## 🎓 Domain Expert Notes
 

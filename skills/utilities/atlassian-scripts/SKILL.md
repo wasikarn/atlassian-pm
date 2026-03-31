@@ -20,7 +20,6 @@ user-invocable: false
 
 > See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full architecture, available scripts, and module responsibilities.
 
-
 ## Discovery
 
 **If invoked with `--list` or no clear script target**, run this to show available scripts:
@@ -41,7 +40,6 @@ except:
   printf '  %-40s %s\n' "$name" "$desc"
 done
 ```
-
 
 ## Quick Reference
 
@@ -73,7 +71,6 @@ CONFLUENCE_URL=https://{{JIRA_SITE}}/wiki
 CONFLUENCE_USERNAME=your-email@example.com
 CONFLUENCE_API_TOKEN=your-api-token
 ```
-
 
 ## Examples
 
@@ -117,13 +114,11 @@ uv run scripts/api/fix_confluence_code_blocks.py --page-id 123456789
 - Running any script without `~/.config/atlassian/.env` set up with `CONFLUENCE_URL`, `CONFLUENCE_USERNAME`, and `CONFLUENCE_API_TOKEN` — all scripts will fail with an authentication error
 - Using `jira_write.py` for non-subtask issues — this script is purpose-built for subtask creation with HR compliance; use MCP `jira_create_issue` for epics and stories
 
-
 ## References
 
 > See [../../../scripts/docs/README.md](../../../scripts/docs/README.md) for full docs, decision tree, and known issues.
 
 [script-reference.md](../../../scripts/docs/script-reference.md) · [library-api.md](../../../scripts/docs/library-api.md) · [technical-notes.md](../../../scripts/docs/technical-notes.md) · [Confluence REST API](https://developer.atlassian.com/cloud/confluence/rest/v1/intro/) · [Jira REST API v3](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/)
-
 
 ## 🎓 Domain Expert Notes
 

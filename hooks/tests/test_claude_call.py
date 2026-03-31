@@ -27,7 +27,8 @@ class TestClaudeCall(unittest.TestCase):
             "type": "result", "subtype": "success",
             "is_error": False, "result": "hello", "session_id": "s1"
         })
-        with patch("subprocess.run", return_value=self._make_proc(payload)):
+        with patch("plugin.ai.claude_call._session_budget_ok", return_value=True), \
+             patch("subprocess.run", return_value=self._make_proc(payload)):
             result = claude_call("say hello")
         self.assertEqual(result, "hello")
 
@@ -39,7 +40,8 @@ class TestClaudeCall(unittest.TestCase):
             captured_env.update(kwargs.get("env", {}))
             return self._make_proc(payload)
 
-        with patch("subprocess.run", side_effect=fake_run):
+        with patch("plugin.ai.claude_call._session_budget_ok", return_value=True), \
+             patch("subprocess.run", side_effect=fake_run):
             claude_call("test")
         self.assertEqual(captured_env.get(RECURSION_GUARD), "1")
 

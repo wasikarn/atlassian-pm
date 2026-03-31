@@ -124,6 +124,7 @@ joakim
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 - [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for fetching in-progress and blocked issues

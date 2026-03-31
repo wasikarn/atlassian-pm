@@ -67,7 +67,6 @@ python .claude/skills/utilities/activity-report/generate_report.py --output repo
 - If `--output` was used, confirm file was saved
 - Offer follow-up: filter by type, expand date range, save to file
 
-
 ## Examples
 
 ### ✅ Good
@@ -100,10 +99,10 @@ python .claude/skills/utilities/activity-report/generate_report.py --output repo
 - Passing `--sprint` or Jira-related filters — this skill has no Jira awareness; valid filters are `--hours`, `--start/--end`, `--project`, and `--types`
 - Expecting Jira issue references in the output — observations are captured from Claude Code sessions, not Jira API calls
 
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 - [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for filtering by date and assignee

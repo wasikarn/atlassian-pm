@@ -130,7 +130,6 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 
 - Next: run `/atlassian-pm:create-story {{PROJECT_KEY}}-XXX` per story to add subtasks
 
-
 ## Examples
 
 ### ✅ Good
@@ -160,6 +159,7 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Writing Style](../../../references/writing-style.md) · [Verification Checklist](../../../references/verification-checklist.md)

@@ -127,7 +127,6 @@ Subtask alignment: [X subtasks checked, Y adjusted]
 → May need: /sync-artifacts {{PROJECT_KEY}}-XXX (for auto cascade)
 ```
 
-
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
 ## Examples
@@ -160,6 +159,7 @@ Subtask alignment: [X subtasks checked, Y adjusted]
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [Update Workflow Patterns](../../../references/update-workflow.md) · [ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Verification Checklist](../../../references/verification-checklist.md)

@@ -121,6 +121,7 @@ After each batch: HR6 `cache_invalidate(key)` for every updated issue.
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 - [HR Rules](../../../references/hr-rules.md) - HR6 cache invalidation (required after every date update)

@@ -28,7 +28,6 @@ effort: medium
 | `adr` | Architecture Decision | Context → Decision → Consequences |
 | `parent` | Category/Parent page | Title → Description → Sub-pages table |
 
-
 ## Phases
 
 ### 1. Discovery
@@ -69,7 +68,6 @@ confluence_search(query="title ~ \"[search term]\"", limit=5)
 
 **Gate:** User provides required info + Parent page identified (if specified)
 
-
 ### 2. Generate Content
 
 Generate markdown content based on template
@@ -81,7 +79,6 @@ Generate markdown content based on template
 > **Note:** `{toc}` and `{children}` macros only render in Confluence — for parent pages that need macros, use the `update_page_storage.py` script
 
 **Gate:** Content generated
-
 
 ### 3. Review
 
@@ -100,7 +97,6 @@ Any changes needed before creating?
 ```
 
 **Gate:** User approves content
-
 
 ### 4. Create
 
@@ -139,11 +135,9 @@ The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name=
 → Link to Jira: use MCP jira_create_remote_issue_link
 ```
 
-
 ## Common Scenarios
 
 > See [references/examples.md](references/examples.md) for common command examples.
-
 
 ## Examples
 
@@ -173,10 +167,10 @@ The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name=
 - Creating a `tech-spec` without linking it back to the related Jira epic/story via `jira_create_remote_issue_link`
 - Skipping `fix_confluence_code_blocks.py` after creation — MCP always renders code blocks as `<pre class="highlight">` (broken); run `uv run scripts/api/fix_confluence_code_blocks.py --page-id [id]` after every create
 
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 Space: `{{PROJECT_KEY}}` · MCP: `confluence_create_page` · Scripts: `scripts/api/`

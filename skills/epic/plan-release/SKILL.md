@@ -167,6 +167,7 @@ Display: "Fix Version [name] created. [N] epics linked."
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Mermaid Guide](../../../references/mermaid-guide.md)

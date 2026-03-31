@@ -36,7 +36,6 @@ effort: medium
 | 5. Create | `issue_key` |
 | 6. Summary | Done |
 
-
 ## Phase 1 — Bug Intake ⛔ GATE
 
 If description provided as argument: use as `bug_summary`, ask for remaining fields.
@@ -44,7 +43,6 @@ If description provided as argument: use as `bug_summary`, ask for remaining fie
 Collect: Summary · Reproduction Steps (numbered) · Environment (service+version+env) · Observed Behavior · Expected Behavior · Affected User · Frequency · Attachments (optional)
 
 Display collected intake as a `## Bug Report` block with all fields, then confirm before scoring.
-
 
 ## Phase 2 — Severity Scoring 🟡 REVIEW
 
@@ -56,7 +54,6 @@ Display collected intake as a `## Bug Report` block with all fields, then confir
 
 Display `## Severity Assessment` with P1/P2/P3, rationale, and response time. Auto-proceed unless user objects.
 
-
 ## Phase 3 — Duplicate Check 🟢 AUTO
 
 1. `cache_search(query="[bug_summary]", limit=5)`
@@ -64,13 +61,11 @@ Display `## Severity Assessment` with P1/P2/P3, rationale, and response time. Au
 
 If duplicate found: show key, summary, status, link — offer (1) link to existing or (2) create separate. If none found: auto-proceed silently.
 
-
 ## Phase 4 — Assign ⛔ GATE
 
 > **Skip if `--no-assign`** — proceed directly to Phase 5 with `assignee_email = null`.
 
 Recommend assignee based on affected service tag and team skill matrix. Show `## Assignment Recommendation` with recommended + fallback. Wait for user confirmation. Record `assignee_email` from `team.members[]`.
-
 
 ## Phase 5 — Create Jira Task 🟢 AUTO
 
@@ -102,7 +97,6 @@ acli jira workitem assign -k "[issue_key]" -a "[assignee_email]" -y
 
 > **HR6:** `cache_invalidate(issue_key)` after each write.
 
-
 ## Phase 6 — Summary
 
 ```
@@ -118,7 +112,6 @@ acli jira workitem assign -k "[issue_key]" -a "[assignee_email]" -y
 → Add comments with new repro evidence as investigation continues
 → Use /create-testplan [KEY] to create QA verification subtask after fix
 ```
-
 
 ## References
 

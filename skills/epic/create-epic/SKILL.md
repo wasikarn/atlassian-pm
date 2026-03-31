@@ -66,7 +66,6 @@ Skip interview questions in Phase 1 for information already documented.
 
 **If no blueprint in history:** ดำเนิน Phase 1 Discovery ปกติ
 
-
 ## Phases
 
 ### 1. Discovery
@@ -183,11 +182,9 @@ Epic: [link]  (no Confluence doc)
 → /atlassian-pm:create-doc {{PROJECT_KEY}}-XXX   create doc later if needed
 ```
 
-
 ## Epic Structure (ADF)
 
 > See [references/epic-adf-structure.md](references/epic-adf-structure.md) for the full Epic ADF section layout and panel type reference.
-
 
 ## Examples
 
@@ -222,10 +219,10 @@ Epic: [link]  (no Confluence doc)
 
 > See [references/examples.md](references/examples.md) for a full input/output example.
 
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Tool Selection](../../../references/tools.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Epic ADF Structure](references/epic-adf-structure.md) · [Examples](references/examples.md)

@@ -110,7 +110,6 @@ acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-update.json --yes
 # ⚠️ HR10: NEVER set sprint on subtasks — inherits from parent
 ```
 
-
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 
 ## Examples

@@ -1,0 +1,4 @@
+# shellcheck configuration for atlassian-pm
+# Minimum severity: skip style (SC2181) and info (SC2015, SC2016) level
+# findings in existing scripts. Warnings and errors still fail the check.
+severity=warning

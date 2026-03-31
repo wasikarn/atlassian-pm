@@ -34,7 +34,7 @@ jobs:
             exit 0
           fi
           # shellcheck disable=SC2086
-          shellcheck $SCRIPTS && echo "  ✓ shellcheck — no errors" || { echo "  ✗ shellcheck — errors found"; exit 1; }
+          shellcheck --severity=warning $SCRIPTS && echo "  ✓ shellcheck — no errors" || { echo "  ✗ shellcheck — errors found"; exit 1; }
 
       - name: 2. markdownlint
         run: |

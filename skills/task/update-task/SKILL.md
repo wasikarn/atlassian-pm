@@ -47,7 +47,6 @@ effort: medium
 
 **🟡 REVIEW** — Present current state to user. Proceed unless user objects.
 
-
 ### 2. Identify Changes
 
 Ask the user what they want to update:
@@ -71,7 +70,6 @@ Ask the user what they want to update:
 
 **⛔ GATE — DO NOT PROCEED** without user confirmation of changes.
 
-
 ### 3. Preserve Intent
 
 | Change Type | Preserve | Allow Change |
@@ -89,7 +87,6 @@ Ask the user what they want to update:
 - ❌ Do not delete content without informing
 
 **🟢 AUTO** — Apply preservation rules programmatically. No user interaction needed.
-
 
 ### 4. Generate Update
 
@@ -126,7 +123,6 @@ Would you like to apply these changes?
 ```
 
 **⛔ GATE — DO NOT APPLY** without user approval of all generated changes.
-
 
 ### 5. Quality Gate (MANDATORY)
 
@@ -165,7 +161,6 @@ acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-update.json --yes
 
 → Use /verify-issue {{PROJECT_KEY}}-XXX to check quality
 ```
-
 
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 > See [references/task-type-detection.md](references/task-type-detection.md) for auto-detection patterns by content.

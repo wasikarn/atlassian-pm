@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.6.5] - 2026-03-31
 
 ### Added
+
 - ci: add GitHub Actions QA workflow (9 gates: shellcheck, markdownlint, plugin.json, SKILL.md frontmatter, agent frontmatter, hooks.json references, Python pytest, CHANGELOG version, required files)
 
 ### Fixed
+
 - fix(hooks): run.sh fallback now uses silent exit 0 instead of invalid JSON output
 
 ## [Unreleased]

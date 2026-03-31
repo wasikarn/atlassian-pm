@@ -64,18 +64,18 @@ Use these anchors when comparing "estimated SP" from cache data to the current s
 
    Use these rates in Step 5 pattern detection and Step 6 adjustments.
 
-4. **Extract comparison data** from each similar story:
+1. **Extract comparison data** from each similar story:
    - Estimated SP (from issue fields) vs actual cycle time (from velocity history loaded in step 1 if available)
    - Complexity signals: number of files in scope table (count CREATE + MODIFY lines in description), number of ACs
    - Keywords that correlate with under-estimation (auth, payment, integration, migration, new-service)
 
-5. **Identify patterns:**
+2. **Identify patterns:**
    - Stories with `auth` / `payment` / `integration` keywords: track if they consistently took longer than estimated
    - Stories with similar scope size (file count): track actual vs estimated SP
    - Carry-over rate for this story type: if >30% of similar stories carried over → flag
    - **From story-outcomes.jsonl**: if `assignee_carry_over_rate` > 50% → flag assignee drift; if `service_tag_carry_over_rate` > 40% → flag service area pattern
 
-6. **Generate calibrated estimate:**
+3. **Generate calibrated estimate:**
    - Base: majority SP of similar completed stories with same service tag
    - Complexity adjustments:
      - +1 SP if story contains auth/payment/integration keywords AND historical pattern shows underestimation

@@ -37,7 +37,6 @@ effort: high
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
-
 ## Artifact Graph
 
 ```text
@@ -53,7 +52,6 @@ Epic (Jira)
 │   └── Sub-tasks ...
 └── ...
 ```
-
 
 ## Phases
 
@@ -154,7 +152,6 @@ Order: Parents first → Children → Confluence
 Output: Summary table (Artifact, Action, Status) + flagged items.
 
 Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
-
 
 ## References
 

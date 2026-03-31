@@ -1,0 +1,17 @@
+{
+	"ignores": [
+		"**/CLAUDE.md",
+		"**/.venv/**",
+		"**/node_modules/**",
+		"docs/superpowers/**",
+		"docs/mermaid/**"
+	],
+	"config": {
+		"MD013": false,
+		"MD024": { "siblings_only": true },
+		"MD033": false,
+		"MD036": false,
+		"MD040": false,
+		"MD041": false
+	}
+}

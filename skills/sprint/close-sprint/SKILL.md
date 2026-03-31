@@ -170,7 +170,6 @@ If velocity-tracker not available → skip and note in Phase 8 summary.
 
 See [references/domain-expert.md](references/domain-expert.md)
 
-
 ## References
 
 [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Team Capacity](../../../references/team-capacity.md) · [Skill Orchestration](../../../references/skill-orchestration.md) · [Mermaid Guide](../../../references/mermaid-guide.md)

@@ -38,7 +38,6 @@ memory: project
 - `/flow-check` — full snapshot: Phase 1 + Phase 2 + Phase 3
 - `/flow-check --replenish` — Phase 2 only (fast path, auto-triggered on Done transitions)
 
-
 ## Phase 1 — Board Snapshot
 
 For each column in board config:
@@ -67,7 +66,6 @@ QA           |   1 |   3 | OK
 Status: `OK` = count < wip_max · `WARN` = count ≥ 80% of wip_max · `FULL` = count ≥ wip_max
 
 Skip Phase 1 if `--replenish` flag passed.
-
 
 ## Phase 2 — Replenishment Check
 
@@ -106,7 +104,6 @@ Move to Ready? Enter numbers (e.g. "1,3") or "none" to skip:
 ```
 
 For each confirmed item: `jira_transition_issue(issue_key, transition="Ready")` then `cache_invalidate(issue_key)` (HR6).
-
 
 ## Phase 3 — Bottleneck Alert
 

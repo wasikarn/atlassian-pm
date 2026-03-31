@@ -75,6 +75,7 @@ Read team from `project-config.json` → `team.members[]`. Match by first name (
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 - [Tools](../../../references/tools.md) - MCP vs acli decision rules, acli assign command

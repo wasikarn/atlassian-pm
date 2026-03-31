@@ -133,7 +133,6 @@ quadrantChart
     ...
 ```
 
-
 ## Examples
 
 ### ✅ Good
@@ -162,10 +161,10 @@ quadrantChart
 - Expecting the skill to create Jira tasks for the tech-debt items it finds — `/scan-tech-debt` is read-only on Jira; it only writes the priority matrix dashboard to Confluence
 - Issues must be labeled `tech-debt`, `chore`, or `spike` in Jira for them to appear — unlabeled tasks are invisible to this skill
 
-
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
+
 ## References
 
 [Task Template](../../../references/templates-task.md) · [Dependency Frameworks](../../../references/dependency-frameworks.md) · [JQL Quick Reference](../../../references/jql-quick-ref.md)
