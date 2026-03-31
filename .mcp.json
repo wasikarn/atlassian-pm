@@ -8,10 +8,10 @@
         "mcp-servers/atlassian-cache",
         "mcp-servers/atlassian-cache/server.py"
       ],
-      "cwd": "${CLAUDE_PLUGIN_ROOT}",
+      "cwd": "${HOME}/.claude/plugins/marketplaces/atlassian-pm",
       "env": {
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts",
-        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
+        "PYTHONPATH": "${HOME}/.claude/plugins/marketplaces/atlassian-pm/scripts",
+        "UV_PROJECT_ENVIRONMENT": "${HOME}/.claude/plugins/data/atlassian-pm-atlassian-pm/venv",
         "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
       }
     }
