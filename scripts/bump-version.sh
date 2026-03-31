@@ -177,6 +177,16 @@ info "Refreshing marketplace cache..."
 claude plugin marketplace update atlassian-pm 2>&1 | grep -E "✔|✘|Error" || true
 ok "Marketplace refreshed"
 
+# Clear marketplace .mcp.json to prevent duplicate MCP registration.
+# Claude Code loads .mcp.json from BOTH marketplace and cache dirs; the cache
+# version (installed copy) is the authoritative one. If marketplace also has the
+# server config, Claude Code warns "skipped — same command/URL" and skips it.
+_MKTPLACE_MCP="$HOME/.claude/plugins/marketplaces/atlassian-pm/.mcp.json"
+if [[ -f "$_MKTPLACE_MCP" ]]; then
+  printf '{"mcpServers": {}}\n' > "$_MKTPLACE_MCP"
+  ok "Cleared marketplace .mcp.json (prevent duplicate atlassian-cache warning)"
+fi
+
 # Backup config for future reinstall recovery (read by setup skill Phase 0)
 if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then
   mkdir -p "$HOME/.config/atlassian"
