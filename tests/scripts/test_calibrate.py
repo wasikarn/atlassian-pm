@@ -347,10 +347,10 @@ def test_hard_timeout_creates_started_daemon_timer(monkeypatch):
 
 def test_run_calibration_returns_none_when_lock_held(tmp_path, monkeypatch):
     """When another process holds the lock, run_calibration returns None immediately."""
-    def locked_flock(fd, op):
+    def locked_flock(*_: object) -> None:
         raise BlockingIOError("lock held by another process")
     monkeypatch.setattr(calibrate.fcntl, "flock", locked_flock)
-    monkeypatch.setattr(calibrate, "_hard_timeout", lambda secs=60: _FakeTimer(secs, lambda: None))
+    monkeypatch.setattr(calibrate, "_hard_timeout", lambda *_: _FakeTimer(60, lambda: None))
 
     outcomes = _write_outcomes(tmp_path, [_make_record("BE", "completed")] * 15)
     cal_path = tmp_path / "calibration.json"
@@ -369,7 +369,7 @@ def test_run_calibration_returns_none_when_lock_held(tmp_path, monkeypatch):
 def test_run_calibration_cancels_timer_on_success(tmp_path, monkeypatch):
     """Timer is cancelled after successful calibration, and calibration.json is written."""
     timer = _FakeTimer(60, lambda: None)
-    monkeypatch.setattr(calibrate, "_hard_timeout", lambda secs=60: timer)
+    monkeypatch.setattr(calibrate, "_hard_timeout", lambda *_: timer)
     # Use real flock — lock_path in tmp_path is isolated
     outcomes = _write_outcomes(tmp_path, [_make_record("BE", "completed")] * 6)
     cal_path = tmp_path / "calibration.json"
