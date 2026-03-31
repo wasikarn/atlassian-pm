@@ -647,18 +647,19 @@ agents/                                  ← 20 subagent definitions (3-layer ar
 ├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
 └── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
 
-hooks/                         ← 46 Python hook scripts
+hooks/                         ← 59 Python hook scripts (65 registrations in hooks.json)
 ├── hooks.json                 ← Plugin hook manifest
 ├── tests/                     ← Unit tests for hook logic
 ├── plugin/
-│   ├── guards/                ← HR1–HR10 enforcement (15 hooks)
+│   ├── guards/                ← HR1–HR10 enforcement (20 hooks)
 │   ├── quality/               ← ADF structure, write quality, story size gates (4 hooks)
 │   ├── cache/                 ← Read optimization, dedup, field presets (6 hooks)
-│   └── session/               ← Session management, compaction, token filtering, skill telemetry (15 hooks)
-└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (6 hooks)
+│   └── session/               ← Session management, compaction, token filtering, skill telemetry (23 hooks)
+└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (5 hooks)
 
-.claude/commands/              ← 11 orchestration chains (vibe-full, story-full, epic-full, blueprint-full, bug-full,
-                               │  qa-full, sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full)
+.claude/commands/              ← 13 orchestration chains (vibe-full, story-full, epic-full, blueprint-full, bug-full,
+                               │  qa-full, sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full,
+                               │  daily-ops, sprint-close-full-with-actions)
                                └── Each chains existing skills end-to-end with confirmation gates
 
 mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
