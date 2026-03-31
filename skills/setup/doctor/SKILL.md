@@ -37,7 +37,7 @@ PASS=0
 WARN=0
 FAIL=0
 SKIP=0
-TOTAL=11
+TOTAL=12
 
 echo "Checking atlassian-pm environment..."
 echo ""
@@ -206,6 +206,25 @@ elif [ -f "$TEAM_TEMPLATE" ]; then
 else
   echo "  -  project-config-team-detail.json not found (no template to scaffold from)"
   echo "     (optional — needed for sprint planning only)"
+  SKIP=$((SKIP+1))
+fi
+
+# Check 11: board_monitor daemon (optional — proactive intelligence)
+MONITOR_PLIST="$HOME/Library/LaunchAgents/com.atlassian-pm.monitor.plist"
+if launchctl list com.atlassian-pm.monitor &>/dev/null; then
+  echo "  ✓  board_monitor daemon running"
+  PASS=$((PASS+1))
+elif [ -f "$MONITOR_PLIST" ]; then
+  echo "  !  board_monitor plist exists but daemon not loaded"
+  echo "     → Run: launchctl bootstrap gui/$(id -u) $MONITOR_PLIST"
+  WARN=$((WARN+1))
+else
+  echo "  -  board_monitor daemon not installed (optional — proactive intelligence)"
+  if [ -n "${PLUGIN_ROOT:-}" ]; then
+    echo "     → Install: $PLUGIN_ROOT/scripts/setup_monitor.sh"
+  else
+    echo "     → Install: scripts/setup_monitor.sh (set CLAUDE_PLUGIN_ROOT first)"
+  fi
   SKIP=$((SKIP+1))
 fi
 

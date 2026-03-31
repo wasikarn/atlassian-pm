@@ -41,13 +41,28 @@ Setup configures: acli auth · mcp-atlassian MCP server · `~/.config/atlassian/
 
 > Claude Code must be **restarted once** after setup to activate the MCP server.
 
+### Optional: Board Monitor Daemon
+
+Runs `board_monitor.py` in the background, auto-starts on login, and feeds proactive Jira insights into AI context:
+
+```bash
+# Install once — auto-starts on login
+CLAUDE_PLUGIN_ROOT=<path-to-plugin> CLAUDE_PROJECT_DIR=<path-to-project> \
+  scripts/setup_monitor.sh
+
+# Uninstall
+scripts/teardown_monitor.sh
+```
+
+`/atlassian-pm:doctor` reports daemon status — run it to confirm.
+
 ---
 
 ## Verify Installation
 
 ```bash
 /atlassian-pm:doctor
-# Expected: 9-10 checks passed
+# Expected: 9-12 checks passed (12 if board_monitor daemon is running)
 ```
 
 If any check fails, the doctor output will tell you exactly what to fix.
