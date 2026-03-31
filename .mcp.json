@@ -5,12 +5,14 @@
       "args": [
         "run",
         "--project",
-        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache",
-        "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/server.py"
+        "mcp-servers/atlassian-cache",
+        "mcp-servers/atlassian-cache/server.py"
       ],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}",
       "env": {
         "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts",
-        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv"
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
       }
     }
   }

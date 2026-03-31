@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.2] - 2026-03-31
+
+### Fixed
+
+- `.mcp.json` — use `cwd: "${CLAUDE_PLUGIN_ROOT}"` with relative paths for `args` so the server resolves correctly in both plugin context (CLAUDE_PLUGIN_ROOT expanded) and project context (cwd defaults to project root). Also add explicit `PATH` to env so `uv` is found regardless of how Claude Code spawns the subprocess.
+
 ## [2.6.1] - 2026-03-31
 
 ### Fixed
