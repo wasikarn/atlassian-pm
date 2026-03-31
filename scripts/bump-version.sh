@@ -194,26 +194,6 @@ for mcp_file in "$CACHE_BASE"/*/.mcp.json "$CACHE_BASE"/.mcp.json; do
 done
 ok "Cleared cache dir .mcp.json files (prevents duplicate registration)"
 
-# Write full MCP config to local marketplace dir.
-# Source .mcp.json is intentionally empty (cache dir gets empty copy → no ghost entry).
-# Marketplace dir is authoritative — only place ${CLAUDE_PLUGIN_ROOT} is expanded.
-MARKETPLACE_MCP="$HOME/.claude/plugins/marketplaces/atlassian-pm/.mcp.json"
-if [[ -d "$(dirname "$MARKETPLACE_MCP")" ]]; then
-  cat > "$MARKETPLACE_MCP" << 'MCP_EOF'
-{
-  "mcpServers": {
-    "atlassian-cache": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/run.sh",
-      "env": {
-        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts"
-      }
-    }
-  }
-}
-MCP_EOF
-  ok "Wrote full MCP config to marketplace dir"
-fi
 
 # Backup config for future reinstall recovery (read by setup skill Phase 0)
 if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then
