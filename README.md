@@ -399,6 +399,9 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 - ✓ `~/.config/atlassian/.env` — Jira/Confluence credentials
 - ✓ `~/.claude/CLAUDE.md` — Atlassian settings block
 - ✓ git smudge/clean filters — placeholder conversion
+- ✓ atlassian-cache venv — Python deps for local issue cache (SQLite + embeddings)
+
+The `atlassian-cache` MCP server registers automatically via the plugin's `.mcp.json` — no manual step needed. Restart Claude Code once after setup to activate it.
 
 ---
 
@@ -497,7 +500,7 @@ claude mcp add --scope user mcp-atlassian -- \
 
 Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/clean filters.
 
-### 7. Install Atlassian cache server
+### 7. Install Atlassian cache server venv
 
 ```bash
 UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/venv" \
@@ -505,6 +508,8 @@ UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/ven
 ```
 
 Reduces token consumption 80–90% for repeated lookups via local SQLite + FTS5. Omit `--extra embeddings` to skip semantic search (~640MB PyTorch/sentence-transformers).
+
+The `atlassian-cache` MCP server registers automatically via the plugin's `.mcp.json` — no `claude mcp add` command needed.
 
 ### 8. Load plugin
 

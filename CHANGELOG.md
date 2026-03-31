@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.15] - 2026-03-31
+
+### Fixed
+
+- **Root cause found and fixed**: removed `"mcpServers": "./.mcp.json"` from `plugin.json`. This field caused Claude Code to read `.mcp.json` a second time from the cache dir (installPath) without `${CLAUDE_PLUGIN_ROOT}` expansion, producing the ghost `atlassian-cache: ${CLAUDE_PLUGIN_ROOT}/... ✗ Failed to connect` entry. The standalone `.mcp.json` at plugin root (read once from marketplace dir with full expansion) is sufficient — same pattern used by all other working plugins (e.g. `claude-mem`).
+
 ## [2.6.14] - 2026-03-31
 
 ### Fixed

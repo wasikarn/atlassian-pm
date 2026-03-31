@@ -23,6 +23,5 @@
     "./skills/sprint/",
     "./skills/confluence/",
     "./skills/utilities/"
-  ],
-  "mcpServers": "./.mcp.json"
+  ]
 }

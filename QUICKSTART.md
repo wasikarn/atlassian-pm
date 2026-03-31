@@ -37,11 +37,11 @@ Open **Settings → Extensions → Add marketplace**, enter `wasikarn/atlassian-
 /atlassian-pm:setup
 ```
 
-Setup configures: acli auth · mcp-atlassian MCP server · `~/.config/atlassian/.env` · git smudge/clean filters · atlassian-cache venv (deps)
+Setup configures: acli auth · mcp-atlassian · `~/.config/atlassian/.env` · `~/.claude/CLAUDE.md` · git smudge/clean filters · atlassian-cache venv
 
-The `atlassian-cache` MCP server starts **automatically** when the plugin loads — no manual registration needed. Setup only installs the Python venv that the server depends on.
+The `atlassian-cache` MCP server registers automatically via the plugin's `.mcp.json` — no manual `claude mcp add` needed. Setup only installs the Python venv it depends on.
 
-> Claude Code must be **restarted once** after setup to activate the MCP server.
+> Restart Claude Code once after setup to activate the MCP server.
 
 ### Optional: Board Monitor Daemon
 
