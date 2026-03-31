@@ -194,6 +194,10 @@ for mcp_file in "$CACHE_BASE"/*/.mcp.json "$CACHE_BASE"/.mcp.json; do
 done
 ok "Cleared cache dir .mcp.json files (prevents duplicate registration)"
 
+# Restore source .mcp.json in case the SessionStart hook or marketplace update cleared it.
+# The source .mcp.json must stay intact — it's what gets distributed to users' marketplace dirs.
+git checkout -- .mcp.json 2>/dev/null || true
+
 # Backup config for future reinstall recovery (read by setup skill Phase 0)
 if [[ -f "$REPO_ROOT/.claude/project-config.json" ]]; then
   mkdir -p "$HOME/.config/atlassian"
