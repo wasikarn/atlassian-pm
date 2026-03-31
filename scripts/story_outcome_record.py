@@ -28,8 +28,8 @@ import argparse
 import json
 import os
 import re
-import subprocess
-import sys
+import subprocess  # used in main() spawn block
+import sys  # used in main() spawn block
 from datetime import UTC, datetime
 from pathlib import Path
 
