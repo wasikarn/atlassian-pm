@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -32,6 +33,7 @@ _DATA_DIR = Path(
 )
 _OUTCOMES_FILE = _DATA_DIR / "story-outcomes.jsonl"
 _CALIBRATION_FILE = _DATA_DIR / "calibration.json"
+_LOCK_FILE = _DATA_DIR / "calibration.lock"
 _ALLOWLIST_FILE = Path(__file__).parent / "keyword_allowlist.json"
 
 _MIN_N = 5
@@ -255,125 +257,154 @@ def _prune_outcomes(path: Path, keep: int = _PRUNE_KEEP) -> None:
             tmp.unlink(missing_ok=True)
 
 
+def _hard_timeout(seconds: int = 60) -> threading.Timer:
+    """Kill the process if calibration takes too long (fire-and-forget protection)."""
+    def _kill() -> None:
+        os._exit(1)
+    t = threading.Timer(seconds, _kill)
+    t.daemon = True
+    t.start()
+    return t
+
+
 def run_calibration(
     outcomes_path: Path = _OUTCOMES_FILE,
     calibration_path: Path = _CALIBRATION_FILE,
+    lock_file: Path = _LOCK_FILE,
     force: bool = False,
 ) -> dict | None:
     """Run calibration. Returns result dict or None if skipped/no data."""
-    if not outcomes_path.exists():
-        return None
+    timer = _hard_timeout(60)
+    # Use "a" mode — avoids truncating the lock file on open (no-truncate is conventional
+    # for lock files). mode 0o600: lock file holds no sensitive data but should not be
+    # world-readable per least-privilege principle.
+    lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        # Early cancel: timer is no longer needed since we're exiting immediately.
+        # The finally block below would also cancel it, but this makes intent explicit.
+        timer.cancel()
+        lock_fd.close()
+        return None  # another calibration is running — exit cleanly
+    try:
+        if not outcomes_path.exists():
+            return None
 
-    lines = outcomes_path.read_text().splitlines()
-    current_count = sum(1 for l in lines if l.strip())
+        lines = outcomes_path.read_text().splitlines()
+        current_count = sum(1 for l in lines if l.strip())
 
-    existing_cal = load_calibration(calibration_path)
-    if not force and not _should_run(current_count, existing_cal):
-        return None
+        existing_cal = load_calibration(calibration_path)
+        if not force and not _should_run(current_count, existing_cal):
+            return None
 
-    records = _parse_records(lines[-_MAX_RECORDS:])
-    if not records:
-        return None
+        records = _parse_records(lines[-_MAX_RECORDS:])
+        if not records:
+            return None
 
-    allowlist = load_allowlist()
+        allowlist = load_allowlist()
 
-    # Group by service_tag
-    groups: dict[str, list[dict]] = {}
-    for r in records:
-        tag = r["service_tag"]
-        if tag:
-            groups.setdefault(tag, []).append(r)
+        # Group by service_tag
+        groups: dict[str, list[dict]] = {}
+        for r in records:
+            tag = r["service_tag"]
+            if tag:
+                groups.setdefault(tag, []).append(r)
 
-    service_tags_out: dict = {}
-    excluded_groups: dict = {}
+        service_tags_out: dict = {}
+        excluded_groups: dict = {}
 
-    for tag, grp in groups.items():
-        weights = [_weight(r["age_days"]) for r in grp]
-        sum_w = sum(weights)
-        if sum_w == 0:
-            continue
+        for tag, grp in groups.items():
+            weights = [_weight(r["age_days"]) for r in grp]
+            sum_w = sum(weights)
+            if sum_w == 0:
+                continue
 
-        carry_sum_w = sum(w for r, w in zip(grp, weights) if r["is_carry_over"])
-        carry_over_rate = carry_sum_w / sum_w
-        decay_weight_mean = sum_w / len(weights)
-        eff_n = _effective_n(weights)
-        conf = _confidence(eff_n)
+            carry_sum_w = sum(w for r, w in zip(grp, weights) if r["is_carry_over"])
+            carry_over_rate = carry_sum_w / sum_w
+            decay_weight_mean = sum_w / len(weights)
+            eff_n = _effective_n(weights)
+            conf = _confidence(eff_n)
 
-        if conf is None:
-            excluded_groups[tag] = {"record_count": len(grp), "reason": "below_min_n"}
-            continue
+            if conf is None:
+                excluded_groups[tag] = {"record_count": len(grp), "reason": "below_min_n"}
+                continue
 
-        keyword_risk = _compute_keyword_risk(grp, weights, sum_w, carry_sum_w, allowlist)
+            keyword_risk = _compute_keyword_risk(grp, weights, sum_w, carry_sum_w, allowlist)
 
-        service_tags_out[tag] = {
-            "carry_over_rate": round(carry_over_rate, 4),
-            "n": len(grp),
-            "confidence": conf,
-            "decay_weight": round(decay_weight_mean, 4),
-            "keyword_risk": keyword_risk,
-            "keyword_method": "weighted_odds_ratio_laplace_alpha1",
+            service_tags_out[tag] = {
+                "carry_over_rate": round(carry_over_rate, 4),
+                "n": len(grp),
+                "confidence": conf,
+                "decay_weight": round(decay_weight_mean, 4),
+                "keyword_risk": keyword_risk,
+                "keyword_method": "weighted_odds_ratio_laplace_alpha1",
+            }
+
+        # Team baseline
+        inject_eligible = [
+            (v["carry_over_rate"], _effective_n([_weight(r["age_days"]) for r in groups[t]]))
+            for t, v in service_tags_out.items()
+            if v.get("confidence") in ("high", "medium")
+        ]
+
+        if current_count >= _MIN_RECORDS_FOR_DERIVED_BASELINE and inject_eligible:
+            total_eff_n = sum(en for _, en in inject_eligible)
+            team_baseline = (
+                sum(rate * en for rate, en in inject_eligible) / total_eff_n
+                if total_eff_n > 0
+                else _FALLBACK_BASELINE
+            )
+        else:
+            team_baseline = _FALLBACK_BASELINE
+            import logging
+            logging.getLogger(__name__).warning(
+                "Calibration: using fallback baseline %.2f (records=%d < %d)",
+                _FALLBACK_BASELINE, current_count, _MIN_RECORDS_FOR_DERIVED_BASELINE,
+            )
+
+        signal_thresholds = existing_cal.get("signal_thresholds", _DEFAULT_THRESHOLDS.copy())
+
+        result: dict = {
+            "schema_version": _SCHEMA_VERSION,
+            "generated_at": datetime.now(UTC).isoformat(),
+            "record_count": current_count,
+            "last_calibrated_record_count": current_count,
+            "team_carry_over_baseline": round(team_baseline, 4),
+            "excluded_groups": excluded_groups,
+            "service_tags": service_tags_out,
+            "signal_thresholds": signal_thresholds,
+            "calibration_model": "haiku",
         }
 
-    # Team baseline
-    inject_eligible = [
-        (v["carry_over_rate"], _effective_n([_weight(r["age_days"]) for r in groups[t]]))
-        for t, v in service_tags_out.items()
-        if v.get("confidence") in ("high", "medium")
-    ]
+        # Optional Haiku note synthesis (failures are non-fatal)
+        inject_tags = {t: v for t, v in service_tags_out.items()
+                       if v.get("confidence") in ("high", "medium")}
+        if inject_tags:
+            try:
+                from claude_runner import run_claude
+                from prompts_calibrate import build_calibrate_prompt
 
-    if current_count >= _MIN_RECORDS_FOR_DERIVED_BASELINE and inject_eligible:
-        total_eff_n = sum(en for _, en in inject_eligible)
-        team_baseline = (
-            sum(rate * en for rate, en in inject_eligible) / total_eff_n
-            if total_eff_n > 0
-            else _FALLBACK_BASELINE
-        )
-    else:
-        team_baseline = _FALLBACK_BASELINE
-        import logging
-        logging.getLogger(__name__).warning(
-            "Calibration: using fallback baseline %.2f (records=%d < %d)",
-            _FALLBACK_BASELINE, current_count, _MIN_RECORDS_FOR_DERIVED_BASELINE,
-        )
+                prompt = build_calibrate_prompt(inject_tags)
+                response = run_claude(prompt, model="haiku", timeout=30)
+                if response:
+                    try:
+                        notes = json.loads(response)
+                        if isinstance(notes, dict):
+                            for tag, note in notes.items():
+                                if tag in service_tags_out and isinstance(note, str):
+                                    service_tags_out[tag]["note"] = note[:200]
+                    except json.JSONDecodeError:
+                        pass
+            except Exception:
+                pass  # Notes are optional — never fail calibration for this
 
-    signal_thresholds = existing_cal.get("signal_thresholds", _DEFAULT_THRESHOLDS.copy())
-
-    result: dict = {
-        "schema_version": _SCHEMA_VERSION,
-        "generated_at": datetime.now(UTC).isoformat(),
-        "record_count": current_count,
-        "last_calibrated_record_count": current_count,
-        "team_carry_over_baseline": round(team_baseline, 4),
-        "excluded_groups": excluded_groups,
-        "service_tags": service_tags_out,
-        "signal_thresholds": signal_thresholds,
-        "calibration_model": "haiku",
-    }
-
-    # Optional Haiku note synthesis (failures are non-fatal)
-    inject_tags = {t: v for t, v in service_tags_out.items()
-                   if v.get("confidence") in ("high", "medium")}
-    if inject_tags:
-        try:
-            from claude_runner import run_claude
-            from prompts_calibrate import build_calibrate_prompt
-
-            prompt = build_calibrate_prompt(inject_tags)
-            response = run_claude(prompt, model="haiku", timeout=30)
-            if response:
-                try:
-                    notes = json.loads(response)
-                    if isinstance(notes, dict):
-                        for tag, note in notes.items():
-                            if tag in service_tags_out and isinstance(note, str):
-                                service_tags_out[tag]["note"] = note[:200]
-                except json.JSONDecodeError:
-                    pass
-        except Exception:
-            pass  # Notes are optional — never fail calibration for this
-
-    _write_atomic(calibration_path, result)
-    return result
+        _write_atomic(calibration_path, result)
+        return result
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        lock_fd.close()
+        timer.cancel()
 
 
 def main() -> None:

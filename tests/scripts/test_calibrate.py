@@ -310,3 +310,78 @@ def test_run_calibration_signal_thresholds_preserved_from_existing(tmp_path):
     )
     assert result["signal_thresholds"]["velocity_drop_sigma"] == 3.0
     assert result["signal_thresholds"]["stagnant_days_override"]["[FE-Web]"] == 5
+
+
+# ── _hard_timeout ─────────────────────────────────────────────────────────────
+
+class _FakeTimer:
+    def __init__(self, interval, fn):
+        self.interval = interval
+        self.fn = fn
+        self.daemon = False
+        self._started = False
+        self._cancelled = False
+    def start(self):
+        self._started = True
+    def cancel(self):
+        self._cancelled = True
+
+
+def test_hard_timeout_creates_started_daemon_timer(monkeypatch):
+    captured = []
+    def fake_timer(interval, fn):
+        t = _FakeTimer(interval, fn)
+        captured.append(t)
+        return t
+    monkeypatch.setattr(calibrate.threading, "Timer", fake_timer)
+    t = calibrate._hard_timeout(30)
+    assert len(captured) == 1
+    assert captured[0].interval == 30
+    assert captured[0].daemon is True
+    assert captured[0]._started is True
+    t.cancel()
+    assert captured[0]._cancelled is True
+
+
+# ── run_calibration flock ──────────────────────────────────────────────────────
+
+def test_run_calibration_returns_none_when_lock_held(tmp_path, monkeypatch):
+    """When another process holds the lock, run_calibration returns None immediately."""
+    def locked_flock(fd, op):
+        raise BlockingIOError("lock held by another process")
+    monkeypatch.setattr(calibrate.fcntl, "flock", locked_flock)
+    monkeypatch.setattr(calibrate, "_hard_timeout", lambda secs=60: _FakeTimer(secs, lambda: None))
+
+    outcomes = _write_outcomes(tmp_path, [_make_record("BE", "completed")] * 15)
+    cal_path = tmp_path / "calibration.json"
+    lock_path = tmp_path / "calibration.lock"
+
+    result = calibrate.run_calibration(
+        outcomes_path=outcomes,
+        calibration_path=cal_path,
+        lock_file=lock_path,
+        force=True,
+    )
+    assert result is None
+    assert not cal_path.exists()
+
+
+def test_run_calibration_cancels_timer_on_success(tmp_path, monkeypatch):
+    """Timer is cancelled after successful calibration, and calibration.json is written."""
+    timer = _FakeTimer(60, lambda: None)
+    monkeypatch.setattr(calibrate, "_hard_timeout", lambda secs=60: timer)
+    # Use real flock — lock_path in tmp_path is isolated
+    outcomes = _write_outcomes(tmp_path, [_make_record("BE", "completed")] * 6)
+    cal_path = tmp_path / "calibration.json"
+    lock_path = tmp_path / "calibration.lock"
+
+    result = calibrate.run_calibration(
+        outcomes_path=outcomes,
+        calibration_path=cal_path,
+        lock_file=lock_path,
+        force=True,
+    )
+    # Verify calibration actually ran (not just early-exited)
+    assert result is not None
+    assert cal_path.exists()
+    assert timer._cancelled is True
