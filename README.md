@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
-Describe what you need in plain English (or Thai) — Claude explores your codebase, writes properly-formatted Jira ADF, passes a quality gate, and publishes. Hooks enforce 10 hard rules automatically and block silent failures before they happen. A local SQLite cache reduces Jira API token consumption by **80–90%**.
+Describe what you need in plain English (or Thai) — Claude explores your codebase, writes properly-formatted Jira ADF, passes a quality gate, and publishes. Hooks enforce 10 hard rules automatically and block silent failures before they happen. A local SQLite cache reduces Jira API token consumption by **80–90%**. A built-in calibration engine learns your team's carry-over patterns and keyword risk signals from sprint history — optionally running as a background `board_monitor` daemon for proactive Jira insights.
 
 ---
 
@@ -605,12 +605,15 @@ references/                    ← Docs loaded by skills on-demand (24 files)
 └── troubleshooting.md         ← Common failures + fixes
 
 scripts/                       ← All Python scripts + lib (merged atlassian-scripts + scripts)
+├── ai/                        ← Intelligence pipeline (calibrate.py decay-weighted calibration engine, keyword_allowlist.json)
 ├── api/                       ← CLI scripts (create/update Confluence, Jira ADF, set parent)
 ├── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
 ├── sprint/                    ← Sprint management scripts
 ├── analysis/                  ← Analysis tools (AC mapper, impact suggester, QA matrix)
 ├── docs/                      ← Script documentation (README, references, technical notes)
 ├── setup.sh                   ← One-command setup (idempotent)
+├── setup_monitor.sh            ← Install board_monitor.py as a macOS launchd daemon (idempotent)
+├── teardown_monitor.sh         ← Fully uninstall the board_monitor daemon (trash-safe)
 ├── bump-version.sh             ← Fully automated version bump + release
 ├── test-install.sh             ← Install validation (remove → install → setup simulation → doctor, 18 checks)
 └── git_filter.py              ← Smudge/clean placeholder conversion
