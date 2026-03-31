@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.9] - 2026-03-31
+
+### Fixed
+
+- Duplicate `atlassian-cache: ${CLAUDE_PLUGIN_ROOT}/... ✗ Failed to connect` entry — Claude Code loads `.mcp.json` from **both** marketplace dir (with variable expansion + `plugin:` prefix) and cache dir (no expansion, no prefix). Fixed by clearing cache dir `.mcp.json` after each release in `bump-version.sh`.
+
 ## [2.6.8] - 2026-03-31
 
 ### Fixed
