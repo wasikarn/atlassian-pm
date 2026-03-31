@@ -1,6 +1,6 @@
 {
   "name": "atlassian-pm",
-  "version": "2.6.13",
+  "version": "2.6.14",
   "description": "Agile Jira/Confluence automation: story creation, sprint planning, quality gates, HR enforcement",
   "author": {
     "name": "Tathep"
