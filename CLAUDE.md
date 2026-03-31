@@ -24,8 +24,9 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 > **Config-first rule:** ALL project-specific values (project key, board ID, space key, team, services) live in `project-config.json` **only**. Never hardcode these values in skill files, agents, or hooks. Skill examples use `<project_key>` / `<space_key>` as placeholders — the actual values come from config at runtime. To switch projects or reconfigure, edit `project-config.json` — not the plugin.
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence + Figma + GitHub), Python 3.x
 **Git filters:** smudge/clean auto-convert placeholders↔real values · `./scripts/setup.sh` to configure
-**Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge, commits, tags, pushes, creates GitHub release, updates plugin + copies config in one step
+**Versioning:** `./scripts/bump-version.sh <X.Y.Z>` — updates marketplace.json + README badge, commits, tags, pushes, creates GitHub release, refreshes marketplace cache in one step
 **Plugin mode:** `claude --plugin-dir .` (dev) · Skills namespaced as `/atlassian-pm:<name>`
+**MCP registration:** `atlassian-cache` registers via standalone `.mcp.json` at plugin root — do NOT add `mcpServers` to `plugin.json` (causes duplicate registration from cache dir without variable expansion)
 
 **Workflows:** [`skill-orchestration.md`](references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
 **Verify:** `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
