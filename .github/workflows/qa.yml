@@ -1,0 +1,162 @@
+name: QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qa:
+    name: QA Gates
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2
+
+      - name: 1. shellcheck
+        run: |
+          SCRIPTS=$(find hooks scripts -name "*.sh" 2>/dev/null)
+          if [ -z "$SCRIPTS" ]; then
+            echo "  - no shell scripts found"
+            exit 0
+          fi
+          # shellcheck disable=SC2086
+          shellcheck $SCRIPTS && echo "  ✓ shellcheck — no errors" || { echo "  ✗ shellcheck — errors found"; exit 1; }
+
+      - name: 2. markdownlint
+        run: |
+          OUTPUT=$(
+            cd . || exit 0
+            markdownlint-cli2 "**/*.md" 2>&1 || true
+          )
+          ERRORS=$(echo "$OUTPUT" | grep "^Summary:" | grep -oE '[0-9]+' | head -1 || true)
+          FILES=$(echo "$OUTPUT" | grep "^Linting:" | grep -oE '[0-9]+' | head -1 || true)
+          if [ "${ERRORS:-0}" -eq 0 ]; then
+            echo "  ✓ markdownlint — ${FILES:-?} files, 0 errors"
+          else
+            echo "  ✗ markdownlint — ${ERRORS} error(s) across ${FILES:-?} file(s)"
+            echo "$OUTPUT" | grep -v "^Linting:\|^Summary:" || true
+            exit 1
+          fi
+
+      - name: 3. plugin.json
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          required = ["name", "version", "description"]
+          with open(".claude-plugin/plugin.json") as f:
+              p = json.load(f)
+          missing = [k for k in required if not p.get(k)]
+          if missing:
+              print(f"  ✗ plugin.json — missing fields: {missing}")
+              sys.exit(1)
+          print(f"  ✓ plugin.json — version {p['version']}, all required fields present")
+          EOF
+
+      - name: 4. SKILL.md frontmatter
+        run: |
+          python3 - <<'EOF'
+          import os, sys
+          required = ["name", "description"]
+          errors = []
+          count = 0
+          for root, _, files in os.walk("skills"):
+              if "SKILL.md" in files:
+                  count += 1
+                  path = os.path.join(root, "SKILL.md")
+                  with open(path) as f:
+                      content = f.read()
+                  if not content.startswith("---"):
+                      errors.append(f"{path}: missing frontmatter")
+                      continue
+                  block = content.split("---")[1]
+                  for field in required:
+                      if f"{field}:" not in block:
+                          errors.append(f"{path}: missing '{field}'")
+          if errors:
+              for e in errors:
+                  print(f"  ✗ {e}")
+              sys.exit(1)
+          print(f"  ✓ SKILL.md frontmatter — {count} skills OK")
+          EOF
+
+      - name: 5. agent frontmatter
+        run: |
+          python3 - <<'EOF'
+          import os, sys
+          errors = []
+          count = 0
+          for fname in os.listdir("agents"):
+              if not fname.endswith(".md"):
+                  continue
+              count += 1
+              path = os.path.join("agents", fname)
+              with open(path) as f:
+                  content = f.read()
+              if not content.startswith("---"):
+                  errors.append(f"{path}: missing frontmatter")
+                  continue
+              block = content.split("---")[1]
+              for field in ["name", "description"]:
+                  if f"{field}:" not in block:
+                      errors.append(f"{path}: missing '{field}'")
+          if errors:
+              for e in errors:
+                  print(f"  ✗ {e}")
+              sys.exit(1)
+          print(f"  ✓ agent frontmatter — {count} agents OK")
+          EOF
+
+      - name: 6. hooks.json script references
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, re
+          with open("hooks/hooks.json") as f:
+              hooks = json.load(f)
+          missing = []
+          for event, entries in hooks.get("hooks", {}).items():
+              for entry in entries:
+                  for hook in entry.get("hooks", []):
+                      cmd = hook.get("command", "")
+                      for m in re.finditer(r'hooks/[^\s"\']+\.(?:sh|py)', cmd):
+                          script = m.group(0)
+                          if not os.path.exists(script):
+                              missing.append(f"{event}: {script}")
+          if missing:
+              for m in missing:
+                  print(f"  ✗ {m}")
+              sys.exit(1)
+          print("  ✓ hooks.json — all script references found")
+          EOF
+
+      - name: 7. Python hook tests
+        run: python3 -m pytest hooks/tests/ -v --tb=short
+
+      - name: 8. CHANGELOG
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          if grep -q "\[${VERSION}\]" CHANGELOG.md 2>/dev/null; then
+            echo "  ✓ CHANGELOG.md — v${VERSION} entry found"
+          else
+            echo "  ✗ CHANGELOG.md — missing entry for v${VERSION}"
+            exit 1
+          fi
+
+      - name: 9. required files
+        run: |
+          for f in LICENSE README.md CHANGELOG.md; do
+            [ -f "$f" ] && echo "  ✓ $f found" || { echo "  ✗ $f missing"; exit 1; }
+          done
