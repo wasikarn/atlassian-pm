@@ -48,7 +48,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", specifier = ">=1.0.0,<2" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0,<9" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0,<10" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24,<1" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=6.0,<7" },
     { name = "sentence-transformers", specifier = ">=3.0.0,<4" },
