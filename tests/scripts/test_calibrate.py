@@ -366,6 +366,25 @@ def test_run_calibration_returns_none_when_lock_held(tmp_path, monkeypatch):
     assert not cal_path.exists()
 
 
+def test_run_calibration_returns_none_when_lock_file_unwritable(tmp_path, monkeypatch):
+    """When lock file directory does not exist, run_calibration returns None and cancels timer."""
+    timer = _FakeTimer(60, lambda: None)
+    monkeypatch.setattr(calibrate, "_hard_timeout", lambda *_: timer)
+
+    outcomes = _write_outcomes(tmp_path, [_make_record("BE", "completed")] * 15)
+    cal_path = tmp_path / "calibration.json"
+    lock_path = tmp_path / "nonexistent_dir" / "calibration.lock"  # parent dir doesn't exist
+
+    result = calibrate.run_calibration(
+        outcomes_path=outcomes,
+        calibration_path=cal_path,
+        lock_file=lock_path,
+        force=True,
+    )
+    assert result is None
+    assert timer._cancelled is True
+
+
 def test_run_calibration_cancels_timer_on_success(tmp_path, monkeypatch):
     """Timer is cancelled after successful calibration, and calibration.json is written."""
     timer = _FakeTimer(60, lambda: None)

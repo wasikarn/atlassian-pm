@@ -278,7 +278,11 @@ def run_calibration(
     # Use "a" mode — avoids truncating the lock file on open (no-truncate is conventional
     # for lock files). mode 0o600: lock file holds no sensitive data but should not be
     # world-readable per least-privilege principle.
-    lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))
+    try:
+        lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))
+    except OSError:
+        timer.cancel()
+        return None
     try:
         fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
