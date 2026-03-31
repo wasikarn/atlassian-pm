@@ -151,7 +151,7 @@ If velocity-tracker not available → skip and note in Phase 8 summary.
 > Then spawn calibration update in the background (non-blocking):
 >
 > ```bash
-> nohup uv run scripts/ai/calibrate.py > /dev/null 2>> ~/.claude/plugins/data/atlassian-pm-atlassian-pm/calibrate.log &
+> nohup uv run scripts/ai/calibrate.py > /dev/null 2>> "${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm}/calibrate.log" &
 > ```
 >
 > Print `[calibration scheduled in background]` and continue immediately — do NOT wait for it to finish.

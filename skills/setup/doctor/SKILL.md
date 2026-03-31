@@ -1,7 +1,7 @@
 ---
 name: doctor
 description: |
-  Health check for atlassian-pm environment — runs 10 checks and reports status.
+  Health check for atlassian-pm environment — runs 12 checks and reports status.
 
   Checks: acli install, acli auth, uv install, atlassian-cache venv, mcp-atlassian config,
   project-config valid, board_id non-zero, git filters, CLAUDE.md block, team-detail config.
@@ -19,7 +19,7 @@ allowed-tools: Bash
 
 # /atlassian-pm:doctor
 
-Health check for the `atlassian-pm` environment. Runs all 10 checks regardless of failures.
+Health check for the `atlassian-pm` environment. Runs all 12 checks regardless of failures.
 
 ## Instructions
 
@@ -244,7 +244,6 @@ echo "✓ pass  ✗ fail  ! warning  - optional"
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)
-
 
 ## References
 
