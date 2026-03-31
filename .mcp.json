@@ -9,7 +9,8 @@
         "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/server.py"
       ],
       "env": {
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts"
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts",
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv"
       }
     }
   }
