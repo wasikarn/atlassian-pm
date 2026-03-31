@@ -40,6 +40,27 @@ if [ -d "$PROJECT_DIR/mcp-servers/atlassian-cache" ]; then
   UV_PROJECT_ENVIRONMENT="$CLAUDE_PLUGIN_DATA/venv" "$UV_BIN" sync --project "$PROJECT_DIR/mcp-servers/atlassian-cache" --quiet
   cp "$PROJECT_DIR/mcp-servers/atlassian-cache/pyproject.toml" "$CLAUDE_PLUGIN_DATA/pyproject.toml" 2>/dev/null || true
 
+  # Write full MCP config to marketplace dir.
+  # Source .mcp.json is intentionally empty so cache dir (no variable expansion) stays empty.
+  # Marketplace dir is where ${CLAUDE_PLUGIN_ROOT} is expanded — only that copy registers the server.
+  MARKETPLACE_MCP="$HOME/.claude/plugins/marketplaces/atlassian-pm/.mcp.json"
+  if [ -d "$(dirname "$MARKETPLACE_MCP")" ]; then
+    cat > "$MARKETPLACE_MCP" << 'MCP_EOF'
+{
+  "mcpServers": {
+    "atlassian-cache": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/run.sh",
+      "env": {
+        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts"
+      }
+    }
+  }
+}
+MCP_EOF
+    echo "  [OK] marketplace .mcp.json configured"
+  fi
+
   # Verify MCP server dependencies are actually importable
   VENV_PYTHON="$CLAUDE_PLUGIN_DATA/venv/bin/python"
   if [ ! -f "$VENV_PYTHON" ]; then

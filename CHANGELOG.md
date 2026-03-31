@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.12] - 2026-03-31
+
+### Fixed
+
+- **Root fix for ghost `atlassian-cache: ${CLAUDE_PLUGIN_ROOT}/... ✗ Failed to connect`** — Claude Code loads `.mcp.json` before SessionStart hooks run, so hook-based clearing was always too late. Solution: source `.mcp.json` is now empty (`{"mcpServers": {}}`), so the cache dir copy is always empty too. `setup.sh` and `bump-version.sh` write the full server config directly to the marketplace dir (the only place `${CLAUDE_PLUGIN_ROOT}` is expanded). No restart dance required after plugin updates.
+
 ## [2.6.11] - 2026-03-31
 
 ### Fixed
