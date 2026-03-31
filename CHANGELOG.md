@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.10] - 2026-03-31
+
+### Fixed
+
+- `bump-version.sh`: cache dir `.mcp.json` clearing now polls up to 10s for async download to complete, then clears all cached versions (not just the new one) — prevents ghost `atlassian-cache: ${CLAUDE_PLUGIN_ROOT}/... ✗ Failed to connect` entry after every release.
+
 ## [2.6.9] - 2026-03-31
 
 ### Fixed
