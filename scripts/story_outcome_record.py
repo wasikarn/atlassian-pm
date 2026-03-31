@@ -28,6 +28,8 @@ import argparse
 import json
 import os
 import re
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -135,6 +137,24 @@ def main() -> None:
         f"Story outcomes recorded: {written} issues — "
         f"{completed} completed, {carry_over} carry-over → story-outcomes.jsonl"
     )
+
+    # Trigger calibration in background (non-blocking, fire-and-forget)
+    plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT", "")
+    if plugin_root:
+        calibrate_path = Path(plugin_root) / "scripts" / "ai" / "calibrate.py"
+        if calibrate_path.exists():
+            log_path = Path(os.environ.get(
+                "CLAUDE_PLUGIN_DATA",
+                str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
+            )) / "calibrate.log"
+            log_fd = open(log_path, "a")
+            subprocess.Popen(
+                [sys.executable, str(calibrate_path)],
+                start_new_session=True,
+                stdout=subprocess.DEVNULL,
+                stderr=log_fd,
+            )
+            log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
 
 
 if __name__ == "__main__":
