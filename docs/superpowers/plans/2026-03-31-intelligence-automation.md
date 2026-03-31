@@ -93,7 +93,7 @@ def test_run_calibration_returns_none_when_lock_held(tmp_path, monkeypatch):
 
 
 def test_run_calibration_cancels_timer_on_success(tmp_path, monkeypatch):
-    """Timer is cancelled after successful calibration."""
+    """Timer is cancelled after successful calibration, and calibration.json is written."""
     timer = _FakeTimer(60, lambda: None)
     monkeypatch.setattr(calibrate, "_hard_timeout", lambda secs=60: timer)
     # Use real flock — lock_path in tmp_path is isolated
@@ -101,12 +101,15 @@ def test_run_calibration_cancels_timer_on_success(tmp_path, monkeypatch):
     cal_path = tmp_path / "calibration.json"
     lock_path = tmp_path / "calibration.lock"
 
-    calibrate.run_calibration(
+    result = calibrate.run_calibration(
         outcomes_path=outcomes,
         calibration_path=cal_path,
         lock_file=lock_path,
         force=True,
     )
+    # Verify calibration actually ran (not just early-exited)
+    assert result is not None
+    assert cal_path.exists()
     assert timer._cancelled is True
 ```
 
@@ -173,10 +176,15 @@ def run_calibration(
 ) -> dict | None:
     """Run calibration. Returns result dict or None if skipped/no data."""
     timer = _hard_timeout(60)
-    lock_fd = open(lock_file, "w")
+    # Use "a" mode — avoids truncating the lock file on open (no-truncate is conventional
+    # for lock files). mode 0o600: lock file holds no sensitive data but should not be
+    # world-readable per least-privilege principle.
+    lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))
     try:
         fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
+        # Early cancel: timer is no longer needed since we're exiting immediately.
+        # The finally block below would also cancel it, but this makes intent explicit.
         timer.cancel()
         lock_fd.close()
         return None  # another calibration is running — exit cleanly
@@ -441,12 +449,14 @@ In `main()`, after the final `print(...)` call (currently the last statement bef
                 "CLAUDE_PLUGIN_DATA",
                 str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
             )) / "calibrate.log"
+            log_fd = open(log_path, "a")
             subprocess.Popen(
                 [sys.executable, str(calibrate_path)],
                 start_new_session=True,
                 stdout=subprocess.DEVNULL,
-                stderr=open(log_path, "a"),  # noqa: SIM115
+                stderr=log_fd,
             )
+            log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
 ```
 
 The complete `main()` function after the change (showing only the end to confirm placement):
@@ -470,12 +480,14 @@ The complete `main()` function after the change (showing only the end to confirm
                 "CLAUDE_PLUGIN_DATA",
                 str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"),
             )) / "calibrate.log"
+            log_fd = open(log_path, "a")
             subprocess.Popen(
                 [sys.executable, str(calibrate_path)],
                 start_new_session=True,
                 stdout=subprocess.DEVNULL,
-                stderr=open(log_path, "a"),  # noqa: SIM115
+                stderr=log_fd,
             )
+            log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -627,11 +639,15 @@ mkdir -p "$HOME/Library/LaunchAgents"
 
 # ── Generate plist (values substituted by bash, no ${} in final file) ─────────
 
-# Capture values now — heredoc expands bash variables
+# Capture values at install time (heredoc expands these bash variables).
+# No ${VARIABLE} literals appear in the final XML — launchd does not expand them.
 _PLUGIN_ROOT="$CLAUDE_PLUGIN_ROOT"
 _PROJECT_DIR="$CLAUDE_PROJECT_DIR"
 _PYTHON="$PYTHON"
 _LOG_DIR="$LOG_DIR"
+# Capture user PATH at install time so the daemon inherits Homebrew tools etc.
+# launchd agents do not inherit shell PATH — provide it explicitly.
+_USER_PATH="$PATH"
 
 cat > "$PLIST_PATH" << PLIST_EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -669,6 +685,8 @@ cat > "$PLIST_PATH" << PLIST_EOF
     <string>${_PLUGIN_ROOT}</string>
     <key>CLAUDE_PROJECT_DIR</key>
     <string>${_PROJECT_DIR}</string>
+    <key>PATH</key>
+    <string>${_USER_PATH}</string>
   </dict>
 </dict>
 </plist>
@@ -696,7 +714,8 @@ fi
 
 echo ""
 echo "✓ board_monitor daemon installed"
-if launchctl list "$LABEL" 2>/dev/null; then
+# || true: launchctl list returns exit 113 if service not yet settled — non-fatal
+if launchctl list "$LABEL" 2>/dev/null || true; then
   echo "  (registered with launchd — RunAtLoad will start it)"
 fi
 echo ""
@@ -729,6 +748,7 @@ git commit -m "feat(setup_monitor): install board_monitor.py as macOS launchd da
 - All plist values substituted at generation time (no \${} in XML)
 - plutil -lint validates plist before loading
 - ThrottleInterval: 60s prevents rapid restart loops
+- PATH captured at install time — launchd agents don't inherit shell PATH
 - Idempotent: bootout existing service before bootstrapping"
 ```
 
@@ -756,8 +776,10 @@ set -euo pipefail
 PLIST_PATH="$HOME/Library/LaunchAgents/com.atlassian-pm.monitor.plist"
 LABEL="com.atlassian-pm.monitor"
 
-# Bootout (silent if not loaded)
-launchctl bootout "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || true
+# Bootout: prefer label form (works even if plist has moved/been deleted already).
+# Fall back to plist-path form for compatibility.
+launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || \
+  launchctl bootout "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || true
 
 # Remove plist (recoverable via Trash — never rm)
 if [ -f "$PLIST_PATH" ]; then
@@ -897,8 +919,10 @@ Find:
 ```
 Replace with:
 ```
-# Expected: 10-12 checks passed
+# Expected: 9-12 checks passed (12 if board_monitor daemon is running)
 ```
+
+Note: The new check 11 is SKIP in the default case (daemon not installed), so base range stays 9–11. "9–12" is correct — 12 only when daemon is running.
 
 - [ ] **Step 5: Run doctor SKILL.md bash block through shellcheck (inline)**
 
@@ -916,7 +940,7 @@ git commit -m "feat(doctor): add check 11 for board_monitor daemon + QUICKSTART 
 
 - doctor: TOTAL 11→12, check 11 detects loaded/plist-exists/missing states
 - QUICKSTART: Optional Board Monitor section with setup/teardown commands
-- QUICKSTART: expected doctor output updated to 10-12 checks passed"
+- QUICKSTART: expected doctor output updated to 9-12 checks passed"
 ```
 
 ---
