@@ -66,6 +66,64 @@ PYCHECK
       echo "  Try: UV_PROJECT_ENVIRONMENT=\"$CLAUDE_PLUGIN_DATA/venv\" uv sync --project mcp-servers/atlassian-cache"
     fi
   fi
+
+  # --- Register atlassian-cache in ~/.claude.json (user-scoped) ---
+  # Plugin .mcp.json is intentionally empty to avoid duplicate registration.
+  # Claude Code loads .mcp.json from BOTH marketplace and cache dirs; if both
+  # had the server, it triggers "skipped — same command/URL" on every startup.
+  # User-scoped registration in ~/.claude.json avoids this entirely.
+  echo "  Registering atlassian-cache MCP server in ~/.claude.json..."
+
+  _ATLASPM_MARKETPLACE="$HOME/.claude/plugins/marketplaces/atlassian-pm"
+  export _ATLASPM_MARKETPLACE _CLAUDE_PLUGIN_DATA="$CLAUDE_PLUGIN_DATA"
+
+  python3 - << 'PYEOF'
+import json, os, sys
+
+claude_json = os.path.expanduser("~/.claude.json")
+marketplace_dir = os.environ["_ATLASPM_MARKETPLACE"]
+data_dir = os.environ["_CLAUDE_PLUGIN_DATA"]
+
+desired = {
+    "command": "uv",
+    "args": [
+        "run", "--project", "mcp-servers/atlassian-cache",
+        "mcp-servers/atlassian-cache/server.py"
+    ],
+    "cwd": marketplace_dir,
+    "env": {
+        "PYTHONPATH": marketplace_dir + "/scripts",
+        "UV_PROJECT_ENVIRONMENT": data_dir + "/venv",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+    }
+}
+
+config = {}
+if os.path.exists(claude_json):
+    with open(claude_json) as f:
+        config = json.load(f)
+
+existing = config.get("mcpServers", {}).get("atlassian-cache")
+if existing == desired:
+    print("  [OK] atlassian-cache already registered in ~/.claude.json")
+    sys.exit(0)
+
+config.setdefault("mcpServers", {})["atlassian-cache"] = desired
+with open(claude_json, "w") as f:
+    json.dump(config, f, indent=2)
+    f.write("\n")
+print("  [OK] atlassian-cache registered in ~/.claude.json")
+PYEOF
+
+  # Clear plugin .mcp.json files so the user-scoped entry above is the only source.
+  # Prevents "skipped — same command/URL" duplicate warning on every startup.
+  _EMPTY='{"mcpServers": {}}'
+  printf '%s\n' "$_EMPTY" > "$HOME/.claude/plugins/marketplaces/atlassian-pm/.mcp.json" 2>/dev/null || true
+  python3 -c "
+import glob, os
+for f in glob.glob(os.path.expanduser('~/.claude/plugins/cache/atlassian-pm/atlassian-pm/*/.mcp.json')):
+    open(f, 'w').write('{\"mcpServers\": {}}\n')
+" 2>/dev/null || true
 fi
 
 echo ""
