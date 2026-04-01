@@ -7,8 +7,7 @@
 Agile Documentation System — skills-based Jira/Confluence automation
 
 **Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (77 hooks) | `agents/` (20) | `.claude/commands/` (13 chains)
-**Skills:** 39 skills at `skills/{setup,epic,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
-**Deprecated skills:** `skills/story/create-story/`, `skills/story/analyze-story/` — replaced by `/create-task` (feature mode)
+**Skills:** 35 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
 **Issue hierarchy:** Epic → Task (2 levels only). No Story/Subtask — Task is the value unit with narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings (สรุปภาพรวม, เงื่อนไขที่ต้องผ่าน, etc.). Human-readable + AI-parseable.
 **Vibe mode:** All creation skills default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Partial flags: `create-epic --no-doc` (Jira-only, skip Confluence), `vibe-plan --dry-run` (preview plan, no Jira write), `create-task --qa/--bug/--spike/--chore` (mode selection). Use `/vibe-plan` for idea → Epic + Tasks in one shot.
