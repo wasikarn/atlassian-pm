@@ -2,11 +2,11 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each subtask includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
-[![Version](https://img.shields.io/badge/version-2.6.15-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-2.6.16-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
-Describe what you need in plain English (or Thai) — Claude explores your codebase, writes properly-formatted Jira ADF, passes a quality gate, and publishes. Hooks enforce 10 hard rules automatically and block silent failures before they happen. A local SQLite cache reduces Jira API token consumption by **80–90%**. A built-in calibration engine learns your team's carry-over patterns and keyword risk signals from sprint history — optionally running as a background `board_monitor` daemon for proactive Jira insights.
+Describe what you need in plain English (or Thai) — Claude explores your codebase, writes properly-formatted Jira ADF for non-technical stakeholders, passes a quality gate, and publishes. Hooks enforce 10 hard rules automatically and block silent failures before they happen. A local SQLite cache reduces Jira API token consumption by **80–90%**. A built-in calibration engine learns your team's carry-over patterns and keyword risk signals from sprint history — optionally running as a background `board_monitor` daemon for proactive Jira insights.
 
 ---
 

@@ -1,6 +1,6 @@
 # QUICKSTART — atlassian-pm Plugin
 
-Agile documentation system that automates Jira/Confluence workflows via Claude Code slash commands.
+Agile documentation system that automates Jira/Confluence workflows via Claude Code slash commands. Writes for non-technical stakeholders (PMs, designers) while supporting engineers with implementation details.
 
 **Read time:** ~5 minutes
 
