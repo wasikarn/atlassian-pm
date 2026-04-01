@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.16] - 2026-04-01
+
+### Changed
+
+- **Improved narrative tone for non-technical audiences** — All templates now write output readable by PMs, designers, and stakeholders (not just engineers)
+- **Minimal-first template approach** — Default ADF includes only required sections (Objective + ACs); optional sections (Scope, Reference, Technical Notes) are snippets with clear inclusion conditions
+- **Plain language for complex concepts** — Epic Domain Model section rewritten from DDD jargon to plain causality format ("เมื่อ X → Y"); removed unnecessary technical terms from Business Value bullets
+- **Updated Content Budget** — Enforces minimal required sections only; optional sections added only when real data exists (no placeholders)
+- **Simplified QA template** — Removed AC Coverage table from default; reduced to Test Objective + Test Cases + optional Reference
+
 ## [2.6.15] - 2026-03-31
 
 ### Fixed
