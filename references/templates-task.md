@@ -163,10 +163,15 @@
 
 **Sections:** (numbered `N. Emoji Title`)
 
+**Required sections (create at ticket creation):**
+
 1. `1. ❓ Research Question` — panel(info): main question
 2. `2. 📋 Context` — paragraph: background/rationale
 3. `3. 🔍 Investigation Areas` — bulletList: topics to study
-4. `4. 📝 Findings` — panel(note): *[To be filled after research]*
-5. `5. 💡 Recommendations` — panel(success): *[To be filled after research]*
-6. `6. ⚡ Out of Scope` — panel(warning): optional, เพิ่มเมื่อ spike มี adjacent area ที่ชัดเจนว่าไม่ investigate
-7. `7. 🔗 Reference` — purple table
+
+**Optional sections (⚡ add only when real data exists):**
+
+- `4. 📝 Findings` — panel(note): **เพิ่มหลังทำ research เสร็จเท่านั้น** — ข้ามไปก่อนถ้ายังไม่มีข้อมูล
+- `5. 💡 Recommendations` — panel(success): **เพิ่มหลังทำ research เสร็จเท่านั้น**
+- `6. ⚡ Out of Scope` — panel(warning): เพิ่มเมื่อ spike มี adjacent area ที่ชัดเจนว่าไม่ investigate
+- `7. 🔗 Reference` — purple table

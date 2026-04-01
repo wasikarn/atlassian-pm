@@ -35,14 +35,19 @@ jira_create_issue({ project_key: "{{PROJECT_KEY}}", summary: "[TAG] - Descriptio
 > `acli jira workitem edit --from-json ... --yes`
 > → see [templates-core.md](templates-core.md) for ADF doc/panel/table node format
 
-**Density rules:**
+**Required sections (always include):**
 
-- Objective: **1 sentence** — Thai narrative, English technical terms
-- Scope table: `Action | File`, **max 10 rows** — ≥1 REF required
-- AC: **max 3 panels** — all `panelType: "success"`, Given/When/Then with method names + HTTP codes
-- Reference section: skip if parent story has all links
+- `1. Objective` — **1 sentence**, Thai + English technical terms
+- `2. Acceptance Criteria` — **1–3 panels**, Given/When/Then with method names + HTTP codes
 
-**Sections:** `1. Objective` → `2. Scope` → `3. Acceptance Criteria` → `4. 🤖 Implementation Hints`
+**Optional sections (⚡ include only when needed):**
+
+- `Scope` — เพิ่มเฉพาะเมื่อมี ≥2 CREATE files หรือ developer ต้องการ file list เพื่อ navigate — ไม่ใส่ถ้ามีไฟล์เดียวหรือชัดเจนจาก ACs แล้ว
+- `🤖 Implementation Hints` — **vibe mode only** หรือเมื่อมี codebase exploration data จริง · ไม่ generate ถ้าไม่มีข้อมูล
+
+**Default output = Objective + ACs only.** เพิ่ม Scope/Hints เมื่อมีเหตุผลชัดเจน
+
+**Sections when full:** `1. Objective` → `2. Scope` ⚡ → `3. Acceptance Criteria` → `4. 🤖 Implementation Hints` ⚡
 
 **Scope table Action values:**
 
@@ -76,7 +81,7 @@ After the table, add a `Claude Code Prompt:` paragraph:
 Implement [objective] following the pattern in [Pattern to Follow]. Run [Test Command] to verify. All ACs must pass.
 ```
 
-**Minimal ADF skeleton for Step 2:**
+**Default ADF skeleton for Step 2 (Objective + ACs only):**
 
 ```json
 {
@@ -85,21 +90,9 @@ Implement [objective] following the pattern in [Pattern to Follow]. Run [Test Co
     "type": "doc", "version": 1,
     "content": [
       {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "1. Objective"}]},
-      {"type": "paragraph", "content": [{"type": "text", "text": "[Thai objective sentence]"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "[Thai objective — 1 sentence]"}]},
       {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "2. Scope"}]},
-      {"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
-        {"type": "tableRow", "content": [
-          {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Action"}]}]},
-          {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "File"}]}]}
-        ]},
-        {"type": "tableRow", "content": [
-          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "CREATE"}]}]},
-          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "app/Services/Feature/NewService.ts", "marks": [{"type": "code"}]}]}]}
-        ]}
-      ]},
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "3. Acceptance Criteria"}]},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "2. Acceptance Criteria"}]},
       {"type": "panel", "attrs": {"panelType": "success"}, "content": [
         {"type": "paragraph", "content": [{"type": "text", "text": "AC1: [Verb] — [Scenario]", "marks": [{"type": "strong"}]}]},
         {"type": "bulletList", "content": [
@@ -113,33 +106,48 @@ Implement [objective] following the pattern in [Pattern to Follow]. Run [Test Co
 }
 ```
 
+**⚡ Scope table snippet — insert between Objective and ACs when ≥2 CREATE files:**
+
+```json
+{"type": "rule"},
+{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "2. Scope"}]},
+{"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+  {"type": "tableRow", "content": [
+    {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Action"}]}]},
+    {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "File"}]}]}
+  ]},
+  {"type": "tableRow", "content": [
+    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "CREATE"}]}]},
+    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "app/Services/Feature/NewService.ts", "marks": [{"type": "code"}]}]}]}
+  ]}
+]}
+// (renumber ACs section to "3. Acceptance Criteria" when Scope is present)
+```
+
 ## QA Test Case Template
 
 > Optional — create when QA requests or story has complex business logic.
 > Summary format: `[QA] - Test: [Feature Name]` · Same Two-Step: MCP create → acli edit
 
-**Density rules:**
+**Required sections:**
 
-- Test Objective: **1 sentence**
-- Test Cases: **max 8 cases** — split QA ticket if >8
-- Each TC: 3 bullets (Given/When/Then) + AC ref + Priority — no prose
-- Use `bulletList` inside panels (not nested tables)
+- `🎯 Test Objective` — 1 sentence (info panel)
+- `🧪 Test Cases` — max 8 cases, split if >8 (success/warning panels)
+
+**Optional sections (⚡):**
+
+- `🔗 Reference` — เพิ่มเฉพาะเมื่อมี link จริง (Story key, Figma, test env URL)
 
 **Panel type by TC type:** happy path → `success` · edge case → `warning`
-
-**Sections:** `🎯 Test Objective` (info panel) → `📊 AC Coverage` (table: # | AC | Scenarios) → `🧪 Test Cases` (panels) → `🔗 Reference` (table: Type | Link)
-
-**AC Coverage table columns:** `#` | `AC` | `Scenarios`
-**Reference table columns:** `Type` | `Link` (with hyperlink mark on issue key)
 
 **Test Case panel structure:**
 
 ```text
 TC1: [Happy Path Test]  ← bold paragraph
-• AC: 1 | Priority: 🟠 High
 • Given: [precondition]
 • When: [action]
 • Then: [expected result]
+• AC: 1 | Priority: 🟠 High
 ```
 
 **Priority scale:** 🔴 Critical · 🟠 High · 🟡 Medium · 🟢 Low

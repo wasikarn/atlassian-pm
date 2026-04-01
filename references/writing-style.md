@@ -36,13 +36,37 @@ Then: Navigate to topup credit page
 
 ## Tone & Style
 
-> **3 Principles:** Concise (cut excess words) · Casual (talk like a teammate) · Clear (specific + testable)
+> **4 Principles:** Concise (cut excess words) · Casual (talk like a teammate) · Clear (specific + testable) · **Human (narrative readable by non-technical stakeholders)**
 
 | ❌ Verbose | ✅ Concise |
 | --- | --- |
 | The system shall render and display a total of 3 card types in accordance with the approved design specifications | Display 3 card types per design |
 | Upon successful completion of page loading, the user shall be able to observe 3 card items rendered on screen | AC1: Display - Page loads and shows 3 cards |
 | Then: Show an appropriate error | Then: Show error "Please enter an amount" |
+
+### Human Principle — Narrative Sections
+
+> **Rule:** Epic Overview, Story narrative ("As a… / I want… / So that…"), and Business Value **must** be understandable by anyone — PM, designer, business stakeholder — with zero technical background. Save jargon for ACs and Technical Notes.
+
+| Section | Audience | Language Target |
+| --- | --- | --- |
+| Epic Overview (Problem + Summary) | Stakeholders, PMs | Plain Thai, no acronyms, no system terms |
+| Business Value bullets | Business, leadership | Outcomes in human terms (revenue, save time, reduce errors) |
+| Story narrative (As a / I want / So that) | Anyone | Describe the experience, not the implementation |
+| 📍 Context line | Anyone | What's painful today — like explaining to a friend |
+| ACs (Given/When/Then) | Developers, QA | Technical OK — routes, component names, edge cases |
+| Technical Notes | Developers | Technical OK — file paths, patterns, API endpoints |
+
+**Before / After:**
+
+| ❌ Tech-heavy | ✅ Human |
+| --- | --- |
+| "Implement OAuth2 token refresh flow for session persistence" | "ผู้ใช้ไม่ต้อง login ซ้ำทุกครั้งที่เปิดแอป" |
+| "Problem: API response latency causes degraded UX on search page" | "ผู้ใช้รอนานกว่าจะเห็นผลการค้นหา ทำให้ออกไปก่อน" |
+| "So that the service layer can process downstream events" | "So that ทีมรู้ทันทีเมื่อมีออเดอร์ใหม่ โดยไม่ต้องเช็กเอง" |
+| "Enable coupon redemption via promo_code validation endpoint" | "ผู้ใช้กรอกโค้ดส่วนลดตอนชำระเงินได้" |
+
+**Plain Language Test:** อ่านออกเสียง — ถ้าต้องอธิบายเพิ่มแสดงว่ายังไม่ plain พอ
 
 ## Scan-First Principle
 
@@ -115,35 +139,31 @@ Team will **scan before reading** — design content to be scannable in 5 second
 | Restated Why | "So that I can do X" = copy of "I want X" | "So that" must add new business value |
 | Technical Events in AC | "DB_INSERT_SUCCESS" in AC | Use domain language: "CouponCollected" |
 | No Event Flow | Story doesn't specify events | ⚡ optional: add command→event in AC title |
+| **Tech jargon in narrative** | "Implement OAuth2 token refresh" in Story narrative — PM can't understand | Rewrite as user experience: "ไม่ต้อง login ซ้ำ" |
+| **System-speak in Problem line** | "API latency degraded UX" in Epic Overview | Write what the user feels: "ผู้ใช้รอนาน ทำให้ออกไปก่อน" |
+| **Feature list as Business Value** | "Add endpoint X, integrate Y, migrate Z" | Write outcomes: "ลดเวลา X%, เพิ่ม Conversion Y%" |
 
 ## Content Budget (per section)
 
-> Agent **must** write within this budget — if exceeded, cut or split
+> Agent **must** write within this budget — if exceeded, cut or split. **Default = minimum. Add sections only when there is real data.**
 
-| Issue Type | Section | Budget |
+| Issue Type | Required | Optional (⚡ real data only) |
 | --- | --- | --- |
-| **Epic** | Overview | 3 lines (Problem + Summary + Supports) |
-| | Business Value | 3 bullets (Revenue/Retention/Ops) |
-| | Scope | 1 line/item, no description needed |
-| | RICE | ⚡ optional — skip if priority is already clear |
-| | Success Metrics | ⚡ optional — skip if metrics not yet defined |
-| | User Stories | list + link only, no description |
-| | Progress | auto counts, don't write manually |
-| **Story** | Narrative | 3-4 lines (⚡ optional 📍 context + As a / I want / So that) |
-| | AC panels | max 5 panels — if >5, split story |
-| | Each AC | 3 bullets (Given/When/Then) + optional And |
-| | Out of Scope | ⚡ optional — เพิ่มเมื่อมี adjacent feature ที่ developer อาจ assume ว่าต้องทำ |
-| | Reference | ⚡ skip if no Figma/external link |
-| **Task** | Context/Objective | 1-2 lines |
-| | Out of Scope | ⚡ optional — เพิ่มเมื่อ task มี adjacent scope ที่อาจสับสน (refactor/spike) |
-| **Sub-task** | Objective | 1 sentence |
-| | Scope table | only files that change, max 10 rows |
-| | AC panels | max 3 panels |
-| | Reference | ⚡ skip if parent story has all links |
-| **QA** ⚡ | Test Objective | 1 sentence |
-| | Test Cases | max 8 cases — if >8, split QA ticket |
+| **Epic** | Overview (3 lines) · Business Value (3 bullets) · Scope (1 line/item) · User Stories (list only) | RICE · Success Metrics · Domain Model · Progress |
+| **Story** | Narrative (3-4 lines) · ACs (1–5 panels, Given/When/Then) | Out of Scope · Reference (Figma/link only) · Technical Notes (after exploration) |
+| **Sub-task** | Objective (1 sentence) · ACs (1–3 panels) | Scope table (≥2 CREATE files) · Implementation Hints (vibe/exploration only) |
+| **QA** ⚡ | Test Objective (1 sentence) · Test Cases (1–8 panels) | Reference (Story/Figma link only) |
+| **Task** | Objective/Context (1-2 lines) · Tasks or Criteria | Out of Scope · Reference |
 
-**⚡ = optional** — section or issue type included only when needed (QA ticket not required for every story)
+**Rules:**
+
+- Never add a section as placeholder — if no real content, skip entirely
+- QA ticket: optional per story — create only when QA requests or story has complex logic
+- Story Reference: only when Figma URL or external design link actually exists
+- Subtask Scope table: skip when story has only 1 service or 1 file to change
+- Technical Notes: only after Phase 7 codebase exploration returns concrete file paths
+
+**⚡ = optional** — include only when there is real content to fill it with
 
 ## ADF Formatting
 
@@ -182,14 +202,16 @@ Use bold for:
 ### User Story
 
 ```text
-[Service Tag] - [Description] ([English feature name])
+[Service Tag] - [Thai description]
 ```
 
 Examples:
 
-- ✅ `[FE-Admin] - Create coupon menu page (Coupon Menu)`
-- ✅ `[BE] - Add API filter coupons`
-- ❌ `Create coupon menu page` (no tag, English only)
+- ✅ `[FE-Admin] - สร้างหน้าเมนูคูปอง`
+- ✅ `[BE] - เพิ่ม API กรองรายการคูปอง`
+- ✅ `[FE-Web] - แสดงหน้าชำระเงินด้วยคูปอง`
+- ❌ `Create coupon menu page` (no tag, no Thai)
+- ❌ `[FE-Admin] - Create coupon menu page (Coupon Menu)` (English + redundant parens)
 - ❌ `[BE] - Build API` (not specific enough)
 
 ### Sub-task

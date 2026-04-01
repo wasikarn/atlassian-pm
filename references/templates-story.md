@@ -25,18 +25,31 @@
 >
 > **Content Budget** → see [writing-style.md](writing-style.md#content-budget-per-section)
 
-**Density rules:**
+**Required sections (always include):**
 
-- Narrative: **3-4 lines** (⚡ optional 📍 Context + As a / I want / So that) — context line only when persona needs grounding
-- AC: **max 5 panels** — if >5, split story (SPIDR)
-- Each AC: **3 bullets** (Given/When/Then) + optional And — no prose
-- Reference: ⚡ **skip** if no Figma/external link
+- User Story narrative (📍 Context optional + As a / I want / So that)
+- Acceptance Criteria (1–5 panels, Given/When/Then — no prose)
+
+**Optional sections (⚡ include only when there is real data):**
+
+- `⛔ Out of Scope` — เพิ่มเฉพาะเมื่อมี adjacent feature ที่ developer อาจ assume ว่าต้องทำ
+- `🔗 Reference` — เพิ่มเฉพาะเมื่อมี Figma URL หรือ external link จริง ๆ (ไม่ใส่ placeholder)
+- `📐 Technical Notes` — เพิ่มเฉพาะเมื่อ codebase exploration ส่งกลับ concrete file paths/patterns
+
+> **Narrative tone:** Story narrative ต้องเขียนให้คนทั่วไปอ่านเข้าใจ — เขียนเป็นประสบการณ์ของผู้ใช้ ไม่ใช่ implementation detail
+>
+> - ❌ "As a user, I want to invoke the OAuth2 token refresh endpoint"
+> - ✅ "As a member, I want to stay logged in without having to sign in again every day"
+> - ❌ "So that the session persistence layer processes the JWT correctly"
+> - ✅ "So that ฉันใช้แอปต่อได้ทันทีโดยไม่สะดุด"
+
+**Default ADF (required sections only):**
 
 ```json
 {
   "projectKey": "{{PROJECT_KEY}}",
   "type": "Story",
-  "summary": "[Feature Name] - Thai Description",
+  "summary": "[Service Tag] - [Thai description]",
   "description": {
     "type": "doc",
     "version": 1,
@@ -47,22 +60,16 @@
         "attrs": {"panelType": "info"},
         "content": [
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "📍 ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[User's current situation — what they're doing, what's difficult] ⚡ optional"}
-          ]},
-          {"type": "paragraph", "content": [
             {"type": "text", "text": "As a ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[persona]"},
-            {"type": "text", "text": ","}
+            {"type": "text", "text": "[persona],"}
           ]},
           {"type": "paragraph", "content": [
             {"type": "text", "text": "I want to ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[action]"},
-            {"type": "text", "text": ","}
+            {"type": "text", "text": "[action],"}
           ]},
           {"type": "paragraph", "content": [
             {"type": "text", "text": "So that ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[benefit]"}
+            {"type": "text", "text": "[benefit — business value in plain language]"}
           ]}
         ]
       },
@@ -88,67 +95,57 @@
             ]}]}
           ]}
         ]
-      },
-      {
-        "type": "panel",
-        "attrs": {"panelType": "warning"},
-        "content": [
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "⛔ Out of Scope: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[สิ่งที่ไม่ต้องทำในรอบนี้] (จะ implement ใน [TICKET-XXX])"}
-          ]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "🔗 Reference"}]},
-      {
-        "type": "table",
-        "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
-        "content": [
-          {"type": "tableRow", "content": [
-            {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Type"}]}]},
-            {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Link"}]}]}
-          ]},
-          {"type": "tableRow", "content": [
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Epic"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "ABC-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/ABC-XXX"}}]}
-            ]}]}
-          ]},
-          {"type": "tableRow", "content": [
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Figma"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "Design", "marks": [{"type": "link", "attrs": {"href": "[Figma URL]"}}]}
-            ]}]}
-          ]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "📐 Technical Notes"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "note"},
-        "content": [
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "Architecture guardrails: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[patterns/conventions to follow — e.g. repo pattern, event-driven, auth middleware]"}
-          ]},
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "Key files: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[relevant file paths from codebase exploration — populated after Phase 6]"}
-          ]},
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "Previous learnings: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[anti-patterns or pitfalls from related past stories — leave blank if none known]"}
-          ]}
-        ]
       }
     ]
   }
 }
 ```
 
-> **⚡ Technical Notes section is optional** — include when `domain_context` is available (Phase 1 Confluence search) or after codebase exploration (Phase 6). Skip if no relevant context exists. Update via `acli jira workitem edit --from-json` after Phase 7 if richer technical notes become available post-exploration.
+**⚡ Optional snippets — append only when real data exists:**
+
+```json
+// 📍 Context line — prepend inside User Story panel when persona needs grounding
+{"type": "paragraph", "content": [
+  {"type": "text", "text": "📍 ", "marks": [{"type": "strong"}]},
+  {"type": "text", "text": "[User's current situation — what's painful today]"}
+]},
+
+// ⛔ Out of Scope — append after last AC panel when adjacent scope needs clarifying
+{"type": "rule"},
+{"type": "panel", "attrs": {"panelType": "warning"}, "content": [
+  {"type": "paragraph", "content": [
+    {"type": "text", "text": "⛔ Out of Scope: ", "marks": [{"type": "strong"}]},
+    {"type": "text", "text": "[สิ่งที่ไม่ต้องทำในรอบนี้] (จะ implement ใน [TICKET-XXX])"}
+  ]}
+]},
+
+// 🔗 Reference — add only when Figma URL or external design link actually exists
+{"type": "rule"},
+{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "🔗 Reference"}]},
+{"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+  {"type": "tableRow", "content": [
+    {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Type"}]}]},
+    {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Link"}]}]}
+  ]},
+  {"type": "tableRow", "content": [
+    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Figma"}]}]},
+    {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+      {"type": "text", "text": "Design", "marks": [{"type": "link", "attrs": {"href": "[Figma URL]"}}]}
+    ]}]}
+  ]}
+]},
+
+// 📐 Technical Notes — add ONLY after codebase exploration returns concrete data (Phase 7)
+// Include only fields that have real values — skip any field with no data
+{"type": "rule"},
+{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "📐 Technical Notes"}]},
+{"type": "panel", "attrs": {"panelType": "note"}, "content": [
+  {"type": "paragraph", "content": [
+    {"type": "text", "text": "Key files: ", "marks": [{"type": "strong"}]},
+    {"type": "text", "text": "[actual file paths from Phase 7 exploration]"}
+  ]}
+]}
+```
 
 **AC Scenario Naming** (5-8 words max, read as mini-story):
 

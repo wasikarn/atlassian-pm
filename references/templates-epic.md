@@ -6,6 +6,8 @@
 
 **Naming:** `[Domain] — [Deliverable]` (never "Phase 1", "v2") · **Size:** 8-15 stories, 2-6 months — split if >15 tickets, multiple domains, or mixed concerns.
 
+> **Narrative tone:** Epic Overview and Business Value ต้องเขียนให้ PM, designer, หรือ stakeholder ที่ไม่ใช่ developer อ่านเข้าใจได้ทันที — ห้ามใช้ system term, acronym, หรือ tech jargon ใน 2 section นี้ (ย้ายไปใส่ Technical Notes ของ Story แทน)
+
 ## Epic Template (ADF) - CREATE
 
 > Used with `acli jira workitem create --from-json`
@@ -40,13 +42,13 @@
         "content": [
           {"type": "paragraph", "content": [
             {"type": "text", "text": "Problem: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[Current situation] → [Problem] → [This Epic solves it by...]"}
+            {"type": "text", "text": "[สถานการณ์ปัจจุบัน] → [ปัญหาที่เกิดขึ้น] → [Epic นี้แก้ด้วย...]  ← เขียนให้คนทั่วไปอ่านเข้าใจ ไม่ใช้ tech term"}
           ]},
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "[Develop system X for Y]", "marks": [{"type": "strong"}]}
+            {"type": "text", "text": "[ทำให้ผู้ใช้ทำ X ได้ / ช่วยให้ทีม Y ทำงานง่ายขึ้น]", "marks": [{"type": "strong"}]}
           ]},
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "[Supports: feature1, feature2, feature3]"}
+            {"type": "text", "text": "[รองรับ: feature1, feature2, feature3]"}
           ]}
         ]
       },
@@ -58,15 +60,15 @@
         "content": [
           {"type": "paragraph", "content": [
             {"type": "text", "text": "Revenue: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[benefit 1]"}
+            {"type": "text", "text": "[ผลลัพธ์เป็นตัวเลขหรือพฤติกรรมที่เปลี่ยน — เช่น เพิ่ม conversion 15%, ผู้ใช้ซื้อซ้ำมากขึ้น]"}
           ]},
           {"type": "paragraph", "content": [
             {"type": "text", "text": "Retention: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[benefit 2]"}
+            {"type": "text", "text": "[ผู้ใช้อยู่นานขึ้น / กลับมาใช้บ่อยขึ้น เพราะ...]"}
           ]},
           {"type": "paragraph", "content": [
             {"type": "text", "text": "Operations: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[benefit 3]"}
+            {"type": "text", "text": "[ทีมทำงานเร็วขึ้น / ลด manual work / ลด error — ไม่ใช่ tech feature]"}
           ]}
         ]
       },
@@ -87,22 +89,21 @@
         ]
       },
       {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "🔄 Domain Model ⚡"}]},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "🔄 เมื่อ X เกิดขึ้น ⚡"}]},
       {
         "type": "panel",
         "attrs": {"panelType": "info"},
         "content": [
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "Aggregates: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[Aggregate1, Aggregate2]"}
+            {"type": "text", "text": "⚡ Developer-only section — include only for complex epics with cross-domain side effects. Write in plain language, not DDD jargon.", "marks": [{"type": "em"}]}
           ]},
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "Domain Events: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[Event1, Event2] — emitted by this Epic's scope"}
+            {"type": "text", "text": "เมื่อ ", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "[ผู้ใช้ทำ X] → ระบบ [ทำ Y ให้อัตโนมัติ]"}
           ]},
           {"type": "paragraph", "content": [
-            {"type": "text", "text": "Policies: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "WHEN [Event] THEN [Action] — ⚡ skip if no cross-domain triggers"}
+            {"type": "text", "text": "เมื่อ ", "marks": [{"type": "strong"}]},
+            {"type": "text", "text": "[event ที่ 2] → [side effect ที่ 2]"}
           ]}
         ]
       },
