@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-04-01
+
+### Removed
+
+- **4 dead hooks** — `pre_hr10_subtask_sprint_guard`, `pre_hr8_subtask_date_guard`, `pre_story_size_guard`, `post_auto_subtask_suggest` (will never fire in Epic→Task hierarchy)
+
+### Changed
+
+- **vibe-plan** — rewritten from Epic→Story→Subtask to Epic→Task (2-level)
+- **blueprint** — Phase 8 backlog_map `stories[]`→`tasks[]`, handoff→`/create-task`
+- **12 skills** updated: update-epic, epic-health, refine-epic, sync-artifacts, release-notes, status, create-testplan + terminology fixes across all
+- **16 hooks** updated: story→task, subtask→task terminology in messages and type checks
+- **pre_adf_structure_validate** — panel check flipped: now warns when panel IS present (forbidden)
+- **Tests** — 4 skill redirect tests updated for v3.0.0
+
+### Deprecated
+
+- `update-story`, `update-subtask` — use `update-task` instead
+
 ## [3.0.0] - 2026-04-01
 
 ### Breaking Changes
