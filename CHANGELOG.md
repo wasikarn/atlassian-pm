@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-04-01
+
+### Added
+
+- **PRD template for `/create-doc`** — New `prd` template type: Executive Summary, User Stories (P1/P2/P3), Functional Requirements (FR-xxx), Non-Functional Requirements (NFR-xxx), Success Criteria (SC-xxx), Assumptions & Constraints, Edge Cases
+- **Performance & Scale section in Blueprint S4** — M/L tier blueprints now require target QPS, latency budget (p95/p99), and data volume projection; new B4a verification check
+- **Phase-based task grouping in `/analyze-story`** — Subtasks classified into Setup → Foundational → Feature → Polish phases with `[P]` parallelization markers and dependency summary
+- **Ambiguity Check phase in `/create-story`** — Phase 1.5 (--thorough only): surfaces ≤5 clarifying questions on ambiguous ACs before drafting
+- **Phase Classification reference** in `templates-subtask.md` for stories with ≥4 subtasks
+
 ## [2.6.17] - 2026-04-01
 
 ### Fixed
