@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-04-01
+
+### Breaking Changes
+
+- **Epic → Task hierarchy** — 2 levels only (no Story, no Subtask). Task is the value unit with narrative + ACs + file paths.
+- **No ADF panel nodes** — All templates use heading + paragraph + bulletList + table only. Panels removed to fix Jira rendering issues (blockquote instead of colored boxes).
+- **Thai headings** — สรุปภาพรวม, คุณค่าทางธุรกิจ, ลูกค้าเห็นอะไร?, เงื่อนไขที่ต้องผ่าน, etc. No emoji in headings.
+- **Unified Task template** — 5 modes: feature (default), qa, bug, spike, chore. Replaces separate Story + Subtask + Task templates.
+- **Deprecated skills** — `create-story` and `analyze-story` replaced by `create-task` (feature mode)
+
+### Removed
+
+- `templates-story.md` — merged into `templates-task.md` (feature mode)
+- `templates-subtask.md` — merged into `templates-task.md`
+- ADF panel nodes, emoji in headings, horizontal rules, numbered sections
+- RICE Score, Domain Model, Progress, Links table from Epic template
+
+### Changed
+
+- Epic template: 9 sections → 6 sections (Thai headings, all required)
+- `create-task` skill: added mode selection (--qa, --bug, --spike, --chore) with auto-detect
+- `create-testplan`: creates [QA] Task (not Subtask), uses Thai headings
+- `create-epic`: updated to Thai headings, references Tasks instead of Stories
+- Verification checklist: panel checks → heading checks, Story/Subtask checks → unified Task checks
+- HR5/HR8/HR9/HR10: updated from Subtask to Task terminology
+
 ## [2.7.0] - 2026-04-01
 
 ### Added
