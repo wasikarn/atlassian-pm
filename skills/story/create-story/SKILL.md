@@ -105,6 +105,24 @@ effort: high
 
 ---
 
+### 1.5. Ambiguity Check (--thorough only)
+
+> ⚡ **Vibe mode:** Skip entirely — proceed to Phase 2.
+> **--thorough:** Agent reviews ACs from Discovery, surfaces ≤5 clarifying questions.
+
+**Questions target:**
+
+- Ambiguous Given/When/Then (multiple interpretations)
+- Missing error handling ACs
+- Undefined boundary values (limits, thresholds)
+- Unclear persona scope (which user role exactly?)
+- Implicit assumptions not stated
+
+**If 0 questions:** Proceed to Phase 2.
+**If ≥1 question:** Present numbered list. User answers inline. Incorporate answers into Phase 2 AC drafting.
+
+---
+
 ### 2. Write User Story
 
 ```text

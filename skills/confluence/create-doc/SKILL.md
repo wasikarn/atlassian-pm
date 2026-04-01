@@ -6,9 +6,9 @@ x-compatibility: [mcp-atlassian, mcp-confluence]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_create_remote_issue_link, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_search
 description: |
   Create Confluence page from template with a 4-phase workflow
-  Supports: tech-spec, adr, parent (category page)
+  Supports: tech-spec, adr, parent (category page), prd (Product Requirements Document)
 
-  Triggers: "create doc", "technical spec", "ADR", "สร้าง doc", "new confluence page", "create tech spec"
+  Triggers: "create doc", "technical spec", "ADR", "สร้าง doc", "new confluence page", "create tech spec", "PRD", "product requirements"
   Use when: creating a new Confluence page — tech-spec, ADR, or parent category page
   Do NOT use for: updating existing pages (use update-doc)
 argument-hint: "[template] [title] [--parent page-id]"
@@ -27,6 +27,7 @@ effort: medium
 | `tech-spec` | API design, Feature spec | Overview → Requirements → Design → API → Testing |
 | `adr` | Architecture Decision | Context → Decision → Consequences |
 | `parent` | Category/Parent page | Title → Description → Sub-pages table |
+| `prd` | Product Requirements Document | Executive Summary → User Stories → FR → NFR → Success Criteria → Assumptions |
 
 ## Phases
 
@@ -41,6 +42,7 @@ What type of Document do you want to create?
 1. tech-spec - Technical Specification
 2. adr - Architecture Decision Record
 3. parent - Category/Parent page (group pages)
+4. prd - Product Requirements Document
 ```
 
 **Gather details by template:**
@@ -50,6 +52,7 @@ What type of Document do you want to create?
 | `tech-spec` | Title, Overview, Related Jira issue |
 | `adr` | Title, Context, Options considered |
 | `parent` | Title, Description, Category type |
+| `prd` | Feature title, Target audience, Related Epic/Jira issue |
 
 **If creating as child of another page:**
 
@@ -74,7 +77,7 @@ Generate markdown content based on template
 
 **tech-spec Template:** | **adr Template:** | **parent Template:**
 
-> See [references/templates.md](references/templates.md) for tech-spec, adr, and parent template bodies.
+> See [references/templates.md](references/templates.md) for tech-spec, adr, parent, and prd template bodies.
 >
 > **Note:** `{toc}` and `{children}` macros only render in Confluence — for parent pages that need macros, use the `update_page_storage.py` script
 
@@ -147,7 +150,8 @@ The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name=
 /create-doc tech-spec "Video Upload API v2"                          # template + clear title
 /create-doc adr "Switch from REST to GraphQL for mobile"             # ADR with decision context
 /create-doc parent "Backend Services" --parent 123456789             # category page under specific parent
-/create-doc tech-spec "Auth Refactor" --parent 987654321             # spec nested under existing section
+/create-doc prd "Video Upload Feature"                                # PRD for stakeholder review
+/create-doc prd "Auth Refactor" --parent 123456789                   # PRD nested under existing section
 ```
 
 ### ❌ Bad
@@ -162,7 +166,7 @@ The script converts `<pre class="highlight">` → `<ac:structured-macro ac:name=
 
 **Common mistakes:**
 
-- Omitting the template type forces a multi-step interactive prompt that wastes time — always specify `tech-spec`, `adr`, or `parent` upfront
+- Omitting the template type forces a multi-step interactive prompt that wastes time — always specify `tech-spec`, `adr`, `parent`, or `prd` upfront
 - Using `/create-doc` for Jira issue descriptions — this skill creates Confluence pages only; use `/create-story` or `/create-task` for Jira
 - Creating a `tech-spec` without linking it back to the related Jira epic/story via `jira_create_remote_issue_link`
 - Skipping `fix_confluence_code_blocks.py` after creation — MCP always renders code blocks as `<pre class="highlight">` (broken); run `uv run scripts/api/fix_confluence_code_blocks.py --page-id [id]` after every create

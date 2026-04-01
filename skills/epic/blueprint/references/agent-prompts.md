@@ -89,6 +89,11 @@ Tasks:
     - Data sensitivity: PII, payment data, encryption at rest/transit?
     - Deployment: feature flag, migration rollback, health check endpoints?
     - Monitoring: new metrics, alerts, dashboards needed?
+11. Performance & Scale assumptions:
+    - Target QPS / concurrent users
+    - Data volume growth (current vs 6-month projection)
+    - Latency budget: p50/p95/p99 targets
+    - Scale constraints (memory, storage, compute)
 
 Output format (max 1200 words):
 ## Domain Analysis
@@ -117,6 +122,8 @@ Chosen: [option] — [rationale]
 | Story | SP | Rationale |
 ## Team Assignment
 | Story/Area | Suggested Assignee | Reason |
+## Performance & Scale
+| Metric | Target | Current Baseline | Notes |
 ## Similar Patterns: [codebase references]
 ```
 

@@ -147,3 +147,81 @@ Proposed | Accepted | Deprecated | Superseded
 
 *Last updated: [date]*
 ```
+
+## prd Template
+
+```markdown
+# [Title] — Product Requirements Document
+
+**Status:** Draft | Under Review | Approved
+**Author:** [name]
+**Stakeholders:** [list]
+**Related Issues:** [ABC-XXX](https://{{JIRA_SITE}}/browse/ABC-XXX)
+
+---
+
+## Executive Summary
+
+[1 paragraph: what problem this solves, who it's for, expected outcome]
+
+---
+
+## User Stories
+
+### US-1: [Title] (Priority: P1)
+
+[Plain language description of this user journey]
+
+**Acceptance Scenarios:**
+1. **Given** [state], **When** [action], **Then** [outcome]
+2. **Given** [state], **When** [action], **Then** [outcome]
+
+### US-2: [Title] (Priority: P2)
+
+[Description]
+
+**Acceptance Scenarios:**
+1. **Given** [state], **When** [action], **Then** [outcome]
+
+---
+
+## Functional Requirements
+
+- **FR-001:** [Requirement — system MUST...]
+- **FR-002:** [Requirement]
+- **FR-003:** [Requirement]
+
+## Non-Functional Requirements
+
+- **NFR-001:** [Performance/Security/Accessibility requirement]
+- **NFR-002:** [Requirement]
+
+---
+
+## Success Criteria
+
+- **SC-001:** [Measurable outcome tied to FR-001]
+- **SC-002:** [Measurable outcome]
+- **SC-003:** [Measurable outcome]
+
+---
+
+## Assumptions & Constraints
+
+### Assumptions
+- [Assumption about scope, users, or environment]
+
+### Constraints
+- [Timeline, budget, technical, or compliance constraint]
+
+---
+
+## Edge Cases
+
+- What happens when [boundary condition]?
+- How does the system handle [error scenario]?
+
+---
+
+*Created: [date] · Last updated: [date]*
+```

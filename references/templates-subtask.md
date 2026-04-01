@@ -151,3 +151,16 @@ TC1: [Happy Path Test]  ← bold paragraph
 ```
 
 **Priority scale:** 🔴 Critical · 🟠 High · 🟡 Medium · 🟢 Low
+
+## Phase Classification
+
+> Optional — add when story has ≥4 subtasks to clarify execution order.
+
+| Phase | When to use | Parallel? |
+| --- | --- | --- |
+| `Setup` | Migration, config, scaffolding | Yes — independent files |
+| `Foundational` | Core service/model that blocks features | No — prerequisite |
+| `Feature` | Implementation (1 per service boundary) | Yes — across services |
+| `Polish` | Docs, monitoring, QA, cleanup | Yes — independent |
+
+Add phase label to subtask summary: `[BE] - DB migration` → Phase shown in dependency summary only (not in Jira summary field).

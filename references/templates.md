@@ -12,6 +12,7 @@
 | **Task** | [templates-task.md](templates-task.md) | Tech-debt, bug, chore, spike |
 | **Tech Note** | [templates-technote.md](templates-technote.md) | Tech Note best practices |
 | **Blueprint** | (inline in SKILL.md) | Blueprint Confluence page structure (8 sections) |
+| **PRD** | (in create-doc refs) | Product Requirements Document template |
 | **Vibe** | [templates-vibe.md](templates-vibe.md) | Implementation Hints ADF, Context Engineering rules, Claude Code Prompt format, Delegation View |
 
 ## Loading Guide
@@ -28,7 +29,7 @@
 | `/create-story`, `/sync-artifacts` | core + story + subtask |
 | `/create-testplan` | core + subtask (QA section) |
 | `/create-task`, `/update-task` | core + task |
-| `/create-doc` | core + technote |
+| `/create-doc` | core + technote (+ prd refs for PRD type) |
 | `/blueprint` | (uses inline template in SKILL.md) |
 | `/verify-issue` | core only |
 | `/vibe-plan`, `/create-story` (vibe), `/analyze-story` (vibe) | core + subtask + **vibe** |

@@ -79,6 +79,10 @@
 
 Canonical criteria in `blueprint/SKILL.md` — "Blueprint Quality Gate" section.
 
+| Check | Criteria |
+| --- | --- |
+| **B4a: Performance Goals** | M/L tier: target QPS or concurrent users stated; latency budget defined (p95/p99); data volume projection included. S tier: optional. |
+
 ---
 
 ## Hierarchy Alignment Checks (`--with-subtasks` only)

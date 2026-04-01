@@ -44,7 +44,7 @@ Non-tech: read S1-S3, S6 risk table, S8. Engineers: read all.
 
 **Non-negotiable:**
 
-- S4 **must have "Alternatives Considered"** with ≥2 options + pros/cons + rationale
+- S4 **must have "Alternatives Considered"** with ≥2 options + pros/cons + rationale; M/L tier **must include "Performance & Scale Assumptions"** (target QPS, latency budget, data volume projection)
 - S1-S2 come before S4-S5 (user/customer first, then technical)
 - All sections follow Thai + transliteration per [writing-style.md](../../../references/writing-style.md)
 
@@ -129,7 +129,7 @@ Synthesize agent outputs into final 8-section blueprint, resolve disagreements, 
 
 #### 5a. Blueprint Sections
 
-S1: synthesized PO+TL (1 paragraph) · S2: PO proposal · S3: TL domain entities/bounded contexts · S4: TL architecture + alternatives table (≥2 options, required) · S5: TL implementation spec/endpoints/data model · S6: QA+TL risks combined, deduplicated · S7: QA test strategy · S8: PO+TL consensus VS plan + story breakdown + team assignment
+S1: synthesized PO+TL (1 paragraph) · S2: PO proposal · S3: TL domain entities/bounded contexts · S4: TL architecture + alternatives table (≥2 options, required) + Performance & Scale Assumptions (M/L tier) · S5: TL implementation spec/endpoints/data model · S6: QA+TL risks combined, deduplicated · S7: QA test strategy · S8: PO+TL consensus VS plan + story breakdown + team assignment
 
 #### 5b. Debate Summary
 

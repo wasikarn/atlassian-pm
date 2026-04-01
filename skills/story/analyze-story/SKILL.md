@@ -116,17 +116,29 @@ If `parent` set → fetch epic via `cache_get_issue(EPIC-KEY)`.
 **Goal:** Subtask designs with real file paths, dependency-ordered, 1 per service boundary, each AC traced.
 **Constraints:** Count target 3–6; each story AC in ≥1 subtask objective. → ADF format: [templates-subtask.md](../../../references/templates-subtask.md)
 
-**Dependency order:**
+**Phase-based ordering:**
+
+| Phase | Contains | Marker |
+| --- | --- | --- |
+| `Setup` | Migration, config, scaffolding, env vars | [P] if independent |
+| `Foundational` | Core service/model that blocks feature subtasks | Sequential |
+| `Feature` | Implementation subtasks (grouped by service) | [P] across services |
+| `Polish` | Docs, monitoring, cleanup, tech-note | [P] always |
 
 ```text
-1. Data layer (migration + model)
-2. Auth/OAuth (if new auth flow)
-3. Backend API (endpoints + routes)
-4. Backend service/channel
-5. FE service layer
-6. FE component/page
-7. FE interactions/events
+Phase: Setup
+  1. [BE] - DB migration + model [P]
+  2. [BE] - Config/env setup [P]
+Phase: Foundational
+  3. [BE] - Core service (depends on Setup)
+Phase: Feature
+  4. [BE] - API endpoints [P]
+  5. [FE-Admin] - UI component [P]
+Phase: Polish
+  6. [QA] - Test plan (depends on Feature)
 ```
+
+> Dependency summary shown before subtask list. `[P]` = parallelizable (different files, no deps within phase).
 
 - Summary: `[TAG] - Description` · ACs: Thai narrative + English technical terms
 - **VS Integrity:** Each subtask contributes to VS completion (not horizontal layer).
