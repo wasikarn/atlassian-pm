@@ -9,7 +9,7 @@ description: |
   --dry-run shows stories + QG scores without creating in Jira.
   Triggers: "spec to stories", "import requirements", "convert spec", "requirements to stories", "แปลง spec", "batch stories from spec"
   Use when: batch-converting a Confluence spec or requirements page into multiple User Stories with deduplication
-  Do NOT use for: creating a single story (use create-story); updating existing stories (use update-story)
+  Do NOT use for: creating a single task (use create-task); updating existing tasks (use update-task)
 argument-hint: "<confluence-page-id> [--epic <key>] [--dry-run]"
 effort: high
 ---
@@ -128,7 +128,7 @@ If any story < 90%: auto-fix (max 2 attempts), then re-score. Still < 90% → as
   Password Reset → {{PROJECT_KEY}}-203
   ```
 
-- Next: run `/atlassian-pm:create-story {{PROJECT_KEY}}-XXX` per story to add subtasks
+- Next: run `/atlassian-pm:create-task {{PROJECT_KEY}}-XXX` per task to add child tasks
 
 ## Examples
 
@@ -162,4 +162,4 @@ See [references/expert-notes.md](references/expert-notes.md)
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Story Template](../../../references/templates-story.md) · [Writing Style](../../../references/writing-style.md) · [Verification Checklist](../../../references/verification-checklist.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Task Template](../../../references/templates-task.md) · [Writing Style](../../../references/writing-style.md) · [Verification Checklist](../../../references/verification-checklist.md)

@@ -1,6 +1,6 @@
 # Skills — atlassian-pm Plugin
 
-38 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
+35 skills implement multi-phase workflows for Jira/Confluence automation. Each skill is a Markdown instruction file that Claude follows step-by-step. Every skill includes a `## 🎓 Domain Expert Notes` section with industry frameworks (Scrum, SAFe, ITIL, DORA, IEEE 829), key metrics, expert decision criteria, and common failure modes.
 
 Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when running inside the plugin context).
 
@@ -25,18 +25,14 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | plan-release | `/atlassian-pm:plan-release` | 9 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | Multi-sprint release plan: velocity-based timeline, dependency mapping, Confluence release page, Jira Fix Version. |
 | epic-health | `/atlassian-pm:epic-health` | 4 | atlassian-cache, mcp-atlassian | Epic health audit: story coverage, SP totals vs velocity, timeline feasibility, AC alignment, and missing QG verifications. |
 
-### Story & Subtask
+### Task
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| create-story | `/atlassian-pm:create-story` | 11 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | PO + TA combined workflow. Vibe mode (default): auto-extract, single-pass, Implementation Hints in subtasks. `--thorough` for full interview + ITERATE rounds. |
-| analyze-story | `/atlassian-pm:analyze-story` | 8 | atlassian-cache, mcp-atlassian, mcp-confluence, acli | TA workflow for an existing story. Vibe mode (default): auto-proceed, single-pass design + Implementation Hints. `--thorough` for full ITERATE rounds. |
 | create-task | `/atlassian-pm:create-task` | 5 | atlassian-cache, mcp-atlassian, acli | Create a Jira Task with 4 type templates: tech-debt, bug, chore, spike. Vibe mode (default): auto-detect type, skip review gate. |
 | create-testplan | `/atlassian-pm:create-testplan` | 6 | atlassian-cache, mcp-atlassian, acli | Create [QA] Sub-task with embedded Test Plan (Given/When/Then). 100% AC coverage required. |
 | execute-testplan | `/atlassian-pm:execute-testplan` | 6 | mcp-atlassian, playwright | Execute test cases from a Google Sheet (linked via Jira Web links) using Playwright. Writes Pass/Fail/Skip results back to Sheet. Creates bug tickets with screenshot evidence for failures. |
 | bug-triage | `/atlassian-pm:bug-triage` | 6 | atlassian-cache, mcp-atlassian, acli | QA triage workflow: intake → P1/P2/P3 severity scoring → duplicate check → assign → Jira Task creation. Distinct from `/create-task bug` (ticket only). |
-| update-story | `/atlassian-pm:update-story` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing User Story (add/modify/remove AC, adjust scope). Validates subtask date alignment after changes. |
-| update-subtask | `/atlassian-pm:update-subtask` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing Sub-task (format migration, add details, language fix, add AC). HR8 date alignment enforced. |
 | update-task | `/atlassian-pm:update-task` | 6 | atlassian-cache, mcp-atlassian, acli | Update an existing Jira Task (migrate Wiki→ADF, add details, change type template). |
 | assign-issue | `/atlassian-pm:assign-issue` | 1 | acli | Quick assign a Jira issue to a team member. Uses acli (HR3-safe). Supports unassign. |
 | verify-issue | `/atlassian-pm:verify-issue` | 6 | atlassian-cache, mcp-atlassian, acli | Verify and improve issue quality: ADF format, INVEST, language, hierarchy alignment (A1–A6). Flags: `--with-subtasks`, `--fix`. |
@@ -123,10 +119,10 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 ## Quick Reference — Argument Patterns
 
 ```text
-/atlassian-pm:create-story                            # interactive, no args
-/atlassian-pm:create-story "admin monthly report"     # description as seed
+/atlassian-pm:create-task                             # interactive, no args
+/atlassian-pm:create-task "admin monthly report"      # description as seed
 
-/atlassian-pm:analyze-story {{PROJECT_KEY}}-123                   # issue key
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-123                    # issue key
 /atlassian-pm:create-testplan {{PROJECT_KEY}}-123                 # issue key
 
 /atlassian-pm:verify-issue {{PROJECT_KEY}}-123                    # single issue
@@ -209,8 +205,6 @@ Each phase specifies actions, tool calls, and a gate level that controls how muc
 | `templates.md` | Index of ADF templates by issue type |
 | `templates-core.md` | ADF CREATE/EDIT rules, panel types, inline code, styling |
 | `templates-epic.md` | Epic ADF template |
-| `templates-story.md` | Story ADF template |
-| `templates-subtask.md` | Subtask ADF template + Two-Step workflow |
 | `templates-task.md` | Task ADF templates (tech-debt, bug, chore, spike) |
 | `templates-technote.md` | Technical Note best practices |
 | `vertical-slice-guide.md` | VS patterns (skeleton, enabler, business rule splits), labels |

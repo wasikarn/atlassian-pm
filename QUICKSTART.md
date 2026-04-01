@@ -102,8 +102,7 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 | `/atlassian-pm:blueprint` | Multi-role feature design (5 domain experts + debate) |
 | `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
 | `/atlassian-pm:create-epic` | Epic + Confluence doc. `--no-doc` for Jira-only (skip Confluence). `--thorough` for RICE + annotation rounds. |
-| `/atlassian-pm:create-story` | Story + subtasks. `--no-subtasks` for story only (add subtasks later). `--thorough` for full workflow. |
-| `/atlassian-pm:analyze-story` | Explore codebase → create subtasks + Implementation Hints. `--skip-explore` when paths known. `--thorough` for ITERATE. |
+| `/atlassian-pm:create-task` | Task with child Tasks. Vibe default: auto-extract + Implementation Hints. Auto-detects type (feature, bug, chore, spike). `--thorough` for full workflow. |
 | `/atlassian-pm:create-task` | Create standalone task: tech-debt, bug, chore, spike. Vibe default: auto-detect type. |
 | `/atlassian-pm:bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign. `--no-assign` to skip assignment gate. |
 | `/atlassian-pm:search-issues` | Dedup check before creating |
@@ -119,11 +118,9 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 | `/atlassian-pm:map-dependencies` | Critical path + swim lane dependency analysis |
 | **Quality & Updates** | |
 | `/atlassian-pm:verify-issue` | ADF format + INVEST criteria check (A1-A6) |
-| `/atlassian-pm:sync-artifacts` | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
-| `/atlassian-pm:update-story` | Edit Story — ACs, scope, description |
+| `/atlassian-pm:sync-artifacts` | Bidirectional sync: Task ↔ child Tasks ↔ Confluence |
 | `/atlassian-pm:update-epic` | Edit Epic — scope, RICE, metrics |
-| `/atlassian-pm:update-task` | Edit Task — format, details |
-| `/atlassian-pm:update-subtask` | Edit Sub-task — format, content |
+| `/atlassian-pm:update-task` | Edit Task — ACs, scope, description, format |
 | `/atlassian-pm:assign-issue` | Assign issue (bypasses MCP silent failure) |
 | **QA** | |
 | `/atlassian-pm:create-testplan` | Test Plan + QA subtasks from Story ACs |
@@ -177,14 +174,14 @@ analyze story {{PROJECT_KEY}}-456 and create implementation subtasks with hints
 Or use the slash command:
 
 ```text
-/atlassian-pm:analyze-story {{PROJECT_KEY}}-XXX
+/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
 ```
 
 ### Workflow C: New feature from scratch
 
 ```
 1. /atlassian-pm:create-epic     → Epic + Confluence epic page
-2. /atlassian-pm:create-story    → User Stories with subtasks under the epic
+2. /atlassian-pm:create-task     → Tasks with child Tasks under the epic
 ```
 
 Or use the fast-path: `/epic-full`

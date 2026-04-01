@@ -127,7 +127,7 @@ Report:
 - Score trend over last 10 records per service (improving/stable/declining)
 - FAIL rate per service tag
 
-If `qg-history.jsonl` does not exist → note: "QG history not yet available. Runs after first `/create-story` or `/analyze-story` call that triggers the QG phase."
+If `qg-history.jsonl` does not exist → note: "QG history not yet available. Runs after first `/create-task` or `/verify-issue` call that triggers the QG phase."
 
 1. **Synthesize findings** — only report patterns with evidence from ≥3 data points. Avoid conclusions from single anomalies.
 

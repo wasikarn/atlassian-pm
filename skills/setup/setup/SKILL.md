@@ -380,7 +380,7 @@ If **Skip for now**:
   ✓  project-config    <KEY> @ <SITE>
 
 → /atlassian-pm:doctor    verify health at any time
-→ /atlassian-pm:create-story  create your first story
+→ /atlassian-pm:create-task   create your first task
 → /atlassian-pm:plan-sprint   sprint planning
 ```
 

@@ -159,10 +159,10 @@ Round to 1 decimal. Higher = pull first.
 
 | Category | Skill to invoke | How |
 |----------|----------------|-----|
-| Needs AC | `atlassian-pm:analyze-story KEY` | Use Skill tool — explores codebase + creates AI-ready subtasks |
+| Needs AC | `atlassian-pm:verify-issue KEY --fix` | Use Skill tool — verifies and auto-fixes issue quality |
 | Orphan (no epic) | `atlassian-pm:create-epic` | Use Skill tool — creates epic and links story |
-| Needs VS Label | `atlassian-pm:update-story KEY` | Use Skill tool — adds missing VS label |
-| Missing Estimate | `atlassian-pm:analyze-story KEY` | Use Skill tool — subtask breakdown informs SP estimate |
+| Needs VS Label | `atlassian-pm:update-task KEY` | Use Skill tool — adds missing VS label |
+| Missing Estimate | `atlassian-pm:verify-issue KEY --fix` | Use Skill tool — verifies issue and suggests improvements |
 ```
 
 ## Story Splitting Guidance

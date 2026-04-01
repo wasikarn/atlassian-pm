@@ -2,7 +2,7 @@
 name: blueprint-full
 description: |
   Triggers: "blueprint full", "blueprint to epic", "full blueprint workflow", "blueprint ครบ"
-  Orchestrates: blueprint → create-epic → create-story → verify-issue --with-subtasks
+  Orchestrates: blueprint → create-epic → create-task → verify-issue
   Args: auto-detected — [A-Z]+-\d+ pattern = existing epic key; otherwise = description
 model: sonnet
 context: fork
@@ -11,7 +11,7 @@ argument-hint: "[description] or EPIC-KEY"
 
 # /blueprint-full
 
-Orchestrates: `blueprint` → `create-epic` → `create-story` → `verify-issue --with-subtasks`
+Orchestrates: `blueprint` → `create-epic` → `create-task` → `verify-issue`
 
 ## Steps
 
@@ -29,16 +29,16 @@ Ask: "Create epic from this blueprint?"
 → If yes: Use the Skill tool to invoke `atlassian-pm:create-epic`
 → If no: exit after blueprint
 
-### Step 3 — Create Story
+### Step 3 — Create Task
 
-> **Gate:** Confirm an epic key is present in conversation context (either from Step 1 existing key or Step 2 create-epic output). If no epic key, STOP and show: "No epic key available — cannot create a story without a parent epic."
+> **Gate:** Confirm an epic key is present in conversation context (either from Step 1 existing key or Step 2 create-epic output). If no epic key, STOP and show: "No epic key available — cannot create a task without a parent epic."
 
-Ask: "Create the first story now?"
-→ If yes: Use the Skill tool to invoke `atlassian-pm:create-story`
+Ask: "Create the first task now?"
+→ If yes: Use the Skill tool to invoke `atlassian-pm:create-task`
 → If no: exit
 
 ### Step 4 — Verify
 
-> **Gate:** Only proceed if create-story was invoked AND produced a story key. If story creation was skipped (user said No), run verify on the epic key instead. If create-story failed, STOP.
+> **Gate:** Only proceed if create-task was invoked AND produced a task key. If task creation was skipped (user said No), run verify on the epic key instead. If create-task failed, STOP.
 
-Use the Skill tool to invoke `atlassian-pm:verify-issue` with `--with-subtasks`.
+Use the Skill tool to invoke `atlassian-pm:verify-issue` with the created key.

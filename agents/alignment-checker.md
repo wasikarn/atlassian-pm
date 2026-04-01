@@ -42,7 +42,7 @@ If `jira_search(jql="parent = STORY-KEY")` returns 0 results:
 - A1 check still applies (parent link on story itself)
 - Output warning: "⚠️ Story has no subtasks — alignment cannot be verified. Create subtasks first."
 - Overall score: N/A (not a score, not a pass/fail)
-- **If `--fix` flag passed:** Use the Skill tool to invoke `atlassian-pm:analyze-story <story-key>` — this will explore the codebase and create AI-ready subtasks for the story.
+- **If `--fix` flag passed:** Use the Skill tool to invoke `atlassian-pm:verify-issue <story-key> --fix` — this will verify and auto-fix issue quality.
 
 ## Data Fetching
 
@@ -112,8 +112,8 @@ When caller passes `--fix`:
 - Date misalignment: update subtask dates via `jira_update_issue` ({{START_DATE_FIELD}}, duedate)
 - Missing parent link: flag — cannot auto-fix (requires REST API, escalate to caller)
 - Scope gap: add comment on story via `jira_add_comment` listing the gap
-- No subtasks exist: invoke `atlassian-pm:analyze-story <story-key>` via Skill tool to create AI-ready subtasks
-- Orphan AC (AC with no subtask coverage): invoke `atlassian-pm:analyze-story <story-key>` via Skill tool — analysis will produce subtasks covering the gaps
+- No subtasks exist: invoke `atlassian-pm:verify-issue <story-key> --fix` via Skill tool to verify and fix issue
+- Orphan AC (AC with no subtask coverage): invoke `atlassian-pm:verify-issue <story-key> --fix` via Skill tool — will identify and fix coverage gaps
 - After any write: `cache_invalidate(issue_key)` — required HR6
 
 Without `--fix`: return report only, no writes.

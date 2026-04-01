@@ -144,7 +144,7 @@ acli jira workitem get ABC-XXX
 
 ## Effort Sizing
 
-> Canonical size guide: [templates-story.md](templates-story.md#story-best-practices)
+> Canonical size guide: [templates-task.md](templates-task.md#task-best-practices)
 
 ## See Also
 

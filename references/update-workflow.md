@@ -1,7 +1,7 @@
 # Update Workflow — Common Patterns
 
-Shared reference for `update-story`, `update-subtask`, `update-task`, `update-epic`.
-All 4 skills follow this 6-phase skeleton: Fetch → Identify Changes → Preserve Intent → Generate Update → Quality Gate → Apply Update.
+Shared reference for `update-task`, `update-epic`.
+Both skills follow this 6-phase skeleton: Fetch → Identify Changes → Preserve Intent → Generate Update → Quality Gate → Apply Update.
 
 ## Standard Frontmatter Defaults
 

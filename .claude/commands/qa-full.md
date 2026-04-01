@@ -74,20 +74,3 @@ Use the Skill tool to invoke `atlassian-pm:execute-testplan` with the `[QA]` sub
 | Production smoke test | `/qa-full {{PROJECT_KEY}}-3282 --env production` | Guard check → execute on production (with warning) |
 | OAuth / LINE test | `/qa-full {{PROJECT_KEY}}-3282 --headed` | Guard check → execute with visible browser |
 | Plan only, no run | `/qa-full {{PROJECT_KEY}}-3282` → answer "No" at Step 2 | Create plan, exit |
-
-## 🎓 Domain Expert Notes
-
-### Idempotency in Test Orchestration (ISTQB)
-
-A test orchestration command that is **not idempotent** — one that creates duplicate artifacts when run twice — is an anti-pattern. In ISTQB Test Management, the test plan is a versioned artifact: it has a lifecycle (draft → approved → executed → closed). Re-running QA should mean executing the same plan, not creating a new one. The guard step enforces this — qa-full is safe to re-run at any sprint cycle without manual cleanup.
-
-### Regression Testing vs Re-testing (ISTQB distinction)
-
-- **Re-testing**: run the same test case that previously failed, after a fix — verifying the fix works.
-- **Regression testing**: run the *full* test suite (or a risk-weighted subset) to ensure the fix didn't break something else.
-
-`--rerun-failed` is a **re-test** cycle. A fresh `/qa-full` on the same story (option C or a new sprint) is a **regression** cycle. Both are valid — the guard step enables both without duplication.
-
-### Test Plan as a Living Document
-
-The option B path ("Update + execute") supports the IEEE 829 concept of a **living test plan**: as ACs evolve during a sprint, the test plan must evolve with them. A test plan that no longer reflects current ACs is worse than useless — it provides false confidence. Running create-testplan with `--update` re-diffs the ACs and adds/removes/modifies test cases without losing prior execution results.

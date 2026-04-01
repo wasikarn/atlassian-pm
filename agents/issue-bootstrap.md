@@ -1,7 +1,7 @@
 ---
 name: issue-bootstrap
 description: |
-  Pre-gather Jira issue context (issue + parent + children + linked issues) in one fast pass before spawning processing agents. Use at the start of create-story, analyze-story, sync-artifacts, update-story workflows to reduce redundant MCP calls.
+  Pre-gather Jira issue context (issue + parent + children + linked issues) in one fast pass before spawning processing agents. Use at the start of create-task, sync-artifacts, update-task workflows to reduce redundant MCP calls.
   <example>
   Context: create-story skill is starting to process an epic
   user: "Create stories for epic {{PROJECT_KEY}}-100"

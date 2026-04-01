@@ -157,7 +157,7 @@ By the end of this Sprint, [target users] will be able to [do something valuable
 
 ## Task Decomposition
 
-> Subtask size guide: [templates-subtask.md](templates-subtask.md#subtask-best-practices)
+> Subtask size guide: [templates-task.md](templates-task.md#subtask-best-practices)
 
 ### Rule: Subtask ≤ 1 day (M = 4-8h max)
 

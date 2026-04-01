@@ -144,6 +144,6 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 ## References
 
-[Story Template](../../../references/templates-story.md) · [Writing Style](../../../references/writing-style.md) · [Workflow Patterns](../../../references/workflow-patterns.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools](../../../references/tools.md) · [Decision Guide](references/decision-guide.md) · [Examples](references/examples.md)
+[Task Template](../../../references/templates-task.md) · [Writing Style](../../../references/writing-style.md) · [Workflow Patterns](../../../references/workflow-patterns.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools](../../../references/tools.md) · [Decision Guide](references/decision-guide.md) · [Examples](references/examples.md)
 
 After refinement: `/create-task` to create in Jira

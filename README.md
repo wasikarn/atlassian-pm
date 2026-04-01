@@ -1,6 +1,6 @@
 # atlassian-pm
 
-> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Stories, Sub-tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each subtask includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
+> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each Task includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
 [![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -29,8 +29,8 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 
 ```text
 ⚡ Commands:  /vibe-full · /story-full · /epic-full · /bug-full · /sprint-close-full · …  (chains skills end-to-end with confirmation gates)
-🚀 Vibe mode: /atlassian-pm:vibe-plan "feature desc"  →  Epic + Stories + AI-Ready Subtasks in one shot
-   Skills:   /atlassian-pm:create-story  →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
+🚀 Vibe mode: /atlassian-pm:vibe-plan "feature desc"  →  Epic + Tasks + AI-Ready child Tasks in one shot
+   Skills:   /atlassian-pm:create-task   →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
 ```
 
 1. Describe what you need in natural language (or pick a Command for the full end-to-end chain)
@@ -51,29 +51,28 @@ flowchart TD
     B -->|Existing| D{Edit scope?}
     B -->|"Confluence spec"| SS["/spec-to-stories"]
 
-    D -->|Single issue| E["/update-{epic,story,task,subtask}"]
-    D -->|Need new Sub-tasks| AS["/analyze-story"]
-    D -->|Story + Sub-tasks sync| F["/sync-artifacts"]
+    D -->|Single issue| E["/update-{epic,task}"]
+    D -->|Need new child Tasks| VF["/verify-issue"]
+    D -->|Task + children sync| F["/sync-artifacts"]
 
     E --> V["/verify-issue"]
-    AS --> V
+    VF --> V
     F --> V
     SS --> V
 
     C --> G{Scope?}
     G -->|"Greenfield / Architecture"| H["/blueprint\nConfluence + backlog map"]
     G -->|"Unclear / High-risk"| I["/refine-epic\n4-role debate"]
-    G -->|"Clear scope"| K["/create-story"]
+    G -->|"Clear scope"| K["/create-task"]
     G -->|"Idea → tasks\none-shot"| VP["/vibe-plan 🚀"]
     G -->|"Bug report"| BT["/bug-triage"]
-    G -->|"Task / Spike"| T["/create-task"]
+    G -->|"Task / Spike"| K
 
     H --> J["/create-epic"] --> K
     I --> K
     K --> L["/create-testplan\noptional"] --> V
     K --> V
     BT --> TP["/create-testplan"] --> V
-    T --> V
     V --> M([✅ Jira + Confluence])
 
     subgraph flow["Scrumban Flow"]
@@ -88,7 +87,7 @@ flowchart TD
     classDef gate fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef endpoint fill:#f3f4f6,stroke:#6b7280,color:#111827
     classDef cmd fill:#fef9c3,stroke:#ca8a04,color:#713f12
-    class C,E,F,AS,H,I,J,K,L,FC,ST,SQ,T,BT,TP,Q,R,SS,VP skill
+    class C,E,F,VF,H,I,J,K,L,FC,ST,SQ,BT,TP,Q,R,SS,VP skill
     class V gate
     class A,M endpoint
     class CMD cmd
@@ -102,13 +101,13 @@ End-to-end orchestration chains — the fastest way to get things done. Each com
 
 | Command | Chains | Description |
 | --- | --- | --- |
-| `/vibe-full` | search-issues → vibe-plan → verify-issue --with-subtasks | Idea → AI-Ready subtasks in one shot (vibe coding) |
-| `/story-full` | search-issues → create-story → verify-issue --with-subtasks | Full story creation with dedup + quality check |
-| `/epic-full` | search-issues → create-epic → create-story → verify-issue --with-subtasks | Full epic + story creation end-to-end |
-| `/blueprint-full` | blueprint → create-epic → create-story → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
+| `/vibe-full` | search-issues → vibe-plan → verify-issue --with-subtasks | Idea → AI-Ready Tasks in one shot (vibe coding) |
+| `/story-full` | search-issues → create-task → verify-issue --with-subtasks | Full Task creation with dedup + quality check |
+| `/epic-full` | search-issues → create-epic → create-task → verify-issue --with-subtasks | Full Epic + Task creation end-to-end |
+| `/blueprint-full` | blueprint → create-epic → create-task → verify-issue --with-subtasks | Greenfield feature from design to verified backlog |
 | `/bug-full` | search-issues → bug-triage → create-testplan | Bug report with triage + test plan |
 | `/qa-full` | create-testplan → execute-testplan | Create test plan + run against staging in one step |
-| `/story-analyze-full` | analyze-story → verify-issue --with-subtasks | Break down existing story + verify alignment |
+| `/story-analyze-full` | verify-issue --with-subtasks | Verify existing Task + child alignment |
 | `/sprint-close-full` | close-sprint → retrospective-analyst | Sprint closure + auto-generated retrospective |
 | `/sprint-plan-full` | plan-sprint → map-dependencies | _(Release forecasting only — not Scrumban daily flow)_ Capacity-based sprint allocation |
 | `/release-full` | plan-release → release-notes | Release plan + Confluence release notes |
@@ -131,7 +130,7 @@ Backlog ownership, flow management, documentation, and reporting.
 | `/atlassian-pm:create-epic` | `--thorough` `--no-doc` | Epic + Confluence doc. Vibe default: auto-extract, skip RICE. `--no-doc` for Jira-only (skip Confluence). `--thorough` for full ceremony. |
 | `/atlassian-pm:vibe-plan` | `--dry-run` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks in one shot (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
 | `/atlassian-pm:plan-release` | | Multi-sprint release plan + Confluence page + Jira Fix Version |
-| `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create User Stories |
+| `/atlassian-pm:spec-to-stories 12345` | | Convert Confluence spec page → batch-create Tasks |
 | `/atlassian-pm:search-issues` | | Dedup check before creating |
 | `/atlassian-pm:assign-issue ABC-123 [name]` | | Assign issue (bypasses MCP silent failure) |
 | `/atlassian-pm:flow-check` | `--replenish` | Board health snapshot + Scrumban replenishment trigger |
@@ -152,15 +151,11 @@ Story and task authoring, DLC flow, codebase exploration, issue maintenance, and
 | --- | --- | --- |
 | `/atlassian-pm:start-ticket ABC-123` | `--force` | Read AC + transition to In Progress. WIP gate enforced. |
 | `/atlassian-pm:ship-to-qa ABC-123` | | Post PR + preview URLs to Jira + transition to Ready for QA. WIP gate enforced. |
-| `/atlassian-pm:create-story` | `--thorough` `--no-subtasks` | **Recommended** — Story + Sub-tasks in one workflow. Vibe default: auto-extract + Implementation Hints. `--no-subtasks` to create story only (add subtasks later via analyze-story). |
-| `/atlassian-pm:analyze-story ABC-123` | `--thorough` `--skip-explore` | Explore codebase → create Sub-tasks + Implementation Hints. Vibe default: auto-proceed, no ITERATE. `--skip-explore` when file paths already known. |
-| `/atlassian-pm:create-task` | `--thorough` | Task: `tech-debt`, `bug`, `chore`, or `spike`. Vibe default: auto-detect type. |
+| `/atlassian-pm:create-task` | `--thorough` | Task with child Tasks. Vibe default: auto-extract + Implementation Hints. Auto-detects type (feature, bug, chore, spike). |
 | `/atlassian-pm:map-dependencies` | `--keys ABC-1,ABC-2` | Critical path + swim lane dependency analysis |
-| `/atlassian-pm:update-story ABC-123` | | Edit Story — ACs, scope, description |
 | `/atlassian-pm:update-epic ABC-123` | | Edit Epic — scope, RICE, metrics |
-| `/atlassian-pm:update-task ABC-123` | | Edit Task — format, details |
-| `/atlassian-pm:update-subtask ABC-123` | | Edit Sub-task — format, content |
-| `/atlassian-pm:sync-artifacts ABC-123` | | Bidirectional sync: Story ↔ Sub-tasks ↔ Confluence |
+| `/atlassian-pm:update-task ABC-123` | | Edit Task — ACs, scope, description, format |
+| `/atlassian-pm:sync-artifacts ABC-123` | | Bidirectional sync: Task ↔ child Tasks ↔ Confluence |
 | `/atlassian-pm:verify-issue ABC-123` | `--with-subtasks` `--fix` `--dry-run` | ADF format + INVEST criteria check |
 | `/atlassian-pm:scan-tech-debt` | | Aggregate tech-debt/spike issues → Effort×Impact matrix on Confluence |
 
@@ -170,7 +165,7 @@ Test planning, bug intake, and acceptance verification.
 
 | Skill | Flags | Description |
 | --- | --- | --- |
-| `/atlassian-pm:create-testplan ABC-123` | | Test Plan + `[QA]` Sub-tasks from Story ACs |
+| `/atlassian-pm:create-testplan ABC-123` | | Test Plan + `[QA]` Tasks from parent ACs |
 | `/atlassian-pm:execute-testplan ABC-123` | | Run Google Sheet test cases via Playwright → write results back → create bug tickets |
 | `/atlassian-pm:bug-triage` | `--no-assign` | Full triage: intake → P1/P2/P3 severity → dedup check → assign. `--no-assign` to skip assignment gate. |
 
@@ -223,30 +218,30 @@ vibe plan "coupon redemption at checkout for logged-in users"
 plan feature: social login with Google OAuth — affects website + backend API
 ```
 
-Each generates: Epic + Stories + AI-Ready Subtasks with Implementation Hints (entry point, pattern, test command). Max 2 interactions — one tree review, then auto-creates in Jira.
+Each generates: Epic + Tasks + AI-Ready child Tasks with Implementation Hints (entry point, pattern, test command). Max 2 interactions — one tree review, then auto-creates in Jira.
 
-#### Story Analysis (analyze-story)
+#### Issue Verification (verify-issue)
 
 ```text
-วิเคราะห์ Story {{PROJECT_KEY}}-123 จากนั้นสร้าง subtasks สำหรับทีม Engineer
+verify {{PROJECT_KEY}}-123 --with-subtasks
 
-analyze story {{PROJECT_KEY}}-456 and create implementation subtasks
+ตรวจสอบ {{PROJECT_KEY}}-456 พร้อม child tasks ทั้งหมด
 
-ช่วย break down {{PROJECT_KEY}}-789 ออกเป็น subtasks พร้อม implementation hints
+check alignment for {{PROJECT_KEY}}-789 --fix
 
-technical analysis for {{PROJECT_KEY}}-321 — 3 services impacted: BE, Admin, Website
+technical quality check for {{PROJECT_KEY}}-321 — 3 services impacted: BE, Admin, Website
 ```
 
-Each explores the codebase (finds real file paths + patterns) before generating subtasks. Subtasks include Implementation Hints so devs can run `implement {{PROJECT_KEY}}-XXX` directly.
+Checks ADF format, INVEST criteria, and alignment across the full issue tree. Use `--fix` to auto-repair issues found.
 
-#### Story Creation
+#### Task Creation
 
 ```text
-สร้าง story: ผู้ใช้สามารถ reset password ผ่าน email ได้
+สร้าง task: ผู้ใช้สามารถ reset password ผ่าน email ได้
 
-create story for Google SSO login — users should be able to sign in without a password
+create task for Google SSO login — users should be able to sign in without a password
 
-สร้าง story สำหรับ feature แสดง transaction history ใน admin dashboard [FE-Admin]
+สร้าง task สำหรับ feature แสดง transaction history ใน admin dashboard [FE-Admin]
 ```
 
 #### Bug Report
@@ -294,10 +289,10 @@ check if {{PROJECT_KEY}}-789 subtasks are aligned — dry run only
 # 3. Epic + Confluence doc
 /atlassian-pm:create-epic
 
-# 4. Story + Sub-tasks (explores codebase automatically)
-/atlassian-pm:create-story
+# 4. Task + child Tasks (explores codebase automatically)
+/atlassian-pm:create-task
 
-# 5. QA sub-tasks (optional)
+# 5. QA child Tasks (optional)
 /atlassian-pm:create-testplan ABC-123
 
 # 6. Verify the full tree
@@ -310,7 +305,7 @@ check if {{PROJECT_KEY}}-789 subtasks are aligned — dry run only
 # 4-role debate before writing Jira artifacts
 /atlassian-pm:refine-epic
 → Roles: PO × Tech Lead × Engineer × QA
-→ Output: revised story + refined ACs → ready for /create-story
+→ Output: revised requirements + refined ACs → ready for /create-task
 ```
 
 #### Scrumban Flow
@@ -329,10 +324,10 @@ check if {{PROJECT_KEY}}-789 subtasks are aligned — dry run only
 #### Update with Cascade
 
 ```bash
-# Story only
-/atlassian-pm:update-story ABC-123
+# Task only
+/atlassian-pm:update-task ABC-123
 
-# Story + Sub-tasks + Confluence (all in sync)
+# Task + child Tasks + Confluence (all in sync)
 /atlassian-pm:sync-artifacts ABC-123
 ```
 
@@ -599,14 +594,14 @@ config/project-config.json.template     ← Template with placeholders (tracked)
 skills/                        ← 39 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
 ├── setup/                     ← setup, doctor
 ├── epic/                      ← blueprint, refine-epic, create-epic, vibe-plan, update-epic, plan-release, epic-health
-├── story/                     ← create-story, analyze-story, spec-to-stories, update-story, verify-issue, sync-artifacts
-├── task/                      ← create-task, create-testplan, execute-testplan, bug-triage, assign-issue, update-subtask, update-task, start-ticket, ship-to-qa
+├── story/                     ← spec-to-stories, verify-issue, sync-artifacts
+├── task/                      ← create-task, create-testplan, execute-testplan, bug-triage, assign-issue, update-task, start-ticket, ship-to-qa
 ├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint, retro-actions
 ├── confluence/                ← create-doc, update-doc
 └── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts, status
 
 references/                    ← Docs loaded by skills on-demand (24 files)
-├── templates.md               ← ADF templates (Epic, Story, Sub-task, Task)
+├── templates.md               ← ADF templates (Epic, Task)
 ├── hr-rules.md                ← Hard rule definitions (HR1–HR10)
 └── troubleshooting.md         ← Common failures + fixes
 
@@ -680,7 +675,7 @@ mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + 
 
 **Save tokens** — run `cache_sprint_issues(sprint_id=...)` before flow-check or close-sprint to pre-cache all issues. Repeated reads cost 0 API tokens.
 
-**Let Claude explore** — `/atlassian-pm:analyze-story` always explores the codebase before creating Sub-tasks. Never skip — generic sub-tasks miss real implementation paths.
+**Let Claude explore** — `/atlassian-pm:create-task` always explores the codebase before creating child Tasks. Never skip — generic Tasks miss real implementation paths.
 
 **Dev hot-reload** — after editing skill or agent files, use `/reload-plugins` in Claude Code.
 

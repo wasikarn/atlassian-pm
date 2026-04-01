@@ -6,7 +6,7 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (61) | `agents/` (20) | `.claude/commands/` (13 chains)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (61) | `agents/` (20) | `.claude/commands/` (11 chains)
 **Skills:** 35 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
 **Issue hierarchy:** Epic → Task (2 levels). Task carries narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings. Human-readable + AI-parseable.
@@ -58,17 +58,29 @@ Team detail: `.claude/project-config-team-detail.json` _(gitignored — create f
 
 | Mistake | Fix |
 | --- | --- |
-| Hardcoding project/space key | Edit `.claude/project-config.json` — skills use `<project_key>` placeholders |
 | Set parent on existing issue | `jira_set_parent.py --issues KEY --parent EPIC` (MCP/acli silently fail) |
 | Sibling tool call errored | One parallel MCP call failed → all cancelled. Fix failing call first |
-| Using ADF panel nodes | Panels render as gray blockquote — use heading + text only (v3.0.0) |
-| Mermaid / Confluence macros | `update_page_storage.py` — MCP corrupts XML. See `.claude/rules/mermaid.md` |
-| MCP assignee field | MCP silently fails — use `acli jira workitem assign` only (HR3) |
 
 ## References
 
-`references/` (26 docs, indexed by `templates.md`): ADF templates (`templates-core/epic/task.md`) · workflow (`workflow-patterns.md`, `skill-orchestration.md`, `hr-rules.md`) · guides (`writing-style.md`, `tools.md`, `troubleshooting.md`) · scripts via `skills/utilities/atlassian-scripts/SKILL.md`
-**Auto-loaded rules:** `.claude/rules/tool-selection.md` · `.claude/rules/mermaid.md` · `.claude/rules/python-scripts.md`
+`references/` (26 docs, indexed by `templates.md`): ADF templates (`templates-core.md`, `templates-epic.md`, `templates-task.md`) · workflow (`workflow-patterns.md`, `skill-orchestration.md`, `hr-rules.md`) · guides (`writing-style.md`, `tools.md`, `troubleshooting.md`) · scripts via `skills/utilities/atlassian-scripts/SKILL.md`
+**Auto-loaded rules:** `.claude/rules/tool-selection.md` (MCP vs acli vs script per operation) · `.claude/rules/mermaid.md` (diagram docs + Confluence constraints) · `.claude/rules/python-scripts.md` (stdlib-only, exit codes, ruff)
+
+### Chain Commands (`.claude/commands/`)
+
+| Chain | Skills orchestrated |
+| --- | --- |
+| `epic-full` | search-issues → create-epic → create-task → verify-issue |
+| `task-full` | search-issues → create-task → verify-issue |
+| `blueprint-full` | blueprint → create-epic → create-task → verify-issue |
+| `vibe-full` | search-issues → vibe-plan → verify-issue |
+| `bug-full` | search-issues → bug-triage → create-testplan |
+| `qa-full` | create-testplan → execute-testplan |
+| `sprint-plan-full` | plan-sprint → map-dependencies |
+| `sprint-close-full` | close-sprint → retrospective-analyst → _(--with-actions)_ retro-actions |
+| `release-full` | plan-release → release-notes |
+| `tech-debt-full` | scan-tech-debt → create-task (per item) |
+| `daily-ops` | standup-report → flow-check → priority summary |
 
 ## Core Principles
 

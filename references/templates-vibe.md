@@ -1,6 +1,6 @@
 # Vibe Mode Templates & Rules
 
-> **Prerequisite:** → see [templates-core.md](templates-core.md) for panel types · [templates-subtask.md](templates-subtask.md) for base ADF
+> **Prerequisite:** → see [templates-core.md](templates-core.md) for panel types · [templates-task.md](templates-task.md) for base ADF
 
 ## Purpose
 

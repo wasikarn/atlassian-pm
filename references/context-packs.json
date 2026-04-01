@@ -110,7 +110,7 @@
       "description": "Vibe coding workflow — fast creation with AI-Ready subtasks",
       "files": [
         "templates-core.md",
-        "templates-subtask.md",
+        "templates-task.md",
         "templates-vibe.md",
         "subtask-design-patterns.md"
       ],

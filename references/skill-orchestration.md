@@ -6,17 +6,17 @@
 
 | Intent | Skill Chain | Gate | Pre | Post |
 |---|---|---|---|---|
-| Feature blueprint | `/blueprint`→`/create-epic`→`/create-story`→verify | ≥90% | Feature idea | Confluence page |
-| Refine feature | `/search-issues`→`/refine-epic`→`/create-story`→verify | — | search | Refined stories |
+| Feature blueprint | `/blueprint`→`/create-epic`→`/create-task`→verify | ≥90% | Feature idea | Confluence page |
+| Refine feature | `/search-issues`→`/refine-epic`→`/create-task`→verify | — | search | Refined stories |
 | Create epic | `/search-issues`→`/create-epic`→verify | ≥90% | search | verify ≥90% |
-| Create story | `/search-issues`→`/create-story`→verify | ≥90% | search | verify `--with-subtasks` |
+| Create story | `/search-issues`→`/create-task`→verify | ≥90% | search | verify `--with-subtasks` |
 | Create task | `/search-issues`→`/create-task`→verify | ≥90% | search | verify ≥90% |
-| Analyze story | `/analyze-story`→verify `--with-subtasks` | ≥90% | Story exists | verify `--with-subtasks` |
+| Analyze story | `/verify-issue`→verify `--with-subtasks` | ≥90% | Story exists | verify `--with-subtasks` |
 | Test plan | `/create-testplan`→verify | ≥90% | Story exists | verify ≥90% |
 | Vibe: idea→tasks | `/vibe-plan`→verify `--with-subtasks` | ≥90% | Feature desc/epic | verify `--with-subtasks` |
 | Update single | `/update-{epic,story,task,subtask}`→verify | ≥90% | Issue exists | verify ≥90% |
 | Update cascade | `/sync-artifacts`→verify `--with-subtasks` | ≥90% | Artifacts changed | verify `--with-subtasks` |
-| Import spec | `/spec-to-stories`→`/create-story` | ≥90% | Confluence+epic | Stories linked to epic |
+| Import spec | `/spec-to-stories`→`/create-task` | ≥90% | Confluence+epic | Stories linked to epic |
 | Bug triage | `/search-issues`→`/bug-triage`→`/create-testplan` | ≥90% | | |
 | Replenishment | `/flow-check --replenish` | | project-config.json | WIP table |
 | Dependencies | `/map-dependencies` | | Issues w/ links | Graph + critical path |
@@ -31,7 +31,7 @@
 | Start ticket | `/start-ticket` | | Issue in Jira | In Progress + AC |
 | Ship to QA | `/ship-to-qa` | | PR open | Comment + Ready for QA |
 
-**Rules:** Search before creating · Verify after every write · `/create-story` for new (PO+TA combined); `/analyze-story` for existing (subtasks only) · All creation = **vibe mode**; `--thorough` for full workflow
+**Rules:** Search before creating · Verify after every write · `/create-task` for new (PO+TA combined); `/verify-issue` for existing (subtasks only) · All creation = **vibe mode**; `--thorough` for full workflow
 
 ## QG Scoring
 
@@ -52,22 +52,22 @@ flowchart TD
     B --> D{Duplicate found?}
     D -->|Yes| E["/update-* or /sync-artifacts"]
     D -->|No| F{Scope?}
-    F -->|"Greenfield / Architecture"| G["/blueprint → /create-epic → /create-story"]
-    F -->|"Unclear / Multi-service"| H["/refine-epic → /create-story"]
-    F -->|"Clear / Single service"| I["/create-story ⭐"]
+    F -->|"Greenfield / Architecture"| G["/blueprint → /create-epic → /create-task"]
+    F -->|"Unclear / Multi-service"| H["/refine-epic → /create-task"]
+    F -->|"Clear / Single service"| I["/create-task ⭐"]
     F -->|"Idea → tasks one-shot"| V["/vibe-plan 🚀"]
     F -->|"Bug / Tech-debt / Spike"| J["/create-task"]
     C -->|Single issue| K["/update-{type}"]
-    C -->|"Story needs Sub-tasks"| L["/analyze-story"]
+    C -->|"Story needs Sub-tasks"| L["/verify-issue"]
     C -->|"Story + Sub-tasks sync"| M["/sync-artifacts"]
     classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     class E,G,H,I,J,K,L,M,V skill
 ```
 
-### create-story vs analyze-story?
+### create-task vs verify-issue?
 
-Story doesn't exist → `/create-story` (Phases 1–10, PO+TA combined, outputs Story+Sub-tasks)
-Story exists, need subtasks only → `/analyze-story` (Phases 5–10, skips story creation)
+Task doesn't exist → `/create-task` (creates new Task with type templates)
+Task exists, need quality check → `/verify-issue` (verifies ADF format, INVEST, alignment)
 
 ## Context Packs
 
