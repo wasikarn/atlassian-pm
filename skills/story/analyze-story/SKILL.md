@@ -15,6 +15,9 @@ argument-hint: "[--thorough | --skip-explore] [issue-key]"
 effort: high
 ---
 
+> **⚠️ DEPRECATED in v3.0.0:** This skill is replaced by `/create-task` (feature mode with --thorough).
+> Task descriptions now include file paths and implementation hints directly — no separate analysis step needed.
+
 # /analyze-story
 
 **Role:** Senior Technical Analyst

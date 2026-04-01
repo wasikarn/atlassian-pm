@@ -11,7 +11,7 @@ description: |
 
   Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "สร้าง epic"
   Use when: creating a NEW Epic from a product vision or initiative idea
-  Do NOT use for: stories or subtasks (use create-story); updating an existing epic (use update-epic)
+  Do NOT use for: tasks under epic (use create-task); updating an existing epic (use update-epic)
 argument-hint: "[--thorough | --no-doc] [epic-title]"
 effort: medium
 ---
@@ -168,9 +168,9 @@ Skip interview questions in Phase 1 for information already documented.
 
 ```text
 ## Epic Created: [Title] ({{PROJECT_KEY}}-XXX)
-RICE Score: X | Stories: N planned
+RICE Score: X | Tasks: N planned
 Epic Doc: [link] | Epic: [link]
-→ Use /create-story to continue
+→ Use /create-task to continue
 ```
 
 **`--no-doc` variant:**
@@ -178,7 +178,7 @@ Epic Doc: [link] | Epic: [link]
 ```text
 ## Epic Created: [Title] ({{PROJECT_KEY}}-XXX)
 Epic: [link]  (no Confluence doc)
-→ /atlassian-pm:create-story     add stories under this epic
+→ /atlassian-pm:create-task      add tasks under this epic
 → /atlassian-pm:create-doc {{PROJECT_KEY}}-XXX   create doc later if needed
 ```
 
@@ -204,13 +204,13 @@ Epic: [link]  (no Confluence doc)
 ```text
 /create-epic                                         # no title → discovery phase asks generic questions, output is shallow
 /create-epic "improve performance"                   # vague — no clear problem narrative, RICE scoring will be guesswork
-/create-epic "Add dark mode toggle"                  # single-screen UI change → use /create-story directly, epic is overkill
+/create-epic "Add dark mode toggle"                  # single-screen UI change → use /create-task directly, epic is overkill
 /create-epic "{{PROJECT_KEY}}-50 fix scope"                     # updating an existing epic → use /update-epic {{PROJECT_KEY}}-50 instead
 ```
 
 **Common mistakes:**
 
-- Creating an epic for work that fits in 1-2 stories — epics represent multi-sprint initiatives; use `/create-story` for smaller scope.
+- Creating an epic for work that fits in 1-2 tasks — epics represent multi-sprint initiatives; use `/create-task` for smaller scope.
 - Skipping the RICE prioritization step by providing arbitrary scores — RICE requires stakeholder input on Reach and Confidence; guessing produces meaningless priority rankings.
 - Creating an epic before running `/blueprint` for complex multi-service features — blueprint generates the VS plan and story breakdown that create-epic needs for Phase 3.
 - Approving Phase 1 without confirming the narrative arc — vague problem statements propagate into the Epic Doc and make scope decisions in Phase 3 ambiguous.

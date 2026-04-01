@@ -1,4 +1,36 @@
-# ADF Core Rules & Patterns
+# ADF Core Rules
+
+## Issue Hierarchy
+
+Epic → Task (2 levels only, no Story/Subtask)
+
+## ADF Principles
+
+1. No panel nodes — use heading + paragraph + bulletList + table only
+2. No blockquote — never use `>` markdown syntax or ADF blockquote node
+3. No emoji in headings — plain Thai text only
+4. No horizontal rules between sections — headings create separation naturally
+5. No numbered section headings — no "1. Context", "2. Scope" style prefixes
+6. AC type prefix: ✅ (happy path) / ⚠️ (edge case) / ❌ (error/negative) in bold paragraph text (NOT in heading)
+
+## Allowed ADF Node Types
+
+| Node | Usage |
+| --- | --- |
+| `heading` (h2) | Section titles |
+| `paragraph` | Content text |
+| `bulletList` / `listItem` | Unordered lists |
+| `orderedList` / `listItem` | Numbered steps |
+| `table` / `tableRow` / `tableHeader` / `tableCell` | Structured data |
+| `text` (marks: `strong`, `em`, `code`, `link`) | Inline formatting |
+
+## Forbidden ADF Node Types
+
+| Node | Why |
+| --- | --- |
+| `panel` | Renders as blockquote on some clients; use heading + content instead |
+| `blockquote` | No visual hierarchy |
+| `rule` | Headings create separation naturally |
 
 ## CREATE vs EDIT
 
@@ -9,30 +41,7 @@
 | **CREATE** | `projectKey`, `type`, `summary`, `description` | `issues` |
 | **EDIT** | `issues`, `description` | `projectKey`, `type`, `summary`, `parent` |
 
-`unknown field "projectKey"` → CREATE format on EDIT · `unknown field "issues"` → EDIT format on CREATE
-
-## Panel Types
-
-| Type | Usage |
-| --- | --- |
-| `info` | Story narrative, objective, summary |
-| `success` | Happy path AC |
-| `warning` | Edge cases, validation |
-| `error` | Error handling, negative tests |
-| `note` | Notes, dependencies |
-
-## Content Rules
-
-| Section | Use | Never |
-| --- | --- | --- |
-| Acceptance Criteria | panels + Given/When/Then | table alone |
-| Fields/Spec | table | panels |
-| Notes/Dependencies | `note` panel | table |
-| Table inside panel | bulletList | nested table/list |
-
-AC panels: happy path → `success` · edge cases → `warning` · errors → `error`
-
-AC Summary table (ID/Title/Type/Description columns) optional for stories with AC ≥ 5.
+`unknown field "projectKey"` → CREATE format used on EDIT · `unknown field "issues"` → EDIT format used on CREATE
 
 ## Inline Code
 
@@ -48,3 +57,5 @@ Mark file paths, routes, functions: `{"type": "text", "text": "src/file.tsx", "m
 | Wiki format | Use ADF JSON with acli |
 | Nested bulletList | Flatten to single list |
 | Missing marks array | `[{"type": "code"}]` not `"code"` |
+| Panel node in ADF | Replace with heading + paragraph/bulletList |
+| Emoji in heading text | Move emoji to paragraph bold text only |

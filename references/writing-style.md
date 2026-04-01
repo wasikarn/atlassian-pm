@@ -149,19 +149,19 @@ Team will **scan before reading** — design content to be scannable in 5 second
 
 | Issue Type | Required | Optional (⚡ real data only) |
 | --- | --- | --- |
-| **Epic** | Overview (3 lines) · Business Value (3 bullets) · Scope (1 line/item) · User Stories (list only) | RICE · Success Metrics · Domain Model · Progress |
-| **Story** | Narrative (3-4 lines) · ACs (1–5 panels, Given/When/Then) | Out of Scope · Reference (Figma/link only) · Technical Notes (after exploration) |
-| **Sub-task** | Objective (1 sentence) · ACs (1–3 panels) | Scope table (≥2 CREATE files) · Implementation Hints (vibe/exploration only) |
-| **QA** ⚡ | Test Objective (1 sentence) · Test Cases (1–8 panels) | Reference (Story/Figma link only) |
-| **Task** | Objective/Context (1-2 lines) · Tasks or Criteria | Out of Scope · Reference |
+| **Epic** | สรุปภาพรวม (3 lines) · คุณค่าทางธุรกิจ (3 bullets) · ลูกค้าเห็นอะไร? · ขอบเขตงาน · เงื่อนไขที่ต้องผ่าน · ความเสี่ยง | RICE · Success Metrics · Domain Model · Progress |
+| **Task (feature)** | สิ่งที่ผู้ใช้ต้องการ (3-4 lines) · เงื่อนไขที่ต้องผ่าน (1–5 ACs) | ขอบเขตไฟล์ (≥2 files) · คำแนะนำการพัฒนา (vibe/exploration only) |
+| **Task (QA)** | วัตถุประสงค์ทดสอบ (1 sentence) · ชุดทดสอบ (max 8 TCs) | Reference (Story/Figma link only) |
+| **Task (bug)** | รายละเอียดปัญหา · ขั้นตอนทำซ้ำ · คาดหวัง vs เกิดจริง · เงื่อนไขที่ต้องผ่าน | Reference (Figma/log link only) |
+| **Task (spike/chore)** | Objective/Context (1-2 lines) · Tasks or Criteria | Out of Scope · Reference |
 
 **Rules:**
 
 - Never add a section as placeholder — if no real content, skip entirely
-- QA ticket: optional per story — create only when QA requests or story has complex logic
-- Story Reference: only when Figma URL or external design link actually exists
-- Subtask Scope table: skip when story has only 1 service or 1 file to change
-- Technical Notes: only after Phase 7 codebase exploration returns concrete file paths
+- QA Task: create only when QA requests or feature has complex logic
+- Feature Task Reference: only when Figma URL or external design link actually exists
+- File Scope table: skip when task has only 1 service or 1 file to change
+- Technical Notes / Implementation Hints: only after codebase exploration returns concrete file paths
 
 **⚡ = optional** — include only when there is real content to fill it with
 
@@ -214,18 +214,18 @@ Examples:
 - ❌ `[FE-Admin] - Create coupon menu page (Coupon Menu)` (English + redundant parens)
 - ❌ `[BE] - Build API` (not specific enough)
 
-### Sub-task
+### Task
 
 ```text
 [TAG] - [Brief description]
 ```
 
-Tags: `[BE]`, `[FE-Admin]`, `[FE-Web]`
+Tags: `[BE]`, `[FE-Admin]`, `[FE-Web]`, `[QA]`
 
-### QA Sub-task
+**QA Task pattern:**
 
 ```text
-[QA] - Test: [Story title or feature name]
+[QA] - Test: [Feature or Epic name]
 ```
 
 ## Common Mistakes

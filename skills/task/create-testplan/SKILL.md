@@ -5,15 +5,15 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_create_issue, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create Test Plan + [QA] Sub-task from User Story with a 6-phase QA workflow
+  Create Test Plan + [QA] Task from parent Epic or feature Task with a 6-phase QA workflow
 
-  Phases: Discovery → Test Scope Analysis → Design Test Cases → Quality Gate → Create [QA] Sub-task → Summary
+  Phases: Discovery → Test Scope Analysis → Design Test Cases → Quality Gate → Create [QA] Task → Summary
 
-  Output: [QA] Sub-task in Jira (Test Plan embedded in description)
+  Output: [QA] Task in Jira (Test Plan embedded in description)
 
-  Triggers: "create test plan", "QA", "test case", "testing", "สร้าง test plan", "add QA subtask"
-  Use when: adding a QA sub-task and test plan to an existing Story
-  Do NOT use for: initial story creation (use create-story); analyzing implementation (use analyze-story)
+  Triggers: "create test plan", "QA", "test case", "testing", "สร้าง test plan", "add QA task"
+  Use when: adding a QA task and test plan to an existing Epic or feature Task
+  Do NOT use for: initial task creation (use create-task); analyzing implementation (use analyze-story)
 argument-hint: "[issue-key]"
 effort: medium
 ---
@@ -21,28 +21,28 @@ effort: medium
 # /create-testplan
 
 **Role:** Senior QA Analyst
-**Output:** [QA] Sub-task (with embedded Test Plan)
+**Output:** [QA] Task (with embedded Test Plan)
 
 ## Context Object (accumulated across phases)
 
 | Phase | Adds to Context |
 |-------|----------------|
-| 1. Discovery | `story_data`, `subtask_inventory[]`, `test_scope` |
+| 1. Discovery | `parent_data`, `task_inventory[]`, `test_scope` |
 | 2. Test Scope | `ac_coverage_map[]`, `test_types[]` |
 | 3. Design | `test_cases[]`, `coverage_matrix` |
 | 4. QG | `qg_score`, `passed_qg` |
-| 5. Create | `qa_subtask_key` |
+| 5. Create | `qa_task_key` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
-> **Note:** Test Plan is embedded in [QA] Sub-task description instead of creating a separate Confluence page
+> **Note:** Test Plan is embedded in [QA] Task description instead of creating a separate Confluence page
 
 ## Phases
 
 ### 1. Discovery
 
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
-- `MCP: jira_search(jql: "parent = {{PROJECT_KEY}}-XXX", fields: "summary,status,assignee,issuetype")` → Sub-tasks (**⚠️ NEVER add ORDER BY to parent queries**)
+- `MCP: jira_search(jql: "parent = {{PROJECT_KEY}}-XXX", fields: "summary,status,assignee,issuetype")` → child Tasks (**⚠️ NEVER add ORDER BY to parent queries**)
 - Read: Narrative, ACs, Technical Note (if available)
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of test scope.
 
@@ -61,17 +61,17 @@ effort: medium
 ### 3. Design Test Cases
 
 > **ADF is minimal-first** — AC Coverage matrix (Phase 2) is internal planning only. Do NOT embed it in the Jira ADF description.
-> Jira ADF = `🎯 Test Objective` + `🧪 Test Cases` panels + optional `🔗 Reference`. Nothing else.
+> Jira ADF = `วัตถุประสงค์ทดสอบ` heading + `ชุดทดสอบ` heading + optional `อ้างอิง`. No panels.
 
-- Max 8 test cases; split into a second [QA] subtask if > 8
+- Max 8 test cases; split into a second [QA] Task if > 8
 - Each TC: ID, Given/When/Then, AC ref, Priority (🔴/🟠/🟡/🟢)
-- Type: ✅ Happy (success panel) / ⚠️ Edge (warning panel) / ❌ Error (error panel)
+- Type: ✅ Happy path / ⚠️ Edge case / ❌ Error case
 - **🟡 REVIEW** — Present test cases to user. Proceed unless user objects.
 
 ### 4. Quality Gate (MANDATORY)
 
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
-> HR1: DO NOT create QA subtask in Jira without QG ≥ 90%.
+> HR1: DO NOT create QA Task in Jira without QG ≥ 90%.
 >
 > [QG Scoring Rules](../../../references/workflow-patterns.md#quality-gate-scoring). Report: `Technical X/5 | QA Quality X/5 | Overall X%`
 >
@@ -83,25 +83,23 @@ effort: medium
 >
 > Score ≥ 90 = PASS. If FAIL → check `issues[].fix_hint` → run `--fix` → re-score. Max 1 fix cycle.
 
-### 5. Create [QA] Sub-task
+### 5. Create [QA] Task
 
 > **🟢 AUTO** — Create → verify parent → edit description. All automated. Escalate only if parent verify fails.
 > HR5: Two-Step + Verify Parent.
 
-> **Principle:** 1 Story = 1 [QA] Sub-task (Test Plan embedded in description)
+> **Principle:** 1 Epic/Feature Task = 1 [QA] Task (Test Plan embedded in description)
 >
-> ⚠️ Use **Two-Step Workflow** (see [Subtask Template](../../../references/templates-subtask.md)):
+> ⚠️ Use **Two-Step Workflow** (see [Task Template](../../../references/templates-task.md)):
 >
-> **Step 1:** MCP `jira_create_issue` → summary: `[QA] - Test: [Feature Name]`, parent: `{{PROJECT_KEY}}-XXX`
+> **Step 1:** MCP `jira_create_issue` → summary: `[QA] - Test: [Feature Name]`, type: `Task`, parent: `{{PROJECT_KEY}}-XXX`
 > **Step 2:** `acli jira workitem edit --from-json {{artifacts_dir}}/tp-xxx-qa.json --yes`
 >
 > ⚠️ EDIT JSON uses `"issues": ["ABC-QQQ"]` (not `"parent"` or `"parentKey"`)
 
-> **⚠️ MANDATORY:** Read `references/templates-subtask.md` § "QA Test Case Template" before generating any ADF. Required sections: `🎯 Test Objective` + `🧪 Test Cases`. Optional: `🔗 Reference` only when real links exist.
+> **⚠️ MANDATORY:** Read `references/templates-task.md` § "Mode: qa" before generating any ADF. Required headings: `วัตถุประสงค์ทดสอบ` + `ชุดทดสอบ`. Optional: `อ้างอิง` only when real links exist. No panel nodes.
 
-Panel colors: see [ADF Core Rules](../../../references/templates-core.md) — success=happy path · warning=edge case · error=error case
-
-> **🟢 AUTO** — HR6: `cache_invalidate(qa_subtask_key)` after create.
+> **🟢 AUTO** — HR6: `cache_invalidate(qa_task_key)` after create.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
 
 ### 6. Summary
@@ -109,7 +107,7 @@ Panel colors: see [ADF Core Rules](../../../references/templates-core.md) — su
 ```text
 ## QA Complete: [Title] ({{PROJECT_KEY}}-XXX)
 
-[QA] Sub-task: ABC-QQQ (N scenarios)
+[QA] Task: ABC-QQQ (N scenarios)
 Coverage: X ACs → Y test scenarios (100%)
 
 → /verify-issue ABC-QQQ to verify
@@ -135,38 +133,36 @@ Coverage: X ACs → Y test scenarios (100%)
 ### ✅ Good
 
 ```text
-/create-testplan {{PROJECT_KEY}}-101                # create [QA] sub-task for story {{PROJECT_KEY}}-101; agent reads all ACs first
-/create-testplan {{PROJECT_KEY}}-101                # after bug fix: creates verification sub-task with regression cases
-/create-testplan {{PROJECT_KEY}}-215                # story with 5 ACs → agent maps 100% coverage before designing test cases
+/create-testplan {{PROJECT_KEY}}-101                # create [QA] Task for Epic/Task {{PROJECT_KEY}}-101; agent reads all ACs first
+/create-testplan {{PROJECT_KEY}}-101                # after bug fix: creates verification task with regression cases
+/create-testplan {{PROJECT_KEY}}-215                # task with 5 ACs → agent maps 100% coverage before designing test cases
 ```
 
 ### ❌ Bad
 
 ```text
-/create-testplan                        # missing story key — skill cannot fetch ACs without it
-/create-testplan {{PROJECT_KEY}}-112               # {{PROJECT_KEY}}-112 is a Sub-task, not a Story — test plan must target the parent story (1 Story = 1 [QA] Sub-task)
+/create-testplan                        # missing issue key — skill cannot fetch ACs without it
 /create-testplan {{PROJECT_KEY}}-101               # run before ACs are finalized — test cases will be incomplete and need full rework
-/create-testplan {{PROJECT_KEY}}-101               # calling a second time on a story that already has a [QA] sub-task — creates a duplicate; check first
+/create-testplan {{PROJECT_KEY}}-101               # calling a second time on an issue that already has a [QA] Task — creates a duplicate; check first
 ```
 
 ### ❌ Bad (correct key, wrong approach)
 
 ```text
-# Writing test cases from memory without reading story ACs first → results in generic TC-01/TC-02 cases
+# Writing test cases from memory without reading ACs first → results in generic TC-01/TC-02 cases
 # Skipping Phase 2 AC coverage matrix → some ACs left uncovered (100% coverage is mandatory)
-# Asking to assign the [QA] sub-task via MCP → HR3: use acli assign only
+# Asking to assign the [QA] Task via MCP → HR3: use acli assign only
 ```
 
 **Common mistakes:**
 
-- Running before the story's ACs are finalized — any AC added or modified after test plan creation requires reworking all affected test cases
+- Running before the ACs are finalized — any AC added or modified after test plan creation requires reworking all affected test cases
 - Not achieving 100% AC coverage in Phase 2 — every AC must map to at least one test scenario before Phase 3 proceeds
-- Creating a test plan against a Sub-task key instead of the parent Story key — 1 Story = 1 [QA] Sub-task is the enforced principle
-- Calling the skill a second time on a story that already has a `[QA]` sub-task — search for existing QA subtask in Phase 1 discovery before creating a new one
+- Calling the skill a second time on an issue that already has a `[QA]` Task — search for existing QA task in Phase 1 discovery before creating a new one
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Subtask Template](../../../references/templates-subtask.md) · [Verification](../../../references/verification-checklist.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Task Template](../../../references/templates-task.md) · [Verification](../../../references/verification-checklist.md)
 
 ## 🎓 Domain Expert Notes
 

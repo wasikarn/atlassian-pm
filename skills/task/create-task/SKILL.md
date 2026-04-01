@@ -7,12 +7,13 @@ allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__ji
 description: |
   Create a new Jira Task — vibe mode by default (fast, auto-detect type)
   Supports 4 task types: tech-debt, bug, chore, spike
+  Supports modes: feature (default), qa, bug, spike, chore
   Use --thorough for full interview + review gates
 
   Triggers: "create task", "new task", "สร้าง task", "tech debt task", "add chore", "new spike"
-  Use when: creating a standalone task — tech-debt, bug, chore, or spike — that is not a User Story
-  Do NOT use for: User Stories (use create-story); epics (use create-epic); full bug triage with severity/dedup/assign (use bug-triage)
-argument-hint: "[--thorough] [type] [description]"
+  Use when: creating a standalone task — feature, tech-debt, bug, chore, or spike — under an Epic
+  Do NOT use for: epics (use create-epic); full bug triage with severity/dedup/assign (use bug-triage)
+argument-hint: "[--qa|--bug|--spike|--chore] [description or issue-key]"
 effort: medium
 ---
 
@@ -23,6 +24,18 @@ effort: medium
 **Modes:** *(none)* = vibe (auto-detect, no review gate, 0–1 interactions) · `--thorough` = full interview + review gate. Strip `--thorough` flag before processing remaining args.
 
 **Types:** `tech-debt` (PR issues, refactor) · `bug` (QA/prod fixes) · `chore` (maintenance, deps) · `spike` (research, POC)
+
+## Mode Selection
+
+| Flag | Mode | Template |
+| --- | --- | --- |
+| *(none)* | feature (default) | สิ่งที่ผู้ใช้ต้องการ + เงื่อนไขที่ต้องผ่าน + ขอบเขตไฟล์ + คำแนะนำการพัฒนา |
+| `--qa` | QA test plan | วัตถุประสงค์ทดสอบ + ชุดทดสอบ |
+| `--bug` | Bug report | รายละเอียดปัญหา + ขั้นตอนทำซ้ำ + คาดหวัง vs เกิดจริง + เงื่อนไขที่ต้องผ่าน |
+| `--spike` | Research spike | คำถามวิจัย + บริบท + พื้นที่สำรวจ |
+| `--chore` | Maintenance | วัตถุประสงค์ + รายการงาน + เงื่อนไขที่ต้องผ่าน |
+
+> **Auto-detect:** If no flag, infer mode from content: "test"/"QA"/"ทดสอบ" → qa, "bug"/"error"/"พัง" → bug, "research"/"วิจัย"/"spike" → spike, "chore"/"upgrade"/"config" → chore
 
 ## Phases
 

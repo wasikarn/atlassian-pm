@@ -19,6 +19,9 @@ argument-hint: "[--thorough | --no-subtasks] [story-description]"
 effort: high
 ---
 
+> **⚠️ DEPRECATED in v3.0.0:** This skill is replaced by `/create-task` (feature mode). Use `/create-task` instead.
+> `/create-task` creates a Task with narrative + ACs + file paths — no separate Story/Subtask needed.
+
 # /create-story
 
 **Role:** PO + TA Combined · **Output:** User Story + Sub-tasks (complete workflow)

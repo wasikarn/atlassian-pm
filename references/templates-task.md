@@ -1,177 +1,320 @@
-# Task Templates (ADF)
+# Task Templates (ADF) — Unified
 
-> **Prerequisite:** Read [templates-core.md](templates-core.md) for CREATE/EDIT rules, panel types, styling
+> **Prerequisite:** Read [templates-core.md](templates-core.md) for CREATE/EDIT rules and styling.
+
+All task types use Jira `"type": "Task"`. Mode is conveyed via summary prefix and content structure — not issue type.
 
 **Jira Fields (set after create via MCP `jira_update_issue`):**
 
 | Field | Jira ID | Value | Required |
 | --- | --- | --- | --- |
-| Story Points | `customfield_10016` | 1-8 based on effort | Recommended |
+| Story Points | `customfield_10016` | 1–8 based on effort | Recommended |
 | Size | `customfield_10107` | `{"value": "S"}` | Recommended |
 | Original Estimate | `timetracking` | `{"originalEstimate": "4h"}` | Recommended |
 | Start Date | `{{START_DATE_FIELD}}` | `"YYYY-MM-DD"` | Optional |
 | Due Date | `duedate` | `"YYYY-MM-DD"` | Optional |
 
-## tech-debt Template
+**EDIT format:** Replace `"projectKey"` with `"issues": ["KEY"]` — all other fields identical.
 
-**Use case:** PR review issues, code improvements, refactoring
-**Summary:** `[BE] [Title] - [Context]`
+---
 
-> Used with `acli jira workitem create --from-json`
-> **Section format:** `N. Emoji Title` — see [writing-style.md](writing-style.md#numbered-section-pattern)
+## Mode: feature (default) — replaces Story + Subtask
+
+**Use case:** Any deliverable work — feature, sub-task, or implementation unit.
+**Summary:** `[BE/FE-Admin/FE-Web] Task title`
+
+**Sections:**
+
+| Section | Required | Notes |
+| --- | --- | --- |
+| สิ่งที่ผู้ใช้ต้องการ | Yes | As a / I want / So that, or plain narrative |
+| เงื่อนไขที่ต้องผ่าน | Yes | Given/When/Then with ✅/⚠️/❌ prefix per AC |
+| ขอบเขตไฟล์ | Optional (AI) | Table: Action \| File path |
+| คำแนะนำการพัฒนา | Optional (AI/vibe) | Table: Field \| Value |
+
+**AC naming:** `AC{N}: [Verb] — [Scenario Name]`
+**AC prefix:** ✅ happy path · ⚠️ edge case · ❌ error case
 
 ```json
 {
   "projectKey": "{{PROJECT_KEY}}",
   "type": "Task",
-  "summary": "[BE] [Title] - [Context]",
+  "summary": "[BE] Task title",
   "description": {
     "type": "doc",
     "version": 1,
     "content": [
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "1. 📋 Context"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "info"},
-        "content": [
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "[Origin of this task - e.g., found during PR review, code smell, etc.]"}
-          ]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "2. 🔴 HIGH Priority"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "error"},
-        "content": [
-          {"type": "paragraph", "content": [{"type": "text", "text": "1. [Issue title]", "marks": [{"type": "strong"}]}]},
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "File: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "path/to/file.ts", "marks": [{"type": "code"}]}
-          ]},
-          {"type": "paragraph", "content": [{"type": "text", "text": "[Description of issue]"}]},
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "Fix: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[How to fix]"}
-          ]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "3. 🟡 MEDIUM Priority"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "warning"},
-        "content": [
-          {"type": "paragraph", "content": [{"type": "text", "text": "2. [Issue title]", "marks": [{"type": "strong"}]}]},
-          {"type": "paragraph", "content": [{"type": "text", "text": "[Description and fix]"}]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "4. 🟣 LOW Priority"}]},
-      {
-        "type": "panel",
-        "attrs": {"panelType": "note"},
-        "content": [
-          {"type": "paragraph", "content": [{"type": "text", "text": "3. [Issue title]", "marks": [{"type": "strong"}]}]},
-          {"type": "paragraph", "content": [{"type": "text", "text": "[Description and fix]"}]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "5. ✅ Acceptance Criteria"}]},
-      {
-        "type": "table",
-        "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
-        "content": [
-          {"type": "tableRow", "content": [
-            {"type": "tableHeader", "attrs": {"background": "#f4f5f7"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "#"}]}]},
-            {"type": "tableHeader", "attrs": {"background": "#f4f5f7"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Priority"}]}]},
-            {"type": "tableHeader", "attrs": {"background": "#f4f5f7"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Criteria"}]}]},
-            {"type": "tableHeader", "attrs": {"background": "#f4f5f7"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Status"}]}]}
-          ]},
-          {"type": "tableRow", "content": [
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "1", "marks": [{"type": "strong"}]}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "🔴 HIGH"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[Criteria description]"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "⬜"}]}]}
-          ]}
-        ]
-      },
-      {
-        "type": "panel",
-        "attrs": {"panelType": "warning"},
-        "content": [
-          {"type": "paragraph", "content": [
-            {"type": "text", "text": "⛔ Out of Scope: ", "marks": [{"type": "strong"}]},
-            {"type": "text", "text": "[สิ่งที่ไม่ต้องทำในรอบนี้] (จะ implement ใน [TICKET-XXX])"}
-          ]}
-        ]
-      },
-      {"type": "rule"},
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "7. 🔗 Reference"}]},
-      {
-        "type": "table",
-        "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
-        "content": [
-          {"type": "tableRow", "content": [
-            {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Type"}]}]},
-            {"type": "tableHeader", "attrs": {"background": "#eae6ff"}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Link"}]}]}
-          ]},
-          {"type": "tableRow", "content": [
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Related Issue"}]}]},
-            {"type": "tableCell", "content": [{"type": "paragraph", "content": [
-              {"type": "text", "text": "ABC-XXX", "marks": [{"type": "link", "attrs": {"href": "https://{{JIRA_SITE}}/browse/ABC-XXX"}}]}
-            ]}]}
-          ]}
-        ]
-      }
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "สิ่งที่ผู้ใช้ต้องการ"}]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "As a ", "marks": [{"type": "strong"}]},
+        {"type": "text", "text": "[persona],"}
+      ]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "I want to ", "marks": [{"type": "strong"}]},
+        {"type": "text", "text": "[action],"}
+      ]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "So that ", "marks": [{"type": "strong"}]},
+        {"type": "text", "text": "[benefit]"}
+      ]},
+
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน"}]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "✅ AC1: Return data — Happy path", "marks": [{"type": "strong"}]}
+      ]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Given: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[precondition]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "When: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[action]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Then: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[result]"}
+        ]}]}
+      ]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "⚠️ AC2: Handle empty — Edge case", "marks": [{"type": "strong"}]}
+      ]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Given: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[precondition]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "When: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[action]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Then: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[result]"}
+        ]}]}
+      ]},
+      {"type": "paragraph", "content": [
+        {"type": "text", "text": "❌ AC3: Reject invalid — Error case", "marks": [{"type": "strong"}]}
+      ]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Given: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[precondition]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "When: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[action]"}
+        ]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [
+          {"type": "text", "text": "Then: ", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": "[result]"}
+        ]}]}
+      ]},
+
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "ขอบเขตไฟล์"}]},
+      {"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+        {"type": "tableRow", "content": [
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Action"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "File"}]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "CREATE"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "app/Services/NewService.ts", "marks": [{"type": "code"}]}
+          ]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "MODIFY"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "app/Models/User.ts", "marks": [{"type": "code"}]}
+          ]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "REF"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "app/Services/ExistingService.ts", "marks": [{"type": "code"}]}
+          ]}]}
+        ]}
+      ]},
+
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "คำแนะนำการพัฒนา"}]},
+      {"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+        {"type": "tableRow", "content": [
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Field"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Value"}]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Entry Point"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "[primary file path]", "marks": [{"type": "code"}]}
+          ]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Pattern"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "[reference file to follow]", "marks": [{"type": "code"}]}
+          ]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Test Command"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [
+            {"type": "text", "text": "[test command]", "marks": [{"type": "code"}]}
+          ]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dependencies"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[key imports]"}]}]}
+        ]}
+      ]}
     ]
   }
 }
 ```
 
-## bug Template
+---
 
-**Use case:** Bug fixes from QA or production
-**Summary:** `[Bug] [Title]`
+## Mode: qa — replaces create-testplan
 
-**Sections:** (numbered `N. Emoji Title`)
+**Use case:** QA test plan linked to a story.
+**Summary:** `[QA] Story title`
 
-1. `1. 🐛 Bug Description` — panel(error): describe symptoms + impact
-2. `2. 🔄 Reproduction Steps` — orderedList: step-by-step
-3. `3. 📊 Expected vs Actual` — table with green/red headers
-4. `4. 🔍 Root Cause` — panel(note): root cause or TBD
-5. `5. ✅ Fix Criteria` — panel(success): bulletList of criteria
-6. `6. 🔗 Reference` — purple table
+**Sections:**
 
-## chore Template
+| Section | Required | Notes |
+| --- | --- | --- |
+| วัตถุประสงค์ทดสอบ | Yes | 1 sentence — what is being tested and why |
+| ชุดทดสอบ | Yes | TC1–TC8, each with Given/When/Then + Priority label |
+| อ้างอิง | Optional | Story key, test environment URL |
 
-**Use case:** Maintenance, dependency updates, configs
-**Summary:** `[Chore] [Title]`
+**Abbreviated ADF structure:**
 
-**Sections:** (numbered `N. Emoji Title`)
+```
+heading(2): วัตถุประสงค์ทดสอบ
+paragraph: [1-sentence test objective]
 
-1. `1. 🎯 Objective` — panel(info): task objective
-2. `2. 📋 Tasks` — panel(note): bulletList with ⬜ checkboxes
-3. `3. ⚡ Out of Scope` — panel(warning): optional, เพิ่มเมื่อ task มี adjacent scope ที่อาจสับสน
-4. `4. 🔗 Reference` — purple table
+heading(2): ชุดทดสอบ
+paragraph(strong): TC1: [Verb] — [Scenario] · Priority: High
+bulletList:
+  listItem → paragraph: Given(strong) + [precondition]
+  listItem → paragraph: When(strong) + [action]
+  listItem → paragraph: Then(strong) + [expected result]
+paragraph(strong): TC2: [Verb] — [Scenario] · Priority: Medium
+bulletList: ...
 
-## spike Template
+heading(2): อ้างอิง
+bulletList:
+  listItem → paragraph: Story: {{PROJECT_KEY}}-XXX
+  listItem → paragraph: Test env: [URL]
+```
 
-**Use case:** Research, investigation, POC
-**Summary:** `[Spike] [Title]`
+---
 
-**Sections:** (numbered `N. Emoji Title`)
+## Mode: bug — replaces bug-triage
 
-**Required sections (create at ticket creation):**
+**Use case:** Bug report from QA or production.
+**Summary:** `[Bug] Title — affected area`
 
-1. `1. ❓ Research Question` — panel(info): main question
-2. `2. 📋 Context` — paragraph: background/rationale
-3. `3. 🔍 Investigation Areas` — bulletList: topics to study
+**Sections:**
 
-**Optional sections (⚡ add only when real data exists):**
+| Section | Required | Notes |
+| --- | --- | --- |
+| รายละเอียดปัญหา | Yes | What is broken, who is affected, severity |
+| ขั้นตอนทำซ้ำ | Yes | Numbered steps to reproduce |
+| คาดหวัง vs เกิดจริง | Yes | Table: Expected \| Actual |
+| เงื่อนไขที่ต้องผ่าน | Yes | Fix criteria — what must be true after fix |
 
-- `4. 📝 Findings` — panel(note): **เพิ่มหลังทำ research เสร็จเท่านั้น** — ข้ามไปก่อนถ้ายังไม่มีข้อมูล
-- `5. 💡 Recommendations` — panel(success): **เพิ่มหลังทำ research เสร็จเท่านั้น**
-- `6. ⚡ Out of Scope` — panel(warning): เพิ่มเมื่อ spike มี adjacent area ที่ชัดเจนว่าไม่ investigate
-- `7. 🔗 Reference` — purple table
+**Abbreviated ADF structure:**
+
+```
+heading(2): รายละเอียดปัญหา
+paragraph: [description of what is broken + who is affected]
+
+heading(2): ขั้นตอนทำซ้ำ
+orderedList:
+  listItem → paragraph: [step 1]
+  listItem → paragraph: [step 2]
+  listItem → paragraph: [step 3]
+
+heading(2): คาดหวัง vs เกิดจริง
+table(layout:default):
+  tableRow: tableHeader[คาดหวัง] | tableHeader[เกิดจริง]
+  tableRow: tableCell[expected behavior] | tableCell[actual behavior]
+
+heading(2): เงื่อนไขที่ต้องผ่าน
+bulletList:
+  listItem → paragraph: ✅ AC1: [fix criterion — happy path]
+  listItem → paragraph: ❌ AC2: [regression guard — error case]
+```
+
+---
+
+## Mode: spike
+
+**Use case:** Research, investigation, proof of concept.
+**Summary:** `[Spike] Title`
+
+**Sections:**
+
+| Section | Required | Notes |
+| --- | --- | --- |
+| คำถามวิจัย | Yes | Main research question — 1 sentence |
+| บริบท | Yes | Why this spike is needed, what decision it unblocks |
+| พื้นที่สำรวจ | Yes | Bullet list of areas/topics to investigate |
+| ผลการค้นหา | Optional | Populate only after spike is done — omit if no data yet |
+| ข้อเสนอแนะ | Optional | Recommendations — populate only after spike is done |
+
+**Abbreviated ADF structure:**
+
+```
+heading(2): คำถามวิจัย
+paragraph: [main research question]
+
+heading(2): บริบท
+paragraph: [background — why this spike, what decision it informs]
+
+heading(2): พื้นที่สำรวจ
+bulletList:
+  listItem → paragraph: [area 1]
+  listItem → paragraph: [area 2]
+  listItem → paragraph: [area 3]
+
+heading(2): ผลการค้นหา          ← add after research, omit at creation
+paragraph: [findings]
+
+heading(2): ข้อเสนอแนะ           ← add after research, omit at creation
+bulletList:
+  listItem → paragraph: [recommendation]
+```
+
+---
+
+## Mode: chore
+
+**Use case:** Maintenance, dependency updates, configuration changes, CI/CD tasks.
+**Summary:** `[Chore] Title`
+
+**Sections:**
+
+| Section | Required | Notes |
+| --- | --- | --- |
+| วัตถุประสงค์ | Yes | 1 sentence — what this chore achieves |
+| รายการงาน | Yes | Bullet checklist with ⬜ prefix |
+| เงื่อนไขที่ต้องผ่าน | Yes | Definition of done — what must be true when complete |
+
+**Abbreviated ADF structure:**
+
+```
+heading(2): วัตถุประสงค์
+paragraph: [1-sentence objective]
+
+heading(2): รายการงาน
+bulletList:
+  listItem → paragraph: ⬜ [task item 1]
+  listItem → paragraph: ⬜ [task item 2]
+  listItem → paragraph: ⬜ [task item 3]
+
+heading(2): เงื่อนไขที่ต้องผ่าน
+bulletList:
+  listItem → paragraph: ✅ [done criterion 1]
+  listItem → paragraph: ✅ [done criterion 2]
+```

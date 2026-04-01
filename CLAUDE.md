@@ -8,8 +8,9 @@ Agile Documentation System — skills-based Jira/Confluence automation
 
 **Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (25 docs) | `scripts/` (ai/, api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (59 hooks in `plugin/` + `dev/`) | `agents/` (20) | `.claude/commands/` (13 orchestration chains)
 **Skills layout:** 39 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
-**Templates:** Minimal-first approach (required sections only) + optional snippets. All output written for non-technical stakeholders (PMs, designers) + implementation details for engineers.
-**Vibe mode:** All creation skills default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Partial flags: `create-story --no-subtasks` (story only), `create-epic --no-doc` (Jira-only, skip Confluence), `vibe-plan --dry-run` (preview plan, no Jira write), `analyze-story --skip-explore` (skip codebase exploration), `bug-triage --no-assign` (skip assignment gate). Use `/vibe-plan` for idea → Epic + Stories + AI-Ready Subtasks in one shot.
+**Issue hierarchy:** Epic → Task (2 levels only). No Story/Subtask — Task is the value unit with narrative + ACs + file paths.
+**Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings (สรุปภาพรวม, เงื่อนไขที่ต้องผ่าน, etc.). Human-readable + AI-parseable.
+**Vibe mode:** All creation skills default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Partial flags: `create-epic --no-doc` (Jira-only, skip Confluence), `vibe-plan --dry-run` (preview plan, no Jira write), `create-task --qa/--bug/--spike/--chore` (mode selection). Use `/vibe-plan` for idea → Epic + Tasks in one shot.
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all 39 skills with phases, categories, and argument patterns.
@@ -55,8 +56,8 @@ Loaded on demand from `references/` (25 docs, indexed by `templates.md`). **Scri
 | --- | --- |
 | QG first | NEVER create/edit Atlassian issues before QG ≥ 90% |
 | Phase order | Follow phases in order, never skip steps |
-| Traceability | Everything links to parent: Sub-task→Story→Epic |
-| Explore first | Prefer `Task(Explore)` before creating Sub-tasks (no explore = generic paths) |
+| Traceability | Everything links to parent: Task→Epic |
+| Explore first | Prefer `Task(Explore)` before creating Tasks with file paths (no explore = generic paths) |
 | Vibe default | All creation skills default to fast mode (no ceremony). Use `--thorough` for full workflow. |
 
 ### HARD RULES (hooks enforce HR2–HR10 automatically)
@@ -69,12 +70,12 @@ Full definitions: `references/hr-rules.md`
 | **HR2** JQL ORDER BY | `parent =` / `key in` JQL | NEVER add `ORDER BY` — parser error |
 | **HR3** Assignee | Assign issue | `acli jira workitem assign -k "KEY" -a "email" -y` only — MCP silently fails |
 | **HR4** Confluence macros | ToC/Children/Code blocks | `update_page_storage.py` only — MCP corrupts XML |
-| **HR5** Subtask parent | Create subtask | MCP create → verify `parent.key` via `jira_get_issue` → acli edit if orphan |
+| **HR5** Task parent | Create child Task | MCP create → verify `parent.key` via `jira_get_issue` → acli edit if orphan |
 | **HR6** Cache invalidate | Any MCP write | `cache_invalidate(issue_key)` after every write — use `auto_refresh=true` |
 | **HR7** Sprint ID | Set `{{SPRINT_FIELD}}` | Never hardcode — `jira_get_sprints_from_board()` always |
-| **HR8** Subtask dates | Create/update subtask | Dates within parent range · SP sum ≈ parent |
-| **HR9** Desc alignment | Create/update any issue | Story ACs → subtask objectives · run `verify-issue --with-subtasks` |
-| **HR10** Subtask sprint | Create subtask | NEVER set `{{SPRINT_FIELD}}` on subtasks — inherited from parent |
+| **HR8** Task dates | Create/update child Task | Dates within parent range |
+| **HR9** Desc alignment | Create/update any issue | Epic ACs → Task objectives · run `verify-issue` |
+| **HR10** Task sprint | Create child Task under Epic | NEVER set `{{SPRINT_FIELD}}` on child Tasks — inherited from parent |
 
 ## Compact Instructions
 
