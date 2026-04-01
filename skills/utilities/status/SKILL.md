@@ -145,9 +145,9 @@ Output a structured status report:
 
 - HR5/HR6 pending → "Resolve pending HR violations first: run `jira_get_issue(key, fields='parent')`"
 - Blocked issues → "Unblock [KEY]: remove blocker or escalate to Tech Lead"
-- ≥ 3 In Progress per assignee → "WIP limit risk: [name] has {N} stories in progress"
-- Sprint ends in < 3 days and unfinished stories → "Sprint closing soon — run `/atlassian-pm:close-sprint`"
-- All In Progress have subtasks done → "Run `/atlassian-pm:verify-issue KEY --with-subtasks` before moving to Done"
+- ≥ 3 In Progress per assignee → "WIP limit risk: [name] has {N} tasks in progress"
+- Sprint ends in < 3 days and unfinished tasks → "Sprint closing soon — run `/atlassian-pm:close-sprint`"
+- All In Progress tasks done → "Run `/atlassian-pm:verify-issue KEY --with-subtasks` before moving to Done"
 
 ## Examples
 

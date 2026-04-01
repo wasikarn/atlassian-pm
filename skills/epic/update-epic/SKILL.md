@@ -13,7 +13,7 @@ description: |
 
   Triggers: "update epic", "edit epic", "adjust epic", "แก้ไข epic", "update RICE", "fix epic scope"
   Use when: modifying scope, RICE score, success metrics, or description of an existing Epic
-  Do NOT use for: creating new epics (use create-epic); story updates (use update-story)
+  Do NOT use for: creating new epics (use create-epic); task updates (use update-task)
 argument-hint: "[issue-key] [changes]"
 effort: medium
 ---
@@ -43,15 +43,15 @@ effort: medium
 - `MCP: jira_get_issue(issue_key: "{{PROJECT_KEY}}-XXX")`
 - `MCP: jira_search(jql: "parent = {{PROJECT_KEY}}-XXX OR 'Epic Link' = {{PROJECT_KEY}}-XXX", fields: "summary,status,assignee,issuetype,priority")` (**⚠️ NEVER add ORDER BY to parent queries**)
 - `MCP: confluence_search(query: "Epic: [title]")`
-- Read: RICE, objectives, success metrics, child stories
+- Read: RICE, objectives, success metrics, child tasks
 - **🟡 REVIEW** — Present current state to user. Proceed unless user objects.
 
 ### 2. Impact Analysis
 
-| Change Type | Impact on Stories | Impact on Planning |
+| Change Type | Impact on Tasks | Impact on Planning |
 | --- | --- | --- |
-| Add scope | Need to create new stories | Re-estimate |
-| Remove scope | Need to close stories | Timeline shorter |
+| Add scope | Need to create new tasks | Re-estimate |
+| Remove scope | Need to close tasks | Timeline shorter |
 | RICE update | ❌ No impact | May reprioritize |
 | Format only | ❌ No impact | ❌ No impact |
 
@@ -62,7 +62,7 @@ effort: medium
 - ✅ Adjusting wording/clarifying is allowed
 - ✅ Updating RICE is allowed
 - ✅ Adding success metrics is allowed
-- ⚠️ Be careful changing scope (affects stories)
+- ⚠️ Be careful changing scope (affects tasks)
 - ❌ Do not change core business value without informing
 
 ### 4. Generate Update
@@ -129,9 +129,9 @@ Changes: [list]
 
 **Common mistakes:**
 
-- Changing scope without checking child stories first — Phase 2 impact analysis exists for this reason; skipping it means removed scope stays in open stories creating {{PROJECT_KEY}} misalignment.
+- Changing scope without checking child tasks first — Phase 2 impact analysis exists for this reason; skipping it means removed scope stays in open tasks creating {{PROJECT_KEY}} misalignment.
 - Passing changes as free-form text that covers multiple unrelated sections — break into separate update calls (RICE update + scope update) so each Phase 4 diff is reviewable.
-- Running update-epic to fix formatting only without checking whether child story ACs still align — use `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` after any scope change.
+- Running update-epic to fix formatting only without checking whether child task ACs still align — use `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks` after any scope change.
 
 > See [references/scenarios.md](references/scenarios.md) for command examples by scenario.
 > See [references/epic-structure.md](references/epic-structure.md) for the Epic ADF section layout and panel type reference.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""PostToolUse async hook: semantic AC↔subtask coverage scoring.
+"""PostToolUse async hook: semantic AC↔task coverage scoring.
 
-Fires after jira_create_issue for subtasks. Scores how well subtask
-objectives semantically cover the parent story ACs.
+Fires after jira_create_issue for tasks. Scores how well task
+objectives semantically cover the parent epic/parent ACs.
 Exit code: 0 always.
 """
 
@@ -128,9 +128,9 @@ def main() -> None:
 
         if score < threshold:
             inject_context(
-                f"AI COVERAGE WARNING: {parent_key} — subtasks cover ~{score}% of ACs semantically. "
-                f"{len(acs)} ACs tracked, {len(subtask_summaries)} subtask(s) so far. "
-                f"Consider adding subtasks for uncovered ACs before running /verify-issue."
+                f"AI COVERAGE WARNING: {parent_key} — tasks cover ~{score}% of epic/parent ACs semantically. "
+                f"{len(acs)} ACs tracked, {len(subtask_summaries)} task(s) so far. "
+                f"Consider adding tasks for uncovered ACs before running /verify-issue."
             )
     except Exception:
         allow()

@@ -29,11 +29,11 @@ _CREATION_SIGNALS = frozenset([
 ])
 
 _SKILL_MAP = {
-    "bug":     ("atlassian-pm:bug-triage",   "bug/defect triage → severity → duplicate check → ADF → QG ≥ 90%"),
-    "story":   ("atlassian-pm:create-story", "discovery → INVEST → QG ≥ 90% → subtask design"),
-    "epic":    ("atlassian-pm:create-epic",  "scope definition → ADF → QG ≥ 90%"),
-    "subtask": ("atlassian-pm:create-story", "Part B of create-story handles subtask design"),
-    "task":    ("atlassian-pm:create-task",  "scoping → ADF → QG ≥ 90%"),
+    "bug":     ("atlassian-pm:bug-triage",  "bug/defect triage → severity → duplicate check → ADF → QG ≥ 90%"),
+    "story":   ("atlassian-pm:create-task", "scoping → ADF → QG ≥ 90% → Jira create (use Task hierarchy)"),
+    "epic":    ("atlassian-pm:create-epic", "scope definition → ADF → QG ≥ 90%"),
+    "subtask": ("atlassian-pm:create-task", "scoping → ADF → QG ≥ 90% → Jira create (use Task under Epic)"),
+    "task":    ("atlassian-pm:create-task", "scoping → ADF → QG ≥ 90%"),
 }
 
 def classify_intent(prompt: str) -> str | None:

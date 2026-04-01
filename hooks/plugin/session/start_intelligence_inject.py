@@ -34,7 +34,7 @@ _STALENESS_DAYS = 7
 _AGENT_SCOPE: dict[str, dict] = {
     "estimation-calibrator": {"calibration": True,  "signals": False},
     "risk-forecaster":       {"calibration": True,  "signals": True},
-    "story-writer":          {"calibration": True,  "signals": False},
+    "task-writer":           {"calibration": True,  "signals": False},
     "sprint-planner":        {"calibration": False, "signals": True},
     "session":               {"calibration": True,  "signals": False},  # main SessionStart context
 }
@@ -125,7 +125,7 @@ def _build_signals_block(signals: list[dict]) -> str:
             parts.append(f" {metric:.0f} SP vs mean {baseline:.0f} SP")
         elif sig == "sp_mismatch":
             if affected:
-                parts.append(f" {affected[0]} subtask_sp={metric:.0f} > {_sp_pct_str(s)}")
+                parts.append(f" {affected[0]} task_sp={metric:.0f} > {_sp_pct_str(s)}")
 
         lines.append("".join(parts))
 

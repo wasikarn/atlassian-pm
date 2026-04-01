@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""HR9: Suggest alignment verification after subtask batch creation.
+"""HR9: Suggest alignment verification after task batch creation.
 
 PostToolUse hook for mcp__mcp-atlassian__jira_create_issue.
-After creating a subtask, checks if story ACs are adequately covered.
-Fires once per parent story per session to avoid suggestion spam.
+After creating a task, checks if epic ACs are adequately covered.
+Fires once per parent epic per session to avoid suggestion spam.
 
 Logic:
-  1. Track subtask count per parent in session state.
-  2. On first subtask for a parent: no suggestion (too early — batch may continue).
-  3. On 2nd subtask (or when AC data shows under-coverage): inject verification reminder.
+  1. Track task count per parent in session state.
+  2. On first task for a parent: no suggestion (too early — batch may continue).
+  3. On 2nd task (or when AC data shows under-coverage): inject verification reminder.
   4. Debounced per parent: suggest once per parent per session.
 
 Exit codes: 0 (always — PostToolUse cannot block)
@@ -72,7 +72,7 @@ def main() -> None:
     tool_input = data.get("tool_input", {})
     parent_key = get_parent_key(tool_input)
 
-    # Only fire for subtask creation
+    # Only fire for child task creation
     if not parent_key:
         allow()
         return
@@ -84,7 +84,7 @@ def main() -> None:
 
     session_id = data.get("session_id", "")
 
-    # Track subtask count for this parent
+    # Track task count for this parent
     count = hr9_increment_subtask_count(session_id, parent_key)
 
     # Only suggest once per parent per session
@@ -92,12 +92,12 @@ def main() -> None:
         allow()
         return
 
-    # Check AC coverage ratio from VS state (populated by create-story Phase 2)
+    # Check AC coverage ratio from VS state (populated by create-task Phase 2)
     coverage = vs_get_coverage(session_id)
     story_acs = coverage["story_acs"].get(parent_key, [])
     ac_count = len(story_acs)
 
-    # Trigger: suggest when ≥ 2 subtasks created, or AC:subtask ratio > 2.5:1
+    # Trigger: suggest when ≥ 2 tasks created, or AC:task ratio > 2.5:1
     under_covered = ac_count > 0 and ac_count / count > 2.5
     enough_subtasks = count >= 2
 
@@ -110,13 +110,13 @@ def main() -> None:
     # Build context-aware message
     if ac_count > 0:
         msg = (
-            f"HR9 REMINDER: {parent_key} has {ac_count} ACs but only {count} subtask(s) created so far. "
-            f"Run /verify-issue {parent_key} --with-subtasks (A1-A6 checks) after all subtasks are created "
-            f"to confirm every AC is traceable to a subtask objective."
+            f"HR9 REMINDER: {parent_key} has {ac_count} ACs but only {count} task(s) created so far. "
+            f"Run /verify-issue {parent_key} --with-subtasks (A1-A6 checks) after all tasks are created "
+            f"to confirm every AC is traceable to a task objective."
         )
     else:
         msg = (
-            f"HR9 REMINDER: {count} subtask(s) created for {parent_key}. "
+            f"HR9 REMINDER: {count} task(s) created for {parent_key}. "
             f"Run /verify-issue {parent_key} --with-subtasks after the batch is complete "
             f"to verify AC alignment (A1-A6 checks). Untraced ACs = QA gaps."
         )

@@ -70,7 +70,7 @@ Group issues:
 
 | Group | Criteria |
 | --- | --- |
-| **Features** | issuetype = Story (or Epic children) |
+| **Features** | issuetype = Task AND labels contains "feature" (or Epic children) |
 | **Bug Fixes** | issuetype = Task AND summary starts with "[Bug]" |
 | **Improvements** | issuetype = Task AND labels contains "tech-debt" or "chore" |
 | **Other** | Everything else |

@@ -46,20 +46,20 @@ def test_detects_defect():
 def test_detects_create_story():
     result = detect_intent("create a user story for payment integration")
     assert result is not None
-    assert result[0] == "story"
-    assert result[1] == "atlassian-pm:create-story"
+    assert result[0] == "task"
+    assert result[1] == "atlassian-pm:create-task"
 
 
 def test_detects_thai_create_story():
     result = detect_intent("สร้าง story สำหรับ ad schedule")
     assert result is not None
-    assert result[0] == "story"
+    assert result[0] == "task"
 
 
 def test_detects_new_story():
     result = detect_intent("new story about notification system")
     assert result is not None
-    assert result[0] == "story"
+    assert result[0] == "task"
 
 
 # ── Task detection ─────────────────────────────────────────────────────────
@@ -103,8 +103,8 @@ def test_detects_thai_create_epic():
 def test_detects_create_subtask():
     result = detect_intent("create a subtask for the BE work")
     assert result is not None
-    assert result[0] == "subtask"
-    assert result[1] == "atlassian-pm:create-story"
+    assert result[0] == "task"
+    assert result[1] == "atlassian-pm:create-task"
 
 
 # ── Non-creation prompts should NOT match ─────────────────────────────────

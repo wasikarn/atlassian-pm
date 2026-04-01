@@ -13,7 +13,7 @@ description: |
 
   Triggers: "create test plan", "QA", "test case", "testing", "สร้าง test plan", "add QA task"
   Use when: adding a QA task and test plan to an existing Epic or feature Task
-  Do NOT use for: initial task creation (use create-task); analyzing implementation (use analyze-story)
+  Do NOT use for: initial task creation (use create-task); analyzing implementation (use analyze-story or create-task)
 argument-hint: "[issue-key]"
 effort: medium
 ---

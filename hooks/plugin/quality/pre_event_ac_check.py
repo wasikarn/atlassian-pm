@@ -2,7 +2,7 @@
 """R: Check event-based AC names against Domain Model catalog.
 
 PreToolUse hook for Bash (acli --from-json).
-When writing Story ADF, checks if event-based AC names (PascalCase pattern)
+When writing Task ADF, checks if event-based AC names (PascalCase pattern)
 reference events from the tracked Domain Model catalog.
 
 Warns (does not block) if event names are unrecognized.

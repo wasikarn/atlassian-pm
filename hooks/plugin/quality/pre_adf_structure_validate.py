@@ -23,10 +23,8 @@ _HOOK = "adf-structure-validate"
 # Required headings by issue type (normalized lowercase, emoji-stripped)
 REQUIRED_HEADINGS = {
     "epic": ["epic overview"],
-    "story": ["user story", "acceptance criteria"],
-    "subtask": ["objective"],
+    "task": ["สิ่งที่ผู้ใช้ต้องการ", "เงื่อนไขที่ต้องผ่าน"],
     "qa": ["test objective", "test cases"],
-    "task": [],
 }
 
 
@@ -114,11 +112,11 @@ def main() -> None:
         )
         sys.exit(2)
 
-    if issue_type != "task" and not has_panel(content):
-        # Warning only — inject context (stdout must be JSON for PreToolUse hooks)
-        log_event(_HOOK, "WARN", {"issue_type": issue_type, "reason": "no_panel", "session_id": session_id})
+    if has_panel(content):
+        # Warning only — panels are forbidden in v3.0.0 (Epic→Task hierarchy)
+        log_event(_HOOK, "WARN", {"issue_type": issue_type, "reason": "panel_present", "session_id": session_id})
         inject_context(
-            f"⚠️ ADF structure ({issue_type}): No panel found. Templates require panels (info/success/warning/error).",
+            f"⚠️ ADF structure ({issue_type}): Panel found but panels are forbidden in v3.0.0. Remove panels from the ADF template.",
             event_name="PreToolUse",
         )
     else:

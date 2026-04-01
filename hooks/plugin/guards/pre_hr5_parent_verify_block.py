@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""HR5: Block subtask creation if parent verification is pending.
+"""HR5: Block task creation if parent verification is pending.
 
 PreToolUse hook for mcp__mcp-atlassian__jira_create_issue.
-Blocks further subtask creates if a previous subtask's parent link
+Blocks further task creates if a previous task's parent link
 hasn't been verified yet.
 
 Exit codes: 0 = allow, 2 = block (pending verification)
@@ -21,7 +21,7 @@ if not data:
 tool_input = data.get("tool_input", {})
 session_id = data.get("session_id", "")
 
-# Check if this is a subtask creation (has parent field)
+# Check if this is a child task creation (has parent field)
 has_parent = bool(get_parent_key(tool_input))
 if not has_parent:
     sys.exit(0)
@@ -32,10 +32,10 @@ if pending:
     children = ", ".join(p["child"] for p in pending)
     parents = ", ".join(f"{p['child']}→{p['parent']}" for p in pending)
     print(
-        f"HR5 BLOCKED: Verify parent links before creating more subtasks.\n"
+        f"HR5 BLOCKED: Verify parent links before creating more tasks.\n"
         f"Pending: {parents}\n"
         f"Run: jira_get_issue(issue_key='KEY', fields='parent,summary') for each pending child.\n"
-        f"After verification, you may continue creating subtasks.",
+        f"After verification, you may continue creating tasks.",
         file=sys.stderr,
     )
     sys.exit(2)

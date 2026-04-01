@@ -5,6 +5,7 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
+  ⚠️ DEPRECATED in v3.0.0 — use /update-task instead.
   Update an existing Sub-task with a 6-phase update workflow
 
   Phases: Fetch Current → Identify Changes → Preserve Intent → Generate Update → Quality Gate → Apply Update
@@ -19,6 +20,8 @@ effort: medium
 ---
 
 # /update-subtask
+
+> **⚠️ DEPRECATED in v3.0.0** — Use `/update-task` instead. The Subtask issue type no longer exists in the Epic → Task hierarchy. This skill is kept for backward compatibility only.
 
 **Role:** Senior Technical Analyst
 **Output:** Updated Sub-task

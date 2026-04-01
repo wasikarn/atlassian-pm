@@ -5,6 +5,7 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
+  ⚠️ DEPRECATED in v3.0.0 — use /update-task instead.
   Update an existing User Story with a 6-phase update workflow
 
   Phases: Fetch Current → Impact Analysis → Preserve Intent → Generate Update → Quality Gate → Apply Update
@@ -19,6 +20,8 @@ effort: medium
 ---
 
 # /update-story
+
+> **⚠️ DEPRECATED in v3.0.0** — Use `/update-task` instead. Epic → Task hierarchy replaces Epic → Story → Subtask. This skill is kept for backward compatibility only.
 
 **Role:** Senior Product Owner
 **Output:** Updated User Story

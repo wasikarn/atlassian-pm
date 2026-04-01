@@ -5,12 +5,12 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   Multi-perspective feature blueprint on Confluence — 3 roles debate (PO, Tech Lead, QA).
-  Outputs: structured Confluence page + backlog map for downstream /create-epic + /create-story.
+  Outputs: structured Confluence page + backlog map for downstream /create-epic + /create-task.
   Supports 3 tiers: S (quick, no debate) / M (standard, single round) / L (full + page tree).
   Triggers: "feature blueprint", "architecture doc", "design doc", "blueprint", "feature spec",
   "multi-perspective design", "research feature", "ทำ blueprint"
   Use when: new feature needing architecture review, multi-service changes, greenfield features before Jira.
-  Do NOT use for: creating a story without architecture review (use create-story); updating an existing epic (use update-epic).
+  Do NOT use for: creating a task without architecture review (use create-task); updating an existing epic (use update-epic).
 argument-hint: "[feature-description or ABC-XXX or Confluence-page-ID]"
 effort: high
 ---
@@ -31,7 +31,7 @@ effort: high
 | 5. Converge | `blueprint_sections{}` (S1-S8), `debate_summary[]`, `consensus_checks{}` |
 | 6. QG | `qg_score`, `qg_passed`, `qg_fixes[]` |
 | 7. Confluence | `page_id` (or `page_ids[]` for L-tier), `page_url` |
-| 8. Bridge | `blueprint_backlog_map{}` (stories[], spikes[], dependencies[], non_goals[]) |
+| 8. Bridge | `blueprint_backlog_map{}` (tasks[], spikes[], dependencies[], non_goals[]) |
 | 9. Handoff | `next_skills[]`, `summary` |
 
 > **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels, ITERATE cycle, Parallel Explore.
@@ -52,9 +52,9 @@ Non-tech: read S1-S3, S6 risk table, S8. Engineers: read all.
 
 | Tier | Criteria | Sections | Debate? | Confluence |
 |------|----------|----------|---------|------------|
-| **S** (Quick) | 1 service, 1-2 stories, clear scope | S1,S2,S4,S6,S8 | No (single-pass) | Single page |
-| **M** (Standard) | Multi-service, 3-5 stories | All S1-S8 | Yes (1 round, 3 agents) | Single page + ToC |
-| **L** (Full) | System-level, 6+ stories, new domain | All S1-S8 | Yes (1 round, 3 agents) | Parent + 8 child pages |
+| **S** (Quick) | 1 service, 1-2 tasks, clear scope | S1,S2,S4,S6,S8 | No (single-pass) | Single page |
+| **M** (Standard) | Multi-service, 3-5 tasks | All S1-S8 | Yes (1 round, 3 agents) | Single page + ToC |
+| **L** (Full) | System-level, 6+ tasks, new domain | All S1-S8 | Yes (1 round, 3 agents) | Parent + 8 child pages |
 
 ## Phases
 
@@ -84,8 +84,8 @@ Agree on tier (S/M/L), sections to generate, and debate strategy before any agen
 | Signal | Suggests Tier |
 |--------|--------------|
 | Single service, well-understood domain | S |
-| Multi-service, 3-5 stories estimated | M |
-| New domain, system-level, 6+ stories | L |
+| Multi-service, 3-5 tasks estimated | M |
+| New domain, system-level, 6+ tasks | L |
 | User says "quick" or "lightweight" | S |
 | User says "thorough" or "full analysis" | L |
 
@@ -198,9 +198,9 @@ Convert published blueprint into `blueprint_backlog_map` for downstream skills.
 
 → ADF format: see references/templates-core.md
 
-`blueprint_backlog_map` fields: `blueprint_page_id`, `blueprint_url`, `epic{title, source_sections}`, `stories[]{title, narrative_hint, acs_hint[], vs_label, sp_estimate, priority}`, `spikes[]{title, timebox, source}`, `dependencies[]{from, to, type}`, `non_goals[]`
+`blueprint_backlog_map` fields: `blueprint_page_id`, `blueprint_url`, `epic{title, source_sections}`, `tasks[]{title, objective_hint, acs_hint[], vs_label, sp_estimate, priority}`, `spikes[]{title, timebox, source}`, `dependencies[]{from, to, type}`, `non_goals[]`
 
-**Conversion:** whole doc → Epic (`/create-epic`) · S2 scenarios → Stories (`/create-story`) · S6 risks/questions → Spikes (`/create-task type=spike`) · S7 → QA subtasks (`/create-testplan`) · S2 non-goals → epic exclusions · S8 dependencies → `jira_create_issue_link`
+**Conversion:** whole doc → Epic (`/create-epic`) · S2 scenarios → Tasks (`/create-task`) · S6 risks/questions → Spikes (`/create-task type=spike`) · S7 → QA Tasks (`/create-testplan`) · S2 non-goals → epic exclusions · S8 dependencies → `jira_create_issue_link`
 
 > Blueprint does NOT auto-create Jira issues. User triggers downstream skills manually.
 
@@ -208,7 +208,7 @@ Convert published blueprint into `blueprint_backlog_map` for downstream skills.
 
 Output: `Blueprint Complete: [Feature Name]` · Confluence URL · tier + section count · stories (MVP/deferred) · spikes · top risks · numbered story cards for creation order.
 
-Next steps: `/create-epic` → `/create-story` → `/create-task type=spike` → `/search-issues`
+Next steps: `/create-epic` → `/create-task` → `/create-task type=spike` → `/search-issues`
 
 > When to use vs alternatives: [references/decision-guide.md](references/decision-guide.md) · S-tier single-pass: [references/s-tier-shortcut.md](references/s-tier-shortcut.md)
 
@@ -220,7 +220,7 @@ Next steps: `/create-epic` → `/create-story` → `/create-task type=spike` →
 /blueprint "Multi-tenant permission system" --tier L   # good: new domain, explicit tier L
 /blueprint 12345678                                    # good: Confluence page ID as input
 
-/blueprint "add button to export CSV"    # bad: single-story scope → use /create-story
+/blueprint "add button to export CSV"    # bad: single-task scope → use /create-task
 /blueprint                               # bad: no input → all roles produce generic output
 /blueprint "improve UX" --tier M         # bad: vague description, Phase 1 gate will block
 ```
@@ -240,4 +240,4 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 [Writing Style](../../../references/writing-style.md) · [Workflow Patterns](../../../references/workflow-patterns.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools](../../../references/tools.md) · [Decision Guide](references/decision-guide.md) · [S-tier Shortcut](references/s-tier-shortcut.md) · [Examples](references/examples.md)
 
-After blueprint: `/create-epic` → `/create-story` → `/create-testplan`
+After blueprint: `/create-epic` → `/create-task` → `/create-testplan`

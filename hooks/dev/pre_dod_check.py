@@ -40,10 +40,9 @@ def main() -> None:
     reason = (
         f"⛔ DoD Check required before transitioning {issue_key} to '{transition}'.\n\n"
         "Before proceeding, verify ALL of the following:\n"
-        "  1. All subtasks are Done\n"
-        "  2. A QA subtask exists and is Done (Stories only)\n"
-        "  3. At least one PR link exists (jira_get_issue_development_info)\n"
-        "  4. No subtask is still In Progress\n\n"
+        "  1. All child tasks are Done\n"
+        "  2. At least one PR link exists (jira_get_issue_development_info)\n"
+        "  3. No child task is still In Progress\n\n"
         f"If all pass → set env CLAUDE_DOD_CONFIRMED={issue_key} and retry."
     )
     log_event(_HOOK, "BLOCKED", {"issue_key": issue_key, "transition": transition})

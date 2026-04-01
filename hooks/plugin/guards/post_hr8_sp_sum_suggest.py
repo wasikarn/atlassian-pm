@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HR8 (SP part): Warn when subtask SP sum exceeds parent story's SP by >50%.
+"""HR8 (SP part): Warn when task SP sum exceeds parent epic's SP by >50%.
 
 PostToolUse hook for mcp__mcp-atlassian__jira_update_issue.
 Fires when Story Points (customfield_10016) is set on a known subtask.
@@ -153,9 +153,9 @@ if total_after > parent_sp * SP_RATIO_THRESHOLD:
         "subtask_total_after": total_after,
     })
     inject_context(
-        f"HR8 WARNING: Subtask SP sum for {parent_key} will be ~{total_after} "
-        f"but parent SP is {parent_sp} (>{int(SP_RATIO_THRESHOLD * 100)}% over). "
-        f"Check estimation: either parent SP needs updating or subtasks are over-scoped. "
+        f"HR8 WARNING: Task SP sum for {parent_key} will be ~{total_after} "
+        f"but parent Epic SP is {parent_sp} (>{int(SP_RATIO_THRESHOLD * 100)}% over). "
+        f"Check estimation: either parent Epic SP needs updating or tasks are over-scoped. "
         f"Run /verify-issue {parent_key} --with-subtasks (A3-A4 checks) to confirm."
     )
 

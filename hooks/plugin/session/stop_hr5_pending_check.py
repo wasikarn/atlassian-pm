@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""P7: HR5 Stop Hook — check for subtasks with unverified parents.
+"""P7: HR5 Stop Hook — check for tasks with unverified parents.
 
 Stop hook (no matcher — runs every turn end).
 Reads HR5 pending state written by post_hr5_parent_verify_remind.py.
-If any subtask keys are pending (parent not verified via jira_get_issue),
+If any task keys are pending (parent not verified via jira_get_issue),
 blocks the turn end with a reminder.
 
 HR5 pending is cleared by post_hr5_parent_verify_clear.py which fires
@@ -35,7 +35,7 @@ def check_pending(pending: list) -> dict:
     return {
         "ok": False,
         "reason": (
-            f"HR5: Subtask parent unverified for: {keys}. "
+            f"HR5: Task parent unverified for: {keys}. "
             f"Run jira_get_issue for each to confirm parent.key is set. "
             f"If parent is correct, the pending state will clear automatically."
         ),

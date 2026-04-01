@@ -7,10 +7,9 @@ calling Jira write tools directly.
 
 Patterns detected (Thai + English):
   bug / บัก / defect / ข้อผิดพลาด  → /atlassian-pm:bug-triage
-  story                              → /atlassian-pm:create-story
+  story / subtask                    → /atlassian-pm:create-task
   task / ticket / งาน               → /atlassian-pm:create-task
   epic                               → /atlassian-pm:create-epic
-  subtask                            → /atlassian-pm:create-story (Part B)
 
 Exit codes: 0 (always — never blocks user prompts)
 """
@@ -40,7 +39,7 @@ _RULES: list[tuple[re.Pattern, str, str, str]] = [
         "atlassian-pm:bug-triage",
         "intake → severity → duplicate check → ADF → QG ≥ 90% → Jira create",
     ),
-    # Story
+    # Story — redirected to create-task in v3.0.0 (no Story type)
     (
         re.compile(
             r"(?i)(?:"
@@ -49,9 +48,9 @@ _RULES: list[tuple[re.Pattern, str, str, str]] = [
             r"|สร้าง\s*(?:user\s+)?story"
             r")"
         ),
-        "story",
-        "atlassian-pm:create-story",
-        "discovery → INVEST → QG ≥ 90% → subtask design → Jira create",
+        "task",
+        "atlassian-pm:create-task",
+        "scoping → ADF → QG ≥ 90% → Jira create",
     ),
     # Epic
     (
@@ -62,14 +61,14 @@ _RULES: list[tuple[re.Pattern, str, str, str]] = [
         "atlassian-pm:create-epic",
         "scope definition → ADF → QG ≥ 90% → Jira create",
     ),
-    # Subtask — checked before task (more specific)
+    # Subtask — redirected to create-task in v3.0.0 (no Subtask type)
     (
         re.compile(
             r"(?i)(?:create|สร้าง|add|เพิ่ม)\s+(?:a\s+)?subtask"
         ),
-        "subtask",
-        "atlassian-pm:create-story",
-        "Part B of /create-story handles subtask design and creation",
+        "task",
+        "atlassian-pm:create-task",
+        "scoping → ADF → QG ≥ 90% → Jira create (use Task under Epic hierarchy)",
     ),
     # Task / ticket — broadest, checked last
     (

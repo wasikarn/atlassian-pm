@@ -29,16 +29,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr3_block_mcp_assignee.py",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr10_subtask_sprint_guard.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr8_subtask_date_guard.py",
-            "timeout": 5
           }
         ]
       },
@@ -93,11 +83,6 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr7_sprint_id_guard.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/pre_story_size_guard.py",
             "timeout": 5
           }
         ]
@@ -206,12 +191,6 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_skill_checkpoint_track.py",
-            "timeout": 5,
-            "async": true
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_auto_subtask_suggest.py",
             "timeout": 5,
             "async": true
           },

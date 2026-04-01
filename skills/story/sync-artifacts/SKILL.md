@@ -4,15 +4,15 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Sync all related artifacts (Epic, Story, Sub-tasks, QA, Confluence) using an 8-phase workflow
+  Sync all related artifacts (Epic, Task, QA, Confluence) using an 8-phase workflow
 
   Phases: Identify Origin → Build Graph → Detect Changes → Impact Analysis → Explore (if needed) → Generate Updates → Execute Sync → Verify & Report
 
   ⭐ Composite: bidirectional sync from any artifact, covering both Jira + Confluence
 
   Triggers: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
-  Use when: Story, Sub-tasks, or Confluence doc have drifted out of alignment and need bidirectional sync
-  Do NOT use for: initial issue creation (use create-story); individual field updates (use update-story)
+  Use when: Epic, Task, or Confluence doc have drifted out of alignment and need bidirectional sync
+  Do NOT use for: initial issue creation (use create-task); individual field updates (use update-task)
 argument-hint: "[issue-key-or-page-id] [changes]"
 effort: high
 ---
@@ -41,15 +41,11 @@ effort: high
 
 ```text
 Epic (Jira)
-├── Epic Doc (Confluence parent page) — story list, status summary
-├── Story 1 (Jira) — ACs, scope
-│   ├── Tech Note (Confluence child page) — technical details, API, DB
-│   ├── Sub-task [BE] (Jira)
-│   ├── Sub-task [FE-Admin] (Jira)
-│   └── Sub-task [QA] (Jira)
-├── Story 2 (Jira)
-│   ├── Tech Note (Confluence)
-│   └── Sub-tasks ...
+├── Epic Doc (Confluence parent page) — task list, status summary
+├── Task 1 (Jira) — ACs, scope, implementation hints
+│   └── Tech Note (Confluence child page) — technical details, API, DB
+├── Task 2 (Jira)
+│   └── Tech Note (Confluence)
 └── ...
 ```
 
@@ -59,7 +55,7 @@ Epic (Jira)
 
 - Receive input: `{{PROJECT_KEY}}-XXX` (Jira key) or Confluence page ID
 - `jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
-- Determine artifact type: Epic / Story / Sub-task
+- Determine artifact type: Epic / Task
 - If Confluence page ID → `confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
 - **⛔ GATE — DO NOT PROCEED** without user confirmation of starting artifact + description of what changed.
 
@@ -70,14 +66,12 @@ Discovery algorithm:
 ```text
 1. jira_get_issue(origin, fields="summary,status,issuetype,parent")
 2. Walk UP:
-   - if Sub-task → parent_story = issue.parent
-   - if Story → parent_epic = issue.parent
+   - if Task → parent_epic = issue.parent
 3. Walk DOWN:
-   - jira_search("parent = EPIC_KEY AND issuetype = Story", fields="summary,status,issuetype,parent") → stories
-   - per story: jira_search("parent = STORY_KEY", fields="summary,status,assignee,issuetype") → sub-tasks
+   - jira_search("parent = EPIC_KEY AND issuetype = Task", fields="summary,status,issuetype,parent") → tasks
    ⚠️ NEVER add ORDER BY to parent queries — JQL parse error (HR2)
 4. Walk SIDEWAYS (Jira → Confluence):
-   - per story: confluence_search("{{PROJECT_KEY}}-XXX") → Tech Note
+   - per task: confluence_search("{{PROJECT_KEY}}-XXX") → Tech Note
    - epic: confluence_search(epic_title) → Epic Doc
 ```
 
@@ -141,7 +135,7 @@ Order: Parents first → Children → Confluence
 | Fields only | MCP `jira_update_issue` | — |
 | Code blocks/macros | — | `update_page_storage.py` |
 
-> **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after EVERY write · HR3: assignee via `acli jira workitem assign` · HR4: Confluence macros → `update_page_storage.py` · HR5: New subtasks → Two-Step + Verify Parent.
+> **🟢 AUTO** — HR6: `cache_invalidate(issue_key)` after EVERY write · HR3: assignee via `acli jira workitem assign` · HR4: Confluence macros → `update_page_storage.py` · HR5: New tasks → Two-Step + Verify Parent.
 
 ### 8. Verify & Report
 

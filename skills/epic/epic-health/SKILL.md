@@ -7,13 +7,13 @@ model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian]
 argument-hint: "[epic-key]"
 description: |
-  Analyze epic health: story coverage, SP totals, timeline feasibility, and AC alignment.
+  Analyze epic health: task coverage, SP totals, timeline feasibility, and AC alignment.
 
   Checks:
-  - All stories linked to epic with SP estimates
+  - All tasks linked to epic with SP estimates
   - SP sum is realistic vs team velocity
-  - Stories cover all epic objectives (no blind spots)
-  - No stories missing QG verification
+  - Tasks cover all epic objectives (no blind spots)
+  - No tasks missing QG verification
   - Timeline: estimated completion vs target date
 
   Triggers: "epic health", "check epic", "epic status", "วิเคราะห์ epic", "ตรวจ epic"
@@ -26,9 +26,9 @@ allowed-tools: mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cach
 ## Phase 1: Load Epic Data
 
 1. Fetch the epic via `cache_get_issue` first, fallback to `jira_get_issue`.
-2. Fetch all linked stories. Use JQL (NO ORDER BY per HR2):
+2. Fetch all linked tasks. Use JQL (NO ORDER BY per HR2):
    - `"Epic Link" = <epic-key>` or `parent = <epic-key>`
-3. For each story, collect: status, SP estimate, AC count, assignee, sprint.
+3. For each task, collect: status, SP estimate, AC count, assignee, sprint.
 
 ## Phase 2: Health Checks
 
@@ -36,8 +36,8 @@ Run all checks in parallel:
 
 ### 🔍 Coverage Check
 
-- Do the stories collectively cover all objectives in the epic description?
-- Flag any epic objectives that have no corresponding story.
+- Do the tasks collectively cover all objectives in the epic description?
+- Flag any epic objectives that have no corresponding task.
 
 ### 📊 Estimation Check
 
@@ -47,9 +47,9 @@ Run all checks in parallel:
 
 ### ✅ Completeness Check
 
-- Stories with no SP estimate → flag
-- Stories with no AC → flag
-- Stories not linked to any sprint (status not Backlog) → flag
+- Tasks with no SP estimate → flag
+- Tasks with no AC → flag
+- Tasks not linked to any sprint (status not Backlog) → flag
 
 ### 📅 Timeline Check
 

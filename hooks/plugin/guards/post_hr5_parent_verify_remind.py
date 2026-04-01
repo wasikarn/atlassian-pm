@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""HR5: Remind to verify parent link after subtask creation.
+"""HR5: Remind to verify parent link after task creation.
 
 PostToolUse hook for mcp__mcp-atlassian__jira_create_issue.
-Only fires when the create had a parent field (subtask creation).
+Only fires when the create had a parent field (child task creation).
 Injects additionalContext reminder to verify the parent link.
 
 Exit codes: 0 (always — PostToolUse cannot block)
@@ -42,7 +42,7 @@ def main() -> None:
     tool_input = data.get("tool_input", {})
     parent_key = get_parent_key(tool_input)
 
-    # Only fire for subtask creation (has parent)
+    # Only fire for child task creation (has parent)
     if not parent_key:
         allow()
         return
@@ -65,11 +65,11 @@ def main() -> None:
     except Exception as e:
         log_event(_HOOK, "ERROR", {"phase": "state_save", "issue_key": issue_key, "error": str(e)})
 
-    # Enrich cache DB so HR10 can detect subtask cross-session
+    # Enrich cache DB so HR10 can detect task cross-session
     try:
         conn = sqlite3.connect(str(CACHE_DB))
         conn.execute(
-            "UPDATE issues SET issue_type = 'Subtask', parent_key = ? WHERE issue_key = ? AND (issue_type IS NULL OR issue_type = '')",
+            "UPDATE issues SET issue_type = 'Task', parent_key = ? WHERE issue_key = ? AND (issue_type IS NULL OR issue_type = '')",
             (parent_key, issue_key),
         )
         conn.commit()
@@ -84,7 +84,7 @@ def main() -> None:
         f"Run: jira_get_issue(issue_key='{issue_key}', fields='parent,summary') "
         f"and confirm parent.key == '{parent_key}'. "
         f"MCP may silently ignore the parent field — if missing, "
-        f"the subtask is orphaned (HR5 violation)."
+        f"the task is orphaned (HR5 violation)."
     )
 
 

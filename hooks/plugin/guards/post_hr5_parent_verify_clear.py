@@ -51,8 +51,8 @@ else:
             "hookEventName": "PostToolUse",
             "additionalContext": (
                 f"⚠️ HR5 WARNING: {issue_key} expected parent {expected_parent} "
-                f"NOT found in response! Subtask may be orphaned. "
-                f"Fix: recreate subtask with correct parent field."
+                f"NOT found in response! Task may be orphaned. "
+                f"Fix: recreate task with correct parent field."
             ),
         }
     }

@@ -41,11 +41,11 @@ def main() -> None:
     block(
         f"⛔ DoR Check required before moving {issue_key} to '{transition}'.\n\n"
         "Verify ALL of the following:\n"
-        "  1. Story has at least 1 subtask created and linked\n"
-        "  2. Story has Acceptance Criteria in the description\n"
-        "  3. Story passed Quality Gate ≥ 90% (run /verify-issue if unsure)\n\n"
+        "  1. Task has Acceptance Criteria in the description\n"
+        "  2. Task Acceptance Criteria are clear and testable\n"
+        "  3. Task passed Quality Gate ≥ 90% (run /verify-issue if unsure)\n\n"
         f"When all checks pass → set CLAUDE_DOR_CONFIRMED={issue_key} and retry.\n"
-        "To add subtasks: /analyze-story   To verify quality: /verify-issue"
+        "To create tasks: /create-task   To verify quality: /verify-issue"
     )
 
 

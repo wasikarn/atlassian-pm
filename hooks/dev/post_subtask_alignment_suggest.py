@@ -1,4 +1,4 @@
-"""PostToolUse hook: remind to check subtask alignment after sprint data reads.
+"""PostToolUse hook: remind to check task alignment after sprint data reads.
 
 Triggers after: cache_sprint_issues, jira_get_sprint_issues
 Suggests running sprint-subtask-alignment.py for HR8 compliance.
@@ -38,7 +38,7 @@ if alignment_is_sprint_suggested(session_id, sprint_id):
 alignment_mark_sprint_suggested(session_id, sprint_id)
 
 inject_context(
-    f"Sprint {sprint_id} data loaded. Run subtask alignment check:\n"
+    f"Sprint {sprint_id} data loaded. Run task alignment check:\n"
     f"   python3 scripts/sprint-subtask-alignment.py --sprint {sprint_id}\n"
     f"   Checks: HR8 dates, missing OE, parent range violations\n"
     f"   Add --apply to fix automatically"

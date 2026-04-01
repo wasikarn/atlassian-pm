@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""V: VS Integrity — Track Story ACs and Subtask coverage.
+"""V: VS Integrity — Track Task ACs and child task coverage.
 
 PostToolUse hook for mcp__mcp-atlassian__jira_get_issue and jira_create_issue.
 
-When a Story is read: extracts AC titles and saves to state.
-When a Subtask is created under a Story: tracks the subtask.
+When a Task is read: extracts AC titles and saves to state.
+When a child Task is created under a parent Task: tracks the task.
 Prints coverage summary when gaps are detected.
 
 Exit 0 = always allow
@@ -27,10 +27,10 @@ tool_input = data.get("tool_input", {})
 tool_output = get_tool_response(data)
 session_id = data.get("session_id", "")
 
-# ── Story read: extract ACs ──────────────────────────
+# ── Task read: extract ACs ──────────────────────────
 if "jira_get_issue" in tool_name:
-    # Check if this is a Story (not Epic/Subtask)
-    if '"Story"' not in tool_output:
+    # Check if this is a Task (not Epic)
+    if '"Task"' not in tool_output:
         sys.exit(0)
 
     key_match = re.search(r'"key"\s*:\s*"([A-Z]+-\d+)"', tool_output)
@@ -56,9 +56,9 @@ if "jira_get_issue" in tool_name:
         }
         print(json.dumps(output))
 
-# ── Subtask create: track under parent ────────────────
+# ── Child task create: track under parent ────────────────
 elif "jira_create_issue" in tool_name:
-    # Check if subtask (has parent)
+    # Check if child task (has parent)
     parent_key = get_parent_key(tool_input)
 
     if not parent_key:
@@ -86,7 +86,7 @@ elif "jira_create_issue" in tool_name:
             "hookSpecificOutput": {
                 "hookEventName": "PostToolUse",
                 "additionalContext": (
-                    f"📊 VS coverage {parent_key}: {len(subtasks)} subtasks for "
+                    f"📊 VS coverage {parent_key}: {len(subtasks)} tasks for "
                     f"{len(story_acs)} ACs — review coverage before proceeding."
                 ),
             }

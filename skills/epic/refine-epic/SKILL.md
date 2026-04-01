@@ -8,7 +8,7 @@ description: |
   PO (scope/value) × Tech Lead (feasibility/risk + implementation) × QA (edge cases/testability)
   Triggers: "refine epic", "refine feature", "team debate", "3 roles review", "debate requirements", "clarify scope", "unclear scope", "high-risk feature", "multi-role review", "ชัดเจน epic"
   Use when: Epic or feature has unclear scope, high risk, or multi-service changes that need multi-role challenge before writing Jira artifacts
-  Do NOT use for: clear-scope Epics ready to write (use create-epic directly); creating individual stories directly without a scope debate (use create-story)
+  Do NOT use for: clear-scope Epics ready to write (use create-epic directly); creating individual tasks directly without a scope debate (use create-task)
 argument-hint: "[feature-description or ABC-XXX]"
 effort: medium
 ---
@@ -16,7 +16,7 @@ effort: medium
 # /refine-epic
 
 **Mode:** Multi-Role Debate (1 round, 3 perspectives)
-**Output:** Refined stories + risks + estimates + test scenarios — ready for `/create-story`
+**Output:** Refined tasks + risks + estimates + test scenarios — ready for `/create-task`
 
 ## Dynamic Context
 
@@ -30,7 +30,7 @@ effort: medium
 |-------|----------------|
 | 1. Gather | `feature_input`, `epic_context`, `existing_issues[]`, `codebase_hints` |
 | 2. Propose | `po_proposal`, `tl_assessment`, `qa_scenarios` |
-| 3. Converge | `refined_stories[]`, `risks[]`, `estimates`, `out_of_scope[]` |
+| 3. Converge | `refined_tasks[]`, `risks[]`, `estimates`, `out_of_scope[]` |
 | 4. QG | `qg_passed`, `qg_fixes[]` |
 | 5. Handoff | `next_skill`, `debate_summary` |
 
@@ -67,13 +67,13 @@ Launch 3 agents **IN PARALLEL** (single message, 3 Task calls). Each proposes in
 
 **Main session synthesizes** all 3 agent outputs:
 
-#### 1. Refined Stories
+#### 1. Refined Tasks
 
-Per story:
+Per task:
 
 | Section | Source |
 |---------|--------|
-| Narrative | PO proposal |
+| Objective | PO proposal |
 | ACs | PO + QA enhancements + TL specifics |
 | Scope | PO + Tech Lead consensus |
 | Risks | Tech Lead combined |
@@ -99,44 +99,44 @@ Show only **disagreements and their resolutions** — skip topics where all agre
 
 If any check fails → flag to user with the disagreement.
 
-**🔄 ITERATE** — Present refined stories + debate summary as plan cards. Ask:
+**🔄 ITERATE** — Present refined tasks + debate summary as plan cards. Ask:
 
 - **Approve** → proceed to QG
-- **Annotate** → user specifies which story # and section to revise → re-run **only the affected role agents** (e.g., scope change → PO + Tech Lead only, not all 3) with updated context (max 1 additional round)
+- **Annotate** → user specifies which task # and section to revise → re-run **only the affected role agents** (e.g., scope change → PO + Tech Lead only, not all 3) with updated context (max 1 additional round)
 - **Another debate round** → repeat full Round 1 with updated context (expensive, use sparingly)
 
 ### 4. Quality Gate — Refined Stories
 
 > **🟢 AUTO** — Validate refined stories before handoff. Escalate only if unfixable.
 
-Per story, verify:
+Per task, verify:
 
 | # | Check | Criteria |
 |---|-------|----------|
 | 1 | AC naming | All ACs use `AC{N}: [Verb] — [Scenario]` format |
-| 2 | SP estimate | Story has SP assigned (XS/S/M/L/XL) |
-| 3 | VS assignment | Story has VS label (`vs1-*`, `vs2-*`, `vs-enabler`) |
-| 4 | QA coverage | At least 1 QA edge case incorporated per story |
+| 2 | SP estimate | Task has SP assigned (XS/S/M/L/XL) |
+| 3 | VS assignment | Task has VS label (`vs1-*`, `vs2-*`, `vs-enabler`) |
+| 4 | QA coverage | At least 1 QA edge case incorporated per task |
 | 5 | Testability | All ACs have measurable Given/When/Then (QA verdict = pass) |
 | 6 | Out of scope | Deferred items explicitly listed with rationale |
 
 If any check fails → auto-fix from debate context → re-check. Escalate to user only if ambiguous.
 
-> Stories will be formatted per [templates-story.md](../../../references/templates-story.md) when passed to `/create-story`.
+> Tasks will be formatted per [templates-task.md](../../../references/templates-task.md) when passed to `/create-task`.
 
 ### 5. Handoff
 
 ```text
 ## Feature Refined: [Title]
-Stories: N refined (M MVP, K deferred)
+Tasks: N refined (M MVP, K deferred)
 Total estimate: X-Y SP
 Key risks: [top 2-3]
-→ /create-story [first-story]     — create first MVP story + subtasks
+→ /create-task [first-task]     — create first MVP task
 → /create-epic [epic-title]     — if epic needed first
 → /search-issues [keywords]     — final dedup check before creating
 ```
 
-Present each story as a numbered plan card for user to pick creation order.
+Present each task as a numbered plan card for user to pick creation order.
 
 ## 🎓 Domain Expert Notes
 
@@ -146,4 +146,4 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 [Story Template](../../../references/templates-story.md) · [Writing Style](../../../references/writing-style.md) · [Workflow Patterns](../../../references/workflow-patterns.md) · [Vertical Slice Guide](../../../references/vertical-slice-guide.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools](../../../references/tools.md) · [Decision Guide](references/decision-guide.md) · [Examples](references/examples.md)
 
-After refinement: `/create-story` to create in Jira
+After refinement: `/create-task` to create in Jira
