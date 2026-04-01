@@ -6,9 +6,9 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (77 hooks) | `agents/` (20) | `.claude/commands/` (13 chains)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (61) | `agents/` (20) | `.claude/commands/` (13 chains)
 **Skills:** 35 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
-**Issue hierarchy:** Epic → Task (2 levels only). No Story/Subtask — Task is the value unit with narrative + ACs + file paths.
+**Issue hierarchy:** Epic → Task (2 levels). Task carries narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings (สรุปภาพรวม, เงื่อนไขที่ต้องผ่าน, etc.). Human-readable + AI-parseable.
 **Vibe mode:** All creation skills default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Partial flags: `create-epic --no-doc` (Jira-only, skip Confluence), `vibe-plan --dry-run` (preview plan, no Jira write), `create-task --qa/--bug/--spike/--chore` (mode selection). Use `/vibe-plan` for idea → Epic + Tasks in one shot.
 
@@ -38,7 +38,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 
 ## Common Mistakes
 
-> Hook-enforced mistakes (HR2-HR10) are blocked automatically. Full troubleshooting: `references/troubleshooting.md`
+> Hook-enforced mistakes (HR2-HR7, HR9) are blocked automatically. Full troubleshooting: `references/troubleshooting.md`
 
 | Category | Quick Fix |
 | --- | --- |
@@ -49,7 +49,7 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 
 ## References
 
-Loaded on demand from `references/` (25 docs, indexed by `templates.md`). **Scripts:** `skills/utilities/atlassian-scripts/SKILL.md` → `scripts/api/`
+Loaded on demand from `references/` (26 docs, indexed by `templates.md`). **Scripts:** `skills/utilities/atlassian-scripts/SKILL.md` → `scripts/api/`
 
 ## Core Principles
 
@@ -61,7 +61,7 @@ Loaded on demand from `references/` (25 docs, indexed by `templates.md`). **Scri
 | Explore first | Prefer `Task(Explore)` before creating Tasks with file paths (no explore = generic paths) |
 | Vibe default | All creation skills default to fast mode (no ceremony). Use `--thorough` for full workflow. |
 
-### HARD RULES (hooks enforce HR2–HR10 automatically)
+### HARD RULES (hooks enforce HR2–HR7, HR9 automatically)
 
 Full definitions: `references/hr-rules.md`
 
@@ -74,9 +74,7 @@ Full definitions: `references/hr-rules.md`
 | **HR5** Task parent | Create child Task | MCP create → verify `parent.key` via `jira_get_issue` → acli edit if orphan |
 | **HR6** Cache invalidate | Any MCP write | `cache_invalidate(issue_key)` after every write — use `auto_refresh=true` |
 | **HR7** Sprint ID | Set `{{SPRINT_FIELD}}` | Never hardcode — `jira_get_sprints_from_board()` always |
-| **HR8** Task dates | Create/update child Task | Dates within parent range |
 | **HR9** Desc alignment | Create/update any issue | Epic ACs → Task objectives · run `verify-issue` |
-| **HR10** Task sprint | Create child Task under Epic | NEVER set `{{SPRINT_FIELD}}` on child Tasks — inherited from parent |
 
 ## Compact Instructions
 
