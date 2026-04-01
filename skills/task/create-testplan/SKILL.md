@@ -60,10 +60,12 @@ effort: medium
 
 ### 3. Design Test Cases
 
-- ID, AC coverage, Priority (🔴/🟠/🟡/🟢)
-- Type: ✅ Happy / ⚠️ Edge / ❌ Error
-- Given/When/Then format
-- Test data requirements
+> **ADF is minimal-first** — AC Coverage matrix (Phase 2) is internal planning only. Do NOT embed it in the Jira ADF description.
+> Jira ADF = `🎯 Test Objective` + `🧪 Test Cases` panels + optional `🔗 Reference`. Nothing else.
+
+- Max 8 test cases; split into a second [QA] subtask if > 8
+- Each TC: ID, Given/When/Then, AC ref, Priority (🔴/🟠/🟡/🟢)
+- Type: ✅ Happy (success panel) / ⚠️ Edge (warning panel) / ❌ Error (error panel)
 - **🟡 REVIEW** — Present test cases to user. Proceed unless user objects.
 
 ### 4. Quality Gate (MANDATORY)
@@ -95,7 +97,9 @@ effort: medium
 >
 > ⚠️ EDIT JSON uses `"issues": ["ABC-QQQ"]` (not `"parent"` or `"parentKey"`)
 
-Panel colors: see [ADF Core Rules](../../../references/templates-core.md) — success=happy, warning=edge, error=error
+> **⚠️ MANDATORY:** Read `references/templates-subtask.md` § "QA Test Case Template" before generating any ADF. Required sections: `🎯 Test Objective` + `🧪 Test Cases`. Optional: `🔗 Reference` only when real links exist.
+
+Panel colors: see [ADF Core Rules](../../../references/templates-core.md) — success=happy path · warning=edge case · error=error case
 
 > **🟢 AUTO** — HR6: `cache_invalidate(qa_subtask_key)` after create.
 > **🟢 AUTO** — HR3: If assignee needed, use `acli jira workitem assign -k "KEY" -a "email" -y` (never MCP).
