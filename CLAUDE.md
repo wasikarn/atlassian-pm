@@ -6,15 +6,16 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (25 docs) | `scripts/` (ai/, api/, lib/, sprint/, analysis/, docs/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (59 hooks in `plugin/` + `dev/`) | `agents/` (20) | `.claude/commands/` (13 orchestration chains)
-**Skills layout:** 39 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` from each skill · each skill has `## 🎓 Domain Expert Notes` (frameworks, metrics, failure modes)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (77 hooks) | `agents/` (20) | `.claude/commands/` (13 chains)
+**Skills:** 39 skills at `skills/{setup,epic,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
+**Deprecated skills:** `skills/story/create-story/`, `skills/story/analyze-story/` — replaced by `/create-task` (feature mode)
 **Issue hierarchy:** Epic → Task (2 levels only). No Story/Subtask — Task is the value unit with narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings (สรุปภาพรวม, เงื่อนไขที่ต้องผ่าน, etc.). Human-readable + AI-parseable.
 **Vibe mode:** All creation skills default to **vibe mode** — fast, no ceremony, auto-generate. Use `--thorough` for full interview + ITERATE + REVIEW gates. Partial flags: `create-epic --no-doc` (Jira-only, skip Confluence), `vibe-plan --dry-run` (preview plan, no Jira write), `create-task --qa/--bug/--spike/--chore` (mode selection). Use `/vibe-plan` for idea → Epic + Tasks in one shot.
 
 **New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
-**Skill index:** [skills/README.md](skills/README.md) — all 39 skills with phases, categories, and argument patterns.
-**Hook reference:** [hooks/README.md](hooks/README.md) — all 65 hooks, what they enforce, and how to debug them.
+**Skill index:** [skills/README.md](skills/README.md) — all skills with phases, categories, and argument patterns.
+**Hook reference:** [hooks/README.md](hooks/README.md) — all hooks, what they enforce, and how to debug them.
 
 ## Project Settings
 
@@ -31,7 +32,8 @@ Team detail (git evidence, capacity model, bus factor — load on-demand for rel
 **MCP registration:** `atlassian-cache` registers via standalone `.mcp.json` at plugin root — do NOT add `mcpServers` to `plugin.json` (causes duplicate registration from cache dir without variable expansion)
 
 **Workflows:** [`skill-orchestration.md`](references/skill-orchestration.md) — how skills chain together · [`workflow-patterns.md`](references/workflow-patterns.md) — gate levels, QG scoring, annotation cycle
-**Verify:** `/atlassian-pm:verify-issue` flags: `--with-subtasks` | `--fix` | `--dry-run`
+**Verify:** `/atlassian-pm:verify-issue` flags: `--fix` | `--dry-run`
+**Test:** `cd hooks && uv run pytest tests/ -q` · **Lint:** `markdownlint-cli2 "**/*.md"`
 
 **Tool selection:** `.claude/rules/tool-selection.md` · `.claude/rules/mermaid.md` · `.claude/rules/python-scripts.md` (3 auto-loaded rules) · `references/tools.md` (field presets)
 
@@ -86,7 +88,7 @@ When compacting, **preserve**: issue keys created/modified · pending HR5/HR6 op
 
 **Hooks:** `start_compact_reinject.py` (SessionStart/compact) + `post_compact_reinject.py` (PostCompact) re-inject HR rules + pending state after compaction.
 
-**Agent invocation:** Skill phases that say `Agent(name: "X")` → use Agent tool with `subagent_type: "atlassian-pm:X"`. Mapping: `quality-gate`, `issue-bootstrap`, `story-writer`, etc.
+**Agent invocation:** Skill phases that say `Agent(name: "X")` → use Agent tool with `subagent_type: "atlassian-pm:X"`. Mapping: `quality-gate`, `issue-bootstrap`, `estimation-calibrator`, etc.
 
 **Subagents:** `agents/` for isolated investigation — full list: [references/agents.md](references/agents.md)
 
