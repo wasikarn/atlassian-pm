@@ -25,6 +25,8 @@ effort: medium
 
 **Types:** `tech-debt` (PR issues, refactor) · `bug` (QA/prod fixes) · `chore` (maintenance, deps) · `spike` (research, POC)
 
+> **See [Scenarios](references/scenarios.md) for common usage patterns.**
+
 ## Mode Selection
 
 | Flag | Mode | Template |
@@ -79,6 +81,8 @@ All use `projectKey: "<project_key>", type: "Task"`.
 > ```bash
 > uv run scripts/api/validate_adf.py {{artifacts_dir}}/tp-xxx-task.json --type task --json
 > ```
+>
+> `{{artifacts_dir}}` is the session artifact directory (default: `~/.claude/artifacts/`).
 >
 > PASS ≥ 90. FAIL → check `issues[].fix_hint` → `--fix` → re-score. Max 1 fix cycle.
 

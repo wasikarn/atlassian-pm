@@ -18,7 +18,7 @@
 | `/create-story` | `/verify-issue ABC-XXX --with-subtasks` |
 | `/improve-issue` (legacy) | → Use `/verify-issue ABC-XXX --with-subtasks --fix` instead |
 
-## Example
+## Example: Verification Mode
 
 **Input:** `/verify-issue ABC-2468 --with-subtasks`
 
@@ -33,4 +33,35 @@ QG Score: 92/100
 ⚠️ File path `src/pages/coupon.tsx` not found in codebase (-3)
 Subtasks: 3/3 aligned with parent ACs
 Recommendation: Fix AC2 format, verify file path
+```
+
+## Example: Auto-Fix Mode
+
+**Input:** `/verify-issue ABC-2468 --fix`
+
+**Output:**
+
+```text
+Phase 1: Fetch & Identify
+  → Issue type: Task
+  → Format: ADF (panels detected)
+
+Phase 2: Technical Verification
+  ✅ T1: ADF root is doc
+  ✅ T2: Panel types valid (info, success)
+  ✅ T3: Technical terms inline-coded
+  ⚠️ T4: Link to parent exists but parent not found (-2)
+
+Phase 3: Quality Verification
+  Score: 88/100
+  ✅ Format: ADF panels correct
+  ⚠️ Language: Mixed Thai/English - standardizing to Thai
+  ✅ Structure: Follows task template
+  ⚠️ AC2: Given/When/Then incomplete - fixing
+
+Phase 6: Apply Fix
+  → Generated: ~/.claude/artifacts/ABC-2468-fixed.json
+  → Applied via: acli jira workitem edit --from-json
+
+QG Score after fix: 94/100 ✅
 ```

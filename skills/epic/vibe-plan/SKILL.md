@@ -218,15 +218,68 @@ Epic: <project_key>-XXX — [Feature Name]
 
 ## Examples
 
+### Vibe Mode (Default)
+
 ```text
 /vibe-plan "coupon redemption at checkout for logged-in users"
-/vibe-plan --epic <project_key>-100
-/vibe-plan "video upload progress indicator with thumbnail generation"
+```
 
-# Too vague → use /create-task: /vibe-plan "fix bug"
-# Too large → use /blueprint first: /vibe-plan "redesign entire platform"
-# Single task → use /create-task instead of /vibe-plan
-# Epic has existing tasks → use --epic flag to avoid duplicates
+**Output:**
+
+```text
+Epic: {{PROJECT_KEY}}-3000 — Coupon Redemption at Checkout
+Total: 4 tasks, 13 SP, 26h OE
+
+Ready to Delegate:
+| Assignee | Task | Type | OE | Claude Code Prompt |
+|----------|------|------|----|--------------------|
+| (assign) | {{PROJECT_KEY}}-3001 [BE] Setup Coupon Service | CREATE | 4h | "Implement CouponService following ApplyCouponService pattern..." |
+| (assign) | {{PROJECT_KEY}}-3002 [BE] Redeem Coupon API | CREATE | 6h | "Create /api/coupon/redeem endpoint with validation..." |
+| (assign) | {{PROJECT_KEY}}-3003 [FE-Web] Coupon Input UI | CREATE | 4h | "Add coupon input field to checkout page..." |
+| (assign) | {{PROJECT_KEY}}-3004 [BE] Coupon Validation | MODIFY | 2h | "Add coupon validation to CheckoutService.validate()..." |
+```
+
+### Dry-Run Mode (Preview)
+
+```text
+/vibe-plan "video upload progress indicator with thumbnail generation" --dry-run
+```
+
+**Output:**
+
+```text
+Phase 1: Understand
+  → Services: [BE], [Video], [FE-Web]
+  → Files: 8 CREATE, 3 MODIFY, 1 REF
+  → Existing patterns: VideoService, ThumbnailGenerator
+
+Phase 2: Decompose
+  Epic: Video Upload Progress Indicator
+  ├── [Video] {{PROJECT_KEY}}-XXX1: Progress tracking service (M=3SP)
+  ├── [Video] {{PROJECT_KEY}}-XXX2: Thumbnail extraction (S=2SP)
+  ├── [BE] {{PROJECT_KEY}}-XXX3: Progress WebSocket API (S=2SP)
+  └── [FE-Web] {{PROJECT_KEY}}-XXX4: Progress bar UI (S=2SP)
+
+Phase 3: Review
+  ✅ Approved by user
+
+(dry-run — not created)
+```
+
+### Anti-Patterns (Do NOT Use)
+
+```text
+# Too vague → use /create-task
+/vibe-plan "fix bug"
+
+# Too large → use /blueprint first
+/vibe-plan "redesign entire platform"
+
+# Single task → use /create-task instead
+/vibe-plan "add login button"
+
+# Epic has existing tasks → use --epic flag
+/vibe-plan --epic {{PROJECT_KEY}}-100 "extend existing epic"
 ```
 
 ## 🎓 Domain Expert Notes
