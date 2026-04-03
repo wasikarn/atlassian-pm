@@ -31,3 +31,25 @@ paths:
 
 **ADF CREATE vs EDIT differ** — CREATE: `projectKey`+`type`+`summary`+`description` (no `issues`) · EDIT: `issues`+`description` (no `projectKey`/`type`/`summary`/`parent`) → details in `skills/shared-references/templates-core.md`
 **Smart Link:** see `skills/shared-references/templates-core.md` for inlineCard format
+
+## Token Efficiency Hierarchy
+
+| Tool | Savings | When to Use |
+| --- | --- | --- |
+| `cache_get_issue(compact=true)` | ~95% | Sprint planning, repeated reads |
+| `cache_text_search` | 100% | Keyword search (local FTS5) |
+| `cache_get_issue(fields=...)` | ~80% | First read, cache miss |
+| `jira_get_issue(fields=...)` | ~50% | Fresh data needed |
+| `jira_get_issue` (no fields) | 0% | ❌ NEVER — full JSON waste |
+
+**Rule:** Cache-first for reads → `cache_*` tools over base MCP. Hook auto-injects `fields`, but explicit is clearer.
+
+## MCP Silent Failures (Use CLI/Scripts)
+
+| Rule | Operation | Problem | Solution |
+| --- | --- | --- | --- |
+| HR3 | Assignee | ✅ succeeds, no change | `acli assign` |
+| HR4 | Confluence macros | HTML-escapes `<ac:structured-macro>` | Python scripts |
+| HR5 | Parent on subtask | May create orphan | MCP create → acli edit |
+| HR6 | Cache invalidation | Stale reads corrupt planning | `cache_invalidate(key)` |
+| HR7 | Sprint ID | Hardcoded → wrong sprint | MCP lookup first |
