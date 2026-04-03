@@ -138,6 +138,30 @@ Key risks: [top 2-3]
 
 Present each task as a numbered plan card for user to pick creation order.
 
+## Examples
+
+### ✅ Good
+
+```text
+/refine-epic "Video upload feature with transcoding"      # multi-role debate on new feature
+/refine-epic {{PROJECT_KEY}}-100                                      # refine existing epic with unclear scope
+/refine-epic "Payment integration" --fast               # skip debate, use PO-only proposal
+```
+
+### ❌ Bad
+
+```text
+/refine-epic                                            # no input — cannot start debate
+/refine-epic {{PROJECT_KEY}}-42                                      # {{PROJECT_KEY}}-42 is a Task, not Epic — use /verify-issue instead
+/refine-epic "Fix login bug"                            # bugs don't need multi-role debate — use /create-task --bug
+```
+
+**Common mistakes:**
+
+- Refining clear-scope features — if scope is obvious, skip debate and use `/create-epic` + `/create-task` directly
+- Refining bugs — bugs are captured in bug-triage; this skill is for feature/story refinement
+- Skipping stakeholder input — Phase 1 gate requires presenting context to user before launching agents
+
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)

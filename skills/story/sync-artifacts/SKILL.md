@@ -145,6 +145,30 @@ Output: Summary table (Artifact, Action, Status) + flagged items.
 
 Post-sync: `rm {{artifacts_dir}}/sync-*.json {{artifacts_dir}}/sync-*.md` → `/verify-issue {{PROJECT_KEY}}-XXX --with-subtasks`
 
+## Examples
+
+### ✅ Good
+
+```text
+/sync-artifacts {{PROJECT_KEY}}-42 "added new AC for error handling"    # sync from Jira task to all related
+/sync-artifacts {{PROJECT_KEY}}-100 "scope reduced, remove v2 features" # sync epic + all children + docs
+/sync-artifacts 123456 "Confluence page outdated"          # sync from Confluence page ID
+```
+
+### ❌ Bad
+
+```text
+/sync-artifacts                          # no issue key or page ID — cannot identify origin
+/sync-artifacts {{PROJECT_KEY}}-42                    # no change description — Phase 3 gate will ask
+/sync-artifacts {{PROJECT_KEY}}-42 "fix typo"         # format-only change — use /update-task for simple edits
+```
+
+**Common mistakes:**
+
+- Syncing without describing changes — impact analysis needs to know what changed
+- Using sync-artifacts for single-field updates — use `/update-task` or `/update-epic` for simple changes
+- Skipping the QG check — HR1 requires QG ≥ 90% before any Jira write
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Templates Index](../../../references/templates.md) · [Tool Selection](../../../references/tools.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Atlassian Scripts](../../../skills/utilities/atlassian-scripts/SKILL.md) · [Edge Cases](references/edge-cases.md) · [Decision Guide](references/decision-guide.md)

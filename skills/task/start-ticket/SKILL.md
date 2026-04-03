@@ -87,6 +87,29 @@ If no ACs found: show description excerpt (first 300 chars) with note "No explic
 | No description | Show "No description available" in AC section |
 | `--force` on Done ticket | Warn prominently, proceed, log to stderr |
 
+## Examples
+
+### ✅ Good
+
+```text
+/start-ticket {{PROJECT_KEY}}-42                        # read + transition to In Progress
+/start-ticket {{PROJECT_KEY}}-42 --force                # force start on Done/Cancelled ticket
+```
+
+### ❌ Bad
+
+```text
+/start-ticket                              # no issue key — cannot fetch ticket
+/start-ticket {{PROJECT_KEY}}-42 {{PROJECT_KEY}}-43                  # only one issue at a time
+/start-ticket --force                      # --force requires an issue key
+```
+
+**Common mistakes:**
+
+- Running on Done ticket without `--force` — blocked by guard; explicitly confirm with `--force`
+- Expecting AC extraction from non-standard formats — only numbered/bullet lists and "Acceptance Criteria" sections are parsed
+- Forgetting that WIP limits apply — the hook will block if "In Progress" column is at capacity
+
 ## Domain Expert Notes
 
 DLC discipline requires reading the ticket before touching code. Bundling the transition prevents the common failure mode where a developer starts work and forgets to move the Jira card — leaving the board state stale and blocking sprint metrics (cycle time starts at In Progress, not at actual code commit).

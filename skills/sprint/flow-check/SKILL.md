@@ -136,6 +136,29 @@ When memory is active, track:
 - WIP violations that occurred in previous flow checks (trend: "column X has been over WIP for 3 days")
 - Bottlenecks that persist across checks (flag as systemic, not temporary)
 
+## Examples
+
+### ✅ Good
+
+```text
+/flow-check                    # full board health snapshot + replenishment + bottleneck detection
+/flow-check --replenish        # fast path — only check Ready queue, propose moves
+```
+
+### ❌ Bad
+
+```text
+/flow-check {{PROJECT_KEY}}-42              # flow-check is board-level, not issue-level — use /start-ticket for single issues
+/flow-check --sprint           # --sprint is not a valid flag; sprint scope is board-wide
+/flow-check --replenish --force # --force is not applicable; WIP gate blocks automatically
+```
+
+**Common mistakes:**
+
+- Treating flow-check as issue-level — this is a board-level workflow tool, not a ticket operation
+- Expecting automatic moves — moves require explicit user confirmation; WIP gate may still block
+- Running without board configuration — requires `.claude/project-config.json` with `board.columns`
+
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md) for Kanban flow theory, WIP limits, and bottleneck detection strategies.

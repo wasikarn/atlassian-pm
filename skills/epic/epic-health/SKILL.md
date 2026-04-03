@@ -83,6 +83,29 @@ Set health to:
 - 🟡 At Risk: 1–3 minor issues or 1 major issue
 - 🔴 Critical: multiple major issues or missed timeline
 
+## Examples
+
+### ✅ Good
+
+```text
+/epic-health {{PROJECT_KEY}}-100                     # health check on epic before sprint
+/epic-health {{PROJECT_KEY}}-100 --timeline          # include timeline feasibility check
+```
+
+### ❌ Bad
+
+```text
+/epic-health                            # no epic key — cannot fetch epic data
+/epic-health {{PROJECT_KEY}}-100 {{PROJECT_KEY}}-101              # one epic at a time; for bulk, run separately
+/epic-health {{PROJECT_KEY}}-42                      # {{PROJECT_KEY}}-42 is a Task, not Epic — use /verify-issue instead
+```
+
+**Common mistakes:**
+
+- Running on a Task instead of Epic — epic-health checks epic-level concerns (objective coverage, SP sum)
+- Skipping before sprint planning — health check surfaces issues early when they're cheaper to fix
+- Expecting auto-fix — this skill only reports; use `/update-epic` or `/create-task` to fix issues
+
 ## 🎓 Domain Expert Notes
 
 See [references/health-criteria.md](references/health-criteria.md) for health check thresholds, scoring formulas, and example outputs.

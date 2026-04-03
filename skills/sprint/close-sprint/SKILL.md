@@ -166,6 +166,29 @@ If velocity-tracker not available → skip and note in Phase 8 summary.
 - Review page: [Confluence link]
 - Next: run `/atlassian-pm:retrospective-analyst [sprint-id]` for deeper analysis
 
+## Examples
+
+### ✅ Good
+
+```text
+/close-sprint                          # close current active sprint with full workflow
+/close-sprint --sprint 42              # close specific sprint by ID
+```
+
+### ❌ Bad
+
+```text
+/close-sprint {{PROJECT_KEY}}-42                    # close-sprint takes sprint ID, not issue key
+/close-sprint --force                  # --force is not a valid flag; gates require explicit confirmation
+/close-sprint --replan                 # close-sprint only closes; use plan-sprint for planning
+```
+
+**Common mistakes:**
+
+- Providing issue key instead of sprint ID — use sprint number from board, not {{PROJECT_KEY}}-XXX
+- Expecting retrospective generation — close-sprint creates review page; use `/retrospective-analyst` for analysis
+- Skipping move plan confirmation — Phase 3 gate requires explicit approval before moving issues
+
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)

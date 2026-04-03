@@ -113,6 +113,31 @@ acli jira workitem assign -k "[issue_key]" -a "[assignee_email]" -y
 → Use /create-testplan [KEY] to create QA verification subtask after fix
 ```
 
+## Examples
+
+### ✅ Good
+
+```text
+/bug-triage "Login page shows 500 error on submit"          # triage from description
+/bug-triage --no-assign "Payment fails with certain cards"   # skip assignment step
+/bug-triage                                                  # interactive intake — asks for each field
+```
+
+### ❌ Bad
+
+```text
+/bug-triage "Fix the bug"                                    # too vague — needs reproduction steps
+/bug-triage {{PROJECT_KEY}}-42                                            # bug-triage creates new issues, not updates existing ones
+/bug-triage --assign "user@example.com"                      # --assign is not valid; use --no-assign to skip
+```
+
+**Common mistakes:**
+
+- Providing only summary without reproduction steps — Phase 1 gate requires complete intake
+- Using bug-triage for existing issues — this skill creates new bug tasks; use `/create-task --bug` for simple bug creation
+- Skipping severity assessment — P1/P2/P3 label is required for prioritization
+- Forgetting `--no-assign` when you don't want to assign immediately
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Task Template](../../../references/templates-task.md) · [Verification Checklist](../../../references/verification-checklist.md) · [Tools Reference](../../../references/tools.md) · [Scenarios](references/scenarios.md)

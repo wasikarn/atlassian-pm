@@ -100,6 +100,36 @@ All use `projectKey: "<project_key>", type: "Task"`.
 
 Output: `✅ Task Created: [Title] (ABC-XXX) · Type: [type] · Priority: [H/M/L] · 🔗 https://{{JIRA_SITE}}/browse/ABC-XXX · → /verify-issue ABC-XXX`
 
+## Examples
+
+### ✅ Good
+
+```text
+/create-task "Add password reset feature"                    # vibe mode (auto-detect type)
+/create-task --bug "Login fails with special characters"    # bug mode with description
+/create-task --spike "Research GraphQL migration path"       # spike mode
+/create-task --chore "Upgrade Node.js to v24"                # chore mode
+/create-task --thorough "Refactor auth module"               # full interview workflow
+/create-task {{PROJECT_KEY}}-50 "Implement video upload API" --thorough  # with parent epic specified
+```
+
+### ❌ Bad
+
+```text
+/create-task                                                # no description — stalls at discovery
+/create-task --bug                                          # bug mode without description — stalls
+/create-task "Fix the bug"                                  # too vague — needs specific description
+/create-task --feature "Add feature"                        # --feature is not a valid mode
+/create-task {{PROJECT_KEY}}-50                                          # parent key alone without description
+```
+
+**Common mistakes:**
+
+- Omitting description entirely — vibe mode still needs a description to infer type
+- Using `--feature` flag — feature is the default, just omit the flag
+- Providing only parent epic without task description — both are needed
+- Skipping QG check for "simple" tasks — HR1 requires QG ≥ 90% for all ADF
+
 ## References
 
 [ADF Core Rules](../../../references/templates-core.md) · [Task Template](../../../references/templates-task.md) · [Scenarios](references/scenarios.md)

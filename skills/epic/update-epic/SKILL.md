@@ -5,15 +5,13 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_update_page, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Update an existing Epic with a 6-phase update workflow
-
+  This skill should be used when modifying scope, RICE score, success metrics, or description of an existing Epic. Uses a 6-phase workflow with impact analysis and intent preservation.
+  
   Phases: Fetch Current → Impact Analysis → Preserve Intent → Generate Update → Quality Gate → Apply Update
-
-  Supports: adjust scope, update RICE, add success metrics, format migration
-
-  Triggers: "update epic", "edit epic", "adjust epic", "แก้ไข epic", "update RICE", "fix epic scope"
-  Use when: modifying scope, RICE score, success metrics, or description of an existing Epic
-  Do NOT use for: creating new epics (use create-epic); task updates (use update-task)
+  
+  Trigger phrases: "update epic", "edit epic", "adjust epic", "change epic", "modify epic", "แก้ไข epic", "update RICE", "fix epic scope"
+  
+  This skill should NOT be used for creating new epics (use create-epic) or task updates (use update-task).
 argument-hint: "[issue-key] [changes]"
 effort: medium
 ---

@@ -116,6 +116,32 @@ See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 4: Ex
 
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 6: Bug Triage & Summary Script**
 
+## Examples
+
+### ✅ Good
+
+```text
+/execute-testplan {{PROJECT_KEY}}-42                           # run test plan for {{PROJECT_KEY}}-42 on staging
+/execute-testplan {{PROJECT_KEY}}-42 --env production          # run against production
+/execute-testplan {{PROJECT_KEY}}-42 --headed                   # force visible browser for all tests
+/execute-testplan {{PROJECT_KEY}}-42 --rerun-failed            # retry only failed tests
+/execute-testplan {{PROJECT_KEY}}-42 --dry-run                  # parse sheet, show plan, don't execute
+```
+
+### ❌ Bad
+
+```text
+/execute-testplan                                 # no issue key — cannot find sheet
+/execute-testplan {{PROJECT_KEY}}-42 --sprint                  # --sprint is not valid; test plans are per-story
+/execute-testplan {{PROJECT_KEY}}-42 --browser chrome          # browser selection is not supported; Playwright uses chromium
+```
+
+**Common mistakes:**
+
+- Running without linked Sheet — test plan must have a Google Sheet weblink on the Jira story
+- Skipping headed mode for OAuth tests — OAuth popups require headed browser; auto-detected but can force with `--headed`
+- Running `--rerun-failed` on first pass — there's no failed status yet; run full test first
+
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)

@@ -84,6 +84,32 @@ Runs all 6 phases for story + each subtask. Output table: Key × Technical × Qu
 
 > See [references/scenarios.md](references/scenarios.md) for command examples, integration workflows, and a full example run.
 
+## Examples
+
+### ✅ Good
+
+```text
+/verify-issue {{PROJECT_KEY}}-42                           # basic quality check
+/verify-issue {{PROJECT_KEY}}-42 --with-subtasks           # verify parent + all children + alignment
+/verify-issue {{PROJECT_KEY}}-42 --fix                     # auto-fix detected issues
+/verify-issue {{PROJECT_KEY}}-42 --fix --dry-run           # preview fixes without applying
+/verify-issue {{PROJECT_KEY}}-42 --with-subtasks --fix     # batch fix parent + children
+```
+
+### ❌ Bad
+
+```text
+/verify-issue                                 # no issue key — cannot fetch issue
+/verify-issue {{PROJECT_KEY}}-42 --with-subtasks {{PROJECT_KEY}}-43     # --with-subtasks checks children of {{PROJECT_KEY}}-42, not additional keys
+/verify-issue {{PROJECT_KEY}}-42 --fix --force             # --force is not a valid flag; fixes apply automatically
+```
+
+**Common mistakes:**
+
+- Running verify on an issue before QG passes — both check ADF, but verify-issue also checks INVEST and hierarchy
+- Using `--fix` without reviewing the diff — fixes are applied automatically; use `--dry-run` to preview
+- Expecting `--with-subtasks` to verify multiple unrelated issues — it only verifies parent + its children
+
 ## 🎓 Domain Expert Notes
 
 See [references/domain-expert.md](references/domain-expert.md)

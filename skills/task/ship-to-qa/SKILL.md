@@ -76,6 +76,17 @@ Preview ({service_key}): {preview_url}   ← one line per service in environment
 Staging (BE): {staging_api_url}
 ```
 
+**Example:**
+
+```
+[ship-to-qa] {{PROJECT_KEY}}-42 — Add video upload feature
+
+PR: #157 — https://github.com/org/repo/pull/157
+Preview (be): https://feat-video-upload.be.tathep.pages.dev
+Preview (fe-admin): https://feat-video-upload.fe-admin.tathep.pages.dev
+Staging (BE): https://staging-api.tathep.com
+```
+
 Omit lines that don't apply: no "Staging (BE)" line when no `be` label; omit preview lines if config was missing and user couldn't provide URLs.
 
 **Step 5 — WIP Check + Transition**
@@ -115,6 +126,29 @@ Card moved to Ready for QA.
 | QA WIP limit reached | Stop — report count/limit, do not transition |
 | Slug > 28 chars | Truncate; add note in output |
 | status ≠ In Progress | Warn + confirm before proceeding |
+
+## Examples
+
+### ✅ Good
+
+```text
+/ship-to-qa {{PROJECT_KEY}}-42                           # post PR + preview URLs + transition
+/ship-to-qa {{PROJECT_KEY}}-42 --env production          # use production preview URLs (if configured)
+```
+
+### ❌ Bad
+
+```text
+/ship-to-qa                                 # no issue key — cannot fetch issue or detect PR
+/ship-to-qa {{PROJECT_KEY}}-42 --branch                  # --branch is not valid; branch auto-detected from PR
+/ship-to-qa {{PROJECT_KEY}}-42 --force                   # --force is not valid; WIP gate requires explicit override
+```
+
+**Common mistakes:**
+
+- Running without a PR open — `gh pr view` will fail; open PR first or provide URL manually
+- Running when QA column is at WIP limit — transition blocked; wait for QA to finish an item
+- Forgetting `be` label on BE tasks — Staging URL hidden; add `be` label before shipping
 
 ## Domain Expert Notes
 
