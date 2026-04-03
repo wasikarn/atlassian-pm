@@ -6,12 +6,13 @@ model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create Epic + Epic Doc — vibe mode by default (fast, no ceremony)
-  Use --thorough for full interview + RICE scoring + annotation workflow
+  This skill creates a new Epic in Jira with optional Confluence Epic Doc. Vibe mode by default (fast, no ceremony).
 
-  Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "สร้าง epic"
-  Use when: creating a NEW Epic from a product vision or initiative idea
-  Do NOT use for: tasks under epic (use create-task); updating an existing epic (use update-epic)
+  Flags: --thorough (full interview + RICE scoring), --no-doc (Jira only)
+
+  Triggers: "create epic", "new epic", "new initiative", "product vision", "RICE", "need an epic", "epic for", "make an epic", "start an epic", "สร้าง epic"
+  Use when: creating a NEW Epic from a product vision, initiative idea, or after running /blueprint
+  Do NOT use for: tasks under epic (use create-task); updating existing epics (use update-epic); single-sprint work (use create-task)
 argument-hint: "[--thorough | --no-doc] [epic-title]"
 effort: medium
 ---
@@ -182,10 +183,6 @@ Epic: [link]  (no Confluence doc)
 → /atlassian-pm:create-doc {{PROJECT_KEY}}-XXX   create doc later if needed
 ```
 
-## Epic Structure (ADF)
-
-> See [references/epic-adf-structure.md](references/epic-adf-structure.md) for the full Epic ADF section layout and panel type reference.
-
 ## Examples
 
 ### ✅ Good
@@ -214,10 +211,6 @@ Epic: [link]  (no Confluence doc)
 - Skipping the RICE prioritization step by providing arbitrary scores — RICE requires stakeholder input on Reach and Confidence; guessing produces meaningless priority rankings.
 - Creating an epic before running `/blueprint` for complex multi-service features — blueprint generates the VS plan and story breakdown that create-epic needs for Phase 3.
 - Approving Phase 1 without confirming the narrative arc — vague problem statements propagate into the Epic Doc and make scope decisions in Phase 3 ambiguous.
-
-## Example
-
-> See [references/examples.md](references/examples.md) for a full input/output example.
 
 ## 🎓 Domain Expert Notes
 

@@ -5,12 +5,12 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create a new Jira Task — vibe mode by default (fast, auto-detect type)
+  This skill creates a new Jira Task in vibe mode (fast, auto-detect type) by default. Use --thorough flag for full interview workflow.
+
   Supports 4 task types: tech-debt, bug, chore, spike
   Supports modes: feature (default), qa, bug, spike, chore
-  Use --thorough for full interview + review gates
 
-  Triggers: "create task", "new task", "สร้าง task", "tech debt task", "add chore", "new spike"
+  Triggers: "create task", "new task", "add task", "create a task", "สร้าง task", "tech debt task", "tech-debt task", "create tech debt", "add tech debt", "add chore", "new spike", "create spike", "create bug task"
   Use when: creating a standalone task — feature, tech-debt, bug, chore, or spike — under an Epic
   Do NOT use for: epics (use create-epic); full bug triage with severity/dedup/assign (use bug-triage)
 argument-hint: "[--qa|--bug|--spike|--chore] [description or issue-key]"

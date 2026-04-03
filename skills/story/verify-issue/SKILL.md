@@ -6,15 +6,15 @@ model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Glob, Grep, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_get_page
 description: |
-  Verify and improve issue quality (ADF format, INVEST, language, hierarchy alignment) with a 6-phase workflow
+  This skill verifies and improves Jira issue quality (ADF format, INVEST criteria, language, hierarchy alignment) with a scored 6-phase checklist.
 
-  Checks: ADF render, panel structure, links, inline code, INVEST criteria, Given/When/Then, file paths, language consistency, hierarchy alignment (Epic↔Story↔Subtasks↔Docs)
+  Checks: ADF render, panel structure, links, inline code, INVEST criteria, Given/When/Then, file paths, language consistency, hierarchy alignment (Epic↔Task↔Docs)
 
   Supports: --with-subtasks (batch + alignment check), --fix (auto-fix + format migration)
 
-  Triggers: "verify", "validate", "check quality", "improve", "migrate format", "QG score", "quality gate", "ตรวจสอบ issue"
+  Triggers: "verify issue", "validate issue", "check task quality", "improve issue", "migrate format", "QG score", "quality gate", "verify ADF", "fix issue format", "ตรวจสอบ issue", "check my task"
   Use when: quality-checking ADF format, INVEST criteria, or hierarchy alignment of any issue before or after creation
-  Do NOT use for: creating issues (use create-story/create-epic/create-task); deliberate scope or AC rewrites (use update-story/update-epic)
+  Do NOT use for: creating issues (use create-epic/create-task); deliberate scope or AC rewrites (use update-epic/update-task)
 argument-hint: "[issue-key] [--with-subtasks] [--fix] [--dry-run]"
 effort: medium
 ---
@@ -46,9 +46,8 @@ Score ⭐–⭐⭐⭐⭐⭐ per dimension: Format (ADF+panels+inline code) · La
 
 **Type-specific checks:**
 
-- **Story:** INVEST criteria (6 points), Narrative format, AC Given/When/Then
-- **Sub-task:** Objective clear, File paths real (not generic), AC format correct
-- **QA:** All Story ACs covered, Test scenarios clear, Priority assigned
+- **Task:** INVEST criteria (6 points), Narrative format, AC Given/When/Then, File paths real (not generic)
+- **QA:** All Task ACs covered, Test scenarios clear, Priority assigned
 
 ### 4. Hierarchy Alignment (`--with-subtasks` only)
 
@@ -56,14 +55,14 @@ Score ⭐–⭐⭐⭐⭐⭐ per dimension: Format (ADF+panels+inline code) · La
 
 **Data fetching:**
 
-1. `jira_get_issue(story_key)` — ACs, scope, services (must come first for story.parent key)
-2. Then in parallel: `jira_get_issue(story.parent)` (Epic scope) + `confluence_search("ABC-XXX")` (Tech Note) — skip if none
+1. `jira_get_issue(task_key)` — ACs, scope, services (must come first for task.parent key)
+2. Then in parallel: `jira_get_issue(task.parent)` (Epic scope) + `confluence_search("ABC-XXX")` (Tech Note) — skip if none
 
-(Subtasks already in memory from Phase 1)
+(Tasks already in memory from Phase 1 if --with-subtasks)
 
-**Alignment checks:** A1 AC↔Subtask (every AC ≥1 subtask) · A2 Service tag match · A3 Scope consistency · A4 Epic↔Story fit (skip if no Epic) · A5 Parent-child links correct · A6 Confluence↔ACs aligned (skip if no page, flag as info).
+**Alignment checks:** A1 AC↔Task alignment (every AC maps to task scope) · A2 Service tag match · A3 Scope consistency · A4 Epic↔Task fit (skip if no Epic) · A5 Parent-child links correct · A6 Confluence↔ACs aligned (skip if no page, flag as info).
 
-> **Agent invocation:** `Agent(name: "alignment-checker", story_key: "[STORY-KEY]", mode: "--fix" | "read-only")`
+> **Agent invocation:** `Agent(name: "alignment-checker", task_key: "[TASK-KEY]", mode: "--fix" | "read-only")`
 
 ### 5. Report
 

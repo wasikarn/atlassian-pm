@@ -5,11 +5,9 @@ agent: general-purpose
 model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 description: |
-  Sprint Planning using a 9-phase workflow
+  This skill plans a new sprint — calculating team capacity, analyzing carry-over items, prioritizing backlog, distributing work, and committing assignments to Jira using a 9-phase workflow.
 
-  Phases: Discovery → Capacity → Carry-over → Prioritize → Distribute → Risk → Risk Forecast → Review → Execute
-
-  Triggers: "plan sprint", "sprint planning", "capacity planning", "assign work", "workload distribution", "วางแผน sprint", "จัดสรรงาน"
+  Triggers: "plan sprint", "sprint planning", "start new sprint", "begin sprint", "capacity planning", "assign work", "workload distribution", "what should we work on this sprint", "วางแผน sprint", "จัดสรรงาน"
   Use when: planning a new sprint — fetching carry-over items, calculating team capacity, distributing work, and committing assignments to Jira
   Do NOT use for: generating a standup digest (use standup-report); closing or reviewing a completed sprint (use close-sprint)
 argument-hint: "[--sprint <id>] [--carry-over-only]"
