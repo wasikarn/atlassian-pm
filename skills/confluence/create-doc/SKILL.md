@@ -5,12 +5,11 @@ agent: general-purpose
 x-compatibility: [mcp-atlassian, mcp-confluence]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_create_remote_issue_link, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_search
 description: |
-  Create Confluence page from template with a 4-phase workflow
-  Supports: tech-spec, adr, parent (category page), prd (Product Requirements Document)
-
-  Triggers: "create doc", "technical spec", "ADR", "สร้าง doc", "new confluence page", "create tech spec", "PRD", "product requirements"
-  Use when: creating a new Confluence page — tech-spec, ADR, or parent category page
-  Do NOT use for: updating existing pages (use update-doc)
+  This skill should be used when creating a new Confluence page from template. Supports tech-spec, ADR, parent (category page), and PRD templates with a 4-phase workflow.
+  
+  Trigger phrases: "create doc", "technical spec", "ADR", "PRD", "product requirements", "new page", "create page", "create confluence", "สร้าง doc", "new confluence page"
+  
+  This skill should NOT be used for updating existing pages (use update-doc).
 argument-hint: "[template] [title] [--parent page-id]"
 effort: medium
 ---

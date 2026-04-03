@@ -4,15 +4,13 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
 description: |
-  Sync all related artifacts (Epic, Task, QA, Confluence) using an 8-phase workflow
-
+  This skill should be used when Jira issues and Confluence pages have drifted out of alignment and need bidirectional sync. Syncs all related artifacts (Epic, Task, QA, Confluence) using an 8-phase workflow.
+  
   Phases: Identify Origin → Build Graph → Detect Changes → Impact Analysis → Explore (if needed) → Generate Updates → Execute Sync → Verify & Report
-
-  ⭐ Composite: bidirectional sync from any artifact, covering both Jira + Confluence
-
-  Triggers: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
-  Use when: Epic, Task, or Confluence doc have drifted out of alignment and need bidirectional sync
-  Do NOT use for: initial issue creation (use create-task); individual field updates (use update-task)
+  
+  Trigger phrases: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "this task is outdated", "cascade changes", "sync with parent", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
+  
+  This skill should NOT be used for initial issue creation (use create-task) or individual field updates (use update-task).
 argument-hint: "[issue-key-or-page-id] [changes]"
 effort: high
 ---

@@ -7,17 +7,18 @@ model: sonnet
 x-compatibility: [atlassian-cache, mcp-atlassian]
 argument-hint: "[epic-key]"
 description: |
-  Analyze epic health: task coverage, SP totals, timeline feasibility, and AC alignment.
-
+  This skill should be used when auditing an epic before sprint or release cutoff. Analyzes task coverage, SP totals, timeline feasibility, and AC alignment.
+  
   Checks:
   - All tasks linked to epic with SP estimates
   - SP sum is realistic vs team velocity
   - Tasks cover all epic objectives (no blind spots)
   - No tasks missing QG verification
   - Timeline: estimated completion vs target date
-
-  Triggers: "epic health", "check epic", "epic status", "วิเคราะห์ epic", "ตรวจ epic"
-  Use when: auditing an epic before a sprint or release cutoff
+  
+  Trigger phrases: "epic health", "check epic", "epic status", "epic audit", "sprint readiness", "วิเคราะห์ epic", "ตรวจ epic"
+  
+  This skill should NOT be used for creating issues (use create-task) or updating epic fields (use update-epic).
 allowed-tools: mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_get_sprints_from_board
 ---
 

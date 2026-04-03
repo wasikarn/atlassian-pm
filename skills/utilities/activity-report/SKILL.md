@@ -99,10 +99,29 @@ python .claude/skills/utilities/activity-report/generate_report.py --output repo
 - Passing `--sprint` or Jira-related filters — this skill has no Jira awareness; valid filters are `--hours`, `--start/--end`, `--project`, and `--types`
 - Expecting Jira issue references in the output — observations are captured from Claude Code sessions, not Jira API calls
 
+## Output Format
+
+```text
+Activity Report — 2026-04-03
+
+Sessions: 3 | Observations: 12 | Effort: 4.5h
+
+By Type:
+- feature: 6 observations (3h)
+- bugfix: 4 observations (1h)
+- chore: 2 observations (30m)
+
+Top Issues:
+1. {{PROJECT_KEY}}-3001 — Payment integration (2h, feature)
+2. {{PROJECT_KEY}}-3005 — Fix login timeout (1h, bugfix)
+3. {{PROJECT_KEY}}-3010 — Update dependencies (30m, chore)
+
+Recent Work:
+- Implemented payment retry logic ({{PROJECT_KEY}}-3001)
+- Fixed session timeout bug ({{PROJECT_KEY}}-3005)
+- Upgraded npm packages ({{PROJECT_KEY}}-3010)
+```
+
 ## 🎓 Domain Expert Notes
 
 See [references/expert-notes.md](references/expert-notes.md)
-
-## References
-
-- [JQL Quick Reference](../../../references/jql-quick-ref.md) - JQL patterns for filtering by date and assignee

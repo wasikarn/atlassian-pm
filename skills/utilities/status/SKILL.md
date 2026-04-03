@@ -6,7 +6,7 @@ x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
   This skill should be used when starting a session, resuming after a break, or when unsure what to work on next. Shows active sprint status, team WIP, pending HR issues, and suggests next action.
   
-  Trigger phrases: "status", "what's next", "sprint status", "what should I work on", "where were we", "session status", "สถานะ sprint", "ทำอะไรต่อ"
+  Trigger phrases: "status", "what's next", "sprint status", "what should I work on", "where were we", "session status", "สถานะ sprint", "ทำอะไรต่อ", "plugin ใช้ได้ไหม"
   
   This skill should NOT be used for detailed sprint planning (use plan-sprint) or closing sprint (use close-sprint).
 argument-hint: ""

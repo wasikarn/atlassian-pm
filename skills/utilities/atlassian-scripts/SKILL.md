@@ -3,7 +3,7 @@ name: atlassian-scripts
 description: |
   This skill should be used when MCP tools have limitations (code macro formatting, ADF manipulation, bulk ADF repair) and you need to run Python scripts that interact directly with Atlassian REST APIs.
   
-  Trigger phrases: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script", "list scripts", "what scripts", "สคริปต์ atlassian"
+  Trigger phrases: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script", "list scripts", "what scripts", "สคริปต์ atlassian", "แก้ไข confluence", "ติดตั้งสำเร็จไหม"
   
   This skill should NOT be used for standard issue creation (use create-task) or normal Confluence updates (use update-doc).
 x-compatibility: []
