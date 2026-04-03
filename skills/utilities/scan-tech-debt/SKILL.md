@@ -4,12 +4,13 @@ context: fork
 agent: Explore
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 description: |
-  Aggregate all tech-debt/chore/spike issues into a priority matrix dashboard on Confluence.
-  Clusters by service tag + age. Scores effort vs impact. Supports trend comparison via Confluence history.
-  --update refreshes existing page instead of creating new.
-  Triggers: "tech debt", "debt radar", "tech debt dashboard", "chore audit", "สรุป tech debt"
-  Use when: aggregating tech-debt and spike issues into an Effort×Impact matrix dashboard on Confluence
-  Do NOT use for: creating individual tasks (use create-task); sprint planning (use plan-sprint)
+  This skill should be used when aggregating tech-debt, chore, and spike issues into an Effort×Impact priority matrix dashboard on Confluence. Clusters by service tag + age. Scores effort vs impact. Supports trend comparison via Confluence history.
+  
+  Use --update to refresh an existing page instead of creating new.
+  
+  Trigger phrases: "tech debt", "debt radar", "tech debt dashboard", "chore audit", "สรุป tech debt", "tech debt matrix"
+  
+  This skill should NOT be used for creating individual tasks (use create-task) or sprint planning (use plan-sprint).
 argument-hint: "[--update]"
 effort: high
 ---

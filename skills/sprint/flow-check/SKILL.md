@@ -135,3 +135,11 @@ When memory is active, track:
 
 - WIP violations that occurred in previous flow checks (trend: "column X has been over WIP for 3 days")
 - Bottlenecks that persist across checks (flag as systemic, not temporary)
+
+## 🎓 Domain Expert Notes
+
+See [references/expert-notes.md](references/expert-notes.md) for Kanban flow theory, WIP limits, and bottleneck detection strategies.
+
+## References
+
+[Expert Notes](references/expert-notes.md) · [Sprint Frameworks](../../../references/sprint-frameworks.md)

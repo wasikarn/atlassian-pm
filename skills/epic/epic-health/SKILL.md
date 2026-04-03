@@ -81,3 +81,11 @@ Set health to:
 - 🟢 Healthy: 0 issues
 - 🟡 At Risk: 1–3 minor issues or 1 major issue
 - 🔴 Critical: multiple major issues or missed timeline
+
+## 🎓 Domain Expert Notes
+
+See [references/health-criteria.md](references/health-criteria.md) for health check thresholds, scoring formulas, and example outputs.
+
+## References
+
+[Health Criteria](references/health-criteria.md) · [Workflow Patterns](../../../references/workflow-patterns.md)

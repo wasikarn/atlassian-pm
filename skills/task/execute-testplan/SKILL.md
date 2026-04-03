@@ -23,15 +23,11 @@ allowed-tools: >
   mcp__plugin_playwright_playwright__browser_console_messages,
   mcp__plugin_playwright_playwright__browser_network_requests
 description: |
-  Execute test cases from a Google Sheet linked to a Jira story using Playwright, then write results back and create bug tickets.
-
-  Triggers:
-  - "execute testplan {{PROJECT_KEY}}-XXX", "run test {{PROJECT_KEY}}-XXX"
-  - "รัน testplan", "ทดสอบ {{PROJECT_KEY}}-XXX", "execute test cases"
-  - "run QA", "QA run"
-
-  Use when: QA wants to automate execution of a Google Sheet test plan linked to a Jira story and record results.
-  Do NOT use for: creating new test plans (use create-testplan); unit/API-only tests; stories with no Sheet link and no ACs.
+  This skill should be used when QA wants to automate execution of a Google Sheet test plan linked to a Jira story. Uses Playwright for browser automation, writes results back to the sheet, and creates bug tickets for failures.
+  
+  Trigger phrases: "execute testplan", "run test", "execute test cases", "run QA", "ทดสอบ", "รัน testplan"
+  
+  This skill should NOT be used for creating new test plans (use create-testplan), unit/API-only tests, or stories with no Sheet link and no ACs.
 argument-hint: "<issue-key> [--env staging|production] [--headed] [--rerun-failed] [--dry-run]"
 effort: high
 ---

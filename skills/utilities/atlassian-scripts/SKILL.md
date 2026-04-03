@@ -1,11 +1,11 @@
 ---
 name: atlassian-scripts
 description: |
-  Python scripts for updating Confluence pages and Jira issues via REST API directly.
-
-  Triggers: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script", "list scripts", "what scripts"
-  Use when: MCP tools have limitations (e.g., code macro formatting, ADF manipulation, bulk ADF repair)
-  Do NOT use for: standard issue creation (use create-story or create-task); normal Confluence updates (use update-doc)
+  This skill should be used when MCP tools have limitations (code macro formatting, ADF manipulation, bulk ADF repair) and you need to run Python scripts that interact directly with Atlassian REST APIs.
+  
+  Trigger phrases: "fix confluence", "update confluence page", "confluence script", "fix jira description", "atlassian script", "list scripts", "what scripts", "สคริปต์ atlassian"
+  
+  This skill should NOT be used for standard issue creation (use create-task) or normal Confluence updates (use update-doc).
 x-compatibility: []
 argument-hint: "[script-name] [args] | --list"
 effort: low

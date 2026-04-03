@@ -5,15 +5,11 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_create_issue, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  Create Test Plan + [QA] Task from parent Epic or feature Task with a 6-phase QA workflow
-
-  Phases: Discovery → Test Scope Analysis → Design Test Cases → Quality Gate → Create [QA] Task → Summary
-
-  Output: [QA] Task in Jira (Test Plan embedded in description)
-
-  Triggers: "create test plan", "QA", "test case", "testing", "สร้าง test plan", "add QA task"
-  Use when: adding a QA task and test plan to an existing Epic or feature Task
-  Do NOT use for: initial task creation (use create-task); analyzing implementation (use analyze-story or create-task)
+  This skill should be used when adding a QA task and test plan to an existing Epic or feature Task. Creates [QA] Task with embedded Test Plan using a 6-phase workflow: Discovery → Test Scope Analysis → Design Test Cases → Quality Gate → Create [QA] Task → Summary.
+  
+  Trigger phrases: "create test plan", "test plan", "QA task", "test case", "testing", "สร้าง test plan", "add QA task"
+  
+  This skill should NOT be used for initial task creation (use create-task) or analyzing implementation (use create-task).
 argument-hint: "[issue-key]"
 effort: medium
 ---

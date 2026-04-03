@@ -7,17 +7,13 @@ effort: low
 x-compatibility: [atlassian-cache, mcp-atlassian]
 allowed-tools: Read, Glob, Grep, Bash, Agent, mcp__mcp-atlassian__jira_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_text_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_similar_issues
 description: |
-  Search for existing Jira issues to prevent duplicates — invoke proactively whenever the user
-  wants to create any new issue (story/task/epic/subtask) before they start creating.
-  3-phase workflow with JQL + semantic similarity check.
-
+  This skill should be used when searching Jira for existing issues before creating new ones to prevent duplicates. Uses a 3-phase workflow with JQL + semantic similarity check.
+  
   Supports: keyword search, JQL query, issue key, filters (sprint, assignee, status, type)
-
-  Triggers: "search", "find", "find issue", "does it already exist", "look for", "check if exists",
-  "before creating", "is there already", "find related", "search sprint", "search backlog",
-  "any similar issues", "ค้นหา", "มี issue อยู่แล้วไหม"
-  Use when: searching Jira for existing issues before creating new ones to prevent duplicates
-  Do NOT use for: creating issues (use create-story or create-task); full backlog analysis (use scan-tech-debt)
+  
+  Trigger phrases: "search", "find", "find issue", "does it already exist", "look for", "check if exists", "before creating", "is there already", "find related", "search sprint", "search backlog", "any similar issues", "ค้นหา", "มี issue อยู่แล้วไหม"
+  
+  This skill should NOT be used for creating issues (use create-task) or full backlog analysis (use scan-tech-debt).
 argument-hint: "[keyword] [--filters]"
 ---
 

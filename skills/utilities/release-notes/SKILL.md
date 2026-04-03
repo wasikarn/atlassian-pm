@@ -5,13 +5,11 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_get_project_versions, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__confluence_create_page, mcp__mcp-atlassian__confluence_update_page, mcp__plugin_atlassian-pm_atlassian-cache__cache_search, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue
 description: |
-  Generate Confluence release notes from a Jira Fix Version.
-  Fetches all resolved issues in the version, groups by type (feature/bugfix/chore),
-  and creates a structured Confluence page ready to share with stakeholders.
-  Triggers: "release notes", "create release notes", "generate release notes",
-            "release documentation", "changelog", "สร้าง release notes"
-  Use when: generating Confluence release notes from a Jira Fix Version for stakeholder sharing
-  Do NOT use for: planning a release (use plan-release); creating epics (use create-epic)
+  This skill should be used when generating Confluence release notes from a Jira Fix Version for stakeholder sharing. Fetches all resolved issues in the version, groups by type (feature/bugfix/chore), and creates a structured Confluence page.
+  
+  Trigger phrases: "release notes", "create release notes", "generate release notes", "release documentation", "changelog", "สร้าง release notes"
+  
+  This skill should NOT be used for planning a release (use plan-release) or creating epics (use create-epic).
 argument-hint: "--version <fix-version-key> [--epic <epic-key>] [--dry-run]"
 effort: medium
 ---

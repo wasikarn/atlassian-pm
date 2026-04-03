@@ -4,11 +4,11 @@ context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian]
 description: |
-  Session navigator — shows active sprint status, team WIP, pending HR issues, and suggests next action.
-
-  Triggers: "status", "what's next", "sprint status", "what should I work on", "where were we", "session status", "สถานะ sprint", "ทำอะไรต่อ"
-  Use when: starting a session, resuming after a break, or unsure what to work on next
-  Do NOT use for: detailed sprint planning (use plan-sprint); closing sprint (use close-sprint)
+  This skill should be used when starting a session, resuming after a break, or when unsure what to work on next. Shows active sprint status, team WIP, pending HR issues, and suggests next action.
+  
+  Trigger phrases: "status", "what's next", "sprint status", "what should I work on", "where were we", "session status", "สถานะ sprint", "ทำอะไรต่อ"
+  
+  This skill should NOT be used for detailed sprint planning (use plan-sprint) or closing sprint (use close-sprint).
 argument-hint: ""
 effort: low
 allowed-tools: [mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_search, Bash]
