@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each Task includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
 
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 

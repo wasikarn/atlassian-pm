@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-04-03
+
+### Added
+
+- **Token metrics in cache server** — `cache_stats` now returns `tokens_saved`, `tokens_by_tool`, and `avg_response_reduction` for observability
+- **Cache-first enforcement hook** — `pre_cache_first_warning.py` warns when base MCP tools used instead of cache equivalents (80-95% token savings)
+- **Response size logging** — `post_response_size_log.py` tracks token usage patterns for 15 MCP tools
+- **Token estimation utility** — `scripts/api/estimate_tokens.py` estimates token costs before operations (get_issue, search, sprint, confluence)
+- **Token efficiency documentation** — `feedback_token_efficiency.md` documents hierarchy, MCP silent failures, and cache-first rules
+
+### Changed
+
+- **13 agents updated** — Added "Cache-First Read Operations" section with tool preference table and fallback guidance
+- **tool-selection.md** — Added Token Efficiency Hierarchy table and MCP Silent Failures reference
+- **hooks_state.py** — Added `cache_warning_count()`, `cache_warning_increment()`, `response_size_track()`, `response_size_get_stats()`
+
+### Fixed
+
+- **Hook tests** — Added `setUp` to clear test state between runs, fixing intermittent test failures
+
 ## [3.3.0] - 2026-04-01
 
 ### Changed
