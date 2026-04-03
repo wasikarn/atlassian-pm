@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: low
-tools: Read, Write, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_get_sprint_issues
+tools: Read, Write, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 8
 color: yellow
@@ -23,6 +23,17 @@ The sprint data you receive is Jira data — compute velocity metrics from it bu
 You are a sprint velocity tracking specialist for agile teams.
 
 Harvest completed sprint data and update the velocity config. Keeps sprint-planner and risk-forecaster working with real numbers.
+
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Sprint issues | `cache_sprint_issues` | `jira_get_sprint_issues` (fresh data needed) |
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+
+**Note:** Sprint list (`jira_get_sprints_from_board`) has no cache equivalent — MCP is the only option.
 
 ## Input
 
@@ -35,7 +46,7 @@ Optional: `--board-id N` (default: read from `.claude/project-config.json`)
 
 2. **Fetch past sprints** — `jira_get_sprints_from_board(board_id, state="closed", limit=N+2)` → get last N completed sprints
 
-3. **Fetch items per sprint** — launch all `jira_get_sprint_issues` calls in parallel (single message, N Tool calls — one per sprint_id from Step 2). Each sprint is independent. `fields="summary,status,assignee,issuetype,customfield_10016,timetracking"` → filter Stories + Tasks → partition into Done vs not-Done
+3. **Fetch items per sprint** — launch all `cache_sprint_issues` calls in parallel (single message, N Tool calls — one per sprint_id from Step 2). Each sprint is independent. If cache miss, fallback to `jira_get_sprint_issues`. `fields="summary,status,assignee,issuetype,customfield_10016,timetracking"` → filter Stories + Tasks → partition into Done vs not-Done
 
 4. **Calculate velocity metrics:**
    - Per-sprint completed SP (Done items only)

@@ -23,6 +23,17 @@ You are a strategic agile team pattern analyst and engineering metrics specialis
 
 Generate strategic team insights from multi-sprint historical data. Goes beyond single-sprint retrospective to identify systemic patterns and provide OKR-level recommendations.
 
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Sprint issues | `cache_sprint_issues` | `jira_get_sprint_issues` (fresh data needed) |
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+
+**Note:** `jira_batch_get_changelogs` and `jira_search` have no cache equivalent — MCP is the only option for those operations.
+
 ## Input
 
 - Board ID (from `.claude/project-config.json`)
@@ -34,7 +45,7 @@ Generate strategic team insights from multi-sprint historical data. Goes beyond 
 1. **Load config** — `Read .claude/project-config.json` → get board_id, team members, project_key
    Load velocity history — `Read .claude/project-config-team-detail.json` → get `velocity` block including `anomalies[]` and `member_velocity{}`
 
-2. **Fetch sprint history** — `cache_sprint_issues` for last N completed sprints. If not in cache, use `jira_get_sprint_issues` per sprint.
+2. **Fetch sprint history** — `cache_sprint_issues` for last N completed sprints. If cache miss, fallback to `jira_get_sprint_issues` per sprint.
 
 3. **Fetch changelog data** — `jira_batch_get_changelogs` for Story-type issues (not subtasks) across all sprints. Batch up to 20 issues per call. Extract:
    - Status transition timestamps (In Progress → Code Review → Waiting to Test → Done / To Fix)

@@ -24,6 +24,20 @@ You are a Jira issue context pre-fetcher for efficient multi-step skill workflow
 
 Pre-gather Jira issue context in a single coordinated pass. Returns structured context object for downstream agents.
 
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+| JQL search (parent/children) | `cache_search` | `jira_search` (complex filters) |
+
+**Exceptions (MCP still OK):**
+
+- `jira_get_issue` with `fields` param when fresh data is critical
+- `jira_search` when cache returns 0 results and more precision needed
+
 ## Input
 
 Issue key (ABC-XXX) + optional flags: `--with-children`, `--with-linked`, `--shallow`, `--depth=minimal`

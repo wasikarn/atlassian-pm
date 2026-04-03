@@ -235,6 +235,21 @@ def cache_is_checked(session_id: str, issue_key: str) -> bool:
     return issue_key in set(_load(session_id).get("cache_checked_issues", []))
 
 
+# ── Cache-first warning: per-session warning count ──────────────────
+
+
+def cache_warning_count(session_id: str) -> int:
+    """Return number of cache-first warnings issued this session."""
+    return _load(session_id).get("cache_warning_count", 0)
+
+
+def cache_warning_increment(session_id: str) -> None:
+    """Increment the cache-first warning count for this session."""
+    state = _load(session_id)
+    state["cache_warning_count"] = state.get("cache_warning_count", 0) + 1
+    _save(session_id, state)
+
+
 # ── QMD: Usage tracking ─────────────────────────────
 
 def _build_qmd_collections() -> dict[str, str]:
@@ -389,3 +404,55 @@ def load_state() -> dict:
 def save_state(state: dict) -> None:
     """Persist global session state (session-id-agnostic convenience wrapper)."""
     _save("default", state)
+
+
+# ── Response size tracking (token usage observability) ───────────────────
+
+
+def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> None:
+    """Track response size for a tool call in session state.
+
+    Accumulates per-tool and total stats for the session, enabling
+    analysis of token-heavy operations via cache_stats or similar.
+
+    Args:
+        session_id: Claude session identifier
+        tool: Short tool name (e.g., "jira_get_issue", "cache_search")
+        chars: Response size in characters
+        tokens: Estimated token count
+    """
+    state = _load(session_id)
+    sizes = state.get("response_sizes", {})
+
+    # Per-tool accumulation
+    if tool not in sizes:
+        sizes[tool] = {"chars": 0, "tokens": 0, "calls": 0}
+    sizes[tool]["chars"] += chars
+    sizes[tool]["tokens"] += tokens
+    sizes[tool]["calls"] += 1
+
+    # Total accumulation
+    totals = state.get("response_totals", {"chars": 0, "tokens": 0, "calls": 0})
+    totals["chars"] += chars
+    totals["tokens"] += tokens
+    totals["calls"] += 1
+
+    state["response_sizes"] = sizes
+    state["response_totals"] = totals
+    _save(session_id, state)
+
+
+def response_size_get_stats(session_id: str) -> dict:
+    """Get cumulative response size stats for the session.
+
+    Returns:
+        {
+            "totals": {"chars": N, "tokens": N, "calls": N},
+            "by_tool": {"jira_get_issue": {"chars": N, "tokens": N, "calls": N}, ...}
+        }
+    """
+    state = _load(session_id)
+    return {
+        "totals": dict(state.get("response_totals", {"chars": 0, "tokens": 0, "calls": 0})),
+        "by_tool": dict(state.get("response_sizes", {})),
+    }

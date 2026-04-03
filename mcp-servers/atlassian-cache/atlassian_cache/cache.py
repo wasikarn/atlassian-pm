@@ -716,8 +716,99 @@ class AtlassianCache:
 
     # --- Statistics ---
 
+    def log_token_metrics(
+        self,
+        tool: str,
+        operation: str,
+        chars_before: int,
+        chars_after: int,
+    ) -> None:
+        """Log token metrics to SQLite for tracking token savings.
+
+        Args:
+            tool: Tool name (e.g., "cache_get_issue", "jira_get_issue")
+            operation: Operation type ("hit", "miss", "mcp_call")
+            chars_before: Response size before stripping (raw API response)
+            chars_after: Response size after stripping (returned to caller)
+        """
+        tokens_saved = max(0, (chars_before - chars_after) // 4)
+        now = datetime.now(tz=timezone.utc).isoformat()
+        with self._lock:
+            self.conn.execute(
+                """INSERT INTO token_metrics
+                (timestamp, tool, operation, chars_before, chars_after, tokens_saved)
+                VALUES (?, ?, ?, ?, ?, ?)""",
+                (now, tool, operation, chars_before, chars_after, tokens_saved),
+            )
+            # Update running total in cache_stats
+            self.conn.execute(
+                "UPDATE cache_stats SET value = value + ? WHERE key = 'tokens_saved_total'",
+                (tokens_saved,),
+            )
+            self.conn.commit()
+
+    def get_token_stats(self) -> dict:
+        """Get aggregated token metrics.
+
+        Returns:
+            Dict with total_tokens_saved, tokens_by_tool, avg_reduction_percent.
+        """
+        # Total tokens saved
+        total_row = self.conn.execute(
+            "SELECT value FROM cache_stats WHERE key = 'tokens_saved_total'"
+        ).fetchone()
+        total_saved = total_row["value"] if total_row else 0
+
+        # Tokens saved by tool
+        by_tool_rows = self.conn.execute(
+            """SELECT tool, SUM(tokens_saved) as tokens_saved
+            FROM token_metrics
+            GROUP BY tool
+            ORDER BY tokens_saved DESC"""
+        ).fetchall()
+        tokens_by_tool = {r["tool"]: r["tokens_saved"] for r in by_tool_rows}
+
+        # Operation breakdown (hits vs misses)
+        op_rows = self.conn.execute(
+            """SELECT operation, COUNT(*) as count, SUM(tokens_saved) as tokens_saved
+            FROM token_metrics
+            GROUP BY operation"""
+        ).fetchall()
+        by_operation = {
+            r["operation"]: {"count": r["count"], "tokens_saved": r["tokens_saved"]}
+            for r in op_rows
+        }
+
+        # Average response size reduction
+        avg_row = self.conn.execute(
+            """SELECT
+                AVG(chars_before) as avg_before,
+                AVG(chars_after) as avg_after,
+                SUM(chars_before - chars_after) as total_chars_saved
+            FROM token_metrics
+            WHERE chars_before > 0"""
+        ).fetchone()
+        avg_reduction = {
+            "avg_chars_before": round(avg_row["avg_before"], 0) if avg_row and avg_row["avg_before"] else 0,
+            "avg_chars_after": round(avg_row["avg_after"], 0) if avg_row and avg_row["avg_after"] else 0,
+            "total_chars_saved": avg_row["total_chars_saved"] if avg_row else 0,
+        }
+        if avg_row and avg_row["avg_before"] and avg_row["avg_before"] > 0:
+            avg_reduction["reduction_percent"] = round(
+                (avg_row["avg_before"] - avg_row["avg_after"]) / avg_row["avg_before"] * 100, 1
+            )
+        else:
+            avg_reduction["reduction_percent"] = 0
+
+        return {
+            "total_tokens_saved": total_saved,
+            "tokens_by_tool": tokens_by_tool,
+            "by_operation": by_operation,
+            "avg_reduction": avg_reduction,
+        }
+
     def get_stats(self) -> dict:
-        """Cache statistics: counts, size, hit rate."""
+        """Cache statistics: counts, size, hit rate, and token metrics."""
         # Flush stat buffer before reporting
         self._flush_stats()
 
@@ -736,7 +827,7 @@ class AtlassianCache:
         stat_rows = {
             r["key"]: r["value"]
             for r in self.conn.execute(
-                "SELECT key, value FROM cache_stats WHERE key IN ('hits','misses','purged_issues','purged_searches')"
+                "SELECT key, value FROM cache_stats WHERE key IN ('hits','misses','purged_issues','purged_searches','tokens_saved_total')"
             ).fetchall()
         }
         with self._stat_lock:
@@ -748,6 +839,9 @@ class AtlassianCache:
         total = hits + misses
 
         db_size_mb = self.db_path.stat().st_size / (1024 * 1024) if self.db_path.exists() else 0
+
+        # Token metrics
+        token_stats = self.get_token_stats()
 
         return {
             "issues_cached": issue_count,
@@ -763,6 +857,11 @@ class AtlassianCache:
             "newest_entry": newest,
             "schema_version": self._get_schema_version(),
             "embedding_available": False,  # server.py injects the real value
+            # Token metrics
+            "tokens_saved": token_stats["total_tokens_saved"],
+            "tokens_by_tool": token_stats["tokens_by_tool"],
+            "avg_response_reduction": token_stats["avg_reduction"],
+            "by_operation": token_stats["by_operation"],
         }
 
     def vacuum(self) -> None:

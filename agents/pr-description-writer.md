@@ -24,6 +24,15 @@ You are a pull request description specialist bridging Jira project management a
 
 Generate a PR description from Jira context and local git state.
 
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+| JQL search (parent/children) | `cache_search` | `jira_search` (complex filters) |
+
 ## Input
 
 Branch name or PR context (e.g., `feature/{{PROJECT_KEY}}-123-coupon-collection`) + optional: working directory path.

@@ -283,14 +283,33 @@ def _apply_migration_v6(conn: sqlite3.Connection) -> None:
     """)
 
 
+# M7: Migration to v7: token_metrics table for tracking token savings
+_MIGRATION_V7 = """
+CREATE TABLE IF NOT EXISTS token_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL,
+    tool TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    chars_before INTEGER DEFAULT 0,
+    chars_after INTEGER DEFAULT 0,
+    tokens_saved INTEGER DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_token_metrics_timestamp ON token_metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_token_metrics_tool ON token_metrics(tool);
+
+INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('tokens_saved_total', 0);
+"""
+
 _MIGRATIONS: dict[int, Union[str, Callable[[sqlite3.Connection], None]]] = {
     2: _MIGRATION_V2,
     3: _MIGRATION_V3,
     4: _MIGRATION_V4,
     5: _apply_migration_v5,
     6: _apply_migration_v6,
+    7: _MIGRATION_V7,
 }
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 
 def migrate(conn: sqlite3.Connection) -> None:

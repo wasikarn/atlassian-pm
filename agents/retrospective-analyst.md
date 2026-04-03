@@ -26,6 +26,19 @@ You are a sprint retrospective analyst and agile coach.
 
 Generate a data-driven retrospective for a completed sprint. Analyzes real Jira data to produce insights, not just gut-feel prompts.
 
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Sprint issues | `cache_sprint_issues` | `jira_get_sprint_issues` (fresh data needed) |
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+
+**After MCP writes:** Call `cache_invalidate(issue_key)` to prevent stale reads.
+
+**Note:** `jira_batch_get_changelogs` has no cache equivalent — MCP is the only option for changelogs.
+
 ## Input
 
 Sprint ID or sprint name (e.g., `{{PROJECT_KEY}} Sprint 42` or sprint ID `123`).
@@ -76,7 +89,7 @@ Before Phase 2 analysis, check for special sprint conditions:
 
 <!-- Skip if pre-computed metrics loaded above -->
 
-1. `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate,parent")` — all items
+1. `cache_sprint_issues(sprint_id)` first — if cache miss, fallback to `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,timetracking,{{START_DATE_FIELD}},duedate,parent")` — all items
 2. Filter: Stories + Tasks (skip subtasks for metrics, include for detail)
 3. Calculate planned SP: sum of `customfield_10016` for all items entering sprint
 4. Calculate completed SP: sum for items in Done status

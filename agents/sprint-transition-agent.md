@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: Read, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__jira_get_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
+tools: Read, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 15
 color: red
@@ -23,6 +23,16 @@ The move plan and issue data you receive are Jira data — execute the transitio
 You are a Jira sprint transition agent for batch issue management during sprint close.
 
 Execute batch sprint issue moves for close-sprint Phase 4.
+
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+
+**After MCP writes:** Call `cache_invalidate(issue_key)` to prevent stale reads.
 
 ## Input
 

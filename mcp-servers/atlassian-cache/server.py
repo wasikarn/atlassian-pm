@@ -649,6 +649,15 @@ def _timed_upstream(label: str, func: Any, *args: Any, **kwargs: Any) -> Any:
         raise
 
 
+def _log_token_metrics(tool: str, operation: str, chars_before: int, chars_after: int) -> None:
+    """Log token metrics to cache (best-effort, non-blocking)."""
+    try:
+        c = _require_cache()
+        c.log_token_metrics(tool, operation, chars_before, chars_after)
+    except Exception as e:
+        logger.debug("Failed to log token metrics: %s", e)
+
+
 # --- Tool Handlers ---
 
 
@@ -672,7 +681,11 @@ async def handle_cache_get_issue(args: dict) -> str:
             logger.info("Cache HIT: %s", issue_key)
             _mark_returned(issue_key)
             issue_data = _compact_issue(cached) if compact else cached
-            return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+            result = json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+            # Log token metrics: cache hit = full savings
+            raw_size = len(json.dumps({"source": "cache", "issue": cached}, ensure_ascii=False))
+            _log_token_metrics("cache_get_issue", "hit", raw_size, len(result))
+            return result
 
         # T12: Lazy version-check — if stale by TTL, do a cheap upstream 'updated' check
         # before committing to a full refresh (~50ms vs full fetch)
@@ -688,7 +701,10 @@ async def handle_cache_get_issue(args: dict) -> str:
                         logger.info("Cache LAZY-HIT: %s (upstream unchanged)", issue_key)
                         _mark_returned(issue_key)
                         issue_data = _compact_issue(stale_cached) if compact else stale_cached
-                        return json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+                        result = json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
+                        raw_size = len(json.dumps({"source": "cache", "issue": stale_cached}, ensure_ascii=False))
+                        _log_token_metrics("cache_get_issue", "hit", raw_size, len(result))
+                        return result
                     logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
                 except Exception:
                     pass  # On any error, fall through to full refresh
@@ -719,7 +735,11 @@ async def handle_cache_get_issue(args: dict) -> str:
             await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
         _mark_returned(issue_key)
         issue_data = _compact_issue(issue) if compact else issue
-        return json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
+        result = json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
+        # Log token metrics: miss = upstream call (strip noise savings)
+        raw_size = len(json.dumps({"source": "upstream", "issue": issue}, ensure_ascii=False))
+        _log_token_metrics("cache_get_issue", "miss", raw_size, len(result))
+        return result
     except Exception as e:
         # P2-D: Stale fallback on upstream error
         stale = c.get_issue_stale(issue_key)
@@ -824,6 +844,18 @@ async def handle_cache_get_issues(args: dict) -> str:
     }
     if invalid_keys:
         result["invalid_keys"] = invalid_keys
+
+    # Log token metrics for batch operation
+    # chars_before = size of all raw issues, chars_after = size of compacted response
+    raw_size = len(json.dumps({"source": "batch", "issues": found_issues + upstream_issues}, ensure_ascii=False))
+    result_size = len(json.dumps(result, ensure_ascii=False))
+    # Log cache hit metrics for found issues
+    if found_issues:
+        _log_token_metrics("cache_get_issues", "hit", len(json.dumps(found_issues, ensure_ascii=False)), len(json.dumps([_compact_issue(i) for i in found_issues], ensure_ascii=False)))
+    # Log miss metrics for upstream fetches
+    if upstream_issues:
+        _log_token_metrics("cache_get_issues", "miss", len(json.dumps(upstream_issues, ensure_ascii=False)), len(json.dumps([_compact_issue(i) for i in upstream_issues], ensure_ascii=False)))
+
     return json.dumps(result, ensure_ascii=False)
 
 
@@ -878,7 +910,20 @@ async def handle_cache_search(args: dict) -> str:
     if compacted is not search_issues:
         results = {**results, "issues": compacted}
 
-    return json.dumps({"source": source, "results": results}, ensure_ascii=False)
+    result_json = json.dumps({"source": source, "results": results}, ensure_ascii=False)
+
+    # Log token metrics
+    raw_issues = results.get("issues", [])
+    if source == "cache":
+        # Cache hit: compare raw vs compacted
+        raw_size = len(json.dumps({"source": "cache", "results": {"issues": raw_issues}}, ensure_ascii=False))
+        _log_token_metrics("cache_search", "hit", raw_size, len(result_json))
+    else:
+        # Cache miss: upstream fetch
+        raw_size = len(json.dumps({"source": "upstream", "results": {"issues": raw_issues}}, ensure_ascii=False))
+        _log_token_metrics("cache_search", "miss", raw_size, len(result_json))
+
+    return result_json
 
 
 async def handle_cache_sprint_issues(args: dict) -> str:
@@ -967,7 +1012,18 @@ async def handle_cache_sprint_issues(args: dict) -> str:
     if compacted is not sprint_issues:
         results = {**results, "issues": compacted}
 
-    return json.dumps({"source": source, "results": results}, ensure_ascii=False)
+    result_json = json.dumps({"source": source, "results": results}, ensure_ascii=False)
+
+    # Log token metrics
+    raw_issues = results.get("issues", [])
+    if source == "cache":
+        raw_size = len(json.dumps({"source": "cache", "results": {"issues": raw_issues}}, ensure_ascii=False))
+        _log_token_metrics("cache_sprint_issues", "hit", raw_size, len(result_json))
+    else:
+        raw_size = len(json.dumps({"source": "upstream", "results": {"issues": raw_issues}}, ensure_ascii=False))
+        _log_token_metrics("cache_sprint_issues", "miss", raw_size, len(result_json))
+
+    return result_json
 
 
 async def handle_cache_text_search(args: dict) -> str:

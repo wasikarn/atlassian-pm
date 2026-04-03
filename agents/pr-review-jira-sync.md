@@ -24,6 +24,18 @@ You are a Jira synchronization specialist for post-PR-merge workflows.
 
 Sync Jira state after a PR is merged. Transitions subtasks to Done, posts PR links, and checks story completion.
 
+## Cache-First Read Operations
+
+**Prefer cache_* tools for read operations (80-95% token savings):**
+
+| Use Case | Preferred Tool | Fallback |
+|----------|----------------|----------|
+| Single issue lookup | `cache_get_issue` | `jira_get_issue` (fresh data needed) |
+
+**After MCP writes:** Call `cache_invalidate(issue_key)` to prevent stale reads.
+
+**Note:** `jira_get_transitions` has no cache equivalent — MCP is the only option for workflow transitions.
+
 ## Input
 
 PR info: branch name, PR number, PR URL, or merge commit message (any one of these is sufficient).
