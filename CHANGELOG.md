@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-04-04
+
+### Added
+
+- **Model selection guide** — `references/model-selection.md` documents when to use haiku vs sonnet for agent tasks
+- **Integration test infrastructure** — `tests/integration/` directory for end-to-end workflow testing
+- **Hook test coverage** — Added tests for HR2, HR3, HR4, HR6, HR7 guard hooks (coverage ~20% → 80%)
+
+### Changed
+
+- **Agent tool whitelist standardized** — All 20 agents now use `allowed-tools:` field instead of mixed `tools:`/`allowed-tools:`
+- **Quality-gate agent deprecated** — Added clear deprecation notice; skills should use `validate_adf.py` directly
+- **File permissions hardened** — Cache database, logs, and state files now use `0o600` (owner-only)
+- **Exit codes standardized** — All hooks now use: 0=pass, 1=fail/validation, 2=error/exception
+
+### Fixed
+
+- **CRITICAL: MCP lazy-load** — `sentence-transformers` (~500MB) now lazy-loads only when semantic search is used (cold start ~10s → ~100ms)
+- **CRITICAL: HR5 state race condition** — Added `STATE_EXPIRY_SECONDS=3600` with `cleanup_stale_state()` to prevent session stalls from partial failures
+- **MEDIUM: Import path fragility** — Hook scripts now use `$CLAUDE_PLUGIN_ROOT` env var with fallback to relative paths
+- **MEDIUM: State timestamp tracking** — `set_state()` and `get_state()` now include automatic timestamp tracking
+- **LOW: Pyright type fixes** — Fixed type annotations in `pre_wip_limit_check.py` and `pre_qmd_auto_search.py`
+
+### Performance
+
+- **Cache hook consolidation** — 4 cache-related hooks consolidated into 1, reducing per-call overhead by ~300ms
+
 ## [3.4.0] - 2026-04-03
 
 ### Added
