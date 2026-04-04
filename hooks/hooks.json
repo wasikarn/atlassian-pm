@@ -53,16 +53,6 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/pre_hr6_stale_read_guard.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "mcp__mcp-atlassian__jira_create_issue|mcp__mcp-atlassian__jira_batch_create_issues",
         "hooks": [
           {
@@ -88,31 +78,11 @@
         ]
       },
       {
-        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
+        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_field_preset_guard.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__mcp-atlassian__jira_get_issue",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_cache_prefer.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_cache_first_warning.py",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_cache_optimize.py",
             "timeout": 5
           }
         ]
