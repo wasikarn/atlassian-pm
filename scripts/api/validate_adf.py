@@ -21,9 +21,9 @@ Usage:
     python validate_adf.py tasks/story.json --type story --threshold 85
 
 Exit codes:
-    0 = pass (>= threshold)
-    1 = fail (< threshold)
-    2 = error (invalid input)
+    0 = success/pass (>= threshold)
+    1 = fail/validation error (< threshold)
+    2 = runtime error/exception (invalid input, file not found, etc.)
 """
 
 import argparse

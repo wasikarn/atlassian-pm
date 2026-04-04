@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: low
-tools: Read, Write, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
+allowed-tools: Read, Write, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 12
 color: magenta

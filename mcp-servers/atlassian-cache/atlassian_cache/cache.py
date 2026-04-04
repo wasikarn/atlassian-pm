@@ -190,7 +190,9 @@ class AtlassianCache:
     def __init__(self, db_path: Path | str | None = None) -> None:
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        os.chmod(self.db_path.parent, 0o700)  # Owner-only: directory contains sensitive cache data
         self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        os.chmod(self.db_path, 0o600)  # Owner read/write: database contains sensitive Jira data
         # Apply PRAGMAs before any migration — WAL must be set first
         self.conn.executescript("""
             PRAGMA journal_mode=WAL;

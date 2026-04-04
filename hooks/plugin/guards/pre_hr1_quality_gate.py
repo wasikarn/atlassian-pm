@@ -11,15 +11,20 @@ Only matches:
 Threshold: reads vibe.qg_threshold from .claude/project-config.json
 when --vibe flag is present in the triggering command. Defaults to 90%.
 
-Exit codes: 0 = allow (or not an acli command), 2 = deny (QG < threshold)
+Exit codes:
+    0 = success/pass (QG >= threshold or not an acli command)
+    1 = fail/validation error (QG < threshold)
+    2 = runtime error/exception (script failure)
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────
-PLUGIN_ROOT = Path(__file__).resolve().parents[3]
+# Use CLAUDE_PLUGIN_ROOT env var if available, fallback to relative path resolution
+PLUGIN_ROOT = Path(os.environ.get("CLAUDE_PLUGIN_ROOT", Path(__file__).resolve().parents[3]))
 SCRIPTS_DIR = PLUGIN_ROOT / "scripts"
 PROJECT_CONFIG_PATH = PLUGIN_ROOT / ".claude" / "project-config.json"
 

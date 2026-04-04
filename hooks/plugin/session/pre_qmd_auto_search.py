@@ -7,7 +7,10 @@ PreToolUse hook — when Glob/Grep targets an indexed project:
 3. Block with results → Claude gets qmd results first
 4. Mark collection → subsequent Glob/Grep for same collection allowed
 
-Exit 0 = allow, Exit 2 = block with qmd results
+Exit codes:
+    0 = success/pass (allow)
+    1 = fail/block (with qmd results)
+    2 = runtime error/exception
 """
 
 import json
@@ -26,9 +29,13 @@ from hooks_state import (
     qmd_mark_collection_searched,
 )
 
-QMD_BIN = shutil.which("qmd")
-if not QMD_BIN:
+_qmd_bin = shutil.which("qmd")
+if not _qmd_bin:
     sys.exit(0)  # qmd not installed → allow Glob/Grep through
+QMD_BIN: str = _qmd_bin  # type: ignore[assignment]
+
+
+# Generic path segments that don't make good search queries
 
 # Generic path segments that don't make good search queries
 SKIP_SEGMENTS = {
@@ -171,7 +178,7 @@ def main() -> None:
     # Run qmd search
     try:
         result = subprocess.run(
-            [QMD_BIN, "search", query, "-n", "8", "--files"],
+            [QMD_BIN, "search", query, "-n", "8", "--files"],  # type: ignore[arg-type]
             capture_output=True,
             text=True,
             timeout=5,

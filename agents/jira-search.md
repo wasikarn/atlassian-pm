@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: low
-tools: mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__atlassian-cache__cache_text_search, mcp__atlassian-cache__cache_similar_issues
+allowed-tools: mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_search, mcp__atlassian-cache__cache_text_search, mcp__atlassian-cache__cache_similar_issues
 permissionMode: dontAsk
 maxTurns: 6
 color: cyan

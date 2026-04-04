@@ -11,7 +11,7 @@ Pattern:
   4. If WIP < limit: Claude sets CLAUDE_WIP_CONFIRMED=<key>:<col>, retries
   5. Hook reads env var — allows if confirmed
 
-Exit codes: 0 (allow via allow()) | 2 (block via block())
+Exit codes: 0 (allow via allow()) | 1 (block via block())
 """
 import json
 import os
@@ -89,7 +89,7 @@ def main() -> None:
         return
 
     col_name, col_cfg = find_column(transition, columns)
-    if col_name is None:
+    if col_name is None or col_cfg is None:
         allow()
         return
 

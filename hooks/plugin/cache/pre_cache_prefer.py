@@ -7,7 +7,10 @@ PreToolUse hook — when Claude calls jira_get_issue:
 3. If not tried → block with suggestion to use cache first
 4. If already tried (cache miss) → allow MCP fallback
 
-Exit 0 = allow, Exit 2 = block with cache suggestion
+Exit codes:
+    0 = success/pass (allow)
+    1 = fail/block (with cache suggestion)
+    2 = runtime error/exception
 """
 
 import sys

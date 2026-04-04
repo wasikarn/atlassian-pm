@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: Read
+allowed-tools: Read
 permissionMode: dontAsk
 maxTurns: 10
 color: blue

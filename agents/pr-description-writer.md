@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: Bash, Read, Glob, Grep, mcp__atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
+allowed-tools: Bash, Read, Glob, Grep, mcp__atlassian-cache__cache_get_issue, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search
 permissionMode: dontAsk
 maxTurns: 12
 color: blue

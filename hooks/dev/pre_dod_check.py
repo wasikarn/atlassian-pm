@@ -3,7 +3,7 @@
 
 Blocks unless CLAUDE_DOD_CONFIRMED=<issue_key> env var is set.
 
-Exit codes: 0 (allow), 2 (block)
+Exit codes: 0 (allow), 1 (block)
 """
 
 import os

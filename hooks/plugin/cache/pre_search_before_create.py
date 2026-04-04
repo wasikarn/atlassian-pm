@@ -2,9 +2,9 @@
 """Search-before-create: Block issue creation if no search was done first.
 
 PreToolUse hook for jira_create_issue / jira_batch_create_issues.
-Blocks (exit 2) if no jira_search was performed in this session.
+Blocks (exit 1) if no jira_search was performed in this session.
 
-Exit codes: 0 = pass, 2 = block
+Exit codes: 0 = pass, 1 = block
 """
 
 import sys

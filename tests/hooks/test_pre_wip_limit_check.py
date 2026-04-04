@@ -34,7 +34,7 @@ _BOARD_CONFIG = {
 
 
 def _run(tool_input: dict, confirmed: str = "", config: dict | None = None) -> dict | None:
-    """Run main() with given input. Returns {} on allow, None on block (SystemExit)."""
+    """Run main() with given input. Returns {} on allow (exit 0), None on block (exit 1/2)."""
     data = {"tool_input": tool_input, "session_id": "test"}
     buf = io.StringIO()
     cfg = config if config is not None else {}
@@ -48,7 +48,10 @@ def _run(tool_input: dict, confirmed: str = "", config: dict | None = None) -> d
             pre_wip_limit_check.main()
             raw = buf.getvalue().strip()
             return json.loads(raw) if raw else {}
-        except SystemExit:
+        except SystemExit as e:
+            # Exit code 0 = allow, exit code 1 or 2 = block
+            if e.code == 0:
+                return {}
             return None  # blocked
 
 
@@ -69,7 +72,7 @@ def test_ignores_empty_transition():
 def test_blocks_in_progress_without_confirmation():
     """In Progress has wip_max=10, no env confirmation → block."""
     result = _run({"issue_key": "TP-1", "transition": "In Progress"}, config=_BOARD_CONFIG)
-    assert result is None  # blocked (SystemExit 2)
+    assert result is None  # blocked (SystemExit 1)
 
 
 def test_blocks_in_qa_without_confirmation():

@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: mcp__atlassian-cache__cache_similar_issues, mcp__atlassian-cache__cache_search, Read, Bash
+allowed-tools: mcp__atlassian-cache__cache_similar_issues, mcp__atlassian-cache__cache_search, Read, Bash
 permissionMode: dontAsk
 maxTurns: 8
 color: yellow

@@ -4,7 +4,7 @@ Complete index of all 37 hooks in `.claude/hooks/`. Organized by category.
 
 **Shared modules** (not hooks): `hooks_lib.py` (utilities), `hooks_state.py` (session state)
 
-**Action types:** Block = exits 2 (tool call aborted) · Warn = exits 0 with message · Track = state update only · Suggest = injects additionalContext
+**Action types:** Block = exits 1 (tool call aborted) · Warn = exits 0 with message · Track = state update only · Suggest = injects additionalContext
 
 ## Session Lifecycle
 

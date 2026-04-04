@@ -26,14 +26,12 @@ logger = logging.getLogger(__name__)
 # Lazy-loaded globals
 _model = None
 _vec_loaded = False
+_model_loaded = False  # Track if sentence-transformers import succeeded
 
 MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 
-# Module-level reference — patchable in tests via monkeypatch.setattr
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    SentenceTransformer = None  # type: ignore[assignment,misc]
+# SentenceTransformer is NOT imported at module level to avoid ~500MB cold start.
+# It will be imported lazily in _get_model() only when semantic search is used.
 
 
 def _load_sqlite_vec(conn: sqlite3.Connection) -> bool:
@@ -67,18 +65,25 @@ def _load_sqlite_vec(conn: sqlite3.Connection) -> bool:
 def _get_model() -> Any:
     """Lazy-load sentence-transformers model.
 
+    Imports sentence-transformers ONLY when semantic search is used,
+    avoiding ~500MB cold start penalty at server startup.
+
     Returns:
         SentenceTransformer model instance.
     """
-    global _model
+    global _model, _model_loaded
     if _model is not None:
         return _model
 
-    if SentenceTransformer is None:
+    # Lazy import: only load sentence-transformers when actually needed
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
         logger.error("sentence-transformers not installed")
         raise ImportError("sentence-transformers not installed — run `uv sync --extra embeddings`")
 
     _model = SentenceTransformer(MODEL_NAME)
+    _model_loaded = True
     logger.info("Loaded embedding model: %s", MODEL_NAME)
     return _model
 

@@ -12,7 +12,7 @@ description: |
   </example>
 model: sonnet
 effort: medium
-tools: >
+allowed-tools: >
   mcp__plugin_playwright_playwright__browser_navigate,
   mcp__plugin_playwright_playwright__browser_snapshot,
   mcp__plugin_playwright_playwright__browser_click,

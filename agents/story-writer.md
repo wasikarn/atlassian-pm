@@ -11,7 +11,7 @@ description: |
   </commentary>
   </example>
 model: haiku
-tools: Read, Write
+allowed-tools: Read, Write
 memory: project
 maxTurns: 10
 permissionMode: dontAsk

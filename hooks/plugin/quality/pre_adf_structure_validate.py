@@ -7,7 +7,7 @@ template requirements before acli writes to Jira.
 Checks required headings by issue type, panel presence, non-empty content.
 Complements HR1 QG scoring with fast structural pre-check.
 
-Exit codes: 0 = allow, 2 = block (structure invalid)
+Exit codes: 0 = allow, 1 = block (structure invalid)
 """
 
 import json

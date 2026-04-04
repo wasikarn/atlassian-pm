@@ -11,15 +11,20 @@ subagents access the same state file concurrently.
 import fcntl
 import functools
 import json
+import os
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
 _STATE_STR = str(STATE_DIR)  # cached str for Path ops
+
+# State entries older than this are considered stale and auto-cleaned
+STATE_EXPIRY_SECONDS = 3600  # 1 hour
 
 # In-process read cache — avoids redundant file reads when a hook calls
 # multiple state functions in one execution (each hook is its own subprocess,
@@ -32,6 +37,7 @@ def _ensure_state_dir() -> None:
     global _state_dir_ready
     if not _state_dir_ready:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
+        os.chmod(STATE_DIR, 0o700)  # Owner-only: directory contains sensitive session state
         _state_dir_ready = True
 
 
@@ -73,8 +79,76 @@ def _save(session_id: str, state: dict) -> None:
             disk_state.update(state)
             _cache[session_id] = disk_state
             f.write_text(json.dumps(disk_state))
+            os.chmod(f, 0o600)  # Owner read/write: session state may contain sensitive Jira keys
         finally:
             fcntl.flock(lf, fcntl.LOCK_UN)
+
+
+def cleanup_stale_state(session_id: str) -> None:
+    """Remove state entries older than STATE_EXPIRY_SECONDS.
+
+    Cleans both top-level dict entries with 'ts' field and list entries
+    (like hr5_pending) that have 'ts' field. Call this before reading state
+    to prevent stale entries from blocking operations.
+    """
+    state = _load(session_id)
+    if not state:
+        return
+    now = time.time()
+    modified = False
+
+    # Clean stale top-level dict entries with 'ts' field
+    for key in list(state.keys()):
+        if isinstance(state[key], dict) and 'ts' in state[key]:
+            if now - state[key]['ts'] > STATE_EXPIRY_SECONDS:
+                del state[key]
+                modified = True
+
+    # Clean stale hr5_pending list entries
+    if 'hr5_pending' in state:
+        pending = state['hr5_pending']
+        if isinstance(pending, list):
+            original_len = len(pending)
+            state['hr5_pending'] = [
+                p for p in pending
+                if not (isinstance(p, dict) and 'ts' in p and now - p['ts'] > STATE_EXPIRY_SECONDS)
+            ]
+            if len(state['hr5_pending']) != original_len:
+                modified = True
+
+    if modified:
+        _save(session_id, state)
+
+
+def set_state(session_id: str, key: str, value: Any) -> None:
+    """Set a state value with automatic timestamp tracking.
+
+    Stores the value with a 'ts' timestamp for expiry detection by
+    cleanup_stale_state. Use this for ephemeral state that should
+    expire after STATE_EXPIRY_SECONDS.
+    """
+    state = _load(session_id)
+    state[key] = {
+        'value': value,
+        'ts': time.time()
+    }
+    _save(session_id, state)
+
+
+def get_state(session_id: str, key: str) -> Any | None:
+    """Get a state value set by set_state.
+
+    Returns the value if present and not expired, None otherwise.
+    """
+    state = _load(session_id)
+    entry = state.get(key)
+    if isinstance(entry, dict) and 'value' in entry:
+        # Entry with timestamp - check expiry
+        if 'ts' in entry:
+            if time.time() - entry['ts'] > STATE_EXPIRY_SECONDS:
+                return None
+        return entry['value']
+    return None
 
 
 # ── HR6: Cache invalidation tracking ──────────────────
@@ -139,7 +213,7 @@ def hr5_add_pending(session_id: str, child_key: str, parent_key: str) -> None:
     state = _load(session_id)
     pending = state.get("hr5_pending", [])
     if not any(p["child"] == child_key for p in pending):
-        pending.append({"child": child_key, "parent": parent_key})
+        pending.append({"child": child_key, "parent": parent_key, "ts": time.time()})
     state["hr5_pending"] = pending
     _save(session_id, state)
 

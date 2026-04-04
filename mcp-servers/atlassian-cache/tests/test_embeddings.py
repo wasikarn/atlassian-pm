@@ -78,6 +78,7 @@ class TestLoadSqliteVec:
 class TestGetModel:
     def setup_method(self):
         emb_module._model = None
+        emb_module._model_loaded = False
 
     def test_already_loaded(self):
         sentinel = object()
@@ -85,21 +86,30 @@ class TestGetModel:
         assert _get_model() is sentinel
 
     def test_loads_model(self):
+        """Test lazy import: SentenceTransformer is imported inside _get_model()."""
         mock_model = MagicMock()
         mock_st_class = MagicMock(return_value=mock_model)
 
-        with patch("atlassian_cache.embeddings.SentenceTransformer", mock_st_class):
+        # Patch the import inside _get_model() by mocking sentence_transformers module
+        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_class)}):
             result = _get_model()
             mock_st_class.assert_called_once_with("paraphrase-multilingual-MiniLM-L12-v2")
             assert result is mock_model
             assert emb_module._model is mock_model
 
     def test_import_error(self):
-        with patch("atlassian_cache.embeddings.SentenceTransformer", None), pytest.raises(ImportError):
-            _get_model()
+        """Test ImportError when sentence_transformers is not installed."""
+        # Remove sentence_transformers from sys.modules to simulate not installed
+        with patch.dict("sys.modules", {}, clear=False):
+            # Also remove any cached import
+            with patch("atlassian_cache.embeddings._model", None):
+                with patch("atlassian_cache.embeddings._model_loaded", False):
+                    with pytest.raises(ImportError, match="sentence-transformers not installed"):
+                        _get_model()
 
     def teardown_method(self):
         emb_module._model = None
+        emb_module._model_loaded = False
 
 
 # --- EmbeddingStore ---
@@ -370,6 +380,7 @@ def test_model_name_is_multilingual(monkeypatch):
     """Model should be multilingual MiniLM, not English-only."""
     import atlassian_cache.embeddings as em
     em._model = None  # reset lazy cache
+    em._model_loaded = False
     loaded_name = []
 
     class FakeST:
@@ -379,7 +390,9 @@ def test_model_name_is_multilingual(monkeypatch):
             import numpy as np
             return np.zeros((1, 384) if isinstance(a[0], list) else (384,))
 
-    monkeypatch.setattr("atlassian_cache.embeddings.SentenceTransformer", FakeST, raising=False)
+    # Patch the import inside _get_model() by mocking sentence_transformers module
+    fake_st_module = MagicMock(SentenceTransformer=FakeST)
+    monkeypatch.setitem(__import__("sys").modules, "sentence_transformers", fake_st_module)
     from atlassian_cache.embeddings import _get_model
     _get_model()
     assert "multilingual" in loaded_name[0]

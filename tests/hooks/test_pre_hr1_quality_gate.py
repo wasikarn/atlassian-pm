@@ -14,7 +14,7 @@ import pre_hr1_quality_gate
 
 
 def _run(tool_input: dict, tool_name: str = "Bash") -> dict | None:
-    """Run main() with given input. Returns {} on allow, None on block (SystemExit)."""
+    """Run main() with given input. Returns {} on allow (exit 0), None on block (exit 1/2)."""
     data = {"tool_name": tool_name, "tool_input": tool_input, "session_id": "test"}
     buf = io.StringIO()
     with (
@@ -25,7 +25,10 @@ def _run(tool_input: dict, tool_name: str = "Bash") -> dict | None:
             pre_hr1_quality_gate.main()
             raw = buf.getvalue().strip()
             return json.loads(raw) if raw else {}
-        except SystemExit:
+        except SystemExit as e:
+            # Exit code 0 = allow, exit code 1 or 2 = block
+            if e.code == 0:
+                return {}
             return None  # blocked
 
 
@@ -137,7 +140,7 @@ def test_allows_when_qg_passes():
 
 
 def test_blocks_when_qg_fails():
-    """QG score < 90 → block (SystemExit 2)."""
+    """QG score < 90 → block (SystemExit 1)."""
     with tempfile.NamedTemporaryFile(suffix="-story.json", mode="w", delete=False) as f:
         json.dump({"type": "Story", "description": {"version": 1, "type": "doc", "content": []}}, f)
         tmp_path = f.name

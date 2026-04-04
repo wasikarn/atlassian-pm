@@ -1,21 +1,13 @@
 ---
 name: quality-gate
 description: |
-  Validate ADF content against quality gate criteria.
+  **AD-HOC USE ONLY** - Manual ADF validation for debugging.
 
-  > **⚠️ DEPRECATED for skill-invoked QG:** As of v2.3.0, all skills use `uv run scripts/api/validate_adf.py {file} --type {type} --json` directly. This agent is for **manual/ad-hoc use only** (e.g., debugging a specific ADF file outside a skill workflow).
-  > Do NOT re-introduce `Agent(name: "quality-gate")` calls in SKILL.md files — use the script instead.
+  **NOT for skill invocation** - Skills should use `scripts/api/validate_adf.py` directly.
 
-  <example>
-  Context: manual ADF validation outside a skill workflow
-  user: "Validate the ADF in /tmp/story.json"
-  assistant: "I'll use the quality-gate agent to validate the ADF content."
-  <commentary>
-  For skill-invoked QG, use validate_adf.py script. This agent is for ad-hoc manual validation only.
-  </commentary>
-  </example>
+  Use this agent ONLY when manually checking ADF quality outside a skill workflow.
 model: haiku
-tools: Read, Glob, Grep
+allowed-tools: Read, Glob, Grep
 permissionMode: dontAsk
 maxTurns: 10
 memory: project

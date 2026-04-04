@@ -87,18 +87,18 @@ def allow() -> None:
     """Exit 0 with no output — signals 'allow' to Claude hooks runtime.
 
     Note: Does not return — always raises SystemExit(0).
-    Symmetric with block() which raises SystemExit(2).
+    Symmetric with block() which raises SystemExit(1).
     """
     sys.exit(0)
 
 
 def block(reason: str) -> None:
-    """Block the tool call: print reason to stderr and exit with code 2.
+    """Block the tool call: print reason to stderr and exit with code 1.
 
-    Note: Does not return — always raises SystemExit(2).
+    Note: Does not return — always raises SystemExit(1).
     """
     print(reason, file=sys.stderr)
-    sys.exit(2)
+    sys.exit(1)
 
 
 def inject_context(text: str, event_name: str = "PostToolUse") -> None:

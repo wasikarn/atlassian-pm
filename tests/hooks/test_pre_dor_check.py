@@ -15,7 +15,7 @@ import pre_dor_check
 
 
 def _run(tool_input: dict, confirmed: str = "") -> dict | None:
-    """Run main() with given input. Returns {} on allow, None on block (SystemExit)."""
+    """Run main() with given input. Returns {} on allow (exit 0), None on block (exit 1/2)."""
     data = {"tool_input": tool_input, "session_id": "test"}
     buf = io.StringIO()
     with (
@@ -26,7 +26,10 @@ def _run(tool_input: dict, confirmed: str = "") -> dict | None:
         try:
             pre_dor_check.main()
             return json.loads(buf.getvalue()) if buf.getvalue().strip() else {}
-        except SystemExit:
+        except SystemExit as e:
+            # Exit code 0 = allow, exit code 1 or 2 = block
+            if e.code == 0:
+                return {}
             return None  # blocked
 
 

@@ -12,7 +12,7 @@ import pre_search_before_create
 
 
 def _run(tool_input: dict, search_done: bool = False) -> dict | None:
-    """Run main() with given input. Returns {} on allow, None on block (SystemExit)."""
+    """Run main() with given input. Returns {} on allow (exit 0), None on block (exit 1/2)."""
     data = {"tool_input": tool_input, "session_id": "test-session"}
     buf = io.StringIO()
     with (
@@ -24,7 +24,10 @@ def _run(tool_input: dict, search_done: bool = False) -> dict | None:
             pre_search_before_create.main()
             raw = buf.getvalue().strip()
             return json.loads(raw) if raw else {}
-        except SystemExit:
+        except SystemExit as e:
+            # Exit code 0 = allow, exit code 1 or 2 = block
+            if e.code == 0:
+                return {}
             return None  # blocked
 
 

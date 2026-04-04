@@ -11,7 +11,7 @@ description: |
   </commentary>
   </example>
 model: haiku
-tools: Read, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
+allowed-tools: Read, Bash, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 skills:
   - shared-references
 maxTurns: 20

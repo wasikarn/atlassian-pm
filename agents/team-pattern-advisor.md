@@ -11,7 +11,7 @@ description: |
   </commentary>
   </example>
 model: sonnet
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
+allowed-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 15
 color: magenta

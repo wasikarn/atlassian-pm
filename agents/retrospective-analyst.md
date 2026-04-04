@@ -12,7 +12,7 @@ description: |
   </example>
 model: sonnet
 effort: high
-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
+allowed-tools: Read, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_batch_get_changelogs, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_add_comment, mcp__atlassian-cache__cache_sprint_issues, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 permissionMode: dontAsk
 maxTurns: 20
 color: magenta

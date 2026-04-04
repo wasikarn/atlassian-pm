@@ -1,12 +1,41 @@
 # atlassian-pm
 
-> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language. Designed for **vibe coding**: skills default to fast mode (no ceremony), each Task includes Implementation Hints (entry point, pattern, test command) so team members can just run `implement {{PROJECT_KEY}}-123` in Claude Code. Each skill embeds domain-expert notes (Scrum, SAFe, ITIL, DORA, IEEE 829) alongside the workflow steps.
+> Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
 [![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
-Describe what you need in plain English (or Thai) — Claude explores your codebase, writes properly-formatted Jira ADF for non-technical stakeholders, passes a quality gate, and publishes. Hooks enforce 10 hard rules automatically and block silent failures before they happen. A local SQLite cache reduces Jira API token consumption by **80–90%**. A built-in calibration engine learns your team's carry-over patterns and keyword risk signals from sprint history — optionally running as a background `board_monitor` daemon for proactive Jira insights.
+---
+
+## 💡 Idea & Concept
+
+**Vibe Coding for Jira** — แปลง idea เป็น backlog ได้ใน 2 interactions โดยไม่ต้องเขียน Jira ticket เอง
+
+```text
+💡 "สร้าง feature push notification บนมือถือ"
+   → /vibe-full → Epic + Tasks + AI-Ready child Tasks
+   → พร้อม Implementation Hints (entry point, pattern, test command)
+   → ทีมงานแค่ /implement {{PROJECT_KEY}}-123 ใน Claude Code
+```
+
+**Core Concepts:**
+
+| Concept | สิ่งที่ทำ |
+| --- | --- |
+| **Vibe Mode** | Fast path: idea → backlog ใน 2 interactions (default สำหรับทุก creation skills) |
+| **AI-Ready Tasks** | แต่ละ Task มี Implementation Hints — entry point file, pattern ที่ควรใช้, test command |
+| **Quality Gate** | ADF ต้องผ่าน QG ≥ 90% ก่อน publish — ป้องกัน format พัง |
+| **Hard Rules** | 10 rules ที่ hooks enforce อัตโนมัติ — ป้องกัน silent failures |
+| **Token Cache** | SQLite cache ลด Jira API calls 80–90% — ประหยัด tokens |
+| **Domain Expertise** | แต่ละ skill มี Scrum/SAFe/ITIL/DORA/IEEE 829 notes ฝังอยู่ |
+
+**ใครควรใช้:**
+
+- PM/PO ที่ต้องการแปลง idea → backlog ไว
+- Engineer ที่ต้องการ Tasks พร้อม implementation hints
+- QA ที่ต้องการ test plans จาก acceptance criteria
+- Team ที่ใช้ Scrumban และต้องการ flow management
 
 ---
 
@@ -28,15 +57,15 @@ Claude will ask for your Jira site, project key, and board ID — then configure
 ## How It Works
 
 ```text
-⚡ Commands:  /vibe-full · /story-full · /epic-full · /bug-full · /sprint-close-full · …  (chains skills end-to-end with confirmation gates)
-🚀 Vibe mode: /atlassian-pm:vibe-plan "feature desc"  →  Epic + Tasks + AI-Ready child Tasks in one shot
-   Skills:   /atlassian-pm:create-task   →  Explore codebase  →  Write ADF  →  QG ≥ 90%  →  Jira
+⚡ Commands:  /vibe-full → chains skills end-to-end with confirmation gates
+🚀 Vibe mode: /atlassian-pm:vibe-plan "feature desc" → Epic + Tasks + AI-Ready child Tasks
+   Skills:   /atlassian-pm:create-task → Explore codebase → Write ADF → QG ≥ 90% → Jira
 ```
 
-1. Describe what you need in natural language (or pick a Command for the full end-to-end chain)
-2. Claude explores your codebase to find real implementation paths
-3. Writes properly-structured ADF JSON and scores it against a quality gate
-4. Publishes to Jira via `acli` — MCP handles field updates and metadata
+1. **Describe** in natural language (Thai/English) or use a Command for full workflow
+2. **Explore** — Claude finds real implementation paths in your codebase
+3. **Quality Gate** — ADF scored ≥ 90% before publish (hooks enforce 10 hard rules)
+4. **Publish** — `acli` creates issues, MCP handles field updates
 
 ### Workflow
 
@@ -416,51 +445,22 @@ The `atlassian-cache` MCP server registers automatically via the plugin's `.mcp.
 
 ## Manual Installation
 
-### 1. Clone
+<details>
+<summary>Click to expand (8 steps)</summary>
 
 ```bash
-git clone https://github.com/wasikarn/atlassian-pm atlassian-pm
-cd atlassian-pm
-```
+# 1. Clone
+git clone https://github.com/wasikarn/atlassian-pm && cd atlassian-pm
 
-### 2. Create config
-
-```bash
+# 2. Create config
 cp config/project-config.json.template .claude/project-config.json
-```
+# Edit .claude/project-config.json with your Jira site, project key, board ID
 
-Edit `.claude/project-config.json`:
+# 3. Authenticate acli
+echo "<api-token>" | acli jira auth login --site https://your-site.atlassian.net --email your@email.com --token
 
-```jsonc
-{
-  "jira": {
-    "site": "your-company.atlassian.net",  // ← your Jira domain
-    "project_key": "ABC",                   // ← your project key
-    "board_id": 1                           // ← from jira_get_agile_boards()
-  },
-  "confluence": { "site": "your-company.atlassian.net", "space_key": "ABC" },
-  "team": { "members": [...] }
-}
-```
-
-> Real config is gitignored — only the template with placeholder values is committed.
-
-### 3. Authenticate acli
-
-```bash
-echo "<api-token>" | acli jira auth login \
-  --site https://your-site.atlassian.net \
-  --email your@email.com \
-  --token
-```
-
-Get your token at **Atlassian Account → Security → API tokens**.
-
-### 4. Create credentials file
-
-```bash
-mkdir -p ~/.config/atlassian
-chmod 700 ~/.config/atlassian
+# 4. Create credentials file
+mkdir -p ~/.config/atlassian && chmod 700 ~/.config/atlassian
 cat > ~/.config/atlassian/.env << 'EOF'
 JIRA_URL=https://your-site.atlassian.net
 JIRA_USERNAME=your@email.com
@@ -470,200 +470,102 @@ CONFLUENCE_USERNAME=your@email.com
 CONFLUENCE_API_TOKEN=<your-api-token>
 EOF
 chmod 600 ~/.config/atlassian/.env
-```
 
-Get your API token at: **Atlassian Account → Security → API tokens**
-One token works for both Jira and Confluence. Tokens expire in ≤365 days.
-
-### 5. Configure MCP
-
-```bash
+# 5. Configure MCP
 claude mcp add --scope user mcp-atlassian -- \
   uvx --no-cache mcp-atlassian==0.21.0 \
   --env-file ~/.config/atlassian/.env \
   --jira-projects-filter=YOUR_PROJECT_KEY \
   --confluence-spaces-filter=YOUR_SPACE_KEY
-```
 
-> **Note:** `~/.config/atlassian/.env` must exist first (Step 4). Replace `YOUR_PROJECT_KEY` with your Jira project key (e.g. `{{PROJECT_KEY}}`).
-
-### 6. Run setup
-
-```bash
+# 6. Run setup
 ./scripts/setup.sh
-```
 
-Configures `~/.claude/CLAUDE.md` with your Jira settings and sets up git smudge/clean filters.
-
-### 7. Install Atlassian cache server venv
-
-```bash
+# 7. Install cache server venv
 UV_PROJECT_ENVIRONMENT="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/venv" \
   uv sync --project mcp-servers/atlassian-cache --extra embeddings
-```
 
-Reduces token consumption 80–90% for repeated lookups via local SQLite + FTS5. Omit `--extra embeddings` to skip semantic search (~640MB PyTorch/sentence-transformers).
-
-The `atlassian-cache` MCP server registers automatically via the plugin's `.mcp.json` — no `claude mcp add` command needed.
-
-### 8. Load plugin
-
-```bash
-# This session only
+# 8. Load plugin
 claude --plugin-dir /path/to/atlassian-pm
+# Or add to ~/.claude/settings.json: { "pluginDirs": ["/path/to/atlassian-pm"] }
 
-# Permanently — add to ~/.claude/settings.json
-{ "pluginDirs": ["/path/to/atlassian-pm"] }
-```
-
-### Verify
-
-```bash
+# Verify
 acli jira auth status
-# Inside Claude Code:
 /atlassian-pm:doctor
 ```
+
+</details>
 
 ---
 
 ## Architecture
 
 ```text
-Claude Code ──skills──► acli (ADF JSON) ──────────────────────► Jira Cloud
-    │                                                                  ▲
-    ├── MCP ──► mcp-atlassian ──────────────────────────────────────── ┤
-    │                                                                  │
-    ├── MCP ──► atlassian-cache ── SQLite + FTS5 ──► Jira REST API v3
-    │                └─ (~/.claude/plugins/data/atlassian-pm-atlassian-pm/jira.db)
-    │
-    ├── MCP ──► Confluence, Figma, GitHub
-    │
-    └── Python ──► scripts/lib/ (REST API helpers)
+Claude Code ──► acli (ADF JSON) ──► Jira Cloud
+     │                                    ▲
+     ├── MCP ──► mcp-atlassian ───────────┤ (field updates)
+     ├── MCP ──► atlassian-cache ──► SQLite + FTS5 (80-90% token savings)
+     └── Python scripts ──► REST API helpers
 ```
 
 | Layer | Tool | Why |
 | --- | --- | --- |
 | Descriptions | `acli --from-json` (ADF) | MCP produces unformatted output |
-| Fields (assignee, sprint, labels) | MCP `jira_update_issue` | More reliable for metadata |
-| Sub-task creation | MCP create → acli edit | MCP may silently drop parent |
-| ML dependencies | venv outside project tree | PyTorch + sentence-transformers ~640MB |
+| Fields | MCP `jira_update_issue` | Reliable for metadata (assignee, sprint, labels) |
+| Sub-task creation | MCP create → acli edit | MCP may silently drop parent link |
+| Cache | SQLite + FTS5 + embeddings | Reduces API calls 80–90% |
 
 ---
 
 ## Configuration
 
-All project-specific values live in `.claude/project-config.json` — the single source of truth. Only the template is committed; real config is gitignored.
+All values in `.claude/project-config.json` (gitignored). Template: `config/project-config.json.template`
 
-| File | Loaded | Contains |
-| --- | --- | --- |
-| `.claude/project-config.json` | Every session | Jira fields, team roster, services, environments |
-| `.claude/project-config-team-detail.json` | Release forecasting only | Git evidence, bus factor, velocity history _(gitignored — create from template)_ |
+| File | Purpose |
+| --- | --- |
+| `.claude/project-config.json` | Jira fields, team roster, services, environments |
+| `.claude/project-config-team-detail.json` | Velocity history, bus factor (gitignored) |
 
-### Git Filter — Automatic Placeholder Conversion
+**Git Filter** — automatic placeholder conversion:
 
 ```text
-Committed:    {{PROJECT_KEY}}-XXX   ← always placeholders
-                      │
-               [smudge on checkout]
-                      ↓
-Working tree: ABC-XXX               ← real values
-                      │
-               [clean on commit]
-                      ↓
-Staged:       {{PROJECT_KEY}}-XXX   ← always placeholders
+Committed:    {{PROJECT_KEY}}-XXX   ← placeholders
+Working tree: ABC-XXX   ← real values
+Staged:       {{PROJECT_KEY}}-XXX   ← placeholders
 ```
 
-| Placeholder | Example |
+| Placeholder | Replaces |
 | --- | --- |
-| `{{PROJECT_KEY}}` | `ABC` |
-| `{{JIRA_SITE}}` | `acme-corp.atlassian.net` |
-| `{{SPACE_KEY}}` | `ABC` |
-| `{{COMPANY}}` | `Acme Corp` |
+| `{{PROJECT_KEY}}` | Your Jira project key (e.g., `ABC`) |
+| `{{JIRA_SITE}}` | Your Jira domain (e.g., `acme-corp.atlassian.net`) |
 
 ---
 
 ## Project Structure
 
 ```text
-.claude-plugin/plugin.json              ← Plugin manifest
-.claude-plugin/marketplace.json         ← Plugin catalog (version lives here — not in plugin.json)
-.mcp.json                               ← MCP server config
-.claude/project-config.json             ← Real config (gitignored)
-config/project-config.json.template     ← Template with placeholders (tracked)
+.claude-plugin/plugin.json       ← Plugin manifest
+.mcp.json                        ← MCP server config
+.claude/project-config.json      ← Real config (gitignored)
 
-skills/                        ← 39 slash-command skills (7 categories, each with 🎓 Domain Expert Notes)
-├── setup/                     ← setup, doctor
-├── epic/                      ← blueprint, refine-epic, create-epic, vibe-plan, update-epic, plan-release, epic-health
-├── story/                     ← spec-to-stories, verify-issue, sync-artifacts
-├── task/                      ← create-task, create-testplan, execute-testplan, bug-triage, assign-issue, update-task, start-ticket, ship-to-qa
-├── sprint/                    ← flow-check, map-dependencies, close-sprint, standup-report, reschedule-sprint, plan-sprint, retro-actions
-├── confluence/                ← create-doc, update-doc
-└── utilities/                 ← search-issues, activity-report, scan-tech-debt, release-notes, atlassian-scripts, status
+skills/                          ← 39 skills in 7 categories
+├── setup/                       ← setup, doctor
+├── epic/                        ← blueprint, refine-epic, create-epic, vibe-plan, update-epic, plan-release
+├── story/                       ← spec-to-stories, verify-issue, sync-artifacts
+├── task/                        ← create-task, create-testplan, execute-testplan, bug-triage, start-ticket, ship-to-qa
+├── sprint/                      ← flow-check, map-dependencies, close-sprint, standup-report, plan-sprint, retro-actions
+├── confluence/                  ← create-doc, update-doc
+└── utilities/                   ← search-issues, activity-report, scan-tech-debt, release-notes, status
 
-references/                    ← Docs loaded by skills on-demand (24 files)
-├── templates.md               ← ADF templates (Epic, Task)
-├── hr-rules.md                ← Hard rule definitions (HR1–HR10)
-└── troubleshooting.md         ← Common failures + fixes
-
-scripts/                       ← All Python scripts + lib (merged atlassian-scripts + scripts)
-├── ai/                        ← Intelligence pipeline (calibrate.py decay-weighted calibration engine, keyword_allowlist.json)
-├── api/                       ← CLI scripts (create/update Confluence, Jira ADF, set parent)
-├── lib/                       ← Shared library (ConfluenceAPI, JiraAPI, ADF validator)
-├── sprint/                    ← Sprint management scripts
-├── analysis/                  ← Analysis tools (AC mapper, impact suggester, QA matrix)
-├── docs/                      ← Script documentation (README, references, technical notes)
-├── setup.sh                   ← One-command setup (idempotent)
-├── setup_monitor.sh            ← Install board_monitor.py as a macOS launchd daemon (idempotent)
-├── teardown_monitor.sh         ← Fully uninstall the board_monitor daemon (trash-safe)
-├── bump-version.sh             ← Fully automated version bump + release
-├── test-install.sh             ← Install validation (remove → install → setup simulation → doctor, 18 checks)
-└── git_filter.py              ← Smudge/clean placeholder conversion
-
-agents/                                  ← 20 subagent definitions (3-layer architecture)
-│
-│  Layer 1 — Foundation (compact output, token-optimized)
-├── code-explorer.md (haiku)             ← Codebase exploration; Memory-First Protocol; --domain flag
-├── issue-bootstrap.md (haiku)           ← Pre-fetch issue context; --preset flags; BOOTSTRAP_COMPACT
-├── jira-search.md (haiku)               ← Duplicate confidence scoring (EXACT/HIGH/MEDIUM/LOW)
-├── quality-gate.md (sonnet)             ← ADF quality scoring; Pattern Memory; Team Convention Check
-├── pr-description-writer.md (haiku)     ← Generate PR description from branch + issue
-├── pr-review-jira-sync.md (haiku)       ← Sync merged PR back to Jira (transition + comment)
-├── velocity-tracker.md (haiku)          ← Velocity history; anomaly detection (1.5σ); per-member stats
-├── sprint-transition-agent.md (haiku)   ← Batch sprint issue moves + sprint state transitions
-├── spec-parser-agent.md (haiku)         ← Parse Confluence spec → structured requirements; Read only
-│
-│  Layer 2 — Analysis (expert reasoning, domain knowledge)
-├── story-writer.md (sonnet)             ← ADF JSON; Convention Memory; Service-Aware AC Defaults
-├── alignment-checker.md (sonnet)        ← AC Coverage Matrix; Predictive Risk Flags; Scope Drift
-├── backlog-groomer.md (sonnet)          ← WSJF scoring; aging alerts; Top Candidates output
-├── retrospective-analyst.md (sonnet)    ← Cross-Sprint Comparison; Team Health Score (0-100)
-├── sprint-planner.md (sonnet)           ← Risk-Adjusted Capacity; 3 Scenario Planning
-├── test-case-runner.md (sonnet)         ← Execute single Playwright test case; structured result + evidence
-└── bug-evidence-writer.md (haiku)       ← Generate ADF bug description from test failure evidence
-│
-│  Layer 3 — Synthesis (cross-domain specialists)
-├── estimation-calibrator.md (haiku)     ← SP calibration from historical similarity; HIGH/MEDIUM/LOW confidence
-├── risk-forecaster.md (sonnet)          ← 4-dimension delivery risk; named mitigations; adjusted scenarios
-├── adf-surgeon.md (haiku)               ← Structural ADF repair; 10 known Jira quirks; content-safe
-└── team-pattern-advisor.md (sonnet)     ← Multi-sprint strategic patterns; ≥3 data point threshold
-
-hooks/                         ← 59 Python hook scripts (65 registrations in hooks.json)
-├── hooks.json                 ← Plugin hook manifest
-├── tests/                     ← Unit tests for hook logic
-├── plugin/
-│   ├── guards/                ← HR1–HR10 enforcement (20 hooks)
-│   ├── quality/               ← ADF structure, write quality, story size gates (4 hooks)
-│   ├── cache/                 ← Read optimization, dedup, field presets (6 hooks)
-│   └── session/               ← Session management, compaction, token filtering, skill telemetry (23 hooks)
-└── dev/                       ← Developer workflow: DoR/DoD gates, WIP limit, PR sync (5 hooks)
-
-.claude/commands/              ← 13 orchestration chains (vibe-full, story-full, epic-full, blueprint-full, bug-full,
-                               │  qa-full, sprint-plan-full, sprint-close-full, release-full, tech-debt-full, story-analyze-full,
-                               │  daily-ops, sprint-close-full-with-actions)
-                               └── Each chains existing skills end-to-end with confirmation gates
-
-mcp-servers/atlassian-cache/ ← Local Jira + Confluence cache (SQLite + FTS5 + embeddings)
+references/                     ← Docs loaded on-demand (templates, hr-rules, troubleshooting)
+scripts/                        ← Python scripts (ai/, api/, lib/, sprint/)
+agents/                         ← 20 subagents (3-layer: Foundation, Analysis, Synthesis)
+hooks/                          ← 59 Python hooks (HR1–HR10 enforcement, quality gates, cache)
+.claude/commands/               ← 13 orchestration chains (vibe-full, story-full, epic-full, ...)
+mcp-servers/atlassian-cache/    ← SQLite + FTS5 + embeddings cache
 ```
+
+**Full structure:** See [skills/README.md](skills/README.md) for skill index, [hooks/README.md](hooks/README.md) for hooks reference.
 
 ---
 

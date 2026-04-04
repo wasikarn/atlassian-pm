@@ -13,7 +13,7 @@ description: |
 model: haiku
 effort: medium
 color: red
-tools: Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_get_transitions, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
+allowed-tools: Bash, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_get_transitions, mcp__mcp-atlassian__jira_transition_issue, mcp__mcp-atlassian__jira_add_comment, mcp__mcp-atlassian__jira_search, mcp__atlassian-cache__cache_get_issue, mcp__atlassian-cache__cache_invalidate
 permissionMode: dontAsk
 maxTurns: 15
 ---

@@ -12,7 +12,7 @@ description: |
   </example>
 model: haiku
 effort: medium
-tools: Read, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
+allowed-tools: Read, mcp__mcp-atlassian__jira_update_issue, mcp__atlassian-cache__cache_invalidate, mcp__atlassian-cache__cache_get_issue
 permissionMode: dontAsk
 maxTurns: 15
 color: red
