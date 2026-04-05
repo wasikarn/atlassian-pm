@@ -346,17 +346,6 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search|mcp__mcp-atlassian__jira_get_sprint_issues|mcp__mcp-atlassian__jira_get_project_issues|mcp__mcp-atlassian__jira_get_board_issues|mcp__mcp-atlassian__jira_get_agile_boards|mcp__mcp-atlassian__jira_get_sprints_from_board|mcp__mcp-atlassian__confluence_get_page|mcp__mcp-atlassian__confluence_get_page_children|mcp__mcp-atlassian__confluence_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue|mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issues|mcp__plugin_atlassian-pm_atlassian-cache__cache_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_text_search|mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/observability/post_response_size_log.py",
-            "timeout": 5,
-            "async": true
-          }
-        ]
       }
     ],
     "Stop": [
@@ -371,11 +360,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_hr5_pending_check.py",
             "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/stop_session_cost_summary.py",
-            "timeout": 5
           }
         ]
       }
@@ -391,16 +375,6 @@
           {
             "type": "command",
             "command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}/tasks\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_cleanup_artifacts.py",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_stuck_issues_notify.py",
             "timeout": 5
           },
           {
@@ -445,16 +419,6 @@
     "UserPromptSubmit": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_context_density_warn.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_prompt_skill_redirect.py",
-            "timeout": 5
-          },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/cache/pre_prompt_issue_prefetch.py",
