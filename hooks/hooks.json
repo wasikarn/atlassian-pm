@@ -318,26 +318,6 @@
         ]
       },
       {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/post_auto_verify_suggest.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr6_queue_invalidation_acli.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_pr_sync.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "mcp__mcp-atlassian__jira_transition_issue",
         "hooks": [
           {
@@ -446,6 +426,7 @@
     ],
     "SubagentStart": [
       {
+        "matcher": "story-writer|sprint-planner|velocity-tracker|retrospective-analyst|backlog-groomer|risk-forecaster|bug-evidence-writer|spec-parser-agent|alignment-checker|sprint-transition-agent|issue-bootstrap|team-pattern-advisor|adf-surgeon|retro-data-extractor|quality-gate|pr-description-writer|jira-search|test-case-runner|estimation-calibrator|pr-review-jira-sync|jira-summary-poster",
         "hooks": [
           {
             "type": "command",
