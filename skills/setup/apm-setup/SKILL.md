@@ -1,5 +1,5 @@
 ---
-name: atlassian-setup
+name: apm-setup
 description: |
   First-time setup for atlassian-pm plugin — installs dependencies, collects Jira config,
   creates ~/.config/atlassian/.env, authenticates acli, registers mcp-atlassian, and validates.
@@ -9,7 +9,7 @@ description: |
 
   Config-file mode: create ~/.atlassian-pm.yaml with --init, fill it in, then run setup for zero-question installation.
 
-  Triggers: "setup atlassian-pm", "atlassian setup", "/atlassian-setup", "install atlassian-pm", "configure atlassian plugin"
+  Triggers: "setup atlassian-pm", "apm setup", "/apm-setup", "install atlassian-pm", "configure atlassian plugin"
   Use when: performing initial plugin setup — acli, MCP, credentials, git filters
   Do NOT use for: daily operation (all other skills handle that); upgrading the plugin
 x-compatibility: []
@@ -18,7 +18,7 @@ effort: low
 allowed-tools: Bash, Read, Write, AskUserQuestion
 ---
 
-# /atlassian-pm:atlassian-setup
+# /atlassian-pm:apm-setup
 
 Guided first-time setup for the `atlassian-pm` plugin. Idempotent — safe to re-run.
 
