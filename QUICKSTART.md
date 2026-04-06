@@ -212,7 +212,7 @@ Or use the fast-path: `/bug-full`
 
 ```
 1. /atlassian-pm:apm-close-sprint           → triage incomplete issues
-2. /atlassian-pm:retrospective-analyst  → generate retro + Confluence page
+2. /atlassian-pm:apm-retro-actions  → create action items from retro
 ```
 
 Or use the fast-path: `/sprint-close-full`
