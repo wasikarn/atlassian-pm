@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] - 2026-04-06
+
+### Changed
+
+- **Setup category flattened** — `apm-setup` and `apm-doctor` moved from `skills/setup/` to `skills/` root
+- **Hooks cleanup** — Removed 3 unused hooks: `pre_skill_usage_log`, `post_subtask_alignment_suggest`, `post_sprint_capacity_recheck`
+- **Sprint alignment** — Documented `sprint-subtask-alignment.py` workflow in CLAUDE.md as instruction instead of hook
+
 ## [3.6.0] - 2026-04-06
 
 ### Changed
