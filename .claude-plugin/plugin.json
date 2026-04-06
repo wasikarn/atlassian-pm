@@ -16,7 +16,8 @@
     "sprint"
   ],
   "skills": [
-    "./skills/setup/",
+    "./skills/apm-setup/",
+    "./skills/apm-doctor/",
     "./skills/epic/",
     "./skills/story/",
     "./skills/task/",
