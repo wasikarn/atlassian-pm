@@ -44,12 +44,12 @@
 ```bash
 /plugin marketplace add wasikarn/atlassian-pm
 /plugin install atlassian-pm@atlassian-pm
-/atlassian-pm:setup
+/atlassian-pm:atlassian-setup
 ```
 
 Claude will ask for your Jira site, project key, and board ID — then configure everything automatically.
 
-> **After plugin updates:** re-run `/atlassian-pm:setup` to rebuild the `atlassian-cache` venv. The MCP server starts automatically — setup just installs its Python dependencies.
+> **After plugin updates:** re-run `/atlassian-pm:atlassian-setup` to rebuild the `atlassian-cache` venv. The MCP server starts automatically — setup just installs its Python dependencies.
 > Requires Claude Code with plugin support. If `/plugin install` is unavailable, see [Manual Installation](#manual-installation).
 
 ---
@@ -389,7 +389,7 @@ Click **Sync** — Claude Desktop fetches the plugin catalog from GitHub. Then f
 Finally, open the Code tab and run setup:
 
 ```text
-/atlassian-pm:setup
+/atlassian-pm:atlassian-setup
 ```
 
 ### Claude Code (CLI)
@@ -409,14 +409,14 @@ Finally, open the Code tab and run setup:
 **Step 3** — Run setup
 
 ```text
-/atlassian-pm:setup
+/atlassian-pm:atlassian-setup
 ```
 
 ---
 
 Claude will ask for your Jira site, project key, and board ID, then write the config and configure git filters automatically.
 
-`/atlassian-pm:setup` configures:
+`/atlassian-pm:atlassian-setup` configures:
 
 - ✓ acli (Jira CLI) — installed + authenticated
 - ✓ mcp-atlassian — registered as user-scoped MCP server
@@ -491,7 +491,7 @@ claude --plugin-dir /path/to/atlassian-pm
 
 # Verify
 acli jira auth status
-/atlassian-pm:doctor
+/atlassian-pm:atlassian-doctor
 ```
 
 </details>

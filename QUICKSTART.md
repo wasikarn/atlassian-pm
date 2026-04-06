@@ -34,7 +34,7 @@ Open **Settings → Extensions → Add marketplace**, enter `wasikarn/atlassian-
 /plugin install atlassian-pm@atlassian-pm
 
 # 3. Run setup — asks for site, project key, board ID
-/atlassian-pm:setup
+/atlassian-pm:atlassian-setup
 ```
 
 Setup configures: acli auth · mcp-atlassian · `~/.config/atlassian/.env` · `~/.claude/CLAUDE.md` · git smudge/clean filters · atlassian-cache venv
@@ -56,14 +56,14 @@ CLAUDE_PLUGIN_ROOT=<path-to-plugin> CLAUDE_PROJECT_DIR=<path-to-project> \
 scripts/teardown_monitor.sh
 ```
 
-`/atlassian-pm:doctor` reports daemon status — run it to confirm.
+`/atlassian-pm:atlassian-doctor` reports daemon status — run it to confirm.
 
 ---
 
 ## Verify Installation
 
 ```bash
-/atlassian-pm:doctor
+/atlassian-pm:atlassian-doctor
 # Expected: 9-12 checks passed (12 if board_monitor daemon is running)
 ```
 
@@ -95,8 +95,8 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 | Skill | When to use |
 |-------|-------------|
-| `/atlassian-pm:setup` | First-time setup — installs deps, configures Jira, registers MCP |
-| `/atlassian-pm:doctor` | Health check — 10 checks, shows what's broken |
+| `/atlassian-pm:atlassian-setup` | First-time setup — installs deps, configures Jira, registers MCP |
+| `/atlassian-pm:atlassian-doctor` | Health check — 10 checks, shows what's broken |
 | **Backlog** | |
 | `/atlassian-pm:vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
 | `/atlassian-pm:blueprint` | Multi-role feature design (5 domain experts + debate) |
@@ -275,14 +275,14 @@ Skills invoke these automatically. Listed here for reference:
 
 | Symptom | Fix |
 |---------|-----|
-| `acli not found` | `brew install acli` then re-run `/atlassian-pm:setup` |
-| MCP tools not found | Restart Claude Code after running `/atlassian-pm:setup` |
-| `atlassian-cache: Failed to connect` | Run `/atlassian-pm:setup` to install the venv. After any plugin update, re-run setup to rebuild it. |
+| `acli not found` | `brew install acli` then re-run `/atlassian-pm:atlassian-setup` |
+| MCP tools not found | Restart Claude Code after running `/atlassian-pm:atlassian-setup` |
+| `atlassian-cache: Failed to connect` | Run `/atlassian-pm:atlassian-setup` to install the venv. After any plugin update, re-run setup to rebuild it. |
 | QG keeps failing | Run `/atlassian-pm:verify-issue KEY --fix` |
 | Stale issue data | Cache auto-invalidates after writes; force with `cache_invalidate(key)` |
 | Subtask has wrong parent | Enforced by HR5: MCP create → verify parent → acli edit |
 | Sprint ID mismatch | Never hardcode sprint IDs; always resolved via `jira_get_sprints_from_board()` |
-| Reinstalled plugin, venv missing | Run `/atlassian-pm:setup` — detects missing venv, re-runs `uv sync` automatically |
+| Reinstalled plugin, venv missing | Run `/atlassian-pm:atlassian-setup` — detects missing venv, re-runs `uv sync` automatically |
 
 Full troubleshooting reference: `references/troubleshooting.md`
 

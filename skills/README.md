@@ -10,8 +10,8 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 
 | Skill | Command | Phases | Requires | Description |
 | --- | --- | --- | --- | --- |
-| setup | `/atlassian-pm:setup` | 6 (0–5) | Bash, acli, uv | First-time setup: installs deps, collects Jira config, authenticates acli, registers mcp-atlassian. Idempotent — safe to re-run. |
-| doctor | `/atlassian-pm:doctor` | 1 (10 checks) | Bash | Health check: runs 10 checks (acli, uv, venv, MCP, config, board ID, git filters). Never stops on failure — shows complete picture. |
+| atlassian-setup | `/atlassian-pm:atlassian-setup` | 6 (0–5) | Bash, acli, uv | First-time setup: installs deps, collects Jira config, authenticates acli, registers mcp-atlassian. Idempotent — safe to re-run. |
+| atlassian-doctor | `/atlassian-pm:atlassian-doctor` | 1 (10 checks) | Bash | Health check: runs 10 checks (acli, uv, venv, MCP, config, board ID, git filters). Never stops on failure — shows complete picture. |
 
 ### Epic & Feature
 

@@ -12,7 +12,7 @@ Agile Documentation System — skills-based Jira/Confluence automation
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings. Human-readable + AI-parseable.
 **Data flow:** Skill phase → generate ADF JSON → `validate_adf.py` (QG ≥ 90%) → `acli --from-json` (create) or MCP `jira_update_issue` (update) → `cache_invalidate`
 
-**New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:doctor` to verify setup.
+**New here?** Start with [QUICKSTART.md](QUICKSTART.md) → then `/atlassian-pm:atlassian-doctor` to verify setup.
 **Skill index:** [skills/README.md](skills/README.md) — all skills with phases, categories, and argument patterns.
 **Hook reference:** [hooks/README.md](hooks/README.md) — all hooks, what they enforce, and how to debug them.
 

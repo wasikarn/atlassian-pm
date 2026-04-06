@@ -1,5 +1,5 @@
 ---
-name: doctor
+name: atlassian-doctor
 description: |
   Health check for atlassian-pm environment — runs 12 checks and reports status.
 
@@ -8,16 +8,16 @@ description: |
 
   Never stops on failure — shows complete picture. Run after setup or after updates.
 
-  Triggers: "doctor", "health check", "check setup", "diagnose", "verify install", "/doctor", "ตรวจสอบ setup", "เช็ค plugin"
+  Triggers: "atlassian doctor", "atlassian-pm health check", "check atlassian setup", "diagnose atlassian", "/atlassian-doctor", "ตรวจสอบ atlassian setup"
   Use when: verifying plugin health and configuration after setup or after issues arise
-  Do NOT use for: initial setup (use setup); creating issues (use create-story or create-task)
+  Do NOT use for: initial setup (use atlassian-setup); creating issues (use create-epic or create-task)
 x-compatibility: []
 argument-hint: ""
 effort: low
 allowed-tools: Bash
 ---
 
-# /atlassian-pm:doctor
+# /atlassian-pm:atlassian-doctor
 
 Health check for the `atlassian-pm` environment. Runs all 12 checks regardless of failures.
 
