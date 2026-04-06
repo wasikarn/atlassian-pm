@@ -34,6 +34,7 @@ mcp-servers/atlassian-cache/.coverage
 
 # Claude Code ephemeral
 .claude/plans/
+.omc/
 
 
 # Git worktrees
