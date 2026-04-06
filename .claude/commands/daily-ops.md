@@ -17,11 +17,11 @@ Run the following skills in sequence:
 
 ## Phase 1: Standup Report
 
-Run `/atlassian-pm:standup-report` to get the current In Progress issues, recent completions, and blockers.
+Run `/atlassian-pm:apm-standup-report` to get the current In Progress issues, recent completions, and blockers.
 
 ## Phase 2: Flow Check
 
-Run `/atlassian-pm:flow-check` to check WIP limits, bottlenecks, and column health.
+Run `/atlassian-pm:apm-flow-check` to check WIP limits, bottlenecks, and column health.
 
 ## Phase 3: Priority Summary
 

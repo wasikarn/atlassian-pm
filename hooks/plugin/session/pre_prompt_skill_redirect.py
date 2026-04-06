@@ -6,10 +6,10 @@ directing it to invoke the appropriate atlassian-pm skill instead of
 calling Jira write tools directly.
 
 Patterns detected (Thai + English):
-  bug / บัก / defect / ข้อผิดพลาด  → /atlassian-pm:bug-triage
-  story / subtask                    → /atlassian-pm:create-task
-  task / ticket / งาน               → /atlassian-pm:create-task
-  epic                               → /atlassian-pm:create-epic
+  bug / บัก / defect / ข้อผิดพลาด  → /atlassian-pm:apm-bug-triage
+  story / subtask                    → /atlassian-pm:apm-create-task
+  task / ticket / งาน               → /atlassian-pm:apm-create-task
+  epic                               → /atlassian-pm:apm-create-epic
 
 Exit codes: 0 (always — never blocks user prompts)
 """

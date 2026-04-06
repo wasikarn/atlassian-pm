@@ -70,7 +70,7 @@ def main() -> None:
         if assignee:
             line += f" (assignee: {assignee})"
         lines.append(line)
-    lines.append("Run /atlassian-pm:status to review and take action.")
+    lines.append("Run /atlassian-pm:apm-status to review and take action.")
 
     inject_context("\n".join(lines), event_name="SessionStart")
     log_event(_HOOK, "INFO", {"surfaced_count": len(pending)})

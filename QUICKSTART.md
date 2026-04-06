@@ -34,7 +34,7 @@ Open **Settings → Extensions → Add marketplace**, enter `wasikarn/atlassian-
 /plugin install atlassian-pm@atlassian-pm
 
 # 3. Run setup — asks for site, project key, board ID
-/atlassian-pm:atlassian-setup
+/atlassian-pm:apm-setup
 ```
 
 Setup configures: acli auth · mcp-atlassian · `~/.config/atlassian/.env` · `~/.claude/CLAUDE.md` · git smudge/clean filters · atlassian-cache venv
@@ -56,14 +56,14 @@ CLAUDE_PLUGIN_ROOT=<path-to-plugin> CLAUDE_PROJECT_DIR=<path-to-project> \
 scripts/teardown_monitor.sh
 ```
 
-`/atlassian-pm:atlassian-doctor` reports daemon status — run it to confirm.
+`/atlassian-pm:apm-doctor` reports daemon status — run it to confirm.
 
 ---
 
 ## Verify Installation
 
 ```bash
-/atlassian-pm:atlassian-doctor
+/atlassian-pm:apm-doctor
 # Expected: 9-12 checks passed (12 if board_monitor daemon is running)
 ```
 
@@ -95,44 +95,44 @@ End-to-end chains — the fastest way to get things done. Invoked as `/name` (no
 
 | Skill | When to use |
 |-------|-------------|
-| `/atlassian-pm:atlassian-setup` | First-time setup — installs deps, configures Jira, registers MCP |
-| `/atlassian-pm:atlassian-doctor` | Health check — 10 checks, shows what's broken |
+| `/atlassian-pm:apm-setup` | First-time setup — installs deps, configures Jira, registers MCP |
+| `/atlassian-pm:apm-doctor` | Health check — 10 checks, shows what's broken |
 | **Backlog** | |
-| `/atlassian-pm:vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
-| `/atlassian-pm:blueprint` | Multi-role feature design (5 domain experts + debate) |
-| `/atlassian-pm:refine-epic` | 4-role debate for unclear or high-risk requirements |
-| `/atlassian-pm:create-epic` | Epic + Confluence doc. `--no-doc` for Jira-only (skip Confluence). `--thorough` for RICE + annotation rounds. |
-| `/atlassian-pm:create-task` | Task with child Tasks. Vibe default: auto-extract + Implementation Hints. Auto-detects type (feature, bug, chore, spike). `--thorough` for full workflow. |
-| `/atlassian-pm:create-task` | Create standalone task: tech-debt, bug, chore, spike. Vibe default: auto-detect type. |
-| `/atlassian-pm:bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign. `--no-assign` to skip assignment gate. |
-| `/atlassian-pm:search-issues` | Dedup check before creating |
-| `/atlassian-pm:spec-to-stories` | Convert Confluence spec page → batch User Stories |
+| `/atlassian-pm:apm-vibe-plan` | 🚀 Idea → Epic + Stories + AI-Ready Subtasks (max 2 interactions). `--dry-run` to preview plan without creating in Jira. |
+| `/atlassian-pm:apm-blueprint` | Multi-role feature design (5 domain experts + debate) |
+| `/atlassian-pm:apm-refine-epic` | 4-role debate for unclear or high-risk requirements |
+| `/atlassian-pm:apm-create-epic` | Epic + Confluence doc. `--no-doc` for Jira-only (skip Confluence). `--thorough` for RICE + annotation rounds. |
+| `/atlassian-pm:apm-create-task` | Task with child Tasks. Vibe default: auto-extract + Implementation Hints. Auto-detects type (feature, bug, chore, spike). `--thorough` for full workflow. |
+| `/atlassian-pm:apm-create-task` | Create standalone task: tech-debt, bug, chore, spike. Vibe default: auto-detect type. |
+| `/atlassian-pm:apm-bug-triage` | Bug intake → P1/P2/P3 severity → dedup → assign. `--no-assign` to skip assignment gate. |
+| `/atlassian-pm:apm-search-issues` | Dedup check before creating |
+| `/atlassian-pm:apm-spec-to-stories` | Convert Confluence spec page → batch User Stories |
 | **Scrumban Flow** | |
-| `/atlassian-pm:flow-check` | Board health snapshot + replenishment trigger |
-| `/atlassian-pm:start-ticket` | Read AC + transition to In Progress (WIP gate enforced) |
-| `/atlassian-pm:ship-to-qa` | Post PR + preview URLs → transition to Ready for QA |
-| `/atlassian-pm:close-sprint` | Triage incomplete → move → Confluence review |
-| `/atlassian-pm:standup-report` | Daily standup digest per assignee |
-| `/atlassian-pm:plan-sprint` | Capacity-based sprint allocation _(release forecasting)_ |
-| `/atlassian-pm:reschedule-sprint` | Bulk-shift issue dates across a sprint |
-| `/atlassian-pm:map-dependencies` | Critical path + swim lane dependency analysis |
+| `/atlassian-pm:apm-flow-check` | Board health snapshot + replenishment trigger |
+| `/atlassian-pm:apm-start-ticket` | Read AC + transition to In Progress (WIP gate enforced) |
+| `/atlassian-pm:apm-ship-to-qa` | Post PR + preview URLs → transition to Ready for QA |
+| `/atlassian-pm:apm-close-sprint` | Triage incomplete → move → Confluence review |
+| `/atlassian-pm:apm-standup-report` | Daily standup digest per assignee |
+| `/atlassian-pm:apm-plan-sprint` | Capacity-based sprint allocation _(release forecasting)_ |
+| `/atlassian-pm:apm-reschedule-sprint` | Bulk-shift issue dates across a sprint |
+| `/atlassian-pm:apm-map-dependencies` | Critical path + swim lane dependency analysis |
 | **Quality & Updates** | |
-| `/atlassian-pm:verify-issue` | ADF format + INVEST criteria check (A1-A6) |
-| `/atlassian-pm:sync-artifacts` | Bidirectional sync: Task ↔ child Tasks ↔ Confluence |
-| `/atlassian-pm:update-epic` | Edit Epic — scope, RICE, metrics |
-| `/atlassian-pm:update-task` | Edit Task — ACs, scope, description, format |
-| `/atlassian-pm:assign-issue` | Assign issue (bypasses MCP silent failure) |
+| `/atlassian-pm:apm-verify-issue` | ADF format + INVEST criteria check (A1-A6) |
+| `/atlassian-pm:apm-sync-artifacts` | Bidirectional sync: Task ↔ child Tasks ↔ Confluence |
+| `/atlassian-pm:apm-update-epic` | Edit Epic — scope, RICE, metrics |
+| `/atlassian-pm:apm-update-task` | Edit Task — ACs, scope, description, format |
+| `/atlassian-pm:apm-assign-issue` | Assign issue (bypasses MCP silent failure) |
 | **QA** | |
-| `/atlassian-pm:create-testplan` | Test Plan + QA subtasks from Story ACs |
-| `/atlassian-pm:execute-testplan` | Run test cases via Playwright → create bug tickets |
+| `/atlassian-pm:apm-create-testplan` | Test Plan + QA subtasks from Story ACs |
+| `/atlassian-pm:apm-execute-testplan` | Run test cases via Playwright → create bug tickets |
 | **Confluence** | |
-| `/atlassian-pm:create-doc` | Create page: tech-spec, adr, parent |
-| `/atlassian-pm:update-doc` | Update or move a Confluence page |
-| `/atlassian-pm:plan-release` | Multi-sprint release plan + Confluence page + Fix Version |
-| `/atlassian-pm:release-notes` | Generate Confluence release notes from Fix Version |
+| `/atlassian-pm:apm-create-doc` | Create page: tech-spec, adr, parent |
+| `/atlassian-pm:apm-update-doc` | Update or move a Confluence page |
+| `/atlassian-pm:apm-plan-release` | Multi-sprint release plan + Confluence page + Fix Version |
+| `/atlassian-pm:apm-release-notes` | Generate Confluence release notes from Fix Version |
 | **Utilities** | |
-| `/atlassian-pm:scan-tech-debt` | Aggregate tech-debt → Effort×Impact matrix on Confluence |
-| `/atlassian-pm:activity-report` | Work activity report from session history |
+| `/atlassian-pm:apm-scan-tech-debt` | Aggregate tech-debt → Effort×Impact matrix on Confluence |
+| `/atlassian-pm:apm-activity-report` | Work activity report from session history |
 | `/atlassian-pm:atlassian-scripts` | Python scripts for complex Jira/Confluence ops |
 
 ---
@@ -174,14 +174,14 @@ analyze story {{PROJECT_KEY}}-456 and create implementation subtasks with hints
 Or use the slash command:
 
 ```text
-/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+/atlassian-pm:apm-verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
 ```
 
 ### Workflow C: New feature from scratch
 
 ```
-1. /atlassian-pm:create-epic     → Epic + Confluence epic page
-2. /atlassian-pm:create-task     → Tasks with child Tasks under the epic
+1. /atlassian-pm:apm-create-epic     → Epic + Confluence epic page
+2. /atlassian-pm:apm-create-task     → Tasks with child Tasks under the epic
 ```
 
 Or use the fast-path: `/epic-full`
@@ -203,15 +203,15 @@ Or use the fast-path: `/bug-full`
 ### Workflow E: Scrumban daily flow
 
 ```
-1. /atlassian-pm:flow-check           → board health + replenish Ready queue if low
-2. /atlassian-pm:start-ticket {{PROJECT_KEY}}-XXX  → read AC + move to In Progress
-3. /atlassian-pm:ship-to-qa {{PROJECT_KEY}}-XXX    → post PR + preview URLs + transition to Ready for QA
+1. /atlassian-pm:apm-flow-check           → board health + replenish Ready queue if low
+2. /atlassian-pm:apm-start-ticket {{PROJECT_KEY}}-XXX  → read AC + move to In Progress
+3. /atlassian-pm:apm-ship-to-qa {{PROJECT_KEY}}-XXX    → post PR + preview URLs + transition to Ready for QA
 ```
 
 ### Workflow F: Sprint close with retrospective
 
 ```
-1. /atlassian-pm:close-sprint           → triage incomplete issues
+1. /atlassian-pm:apm-close-sprint           → triage incomplete issues
 2. /atlassian-pm:retrospective-analyst  → generate retro + Confluence page
 ```
 
@@ -228,7 +228,7 @@ verify {{PROJECT_KEY}}-123 --with-subtasks --fix
 Or use the slash command:
 
 ```
-/atlassian-pm:verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
+/atlassian-pm:apm-verify-issue {{PROJECT_KEY}}-XXX --with-subtasks
 flags: --fix (auto-repair), --dry-run (preview only)
 ```
 
@@ -275,14 +275,14 @@ Skills invoke these automatically. Listed here for reference:
 
 | Symptom | Fix |
 |---------|-----|
-| `acli not found` | `brew install acli` then re-run `/atlassian-pm:atlassian-setup` |
-| MCP tools not found | Restart Claude Code after running `/atlassian-pm:atlassian-setup` |
-| `atlassian-cache: Failed to connect` | Run `/atlassian-pm:atlassian-setup` to install the venv. After any plugin update, re-run setup to rebuild it. |
-| QG keeps failing | Run `/atlassian-pm:verify-issue KEY --fix` |
+| `acli not found` | `brew install acli` then re-run `/atlassian-pm:apm-setup` |
+| MCP tools not found | Restart Claude Code after running `/atlassian-pm:apm-setup` |
+| `atlassian-cache: Failed to connect` | Run `/atlassian-pm:apm-setup` to install the venv. After any plugin update, re-run setup to rebuild it. |
+| QG keeps failing | Run `/atlassian-pm:apm-verify-issue KEY --fix` |
 | Stale issue data | Cache auto-invalidates after writes; force with `cache_invalidate(key)` |
 | Subtask has wrong parent | Enforced by HR5: MCP create → verify parent → acli edit |
 | Sprint ID mismatch | Never hardcode sprint IDs; always resolved via `jira_get_sprints_from_board()` |
-| Reinstalled plugin, venv missing | Run `/atlassian-pm:atlassian-setup` — detects missing venv, re-runs `uv sync` automatically |
+| Reinstalled plugin, venv missing | Run `/atlassian-pm:apm-setup` — detects missing venv, re-runs `uv sync` automatically |
 
 Full troubleshooting reference: `references/troubleshooting.md`
 

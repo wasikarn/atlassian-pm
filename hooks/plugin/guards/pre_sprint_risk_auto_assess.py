@@ -2,7 +2,7 @@
 """PreToolUse hook: warn before activating a sprint without risk assessment.
 
 Fires on jira_update_sprint when state is being set to 'active'.
-Injects a reminder to run /atlassian-pm:risk-forecaster before starting the sprint.
+Injects a reminder to run /atlassian-pm:apm-risk-forecaster before starting the sprint.
 """
 
 import sys
@@ -40,7 +40,7 @@ def main():
 
     inject_context(
         f"**Sprint Risk Check:** Sprint {sprint_id} is being activated. "
-        f"Consider running `/atlassian-pm:risk-forecaster` first to assess delivery risk "
+        f"Consider running `/atlassian-pm:apm-risk-forecaster` first to assess delivery risk "
         f"(capacity, complexity hotspots, dependency chains) before committing the team. "
         f"To suppress this reminder, run risk-forecaster — it will mark the sprint as assessed.",
         event_name="PreToolUse",

@@ -44,7 +44,7 @@ sprint_ref = f"sprint {sprint_id}" if sprint_id else "sprint"
 inject_context(
     f"Sprint assignment updated ({sprint_ref}). "
     f"Verify sprint capacity has not exceeded team throughput ({avg_throughput} SP). "
-    f"Run `/atlassian-pm:plan-sprint --check-capacity` or manually sum SP of all issues in this sprint."
+    f"Run `/atlassian-pm:apm-plan-sprint --check-capacity` or manually sum SP of all issues in this sprint."
 )
 
 sys.exit(0)
