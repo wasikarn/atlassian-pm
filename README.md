@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -560,8 +560,8 @@ skills/                          ← 39 skills in 7 categories
 references/                     ← Docs loaded on-demand (templates, hr-rules, troubleshooting)
 scripts/                        ← Python scripts (ai/, api/, lib/, sprint/)
 agents/                         ← 20 subagents (3-layer: Foundation, Analysis, Synthesis)
-hooks/                          ← 59 Python hooks (HR1–HR10 enforcement, quality gates, cache)
-.claude/commands/               ← 13 orchestration chains (vibe-full, story-full, epic-full, ...)
+hooks/                          ← 71 Python hooks (HR1–HR10 enforcement, quality gates, cache)
+.claude/commands/               ← 11 orchestration chains (vibe-full, story-full, epic-full, ...)
 mcp-servers/atlassian-cache/    ← SQLite + FTS5 + embeddings cache
 ```
 
