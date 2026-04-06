@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.7.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.7.1-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
