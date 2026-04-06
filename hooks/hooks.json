@@ -126,17 +126,6 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/pre_skill_usage_log.py",
-            "timeout": 5,
-            "async": true
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -197,11 +186,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_sprint_capacity_recheck.py",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/guards/post_hr8_sp_sum_suggest.py",
             "timeout": 5
           }
@@ -246,16 +230,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/post_auto_parse_large_output.py",
             "timeout": 15
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues|mcp__mcp-atlassian__jira_get_sprint_issues",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/dev/post_subtask_alignment_suggest.py",
-            "timeout": 5
           }
         ]
       },

@@ -548,8 +548,9 @@ Staged:       {{PROJECT_KEY}}-XXX   ← placeholders
 .mcp.json                        ← MCP server config
 .claude/project-config.json      ← Real config (gitignored)
 
-skills/                          ← 39 skills in 7 categories
-├── setup/                       ← setup, doctor
+skills/                          ← 39 skills in 6 categories + 2 root-level
+├── apm-setup/                   ← setup
+├── apm-doctor/                  ← doctor
 ├── epic/                        ← blueprint, refine-epic, create-epic, vibe-plan, update-epic, plan-release
 ├── story/                       ← spec-to-stories, verify-issue, sync-artifacts
 ├── task/                        ← create-task, create-testplan, execute-testplan, bug-triage, start-ticket, ship-to-qa
@@ -560,7 +561,7 @@ skills/                          ← 39 skills in 7 categories
 references/                     ← Docs loaded on-demand (templates, hr-rules, troubleshooting)
 scripts/                        ← Python scripts (ai/, api/, lib/, sprint/)
 agents/                         ← 20 subagents (3-layer: Foundation, Analysis, Synthesis)
-hooks/                          ← 71 Python hooks (HR1–HR10 enforcement, quality gates, cache)
+hooks/                          ← 68 Python hooks (HR1–HR10 enforcement, quality gates, cache)
 .claude/commands/               ← 11 orchestration chains (vibe-full, story-full, epic-full, ...)
 mcp-servers/atlassian-cache/    ← SQLite + FTS5 + embeddings cache
 ```

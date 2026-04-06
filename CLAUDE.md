@@ -6,8 +6,8 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (71) | `agents/` (20) | `.claude/commands/` (11 chains)
-**Skills:** 35 skills at `skills/{setup,epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (68) | `agents/` (20) | `.claude/commands/` (11 chains)
+**Skills:** 35 skills · root-level: `skills/{apm-setup,apm-doctor}/SKILL.md` · categorized: `skills/{epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
 **Issue hierarchy:** Epic → Task (2 levels). Task carries narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings. Human-readable + AI-parseable.
 **Data flow:** Skill phase → generate ADF JSON → `validate_adf.py` (QG ≥ 90%) → `acli --from-json` (create) or MCP `jira_update_issue` (update) → `cache_invalidate`
@@ -106,6 +106,8 @@ Full definitions: `references/hr-rules.md`
 | **HR6** Cache invalidate | Any MCP write | `cache_invalidate(issue_key)` after every write |
 | **HR7** Sprint ID | Set `{{SPRINT_FIELD}}` | Never hardcode — `jira_get_sprints_from_board()` always |
 | **HR9** Desc alignment | Create/update any issue | Epic ACs → Task objectives · run `verify-issue` |
+
+> **Sprint alignment:** After fetching sprint issues (`jira_get_sprint_issues` / `cache_sprint_issues`), run `python3 scripts/sprint-subtask-alignment.py --sprint <id>` — checks HR8 dates, missing OE, parent range violations. Add `--apply` to auto-fix.
 
 ## Context Management
 
