@@ -36,7 +36,10 @@ def _get_connection(session_id: str, fast_mode: bool = False) -> sqlite3.Connect
 
     Args:
         session_id: Session identifier
-        fast_mode: If True, skip migration and use shorter timeout (for stop hooks)
+        fast_mode: If True, use shorter timeout (1s vs 5s), skip JSON migration,
+                   and skip memory-mapped I/O optimizations. Use for stop hooks
+                   where speed is critical and old data migration is not needed.
+                   Note: fast_mode still creates schema tables as they are required.
     """
     _ensure_state_dir()
     db_path = _get_db_path(session_id)

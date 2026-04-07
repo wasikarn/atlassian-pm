@@ -26,10 +26,11 @@ def is_cache_server_running() -> bool:
     """Check if the atlassian-cache process is running via PID file.
 
     Fast check using PID file แทน pgrep -f ซึ่งช้ามากเมื่อมี process เยอะ.
+    ถ้าไม่มี PID file (เช่น server ไม่ได้ start ผ่าน run.sh) จะ fallback ไป pgrep.
     """
     import os
 
-    # Check PID file first (instant)
+    # Check PID file first (instant) - created by run.sh
     try:
         pid_file = Path("/tmp/atlassian-cache.pid")
         if pid_file.exists():
@@ -38,26 +39,20 @@ def is_cache_server_running() -> bool:
             os.kill(pid, 0)
             return True
     except (OSError, ValueError):
-        # Process doesn't exist or invalid PID file
-        pass
+        # Process doesn't exist or invalid PID file - clean up stale file
+        try:
+            Path("/tmp/atlassian-cache.pid").unlink(missing_ok=True)
+        except Exception:
+            pass
+        return False
 
-    # Fallback: Check socket file
-    try:
-        socket_file = Path("/tmp/atlassian-cache.sock")
-        if socket_file.exists():
-            return True
-    except Exception:
-        pass
-
-    # Last resort: fast pgrep without -f flag (only matches process name)
+    # Fallback: pgrep for atlassian-cache process (without -f to avoid scanning cmdline)
     try:
         result = subprocess.run(
-            ["pgrep", "-x", "python3"],  # -x = exact match, faster than -f
+            ["pgrep", "-f", "atlassian-cache"],  # Match process with atlassian-cache in name
             capture_output=True,
             timeout=0.5,
         )
-        # If any python3 is running, assume cache server might be running
-        # This is conservative but fast
         return result.returncode == 0
     except Exception:
         return False

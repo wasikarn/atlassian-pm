@@ -40,6 +40,12 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── start server ──────────────────────────────────────────────────────────────
+PID_FILE="/tmp/atlassian-cache.pid"
+
+# Write PID file and cleanup on exit
+echo $$ > "$PID_FILE"
+trap "rm -f '$PID_FILE'" EXIT
+
 exec "$UV_CMD" run \
   --project "$SCRIPT_DIR" \
   "$SCRIPT_DIR/server.py"
