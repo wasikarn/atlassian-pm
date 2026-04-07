@@ -50,7 +50,18 @@ def main() -> None:
         return
 
     session_id = data.get("session_id", "")
-    pending = hr5_get_pending(session_id)
+    if not session_id:
+        print(json.dumps({"ok": True}))
+        return
+
+    # Fast-path: Check if DB exists before querying
+    from hooks_state import STATE_DIR
+    db_path = STATE_DIR / f"{session_id}.db"
+    if not db_path.exists():
+        print(json.dumps({"ok": True}))
+        return
+
+    pending = hr5_get_pending(session_id, fast_mode=True)
 
     result = check_pending(pending)
     if result["ok"]:

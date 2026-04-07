@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
-_STATE_DIR_STR = str(STATE_DIR)
+_STATE_DIR_STR = str(STATE_DIR)  # Kept for backward compatibility with tests
 
 STATE_EXPIRY_SECONDS = 3600  # 1 hour
 
@@ -31,21 +31,30 @@ def _ensure_state_dir() -> None:
 def _get_db_path(session_id: str) -> Path:
     return STATE_DIR / f"{session_id or 'default'}.db"
 
-def _get_connection(session_id: str) -> sqlite3.Connection:
-    """Creates a connection to the SQLite state DB with WAL mode enabled."""
+def _get_connection(session_id: str, fast_mode: bool = False) -> sqlite3.Connection:
+    """Creates a connection to the SQLite state DB with WAL mode enabled.
+
+    Args:
+        session_id: Session identifier
+        fast_mode: If True, skip migration and use shorter timeout (for stop hooks)
+    """
     _ensure_state_dir()
     db_path = _get_db_path(session_id)
 
-    # timeout=5.0 prevents immediate crash if DB is busy
-    conn = sqlite3.connect(str(db_path), timeout=5.0)
+    # Fast mode: shorter timeout for stop hooks
+    timeout = 1.0 if fast_mode else 5.0
+    conn = sqlite3.connect(str(db_path), timeout=timeout)
 
     # WAL mode allows concurrent reads and writes without blocking
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA synchronous=NORMAL;")
-    conn.execute("PRAGMA mmap_size = 268435456;")  # Map up to 256MB of DB into memory
-    conn.execute("PRAGMA cache_size = -64000;")   # 64MB cache
 
-    # Initialize schema
+    if not fast_mode:
+        # Full optimization (for regular operations)
+        conn.execute("PRAGMA mmap_size = 268435456;")
+        conn.execute("PRAGMA cache_size = -64000;")
+
+    # Initialize schema (always needed)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS state (
             key TEXT PRIMARY KEY,
@@ -81,7 +90,9 @@ def _get_connection(session_id: str) -> sqlite3.Connection:
         )
     """)
 
-    _migrate_from_json(session_id, conn)
+    # Skip migration in fast mode (stop hooks don't need old JSON data)
+    if not fast_mode:
+        _migrate_from_json(session_id, conn)
 
     return conn
 
@@ -301,12 +312,15 @@ def hr6_remove_pending(session_id: str, key: str) -> None:
     finally:
         conn.close()
 
-def hr6_get_pending(session_id: str) -> set[str]:
-    conn = _get_connection(session_id)
+def hr6_get_pending(session_id: str, fast_mode: bool = False) -> set[str]:
+    """Get pending HR6 invalidations.
+
+    Args:
+        session_id: Session ID
+        fast_mode: If True, use optimized path for stop hooks (no migration, cached connection)
+    """
+    conn = _get_connection(session_id, fast_mode=fast_mode)
     try:
-        # Probabilistic check: If Bloom Filter (for the table) would be useful,
-        # but since we are fetching ALL, we just query.
-        # However, for individual key checks we'd use it.
         cursor = conn.execute("SELECT key FROM hr6_pending")
         return set(row[0] for row in cursor.fetchall())
     finally:
@@ -349,8 +363,14 @@ def hr5_add_pending(session_id: str, child_key: str, parent_key: str) -> None:
     finally:
         conn.close()
 
-def hr5_get_pending(session_id: str) -> list:
-    conn = _get_connection(session_id)
+def hr5_get_pending(session_id: str, fast_mode: bool = False) -> list:
+    """Get pending HR5 parent verifications.
+
+    Args:
+        session_id: Session ID
+        fast_mode: If True, use optimized path for stop hooks (no migration, cached connection)
+    """
+    conn = _get_connection(session_id, fast_mode=fast_mode)
     try:
         cursor = conn.execute("SELECT child, parent, ts FROM hr5_pending")
         return [{"child": row[0], "parent": row[1], "ts": row[2]} for row in cursor.fetchall()]
