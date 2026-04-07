@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.8.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.9.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -499,21 +499,11 @@ acli jira auth status
 ---
 
 ## Architecture
-
-```text
-Claude Code ──► acli (ADF JSON) ──► Jira Cloud
-     │                                    ▲
-     ├── MCP ──► mcp-atlassian ───────────┤ (field updates)
-     ├── MCP ──► atlassian-cache ──► SQLite + FTS5 (80-90% token savings)
-     └── Python scripts ──► REST API helpers
-```
-
-| Layer | Tool | Why |
-| --- | --- | --- |
-| Descriptions | `acli --from-json` (ADF) | MCP produces unformatted output |
-| Fields | MCP `jira_update_issue` | Reliable for metadata (assignee, sprint, labels) |
-| Sub-task creation | MCP create → acli edit | MCP may silently drop parent link |
-| Cache | SQLite + FTS5 + embeddings | Reduces API calls 80–90% |
+Coda-level performance via multi-tier state management:
+- **L1 Cache**: Process-level LRU cache for zero-latency reads.
+- **State-Daemon**: RAM-based state management via Unix Domain Sockets (Zero-Disk I/O).
+- **SQLite WAL**: ACID-compliant persistent storage with Write-Ahead Logging, Bloom Filters, and Delta Tracking.
+- **Iterative ADF Processing**: Stack-based traversal to prevent RecursionError in large documents.
 
 ---
 

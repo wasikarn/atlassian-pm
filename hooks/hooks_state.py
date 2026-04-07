@@ -1,19 +1,18 @@
 """Shared session state for Claude hooks.
 
-Single state file per session at /tmp/claude-hooks-state/{session_id}.json.
-Used by HR6 (cache invalidation), HR7 (sprint lookup), search tracking,
-cache-prefer (cache-first reads), and qmd (codebase search).
+Replaces JSON-based state with SQLite in WAL mode to eliminate lock contention
+and prevent "Levitating..." hangs during stop-hooks.
 
-File locking via fcntl.flock prevents race conditions when parallel
-subagents access the same state file concurrently.
+State is stored in /tmp/claude-hooks-state/{session_id}.db
 """
 
-import fcntl
-import functools
+import sqlite3
 import json
 import os
 import sys
 import time
+import functools
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -21,527 +20,655 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
-_STATE_STR = str(STATE_DIR)  # cached str for Path ops
+_STATE_DIR_STR = str(STATE_DIR)
 
-# State entries older than this are considered stale and auto-cleaned
 STATE_EXPIRY_SECONDS = 3600  # 1 hour
 
-# In-process read cache — avoids redundant file reads when a hook calls
-# multiple state functions in one execution (each hook is its own subprocess,
-# so this cache is discarded when the process exits).
-_cache: dict[str, dict] = {}
-_state_dir_ready: bool = False  # mkdir guard: only called once per process
-
-
 def _ensure_state_dir() -> None:
-    global _state_dir_ready
-    if not _state_dir_ready:
-        STATE_DIR.mkdir(parents=True, exist_ok=True)
-        os.chmod(STATE_DIR, 0o700)  # Owner-only: directory contains sensitive session state
-        _state_dir_ready = True
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    os.chmod(STATE_DIR, 0o700)
 
+def _get_db_path(session_id: str) -> Path:
+    return STATE_DIR / f"{session_id or 'default'}.db"
 
-@functools.lru_cache(maxsize=64)
-def _state_file(session_id: str) -> Path:
-    return STATE_DIR / f"{session_id or 'default'}.json"
-
-
-@functools.lru_cache(maxsize=64)
-def _lock_file(session_id: str) -> Path:
-    return STATE_DIR / f"{session_id or 'default'}.lock"
-
-
-def _load(session_id: str) -> dict:
-    if session_id in _cache:
-        return _cache[session_id]
-    f = _state_file(session_id)
-    try:
-        state = json.loads(f.read_text()) if f.exists() else {}
-    except Exception:
-        state = {}
-    _cache[session_id] = state
-    return state
-
-
-def _save(session_id: str, state: dict) -> None:
+def _get_connection(session_id: str) -> sqlite3.Connection:
+    """Creates a connection to the SQLite state DB with WAL mode enabled."""
     _ensure_state_dir()
-    lock = _lock_file(session_id)
+    db_path = _get_db_path(session_id)
 
-    # Implementation of Non-blocking Lock with Exponential Backoff
-    # Prevents the "stop hooks 7/8" hang by not waiting indefinitely for LOCK_EX
-    max_retries = 5
-    base_delay = 0.05  # 50ms
+    # timeout=5.0 prevents immediate crash if DB is busy
+    conn = sqlite3.connect(str(db_path), timeout=5.0)
 
-    with open(lock, "a+") as lf:
-        for attempt in range(max_retries):
-            try:
-                fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                try:
-                    # Re-read under lock to merge concurrent writes
-                    f = _state_file(session_id)
-                    try:
-                        disk_state = json.loads(f.read_text()) if f.exists() else {}
-                    except Exception:
-                        disk_state = {}
-                    # Merge: our state wins for keys we touched
-                    disk_state.update(state)
-                    _cache[session_id] = disk_state
-                    f.write_text(json.dumps(disk_state))
-                    os.chmod(f, 0o600)  # Owner read/write: session state may contain sensitive Jira keys
-                    return # Success!
-                finally:
-                    fcntl.flock(lf, fcntl.LOCK_UN)
-            except (BlockingIOError, IOError):
-                if attempt == max_retries - 1:
-                    # Final attempt failed, log and bail to prevent turn-end hang
-                    log_event("hooks_state_save", "LOCK_TIMEOUT", {"session_id": session_id, "retries": max_retries})
-                    return
-                time.sleep(base_delay * (2 ** attempt)) # Exponential backoff
+    # WAL mode allows concurrent reads and writes without blocking
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    conn.execute("PRAGMA mmap_size = 268435456;")  # Map up to 256MB of DB into memory
+    conn.execute("PRAGMA cache_size = -64000;")   # 64MB cache
 
+    # Initialize schema
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS state (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            ts REAL
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS state_deltas (
+            key TEXT,
+            delta TEXT,
+            ts REAL,
+            PRIMARY KEY (key, ts)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS bloom_filter (
+            session_id TEXT PRIMARY KEY,
+            bitset BLOB
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS hr5_pending (
+            child TEXT,
+            parent TEXT,
+            ts REAL,
+            PRIMARY KEY (child, parent)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS known_subtasks (
+            key TEXT PRIMARY KEY
+        )
+    """)
 
-def cleanup_stale_state(session_id: str) -> None:
-    """Remove state entries older than STATE_EXPIRY_SECONDS.
+    _migrate_from_json(session_id, conn)
 
-    Cleans both top-level dict entries with 'ts' field and list entries
-    (like hr5_pending) that have 'ts' field. Call this before reading state
-    to prevent stale entries from blocking operations.
-    """
-    state = _load(session_id)
-    if not state:
+    return conn
+
+def _migrate_from_json(session_id: str, conn: sqlite3.Connection) -> None:
+    """Migrates data from old .json state file to SQLite."""
+    json_file = STATE_DIR / f"{session_id or 'default'}.json"
+    if not json_file.exists():
         return
-    now = time.time()
-    modified = False
 
-    # Clean stale top-level dict entries with 'ts' field
-    for key in list(state.keys()):
-        if isinstance(state[key], dict) and 'ts' in state[key]:
-            if now - state[key]['ts'] > STATE_EXPIRY_SECONDS:
-                del state[key]
-                modified = True
+    try:
+        state = json.loads(json_file.read_text())
 
-    # Clean stale hr5_pending list entries
-    if 'hr5_pending' in state:
-        pending = state['hr5_pending']
-        if isinstance(pending, list):
-            original_len = len(pending)
-            state['hr5_pending'] = [
-                p for p in pending
-                if not (isinstance(p, dict) and 'ts' in p and now - p['ts'] > STATE_EXPIRY_SECONDS)
-            ]
-            if len(state['hr5_pending']) != original_len:
-                modified = True
+        # Get Bloom Filter for current session to update it during migration
+        conn_bf = _get_connection(session_id)
+        bf = _get_bloom_filter(session_id, conn_bf)
 
-    if modified:
-        _save(session_id, state)
+        # Migrate global state
+        for key, val in state.items():
+            if isinstance(val, dict) and 'value' in val:
+                conn.execute(
+                    "INSERT OR REPLACE INTO state (key, value, ts) VALUES (?, ?, ?)",
+                    (key, json.dumps(val['value']), val.get('ts', time.time()))
+                )
+                bf.add(key)
+            elif key == "hr6_pending":
+                for k in val:
+                    hr6_add_pending(session_id, k)
+            elif key == "hr5_pending":
+                for p in val:
+                    if isinstance(p, dict):
+                        conn.execute(
+                            "INSERT OR REPLACE INTO hr5_pending (child, parent, ts) VALUES (?, ?, ?)",
+                            (p['child'], p['parent'], p.get('ts', time.time()))
+                        )
+            elif key == "hr5_known_subtasks":
+                for k in val:
+                    conn.execute("INSERT OR REPLACE INTO known_subtasks (key) VALUES (?)", (k,))
 
+        _save_bloom_filter(session_id, conn_bf, bf)
+        conn_bf.close()
+
+        # Archive old json file
+        json_file.rename(json_file.with_suffix(".json.bak"))
+    except Exception as e:
+        # Log migration failure but don't crash the hook
+        print(f"Migration error: {e}", file=sys.stderr)
+
+# ── Advanced Optimizations ────────────────────────────────
+
+class SimpleBloomFilter:
+    """Simple Bloom Filter for fast key existence checks.
+    Optimized for short-lived CLI processes: persisted as bitset in DB.
+    """
+    def __init__(self, size=1024 * 8):  # 8Kb bitset
+        self.size = size
+        self.bitset = bytearray(size // 8)
+
+    def _hashes(self, key: str):
+        h1 = int(hashlib.md5(key.encode()).hexdigest(), 16)
+        h2 = int(hashlib.sha1(key.encode()).hexdigest(), 16)
+        for i in range(3):
+            yield (h1 + i * h2) % self.size
+
+    def add(self, key: str):
+        for h in self._hashes(key):
+            self.bitset[h // 8] |= (1 << (h % 8))
+
+    def exists(self, key: str) -> bool:
+        for h in self._hashes(key):
+            if not (self.bitset[h // 8] & (1 << (h % 8))):
+                return False
+        return True
+
+    def to_bytes(self) -> bytes:
+        return bytes(self.bitset)
+
+    @classmethod
+    def from_bytes(cls, data: bytes):
+        bf = cls(len(data) * 8)
+        bf.bitset = bytearray(data)
+        return bf
+
+def _get_bloom_filter(session_id: str, conn: sqlite3.Connection) -> SimpleBloomFilter:
+    cursor = conn.execute("SELECT bitset FROM bloom_filter WHERE session_id = ?", (session_id,))
+    row = cursor.fetchone()
+    if row:
+        return SimpleBloomFilter.from_bytes(row[0])
+    return SimpleBloomFilter()
+
+def _save_bloom_filter(session_id: str, conn: sqlite3.Connection, bf: SimpleBloomFilter):
+    conn.execute("INSERT OR REPLACE INTO bloom_filter (session_id, bitset) VALUES (?, ?)",
+                 (session_id, bf.to_bytes()))
+
+def merge_deltas(base_value: Any, deltas: list[dict]) -> Any:
+    """Merges a base value with a sequence of JSON patches (deltas)."""
+    import copy
+    current = copy.deepcopy(base_value)
+    for delta in deltas:
+        patch = delta.get("patch")
+        if isinstance(current, dict) and isinstance(patch, dict):
+            current.update(patch)
+        elif isinstance(current, list) and isinstance(patch, list):
+            # Simple append for lists; in a real system this would be more complex
+            current.extend(patch)
+        else:
+            current = patch
+    return current
+
+# ── Generic State API ──────────────────────────────────
+
+@functools.lru_cache(maxsize=128)
+def get_state(session_id: str, key: str) -> Any | None:
+    """Get a state value set by set_state. Returns None if expired.
+    L1 Cache: Cached for the duration of the process.
+    """
+    conn = _get_connection(session_id)
+    try:
+        # Probabilistic check: Skip DB if Bloom Filter says it's not there
+        bf = _get_bloom_filter(session_id, conn)
+        if not bf.exists(key):
+            return None
+
+        cursor = conn.execute("SELECT value, ts FROM state WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        if row:
+            value, ts = row
+            if time.time() - ts > STATE_EXPIRY_SECONDS:
+                return None
+
+            # Resolve deltas if any exist
+            base_val = json.loads(value)
+            cursor_deltas = conn.execute("SELECT delta FROM state_deltas WHERE key = ? ORDER BY ts ASC", (key,))
+            deltas = [json.loads(d[0]) for d in cursor_deltas.fetchall()]
+
+            if deltas:
+                return merge_deltas(base_val, deltas)
+            return base_val
+        return None
+    finally:
+        conn.close()
 
 def set_state(session_id: str, key: str, value: Any) -> None:
-    """Set a state value with automatic timestamp tracking.
+    """Set a state value with automatic timestamp tracking and delta support."""
+    # Invalidate L1 cache for this key
+    get_state.cache_clear()
+    conn = _get_connection(session_id)
+    try:
+        # Delta Tracking: If value is a large dict/list, store as delta if base exists
+        cursor = conn.execute("SELECT value FROM state WHERE key = ?", (key,))
+        row = cursor.fetchone()
 
-    Stores the value with a 'ts' timestamp for expiry detection by
-    cleanup_stale_state. Use this for ephemeral state that should
-    expire after STATE_EXPIRY_SECONDS.
-    """
-    state = _load(session_id)
-    state[key] = {
-        'value': value,
-        'ts': time.time()
-    }
-    _save(session_id, state)
+        is_large = isinstance(value, (dict, list)) and len(str(value)) > 1024
 
+        if row and is_large:
+            base_val = json.loads(row[0])
+            # Calculate simple delta (for dicts)
+            if isinstance(value, dict) and isinstance(base_val, dict):
+                diff = {k: v for k, v in value.items() if v != base_val.get(k)}
+                if diff:
+                    conn.execute("INSERT INTO state_deltas (key, delta, ts) VALUES (?, ?, ?)",
+                                 (key, json.dumps({"patch": diff}), time.time()))
+                    conn.commit()
+                    # We don't update the base state every time to keep it stable
+                    # but we could optionally update it if deltas get too long
+                    return
 
-def get_state(session_id: str, key: str) -> Any | None:
-    """Get a state value set by set_state.
+        # Full write (base state)
+        conn.execute(
+            "INSERT OR REPLACE INTO state (key, value, ts) VALUES (?, ?, ?)",
+            (key, json.dumps(value), time.time())
+        )
 
-    Returns the value if present and not expired, None otherwise.
-    """
-    state = _load(session_id)
-    entry = state.get(key)
-    if isinstance(entry, dict) and 'value' in entry:
-        # Entry with timestamp - check expiry
-        if 'ts' in entry:
-            if time.time() - entry['ts'] > STATE_EXPIRY_SECONDS:
-                return None
-        return entry['value']
-    return None
+        # Update Bloom Filter
+        bf = _get_bloom_filter(session_id, conn)
+        bf.add(key)
+        _save_bloom_filter(session_id, conn, bf)
 
+        # Clear old deltas when base is reset
+        conn.execute("DELETE FROM state_deltas WHERE key = ?", (key,))
+
+        conn.commit()
+    finally:
+        conn.close()
+
+def cleanup_stale_state(session_id: str) -> None:
+    """Remove state entries older than STATE_EXPIRY_SECONDS."""
+    conn = _get_connection(session_id)
+    try:
+        now = time.time()
+        conn.execute("DELETE FROM state WHERE ts < ?", (now - STATE_EXPIRY_SECONDS,))
+        conn.execute("DELETE FROM hr5_pending WHERE ts < ?", (now - STATE_EXPIRY_SECONDS,))
+        conn.commit()
+    finally:
+        conn.close()
 
 # ── HR6: Cache invalidation tracking ──────────────────
 
-
 def hr6_add_pending(session_id: str, key: str) -> None:
-    state = _load(session_id)
-    pending = set(state.get("hr6_pending", []))
-    pending.add(key)
-    state["hr6_pending"] = sorted(pending)
-    _save(session_id, state)
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS hr6_pending (key TEXT PRIMARY KEY)")
+        conn.execute("INSERT OR REPLACE INTO hr6_pending (key) VALUES (?)", (key,))
+        conn.commit()
 
+        # Update Bloom Filter for keys in hr6_pending
+        bf = _get_bloom_filter(session_id, conn)
+        bf.add(f"hr6_pending:{key}")
+        _save_bloom_filter(session_id, conn, bf)
+    finally:
+        conn.close()
 
 def hr6_remove_pending(session_id: str, key: str) -> None:
-    state = _load(session_id)
-    pending = set(state.get("hr6_pending", []))
-    pending.discard(key)
-    state["hr6_pending"] = sorted(pending)
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("DELETE FROM hr6_pending WHERE key = ?", (key,))
+        conn.commit()
+    finally:
+        conn.close()
 
 def hr6_get_pending(session_id: str) -> set[str]:
-    return set(_load(session_id).get("hr6_pending", []))
-
+    conn = _get_connection(session_id)
+    try:
+        # Probabilistic check: If Bloom Filter (for the table) would be useful,
+        # but since we are fetching ALL, we just query.
+        # However, for individual key checks we'd use it.
+        cursor = conn.execute("SELECT key FROM hr6_pending")
+        return set(row[0] for row in cursor.fetchall())
+    finally:
+        conn.close()
 
 def hr6_clear_all_pending(session_id: str) -> None:
-    state = _load(session_id)
-    state["hr6_pending"] = []
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("DELETE FROM hr6_pending")
+        conn.commit()
+    finally:
+        conn.close()
 
 # ── HR7: Sprint lookup tracking ───────────────────────
 
-
 def hr7_mark_lookup_done(session_id: str) -> None:
-    state = _load(session_id)
-    state["hr7_lookup_done"] = True
-    _save(session_id, state)
-
+    set_state(session_id, "hr7_lookup_done", True)
 
 def hr7_is_lookup_done(session_id: str) -> bool:
-    return _load(session_id).get("hr7_lookup_done", False)
-
+    return bool(get_state(session_id, "hr7_lookup_done"))
 
 # ── Search tracking ───────────────────────────────────
 
-
 def search_mark_done(session_id: str) -> None:
-    state = _load(session_id)
-    state["search_done"] = True
-    _save(session_id, state)
-
+    set_state(session_id, "search_done", True)
 
 def search_is_done(session_id: str) -> bool:
-    return _load(session_id).get("search_done", False)
-
+    return bool(get_state(session_id, "search_done"))
 
 # ── HR5: Parent verification tracking ─────────────────
 
-
 def hr5_add_pending(session_id: str, child_key: str, parent_key: str) -> None:
-    state = _load(session_id)
-    pending = state.get("hr5_pending", [])
-    if not any(p["child"] == child_key for p in pending):
-        pending.append({"child": child_key, "parent": parent_key, "ts": time.time()})
-    state["hr5_pending"] = pending
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute(
+            "INSERT OR REPLACE INTO hr5_pending (child, parent, ts) VALUES (?, ?, ?)",
+            (child_key, parent_key, time.time())
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 def hr5_get_pending(session_id: str) -> list:
-    return list(_load(session_id).get("hr5_pending", []))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT child, parent, ts FROM hr5_pending")
+        return [{"child": row[0], "parent": row[1], "ts": row[2]} for row in cursor.fetchall()]
+    finally:
+        conn.close()
 
 def hr5_add_known_subtask(session_id: str, child_key: str) -> None:
-    """Permanently track a key as a known subtask (survives verify-clear)."""
-    state = _load(session_id)
-    subtasks = set(state.get("hr5_known_subtasks", []))
-    subtasks.add(child_key)
-    state["hr5_known_subtasks"] = sorted(subtasks)
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("INSERT OR REPLACE INTO known_subtasks (key) VALUES (?)", (child_key,))
+        conn.commit()
+    finally:
+        conn.close()
 
 def hr5_is_known_subtask(session_id: str, issue_key: str) -> bool:
-    return issue_key in set(_load(session_id).get("hr5_known_subtasks", []))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT 1 FROM known_subtasks WHERE key = ?", (issue_key,))
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
 
 def hr5_remove_pending(session_id: str, child_key: str) -> None:
-    state = _load(session_id)
-    pending = [p for p in state.get("hr5_pending", []) if p["child"] != child_key]
-    state["hr5_pending"] = pending
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("DELETE FROM hr5_pending WHERE child = ?", (child_key,))
+        conn.commit()
+    finally:
+        conn.close()
 
 # ── Event-AC: Domain Model tracking ──────────────────
 
-
 def event_set_domain_events(session_id: str, epic_key: str, events: list) -> None:
-    state = _load(session_id)
-    catalog = state.get("domain_events", {})
-    catalog[epic_key] = events
-    state["domain_events"] = catalog
-    _save(session_id, state)
-
+    set_state(session_id, f"domain_events_{epic_key}", events)
 
 def event_get_all_events(session_id: str) -> list:
-    """Get all known domain events across all epics."""
-    catalog = _load(session_id).get("domain_events", {})
-    all_events = []
-    for events in catalog.values():
-        all_events.extend(events)
-    return list(set(all_events))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT key, value FROM state WHERE key LIKE 'domain_events_%'")
+        all_events = []
+        for key, value in cursor.fetchall():
+            all_events.extend(json.loads(value))
+        return list(set(all_events))
+    finally:
+        conn.close()
 
 # ── VS Integrity: AC coverage tracking ───────────────
 
-
 def vs_set_story_acs(session_id: str, story_key: str, acs: list) -> None:
-    state = _load(session_id)
-    ac_map = state.get("vs_story_acs", {})
-    ac_map[story_key] = acs
-    state["vs_story_acs"] = ac_map
-    _save(session_id, state)
-
+    set_state(session_id, f"vs_story_acs_{story_key}", acs)
 
 def vs_add_subtask(session_id: str, story_key: str, subtask_key: str, summary: str) -> None:
-    state = _load(session_id)
-    subtasks = state.get("vs_subtasks", {})
-    if story_key not in subtasks:
-        subtasks[story_key] = []
-    if not any(s["key"] == subtask_key for s in subtasks[story_key]):
-        subtasks[story_key].append({"key": subtask_key, "summary": summary})
-    state["vs_subtasks"] = subtasks
-    _save(session_id, state)
-
+    # For VS subtasks, we use a specific key to avoid huge JSON blobs
+    # and allow easier querying.
+    key = f"vs_subtask_{story_key}_{subtask_key}"
+    set_state(session_id, key, {"summary": summary, "story": story_key})
 
 def vs_get_coverage(session_id: str) -> dict:
-    state = _load(session_id)
-    return {
-        "story_acs": dict(state.get("vs_story_acs", {})),
-        "subtasks": dict(state.get("vs_subtasks", {})),
-    }
-
+    conn = _get_connection(session_id)
+    try:
+        story_acs = {}
+        subtasks = {}
+        cursor = conn.execute("SELECT key, value FROM state")
+        for key, value in cursor.fetchall():
+            val = json.loads(value)
+            if key.startswith("vs_story_acs_"):
+                story_key = key.replace("vs_story_acs_", "")
+                story_acs[story_key] = val
+            elif key.startswith("vs_subtask_"):
+                # key: vs_subtask_{story}_{subtask}
+                parts = key.replace("vs_subtask_", "").split("_")
+                if len(parts) >= 2:
+                    story_key, subtask_key = parts[0], parts[1]
+                    if story_key not in subtasks:
+                        subtasks[story_key] = []
+                    subtasks[story_key].append({"key": subtask_key, "summary": val.get("summary", "")})
+        return {"story_acs": story_acs, "subtasks": subtasks}
+    finally:
+        conn.close()
 
 # ── Cache-prefer: per-issue cache-first tracking ─────
 
-
 def cache_mark_checked(session_id: str, issue_key: str) -> None:
-    """Mark that cache was tried for this issue (allows MCP fallback)."""
-    state = _load(session_id)
-    checked = set(state.get("cache_checked_issues", []))
-    checked.add(issue_key)
-    state["cache_checked_issues"] = sorted(checked)
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS cache_checked (key TEXT PRIMARY KEY)")
+        conn.execute("INSERT OR REPLACE INTO cache_checked (key) VALUES (?)", (issue_key,))
+        conn.commit()
+    finally:
+        conn.close()
 
 def cache_is_checked(session_id: str, issue_key: str) -> bool:
-    """Check if cache was already tried for this issue."""
-    return issue_key in set(_load(session_id).get("cache_checked_issues", []))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT 1 FROM cache_checked WHERE key = ?", (issue_key,))
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
 
 # ── Cache-first warning: per-session warning count ──────────────────
 
-
 def cache_warning_count(session_id: str) -> int:
-    """Return number of cache-first warnings issued this session."""
-    return _load(session_id).get("cache_warning_count", 0)
-
+    val = get_state(session_id, "cache_warning_count")
+    return val if val is not None else 0
 
 def cache_warning_increment(session_id: str) -> None:
-    """Increment the cache-first warning count for this session."""
-    state = _load(session_id)
-    state["cache_warning_count"] = state.get("cache_warning_count", 0) + 1
-    _save(session_id, state)
-
+    count = cache_warning_count(session_id)
+    set_state(session_id, "cache_warning_count", count + 1)
 
 # ── QMD: Usage tracking ─────────────────────────────
 
-def _build_qmd_collections() -> dict[str, str]:
-    """Build QMD_COLLECTIONS from project-config.json services.tags[].
+def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS qmd_searched (collection TEXT PRIMARY KEY)")
+        conn.execute("INSERT OR REPLACE INTO qmd_searched (collection) VALUES (?)", (collection,))
+        conn.commit()
+    finally:
+        conn.close()
 
-    Returns empty dict if config missing — qmd hooks degrade gracefully.
-    expanduser() converts ~/Codes/... to absolute path.
-    Note: if two services share the same directory basename, the last one wins silently.
-    """
+def qmd_is_collection_searched(session_id: str, collection: str) -> bool:
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT 1 FROM qmd_searched WHERE collection = ?", (collection,))
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
+
+def qmd_collection_for_path(path: str) -> str | None:
     config = load_project_config()
-    result = {}
     for svc in config.get("services", {}).get("tags", []):
         if svc.get("path"):
             resolved = Path(svc["path"]).expanduser()
-            result[str(resolved)] = resolved.name
-    return result
-
-
-@functools.cache
-def _get_qmd_collections() -> dict[str, str]:
-    """Lazy-loaded QMD collection map. Only evaluated on first call."""
-    return _build_qmd_collections()
-
-
-def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
-    """Mark a collection as auto-searched (per-collection tracking)."""
-    state = _load(session_id)
-    searched = set(state.get("qmd_searched_collections", []))
-    searched.add(collection)
-    state["qmd_searched_collections"] = sorted(searched)
-    _save(session_id, state)
-
-
-def qmd_is_collection_searched(session_id: str, collection: str) -> bool:
-    """Check if a collection was already auto-searched."""
-    return collection in set(_load(session_id).get("qmd_searched_collections", []))
-
-
-def qmd_collection_for_path(path: str) -> str | None:
-    """Return collection name if path falls within an indexed project."""
-    for root, name in _get_qmd_collections().items():
-        if path.startswith(root):
-            return name
+            if path.startswith(str(resolved)):
+                return resolved.name
     return None
 
 # ── Jira write activity tracking ────────────────────────────────────────────
 
-
 def jira_write_mark_occurred(session_id: str) -> None:
-    """Mark that at least one Jira write occurred this session (never cleared)."""
-    state = _load(session_id)
-    if not state.get("jira_write_occurred"):
-        state["jira_write_occurred"] = True
-        _save(session_id, state)
-
+    set_state(session_id, "jira_write_occurred", True)
 
 def jira_write_is_occurred(session_id: str) -> bool:
-    """Return True if any Jira write operation occurred this session."""
-    return bool(_load(session_id).get("jira_write_occurred", False))
-
+    return bool(get_state(session_id, "jira_write_occurred"))
 
 # ── Subtask alignment tracking ──────────────────────────────────────────────
 
 def alignment_mark_sprint_suggested(session_id: str, sprint_id: str) -> None:
-    """Mark that alignment check was suggested for this sprint."""
-    state = _load(session_id)
-    suggested = set(state.get("alignment_suggested_sprints", []))
-    suggested.add(str(sprint_id))
-    state["alignment_suggested_sprints"] = sorted(suggested)
-    _save(session_id, state)
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS alignment_suggested (sprint_id TEXT PRIMARY KEY)")
+        conn.execute("INSERT OR REPLACE INTO alignment_suggested (sprint_id) VALUES (?)", (str(sprint_id),))
+        conn.commit()
+    finally:
+        conn.close()
 
 def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
-    """Check if alignment check was already suggested for this sprint."""
-    return str(sprint_id) in set(_load(session_id).get("alignment_suggested_sprints", []))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT 1 FROM alignment_suggested WHERE sprint_id = ?", (str(sprint_id),))
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
 
 # ── Sprint risk assessment tracking ─────────────────────────────────────────
 
-
 def risk_mark_sprint_assessed(session_id: str, sprint_id: str) -> None:
-    """Mark that risk-forecaster was run for this sprint."""
-    state = _load(session_id)
-    assessed = set(state.get("risk_assessed_sprints", []))
-    assessed.add(str(sprint_id))
-    state["risk_assessed_sprints"] = sorted(assessed)
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS risk_assessed (sprint_id TEXT PRIMARY KEY)")
+        conn.execute("INSERT OR REPLACE INTO risk_assessed (sprint_id) VALUES (?)", (str(sprint_id),))
+        conn.commit()
+    finally:
+        conn.close()
 
 def risk_is_sprint_assessed(session_id: str, sprint_id: str) -> bool:
-    """Return True if risk-forecaster was already run for this sprint."""
-    return str(sprint_id) in set(_load(session_id).get("risk_assessed_sprints", []))
-
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT 1 FROM risk_assessed WHERE sprint_id = ?", (str(sprint_id),))
+        return cursor.fetchone() is not None
+    finally:
+        conn.close()
 
 # ── Skill checkpoint tracking ────────────────────────────────────────────────
-#
-# Saves issue keys created during skill workflows so they survive context
-# compaction. Compact-reinject reads these and outputs them to Claude's context,
-# restoring the "what was created so far" context without any skill re-execution.
-#
-# Schema per checkpoint:
-#   {"key": "TP-123", "type": "Story", "ts": 1234567890.0}
-# For subtasks, also includes: {"parent": "TP-100"}
-
 
 def skill_checkpoint_save(session_id: str, key: str, issue_type: str, parent_key: str | None = None) -> None:
-    """Save a created issue checkpoint. Stores up to 10 subtasks; story/epic overwrite."""
-    state = _load(session_id)
-    cp = state.get("skill_checkpoints", {})
-    entry = {"key": key, "type": issue_type, "ts": time.time()}
-    if parent_key:
-        entry["parent"] = parent_key
-
-    issue_type_lower = issue_type.lower()
-    if "subtask" in issue_type_lower or "sub-task" in issue_type_lower:
-        subtasks = cp.get("subtasks", [])
-        if not any(s["key"] == key for s in subtasks):
-            subtasks.append(entry)
-        cp["subtasks"] = subtasks[-10:]  # keep last 10
-    elif "epic" in issue_type_lower:
-        cp["latest_epic"] = entry
-    else:
-        cp["latest_story"] = entry
-
-    state["skill_checkpoints"] = cp
-    _save(session_id, state)
-
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS skill_checkpoints (key TEXT PRIMARY KEY, type TEXT, parent TEXT, ts REAL)")
+        conn.execute(
+            "INSERT OR REPLACE INTO skill_checkpoints (key, type, parent, ts) VALUES (?, ?, ?, ?)",
+            (key, issue_type, parent_key, time.time())
+        )
+        # Maintain subtask limit (last 10)
+        if "subtask" in issue_type.lower():
+            conn.execute("""
+                DELETE FROM skill_checkpoints
+                WHERE type LIKE '%subtask%' AND key NOT IN (
+                    SELECT key FROM skill_checkpoints
+                    WHERE type LIKE '%subtask%'
+                    ORDER BY ts DESC LIMIT 10
+                )
+            """)
+        conn.commit()
+    finally:
+        conn.close()
 
 def skill_checkpoint_get(session_id: str) -> dict:
-    """Return all skill checkpoints: {latest_story, latest_epic, subtasks:[]}."""
-    return dict(_load(session_id).get("skill_checkpoints", {}))
+    conn = _get_connection(session_id)
+    try:
+        cursor = conn.execute("SELECT key, type, parent, ts FROM skill_checkpoints")
+        rows = cursor.fetchall()
 
+        cp = {"subtasks": []}
+        for key, itype, parent, ts in rows:
+            entry = {"key": key, "type": itype, "ts": ts}
+            if parent: entry["parent"] = parent
+
+            if "subtask" in itype.lower():
+                cp["subtasks"].append(entry)
+            elif "epic" in itype.lower():
+                cp["latest_epic"] = entry
+            else:
+                cp["latest_story"] = entry
+        return cp
+    finally:
+        conn.close()
 
 def skill_checkpoint_clear(session_id: str) -> None:
-    """Clear all skill checkpoints (call when a workflow completes cleanly)."""
-    state = _load(session_id)
-    state.pop("skill_checkpoints", None)
-    _save(session_id, state)
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("DELETE FROM skill_checkpoints")
+        conn.commit()
+    finally:
+        conn.close()
 
+def _load() -> dict:
+    return load_state()
 
-# ── Session-level state (no session_id required) ─────────────────────────
-#
-# Convenience wrappers for global/session-agnostic state such as AI cost
-# tracking. Uses the "default" session key so data persists for the lifetime
-# of /tmp/claude-hooks-state/default.json.
-
+def _save(state: dict) -> None:
+    save_state(state)
 
 def load_state() -> dict:
     """Load global session state (session-id-agnostic convenience wrapper)."""
-    return dict(_load("default"))
-
+    conn = _get_connection("default")
+    try:
+        cursor = conn.execute("SELECT key, value FROM state")
+        return {row[0]: json.loads(row[1]) for row in cursor.fetchall()}
+    finally:
+        conn.close()
 
 def save_state(state: dict) -> None:
     """Persist global session state (session-id-agnostic convenience wrapper)."""
-    _save("default", state)
-
+    conn = _get_connection("default")
+    try:
+        for key, value in state.items():
+            conn.execute(
+                "INSERT OR REPLACE INTO state (key, value, ts) VALUES (?, ?, ?)",
+                (key, json.dumps(value), time.time())
+            )
+        conn.commit()
+    finally:
+        conn.close()
 
 # ── Response size tracking (token usage observability) ───────────────────
 
-
 def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> None:
-    """Track response size for a tool call in session state.
+    conn = _get_connection(session_id)
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS response_sizes (
+                tool TEXT PRIMARY KEY,
+                chars INTEGER,
+                tokens INTEGER,
+                calls INTEGER
+            )
+        """)
+        conn.execute("""
+            INSERT INTO response_sizes (tool, chars, tokens, calls)
+            VALUES (?, ?, ?, 1)
+            ON CONFLICT(tool) DO UPDATE SET
+                chars = chars + excluded.chars,
+                tokens = tokens + excluded.tokens,
+                calls = calls + 1
+        """, (tool, chars, tokens))
 
-    Accumulates per-tool and total stats for the session, enabling
-    analysis of token-heavy operations via cache_stats or similar.
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS response_totals (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                chars INTEGER,
+                tokens INTEGER,
+                calls INTEGER
+            )
+        """)
+        conn.execute("""
+            INSERT INTO response_totals (id, chars, tokens, calls)
+            VALUES (1, ?, ?, 1)
+            ON CONFLICT(id) DO UPDATE SET
+                chars = chars + excluded.chars,
+                tokens = tokens + excluded.tokens,
+                calls = calls + 1
+        """, (chars, tokens))
 
-    Args:
-        session_id: Claude session identifier
-        tool: Short tool name (e.g., "jira_get_issue", "cache_search")
-        chars: Response size in characters
-        tokens: Estimated token count
-    """
-    state = _load(session_id)
-    sizes = state.get("response_sizes", {})
-
-    # Per-tool accumulation
-    if tool not in sizes:
-        sizes[tool] = {"chars": 0, "tokens": 0, "calls": 0}
-    sizes[tool]["chars"] += chars
-    sizes[tool]["tokens"] += tokens
-    sizes[tool]["calls"] += 1
-
-    # Total accumulation
-    totals = state.get("response_totals", {"chars": 0, "tokens": 0, "calls": 0})
-    totals["chars"] += chars
-    totals["tokens"] += tokens
-    totals["calls"] += 1
-
-    state["response_sizes"] = sizes
-    state["response_totals"] = totals
-    _save(session_id, state)
-
+        conn.commit()
+    finally:
+        conn.close()
 
 def response_size_get_stats(session_id: str) -> dict:
-    """Get cumulative response size stats for the session.
+    conn = _get_connection(session_id)
+    try:
+        totals_row = conn.execute("SELECT chars, tokens, calls FROM response_totals WHERE id = 1").fetchone()
+        totals = {"chars": totals_row[0], "tokens": totals_row[1], "calls": totals_row[2]} if totals_row else {"chars": 0, "tokens": 0, "calls": 0}
 
-    Returns:
-        {
-            "totals": {"chars": N, "tokens": N, "calls": N},
-            "by_tool": {"jira_get_issue": {"chars": N, "tokens": N, "calls": N}, ...}
-        }
-    """
-    state = _load(session_id)
-    return {
-        "totals": dict(state.get("response_totals", {"chars": 0, "tokens": 0, "calls": 0})),
-        "by_tool": dict(state.get("response_sizes", {})),
-    }
+        by_tool = {}
+        cursor = conn.execute("SELECT tool, chars, tokens, calls FROM response_sizes")
+        for tool, chars, tokens, calls in cursor.fetchall():
+            by_tool[tool] = {"chars": chars, "tokens": tokens, "calls": calls}
+
+        return {"totals": totals, "by_tool": by_tool}
+    finally:
+        conn.close()

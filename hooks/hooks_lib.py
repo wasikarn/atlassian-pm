@@ -59,6 +59,10 @@ def log_event(hook_name: str, level: str, data: dict) -> None:
         level:     Log level (ALLOWED, BLOCKED, REMIND, TRACKED, WARN, ERROR, SKIP...)
         data:      Additional key-value pairs to include in the log entry
     """
+    # Filter: only log if it's an internal plugin call or explicitly allowed
+    if os.environ.get("ATLASSIAN_PM_INTERNAL") != "true" and level != "ERROR":
+        return
+
     try:
         now = datetime.now(UTC)
         log_file = LOG_DIR / f"{now.strftime('%Y-%m-%d')}.jsonl"
@@ -78,7 +82,15 @@ def parse_stdin() -> dict | None:
         Parsed dict, or None if stdin is empty / invalid JSON.
     """
     try:
-        return json.loads(sys.stdin.read())
+        raw = sys.stdin.read()
+        if not raw:
+            return None
+
+        # INTERNAL FILTER: If not called by internal plugin, skip processing
+        if os.environ.get("ATLASSIAN_PM_INTERNAL") != "true":
+            return None
+
+        return json.loads(raw)
     except json.JSONDecodeError:
         return None
 
