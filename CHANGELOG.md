@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.4] - 2026-04-07
+
+### Fixed
+
+- **run.sh** — Added `ATLASSIAN_PM_INTERNAL=true` to Python invocations; without this env var, `parse_stdin()` returned `None` in production, causing all hooks to silently no-op
+- **run.sh** — Removed `date +%s.%N` (GNU coreutils only); macOS BSD `date` does not support nanosecond format, causing silent failures in hook duration logging
+
+### Performance
+
+- **Hook aggregator** (`hooks/aggregator.py`) — New framework runs multiple hook scripts in a single Python subprocess, eliminating ~28ms Python startup cost per aggregated hook
+- **Aggregated entry points** — 14 sequential subprocess calls consolidated into 6 aggregated calls: `pre_bash.py` (3→1), `pre_jira_create.py` (2→1), `post_jira_create.py` (3→1), `post_jira_get.py` (2→1), `stop.py` (2→1), `subagent_start.py` (2→1); total savings ~224ms per workflow cycle
+- Async hooks preserved as separate entries; aggregation applies to sync hooks only
+
+### Tests
+
+- 10 new unit tests for aggregator framework (188 total); covers Pattern A/B hooks, stdin sharing, context merging, blocking, missing files
+
 ## [3.9.3] - 2026-04-07
 
 ### Performance
