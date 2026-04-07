@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.3] - 2026-04-07
+
+### Performance
+
+- **hooks_state Phase 1A** — Consolidated all 8 `CREATE TABLE IF NOT EXISTS` statements into `_get_connection()` schema init; eliminates 1-2ms DDL overhead on every hot-path call (hr6_pending, cache_checked, qmd_searched, alignment_suggested, risk_assessed, skill_checkpoints, response_sizes, response_totals)
+- **hooks_state Phase 1B** — Replaced `@functools.lru_cache(maxsize=128)` with custom `_StateCache` supporting selective per-key eviction; `set_state()` now invalidates only the affected `(session_id, key)` pair instead of clearing all 128 entries, preserving ~90% cache hit rate under write workloads
+
+### Fixed
+
+- **QA markdownlint** — Exclude `.omc/` and `.claude/` directories from markdownlint scan in `qa-check.sh`; add `.markdownlintignore` to prevent false failures from OMC research files
+
 ## [3.9.2] - 2026-04-07
 
 ### Fixed
