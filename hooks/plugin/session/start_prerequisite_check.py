@@ -11,12 +11,11 @@ Checks:
   - state dir: required for session state (HR5, HR6, HR7 tracking)
 """
 
-import os
 import shutil
 import sys
 from pathlib import Path
 
-CACHE_DB = Path(os.environ.get("CLAUDE_PLUGIN_DATA", str(Path.home() / ".claude" / "plugins" / "data" / "atlassian-pm-atlassian-pm"))) / "atlassian.db"
+CACHE_DB = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"
 STATE_DIR = Path("/tmp/claude-hooks-state")
 
 warnings = []

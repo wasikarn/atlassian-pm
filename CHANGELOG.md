@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.1] - 2026-04-08
+
+### Fixed
+
+- **`hooks/plugin/session/start_prerequisite_check.py`** — Corrected atlassian-cache DB path from `CLAUDE_PLUGIN_DATA/atlassian.db` to `~/.cache/atlassian-pm/atlassian.db` (matches actual server path and all other hooks)
+
+### Changed
+
+- **`CLAUDE.md`** — Updated counts: hooks 74→69, references 26→27
+
 ## [3.10.0] - 2026-04-08
 
 ### Changed

@@ -6,7 +6,7 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (26 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (74, aggregated via `aggregator.py`) | `agents/` (20) | `.claude/commands/` (11 chains)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (27 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (69, aggregated via `aggregator.py`) | `agents/` (20) | `.claude/commands/` (11 chains)
 **Skills:** 35 skills · root-level: `skills/{apm-setup,apm-doctor}/SKILL.md` · categorized: `skills/{epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
 **Issue hierarchy:** Epic → Task (2 levels). Task carries narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings. Human-readable + AI-parseable.
@@ -62,7 +62,7 @@ Core config: `.claude/project-config.json` (jira fields, team, services, environ
 
 ## References
 
-`references/` (26 docs, indexed by `templates.md`): ADF templates (`templates-core.md`, `templates-epic.md`, `templates-task.md`) · workflow (`workflow-patterns.md`, `skill-orchestration.md`, `hr-rules.md`) · guides (`writing-style.md`, `tools.md`, `troubleshooting.md`) · scripts via `skills/utilities/atlassian-scripts/SKILL.md`
+`references/` (27 docs, indexed by `templates.md`): ADF templates (`templates-core.md`, `templates-epic.md`, `templates-task.md`) · workflow (`workflow-patterns.md`, `skill-orchestration.md`, `hr-rules.md`) · guides (`writing-style.md`, `tools.md`, `troubleshooting.md`) · scripts via `skills/utilities/atlassian-scripts/SKILL.md`
 **Auto-loaded rules:** `.claude/rules/tool-selection.md` (MCP vs acli vs script per operation) · `.claude/rules/mermaid.md` (diagram docs + Confluence constraints) · `.claude/rules/python-scripts.md` (stdlib-only, exit codes, ruff)
 
 ### Chain Commands (`.claude/commands/`)
