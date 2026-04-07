@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config_loader import load_project_config
 
 STATE_DIR = Path("/tmp/claude-hooks-state")
-_STATE_DIR_STR = str(STATE_DIR)  # Kept for backward compatibility with tests
+_STATE_STR = str(STATE_DIR)  # Kept for backward compatibility with tests
+_STATE_DIR_STR = _STATE_STR  # Alias for newer code
 
 STATE_EXPIRY_SECONDS = 3600  # 1 hour
 
