@@ -344,7 +344,7 @@ If **Yes, configure**:
 
 See [references/phase-scripts.md](references/phase-scripts.md) — **Phase 6: Finalize Script** (team-detail copy + setup.sh)
 
-Handles: git smudge/clean filter + global `~/.claude/CLAUDE.md` Atlassian block.
+Handles: git smudge/clean filter.
 
 ### 2. Health Check
 

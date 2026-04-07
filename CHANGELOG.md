@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0] - 2026-04-08
+
+### Changed
+
+- **`plugin.json`** — Added `"mcpServers": "./.mcp.json"` declaration; `atlassian-cache` MCP now auto-registers for all marketplace users via plugin manifest (OMC pattern)
+- **`.mcp.json`** — Updated to use `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` variables; points directly to `run.sh` instead of the `run-mcp.sh` wrapper
+- **`setup.sh`** — Removed dynamic `.mcp.json` writing, `run-mcp.sh` copy to data dir, and `~/.claude/CLAUDE.md` Atlassian settings injection; setup now only installs the venv and configures git filters
+
+### Removed
+
+- **`~/.claude/CLAUDE.md` injection** — Setup no longer writes Atlassian settings to the user's global CLAUDE.md; project-level CLAUDE.md handles all context
+- **`run-mcp.sh` copy step** — Dead code removed from `setup.sh`; MCP resolves via `${CLAUDE_PLUGIN_ROOT}` directly
+
 ## [3.9.5] - 2026-04-08
 
 ### Removed

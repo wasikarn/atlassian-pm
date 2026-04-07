@@ -102,82 +102,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   fi
 fi
 
-# --- Install run-mcp.sh launcher at stable data dir ---
-if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
-  CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
-fi
-RUN_MCP_SRC="$PROJECT_DIR/mcp-servers/atlassian-cache/run-mcp.sh"
-RUN_MCP_DEST="$CLAUDE_PLUGIN_DATA/run-mcp.sh"
-if [ -f "$RUN_MCP_SRC" ]; then
-  mkdir -p "$CLAUDE_PLUGIN_DATA"
-  cp "$RUN_MCP_SRC" "$RUN_MCP_DEST"
-  chmod +x "$RUN_MCP_DEST"
-  echo "Installed run-mcp.sh → $RUN_MCP_DEST"
-fi
-
-# --- 1. Add Atlassian config to ~/.claude/CLAUDE.md ---
+# --- 1. Configure git smudge/clean filter ---
 echo ""
-echo "[1/2] Configuring ~/.claude/CLAUDE.md..."
-mkdir -p "$HOME/.claude"
-CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-
-# Read real values from project-config.json (skip if still placeholder)
-JIRA_SITE=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('site','your-site.atlassian.net'))" 2>/dev/null || echo "your-site.atlassian.net")
-PROJECT_KEY=$(python3 -c "import json; c=json.load(open('$CONFIG_FILE')); print(c.get('jira',{}).get('project_key','YOUR_KEY'))" 2>/dev/null || echo "YOUR_KEY")
-
-if _config_has_placeholder "$CONFIG_FILE" 2>/dev/null; then
-  echo "  config has placeholder values — CLAUDE.md update skipped (run /atlassian-pm:setup to configure)"
-elif [ -f "$CLAUDE_MD" ] && grep -q "Atlassian Settings" "$CLAUDE_MD"; then
-  echo "  Atlassian settings already present"
-else
-  cat >> "$CLAUDE_MD" << ATLASSIAN_CONFIG
-
-## Atlassian Settings
-
-> **Full config:** \`atlassian-pm/.claude/project-config.json\` — team, services, environments, custom fields
-
-| Setting | Value |
-| --- | --- |
-| Jira | \`${JIRA_SITE}\` / Project: \`${PROJECT_KEY}\` |
-| Date Fields | \`{{START_DATE_FIELD}}\` (Start), \`{{SPRINT_FIELD}}\` (Sprint) |
-
-**Dynamic lookup:** Board → \`jira_get_agile_boards(project_key="${PROJECT_KEY}")\` · Sprint → \`jira_get_sprints_from_board(board_id, state="future")\`
-
-**Assign:** \`acli jira workitem assign -k "KEY" -a "email" -y\` (MCP assignee broken)
-
-## Development Workflow
-
-### When referencing Jira issues (${PROJECT_KEY}-XXX)
-
-**Before implement:**
-1. Read issue via MCP \`jira_get_issue\` — understand AC, scope, technical notes
-2. Read sub-tasks for implementation details
-
-**After implement:**
-1. Add Jira comment via MCP \`jira_add_comment\`:
-   - What was implemented/changed
-   - Files modified
-   - Deviations from AC (if any)
-
-### Daily Ops Tool Selection
-
-| Operation | Tool |
-| --- | --- |
-| Read issue | MCP \`jira_get_issue\` |
-| Search issues | MCP \`jira_search\` |
-| Add comment | MCP \`jira_add_comment\` |
-| Update issue fields | MCP \`jira_update_issue\` |
-| Read Confluence | MCP \`confluence_get_page\` |
-| Update Confluence | MCP \`confluence_update_page\` |
-| Complex formatting | \`/atlassian-scripts\` |
-| Create/manage issues | Skill commands (\`/story-full\`, \`/verify-issue\`, etc.) |
-ATLASSIAN_CONFIG
-  echo "  added Atlassian settings (site: ${JIRA_SITE}, project: ${PROJECT_KEY})"
-fi
-
-# --- 2. Configure git smudge/clean filter ---
-echo ""
-echo "[2/2] Configuring git filters..."
+echo "[1/1] Configuring git filters..."
 if ! git -C "$PROJECT_DIR" rev-parse --git-dir &>/dev/null; then
   echo "  skipped (not a git repository — plugin installed from cache)"
 else

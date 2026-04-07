@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.9.5-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.10.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -421,7 +421,6 @@ Claude will ask for your Jira site, project key, and board ID, then write the co
 - ✓ acli (Jira CLI) — installed + authenticated
 - ✓ mcp-atlassian — registered as user-scoped MCP server
 - ✓ `~/.config/atlassian/.env` — Jira/Confluence credentials
-- ✓ `~/.claude/CLAUDE.md` — Atlassian settings block
 - ✓ git smudge/clean filters — placeholder conversion
 - ✓ atlassian-cache venv — Python deps for local issue cache (SQLite + embeddings)
 
