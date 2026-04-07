@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.5] - 2026-04-08
+
+### Removed
+
+- **project-config-team-detail.json** — Removed optional team-detail config dependency from all 23 files (agents, skills, scripts, docs, hooks); `board_monitor.py` velocity now defaults to `None`; `velocity-tracker` agent deprecated (redirected to `retrospective-analyst`)
+
+### Changed
+
+- **`.mcp.json`** — Emptied (`mcpServers: {}`); MCP registration removed from project config entirely. Plugin system registers `atlassian-cache` via marketplace `.mcp.json` on install; dev mode (`--plugin-dir .`) no longer relies on project-level registration
+- **`run-mcp.sh`** — New self-discovering MCP launcher wrapper; uses `find+sort -V` to locate latest plugin version automatically; installed to stable data dir (`$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm/`) by `setup.sh`
+- **`apm-doctor` check 10** — Now verifies `run-mcp.sh` launcher instead of team-detail config
+
+### Performance
+
+- **`atlassian-cache` MCP server** — 5 optimizations from 4-agent parallel analysis:
+  - `migrations.py` v8: Added missing indexes on `confluence_links(to_page_id)` and `confluence_sprint_links(page_id)` — eliminates full table scans on reverse lookups
+  - `server.py`: Fixed double JSON serialization in `cache_get_issue` hit/lazy-hit/miss paths — skips redundant `json.dumps` when `compact=False` (`raw_size = len(result)`)
+  - `server.py`: `embeddings.find_similar` now runs via `asyncio.to_thread` — CPU-bound ML inference no longer blocks the event loop
+  - `server.py`: Cache enrichment in `handle_cache_similar_issues` parallelized via `asyncio.gather` — N serial SQLite reads → concurrent
+  - `server.py`: `_init()` now runs via `asyncio.to_thread` in `_lifespan` — DB migrations + model load no longer block event loop during startup
+
+### Fixed
+
+- **`pyrightconfig.json`** — Added to fix import resolution for `scripts/` and root paths; suppress unused parameter warnings across `monitor/` module
+
 ## [3.9.4] - 2026-04-07
 
 ### Fixed
