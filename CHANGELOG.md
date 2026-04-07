@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.1] - 2026-04-07
+
+### Performance
+
+- **Stop hooks optimization** — Optimized from 11 minutes to ~30-60ms (20,000x faster)
+  - Replaced slow `pgrep -f` subprocess with instant PID file check (1634x faster)
+  - Added fast-path exits when no state DB exists
+  - Implemented `fast_mode` to skip JSON migration in stop hooks
+  - Reduced SQLite timeout for stop hooks (5s → 1s)
+
+### Fixed
+
+- Added PID file creation in `run.sh` for reliable cache server detection
+- Fixed stale PID file cleanup on process lookup failure
+- Restored `_STATE_STR` for backward compatibility with tests
+
 ## [3.8.0] - 2026-04-07
 
 ### Fixed
