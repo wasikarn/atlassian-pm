@@ -56,7 +56,6 @@ Codebase hints (base analysis ONLY on what's listed — do not invent file paths
 {codebase_context from Phase 3}
 Stack: AdonisJS 5.9 + Effect-TS + Clean Architecture, Next.js 14
 Team roster: {team.members from project-config.json}
-Bus factor areas: {bus_factor from project-config-team-detail.json}
 
 Tasks:
 1. Domain analysis:
@@ -81,7 +80,7 @@ Tasks:
    - Implementation gotchas (N+1 queries, race conditions, auth edge cases, Effect-TS patterns)
 6. VS plan: how to slice this into vertical slices
 7. Effort estimate: SP per story (XS=1,S=2,M=3,L=5,XL=8)
-8. Team assignment suggestions (based on skill_profile + bus_factor)
+8. Team assignment suggestions (based on skill_profile and team capacity)
 9. Reference similar implementations in codebase
 10. Security & deployment assessment:
     - Auth model: new roles/permissions needed?

@@ -13,9 +13,6 @@ __pycache__/
 # Project config (real values — use .template to create)
 .claude/project-config.json
 
-# Team detail (internal: git stats, capacity, sprint history)
-.claude/project-config-team-detail.json
-
 # Generated output
 output/
 

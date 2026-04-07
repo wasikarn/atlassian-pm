@@ -100,8 +100,6 @@ if [[ "$MODE" != "--doctor" ]]; then
   PLUGIN_DATA=$(_get_plugin_data)
   CONFIG_FILE="${PLUGIN_ROOT}/.claude/project-config.json"
   CONFIG_BACKUP="$HOME/.config/atlassian/project-config.json"
-  TEAM_DETAIL="${PLUGIN_ROOT}/.claude/project-config-team-detail.json"
-  TEAM_DETAIL_TMPL="${PLUGIN_ROOT}/.claude/project-config-team-detail.json.template"
 
   # Phase 0: auto-restore
   info "Phase 0: auto-restore config..."
@@ -143,24 +141,13 @@ if [[ "$MODE" != "--doctor" ]]; then
     fi
   fi
 
-  # Phase 5a: team-detail
-  info "Phase 5a: team-detail..."
-  if [ ! -f "$TEAM_DETAIL" ] && [ -f "$TEAM_DETAIL_TMPL" ]; then
-    cp "$TEAM_DETAIL_TMPL" "$TEAM_DETAIL"
-    pass "team-detail created from template"
-  else
-    pass "team-detail already exists"
-  fi
-
   # Verify final cache state
   info "Verifying .claude/ contents..."
-  for f in project-config.json project-config-team-detail.json; do
-    if [ -f "${PLUGIN_ROOT}/.claude/$f" ]; then
-      pass "$f present"
-    else
-      fail "$f MISSING"
-    fi
-  done
+  if [ -f "${PLUGIN_ROOT}/.claude/project-config.json" ]; then
+    pass "project-config.json present"
+  else
+    fail "project-config.json MISSING"
+  fi
   if [ -f "${PLUGIN_DATA}/venv/bin/python" ]; then
     pass "venv/bin/python present"
   else
@@ -175,7 +162,7 @@ echo -e "${CYAN}━━━ Phase 3: Doctor (11 checks) ━━━${NC}"
 PLUGIN_ROOT=$(_get_plugin_root)
 PLUGIN_DATA=$(_get_plugin_data)
 CONFIG_FILE="${PLUGIN_ROOT}/.claude/project-config.json"
-DR_PASS=0; DR_FAIL=0; DR_WARN=0; DR_SKIP=0; DR_TOTAL=11
+DR_PASS=0; DR_FAIL=0; DR_WARN=0; DR_SKIP=0; DR_TOTAL=9
 
 _dr_pass() { echo -e "  ${GREEN}✓${NC}  $*"; DR_PASS=$((DR_PASS+1)); }
 _dr_fail() { echo -e "  ${RED}✗${NC}  $*"; DR_FAIL=$((DR_FAIL+1)); }
@@ -223,13 +210,6 @@ B=$(python3 -c "import json;print(json.load(open('$CONFIG_FILE'))['jira']['board
 [[ "$PLUGIN_ROOT" == *"/.claude/plugins/cache/"* ]] && _dr_pass "git filters n/a (cache install)" || _dr_warn "git filters not configured"
 # 9 CLAUDE.md
 grep -q "Atlassian Settings" "$HOME/.claude/CLAUDE.md" 2>/dev/null && _dr_pass "CLAUDE.md Atlassian block present" || _dr_warn "CLAUDE.md missing Atlassian block"
-# 10 team-detail (optional)
-if [ -f "${PLUGIN_ROOT}/.claude/project-config-team-detail.json" ]; then
-  _dr_pass "project-config-team-detail.json present"
-else
-  echo -e "  -  project-config-team-detail.json not found (optional — needed for sprint planning only)"
-  DR_SKIP=$((DR_SKIP+1))
-fi
 
 # ── summary ───────────────────────────────────────────────────────────────────
 echo ""

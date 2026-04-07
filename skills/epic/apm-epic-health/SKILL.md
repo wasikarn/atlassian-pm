@@ -43,7 +43,7 @@ Run all checks in parallel:
 ### 📊 Estimation Check
 
 - Sum SP across all stories (exclude Done stories if sprint is in-flight).
-- Compare to team velocity if available (project-config-team-detail.json).
+- Compare to team velocity if available from recent sprint history or project-config.json baseline.
 - Flag: total SP > 3× velocity = likely multi-sprint, needs breakdown confirmation.
 
 ### ✅ Completeness Check

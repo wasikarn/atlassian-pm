@@ -1,5 +1,5 @@
 {
-  "_comment": "Lean project config — loaded every session. Detail (git evidence, capacity model, bus factor): @.claude/project-config-team-detail.json (load on-demand for sprint planning)",
+  "_comment": "Lean project config — loaded every session.",
   "_setup": "Copy this file to project-config.json and fill in your values. Run /atlassian-pm:doctor to verify.",
 
   "jira": {

@@ -1,10 +1,11 @@
 ---
 name: apm-doctor
 description: |
-  Health check for atlassian-pm environment — runs 12 checks and reports status.
+  Health check for atlassian-pm environment — runs 11 checks and reports status.
 
   Checks: acli install, acli auth, uv install, atlassian-cache venv, mcp-atlassian config,
-  project-config valid, board_id non-zero, git filters, CLAUDE.md block, team-detail config.
+  project-config valid, board_id non-zero, git filters, CLAUDE.md block, run-mcp.sh launcher,
+  board_monitor daemon (optional).
 
   Never stops on failure — shows complete picture. Run after setup or after updates.
 
@@ -19,7 +20,7 @@ allowed-tools: Bash
 
 # /atlassian-pm:apm-doctor
 
-Health check for the `atlassian-pm` environment. Runs all 12 checks regardless of failures.
+Health check for the `atlassian-pm` environment. Runs all 11 checks regardless of failures.
 
 ## Instructions
 
@@ -37,7 +38,7 @@ PASS=0
 WARN=0
 FAIL=0
 SKIP=0
-TOTAL=12
+TOTAL=11
 
 echo "Checking atlassian-pm environment..."
 echo ""
@@ -191,22 +192,26 @@ else
   WARN=$((WARN+1))
 fi
 
-# Check 10: team-detail config (optional — auto-scaffold from template)
-TEAM_DETAIL="${PLUGIN_ROOT}/.claude/project-config-team-detail.json"
-TEAM_TEMPLATE="${PLUGIN_ROOT}/.claude/project-config-team-detail.json.template"
-if [ -f "$TEAM_DETAIL" ]; then
-  echo "  ✓  project-config-team-detail.json present"
+# Check 10: run-mcp.sh launcher (MCP server stable path)
+DATA_DIR="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
+RUN_MCP="$DATA_DIR/run-mcp.sh"
+if [ -x "$RUN_MCP" ]; then
+  echo "  ✓  run-mcp.sh launcher ready ($RUN_MCP)"
   PASS=$((PASS+1))
-elif [ -f "$TEAM_TEMPLATE" ]; then
-  cp "$TEAM_TEMPLATE" "$TEAM_DETAIL"
-  echo "  ~  project-config-team-detail.json scaffolded from template"
-  echo "     → Edit $TEAM_DETAIL to add real git evidence and capacity data"
-  echo "     → Run /atlassian-pm:velocity-tracker to populate velocity history"
-  WARN=$((WARN+1))
+elif [ -f "$RUN_MCP" ]; then
+  chmod +x "$RUN_MCP"
+  echo "  ~  run-mcp.sh fixed permissions"
+  PASS=$((PASS+1))
+elif [ -n "$PLUGIN_ROOT" ] && [ -f "$PLUGIN_ROOT/mcp-servers/atlassian-cache/run-mcp.sh" ]; then
+  mkdir -p "$DATA_DIR"
+  cp "$PLUGIN_ROOT/mcp-servers/atlassian-cache/run-mcp.sh" "$RUN_MCP"
+  chmod +x "$RUN_MCP"
+  echo "  ~  run-mcp.sh installed from plugin source"
+  PASS=$((PASS+1))
 else
-  echo "  -  project-config-team-detail.json not found (no template to scaffold from)"
-  echo "     (optional — needed for sprint planning only)"
-  SKIP=$((SKIP+1))
+  echo "  ✗  run-mcp.sh missing — atlassian-cache MCP will not start"
+  echo "     → Run: /atlassian-pm:apm-setup"
+  FAIL=$((FAIL+1))
 fi
 
 # Check 11: board_monitor daemon (optional — proactive intelligence)
@@ -223,7 +228,7 @@ else
   if [ -n "${PLUGIN_ROOT:-}" ]; then
     echo "     → Install: $PLUGIN_ROOT/scripts/setup_monitor.sh"
   else
-    echo "     → Install: scripts/setup_monitor.sh (set CLAUDE_PLUGIN_ROOT first)"
+    echo "     → Install: scripts/setup_monitor.sh"
   fi
   SKIP=$((SKIP+1))
 fi

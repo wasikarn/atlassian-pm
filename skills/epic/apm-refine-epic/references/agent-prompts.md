@@ -64,8 +64,7 @@ Tasks:
    - Code reuse: existing services, components, patterns to leverage
    - Implementation gotchas: N+1 queries, race conditions, auth edge cases, Effect-TS error handling
    - Missing items: "PO didn't mention X but we'll need it"
-4. Risk flags: performance, security, data migration, bus factor
-   (reference bus_factor from project-config-team-detail.json)
+4. Risk flags: performance, security, data migration, team capacity
 5. Effort estimate: SP per story (XS=1,S=2,M=3,L=5,XL=8)
 6. Dependency ordering: what blocks what?
 7. Reference similar implementations in codebase

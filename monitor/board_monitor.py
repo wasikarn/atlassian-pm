@@ -25,11 +25,11 @@ _ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_ROOT / "scripts"))
 sys.path.insert(0, str(_ROOT))
 
-from lib.auth import create_ssl_context, get_auth_header, load_credentials
-from lib.jira_api import JiraAPI, derive_jira_url
+from lib.auth import create_ssl_context, get_auth_header, load_credentials  # type: ignore[import-untyped]
+from lib.jira_api import JiraAPI, derive_jira_url  # type: ignore[import-untyped]
 
 from monitor.handlers import issue_changed, pr_sync, sprint_health
-from monitor.handlers import stuck_issue_detector, velocity_feed
+from monitor.handlers import stuck_issue_detector
 from monitor.state import MonitorState, diff_snapshots
 
 _LOG_DIR = _ROOT / "monitor" / "logs"
@@ -59,7 +59,7 @@ _stop_event = threading.Event()
 _last_analyzer_thread: threading.Thread | None = None
 
 
-def _get_poll_interval(board_state: dict, config: dict) -> int:
+def _get_poll_interval(board_state: dict, _config: dict) -> int:
     """Return poll interval in seconds based on board activity level.
 
     Priority (highest wins):
@@ -192,11 +192,6 @@ def run_cycle(
             except Exception as e:
                 log.error("Stuck issue detector failed: %s", e)
 
-        # Velocity feed: run when sprint state has changed to closed
-        try:
-            velocity_feed.check_and_update_velocity(jira, board_config, _ROOT)
-        except Exception as e:
-            log.error("Velocity feed failed: %s", e)
 
         # Enrich snapshot with status-entry timestamps before saving so stuck
         # detector can measure staleness across cycles.
@@ -222,16 +217,6 @@ def _load_calibration() -> dict:
         return {}
 
 
-def _load_velocity(root: Path) -> dict | None:
-    """Load velocity section from project-config-team-detail.json."""
-    config_path = root / ".claude" / "project-config-team-detail.json"
-    if not config_path.exists():
-        return None
-    try:
-        data = json.loads(config_path.read_text())
-        return data.get("velocity")
-    except (json.JSONDecodeError, OSError):
-        return None
 
 
 def _write_pid() -> None:
@@ -264,7 +249,7 @@ def _cleanup_pid() -> None:
         pass
 
 
-def _sigterm_handler(signum: int, frame: object) -> None:
+def _sigterm_handler(_signum: int, _frame: object) -> None:
     """Handle SIGTERM: signal stop, join analyzer thread, cleanup."""
     global _last_analyzer_thread
     log.info("SIGTERM received — shutting down")
@@ -296,7 +281,7 @@ def _dispatch_analyzer(
         return
     from monitor.handlers import intelligence_analyzer  # type: ignore[import-not-at-top]
     calibration = _load_calibration()
-    velocity = _load_velocity(_ROOT)
+    velocity = None  # team-detail config removed
     t = threading.Thread(
         target=intelligence_analyzer.analyze,
         args=(changes, snapshot, old_snapshot),

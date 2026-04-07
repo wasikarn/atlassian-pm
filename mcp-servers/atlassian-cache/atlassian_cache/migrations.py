@@ -301,6 +301,11 @@ CREATE INDEX IF NOT EXISTS idx_token_metrics_tool ON token_metrics(tool);
 INSERT OR IGNORE INTO cache_stats (key, value) VALUES ('tokens_saved_total', 0);
 """
 
+_MIGRATION_V8 = """
+CREATE INDEX IF NOT EXISTS idx_confluence_links_to ON confluence_links(to_page_id);
+CREATE INDEX IF NOT EXISTS idx_confluence_sprint_links_page ON confluence_sprint_links(page_id);
+"""
+
 _MIGRATIONS: dict[int, Union[str, Callable[[sqlite3.Connection], None]]] = {
     2: _MIGRATION_V2,
     3: _MIGRATION_V3,
@@ -308,8 +313,9 @@ _MIGRATIONS: dict[int, Union[str, Callable[[sqlite3.Connection], None]]] = {
     5: _apply_migration_v5,
     6: _apply_migration_v6,
     7: _MIGRATION_V7,
+    8: _MIGRATION_V8,
 }
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 
 def migrate(conn: sqlite3.Connection) -> None:

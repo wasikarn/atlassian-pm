@@ -1,5 +1,4 @@
 """Tests for monitor/board_monitor.py — PID lockfile, velocity loader, SIGTERM, threading."""
-import json
 import os
 import signal
 import sys
@@ -49,27 +48,6 @@ def test_write_pid_permission_error_exits(tmp_path, monkeypatch):
     assert exc.value.code == 1
 
 
-# --- _load_velocity ---
-
-def test_load_velocity_returns_dict(tmp_path):
-    config = tmp_path / ".claude" / "project-config-team-detail.json"
-    config.parent.mkdir()
-    config.write_text(json.dumps({"velocity": {"rolling_average": 32, "trend_pct": -5}}))
-    result = board_monitor._load_velocity(tmp_path)
-    assert result == {"rolling_average": 32, "trend_pct": -5}
-
-
-def test_load_velocity_missing_file_returns_none(tmp_path):
-    result = board_monitor._load_velocity(tmp_path)
-    assert result is None
-
-
-def test_load_velocity_malformed_json_returns_none(tmp_path):
-    config = tmp_path / ".claude" / "project-config-team-detail.json"
-    config.parent.mkdir()
-    config.write_text("{bad json")
-    result = board_monitor._load_velocity(tmp_path)
-    assert result is None
 
 
 # --- SIGTERM handler ---
@@ -104,7 +82,6 @@ def test_dispatch_analyzer_starts_daemon_thread(monkeypatch):
 
     with patch.dict("sys.modules", {"monitor.handlers.intelligence_analyzer": fake_module}), \
          patch.object(board_monitor, "_load_calibration", return_value={}), \
-         patch.object(board_monitor, "_load_velocity", return_value=None), \
          patch.object(board_monitor, "_stop_event", threading.Event()):
         board_monitor._dispatch_analyzer([], {}, {}, board_config={}, dry_run=False)
 

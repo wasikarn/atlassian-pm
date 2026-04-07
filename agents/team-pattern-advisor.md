@@ -43,7 +43,7 @@ Generate strategic team insights from multi-sprint historical data. Goes beyond 
 ## Steps
 
 1. **Load config** — `Read .claude/project-config.json` → get board_id, team members, project_key
-   Load velocity history — `Read .claude/project-config-team-detail.json` → get `velocity` block including `anomalies[]` and `member_velocity{}`
+   Velocity history is computed directly from closed sprint data (no external velocity config file).
 
 2. **Fetch sprint history** — `cache_sprint_issues` for last N completed sprints. If cache miss, fallback to `jira_get_sprint_issues` per sprint.
 

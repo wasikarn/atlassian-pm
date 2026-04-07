@@ -5,9 +5,6 @@
 Team roster, avg throughput per member:
 → `.claude/project-config.json` (auto-loaded every session)
 
-Git evidence, bus factor, growth tracks, cross-training, review cost, velocity history:
-→ `.claude/project-config-team-detail.json` (load on-demand for sprint planning)
-
 ## Capacity Model (Evidence-Based)
 
 > **Source of truth:** `project-config.json` → `team.members[]` + `team.velocity`
@@ -118,7 +115,7 @@ Complexity Factor: 1.0 = mostly M/L tasks, 0.5 = mostly XS/S tasks, 0.6-0.8 = mi
 Adjusted Throughput = raw avg_throughput × complexity_factor
 ```
 
-> Per-member raw throughput: see `project-config.json → team.members[].avg_throughput`. Git evidence (dominant task size): see `project-config-team-detail.json → git_evidence`.
+> Per-member raw throughput: see `project-config.json → team.members[].avg_throughput`.
 
 ## Review Load Formula
 
@@ -129,7 +126,7 @@ Review Load (per reviewer) = count(reviewees) × review_cost.hours_per_junior_pe
 Net Available = Productive Hours - Review Load - Already Assigned
 ```
 
-> Reviewer map and `hours_per_junior_per_sprint`: see `project-config-team-detail.json → review_cost`.
+> Review load should be factored into capacity planning for reviewers managing junior engineers.
 
 **Impact on Productive Hours:**
 

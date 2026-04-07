@@ -42,9 +42,9 @@ Sprint plan context (from sprint-planner output):
 
 ## Steps
 
-> **🟢 PARALLEL** — Steps 1, 2, and 3 have no dependencies. Launch simultaneously (single message, 4 Tool calls): `Read project-config.json` + `Read project-config-team-detail.json` + `cache_sprint_issues(sprint_id)` + `Read story-outcomes.jsonl`.
+> **🟢 PARALLEL** — Steps 1, 2, and 3 have no dependencies. Launch simultaneously (single message, 3 Tool calls): `Read project-config.json` + `cache_sprint_issues(sprint_id)` + `Read story-outcomes.jsonl`.
 
-1. **Load team data** — `Read .claude/project-config.json` for team member skills. `Read .claude/project-config-team-detail.json` for velocity anomalies and member velocity trends.
+1. **Load team data** — `Read .claude/project-config.json` for team member skills and baseline throughput. Velocity anomalies are computed from live sprint data, not external config.
 
 2. **Fetch sprint items** — `cache_sprint_issues(sprint_id)` or fallback `jira_get_sprint_issues(sprint_id, fields="summary,status,assignee,issuetype,customfield_10016,labels,issuelinks")`. Analyze actual item data for Complexity and Dependency risk dimensions.
 
@@ -188,7 +188,7 @@ Apply these defaults when data is absent — do not skip the dimension, do not f
 | No SP on items | Items missing story points | Treat unestimated items as M (3 SP) each; flag count in output |
 | No assignee on items | Unassigned sprint items | Score team risk +10 (unassigned = invisible bottleneck) |
 | No labels / service tag | Labels field empty | Skip service-span check; note "service tags missing — cross-service risk undetectable" |
-| `project-config-team-detail.json` absent | Config file missing | Skip velocity trend analysis; set Team base_score = 40 (unknown) |
+| Velocity history unavailable | No historical sprint data available | Compute velocity directly from closed sprint data; note if fewer than 3 closed sprints exist for calibration |
 | `story-outcomes.jsonl` absent or < 5 records per group | No outcome history | Skip historical carry-over signals; note "no outcome history yet — run `/close-sprint` after first sprint to build history" |
 | Sprint has no items yet | Sprint state = "future" with 0 items | Use defaults; note "Sprint not yet populated — run after backlog grooming" |
 | Sprint not created in Jira | sprint_id lookup fails | Return: "Sprint does not exist in Jira yet. Create the sprint first, then run risk forecast." Do NOT proceed with defaults. |

@@ -96,7 +96,7 @@ Before Phase 2 analysis, check for special sprint conditions:
 
 ### Phase 2: Changelog Analysis
 
-> **🟢 PARALLEL** — Launch `jira_batch_get_changelogs` (Phase 2) and `Read .claude/project-config-team-detail.json` (Phase 3b) simultaneously after Phase 1. Changelog fetch and velocity history read have no dependency on each other.
+Launch `jira_batch_get_changelogs` after Phase 1 to analyze issue transitions and time-in-status metrics.
 
 For each Story (not subtask) — batch fetch changelogs via `jira_batch_get_changelogs`:
 
@@ -130,7 +130,7 @@ Calculate:
 
 ### Phase 3b: Cross-Sprint Comparison
 
-Load velocity history from `.claude/project-config-team-detail.json` `velocity` block (if available):
+Compute velocity history from recently closed sprints:
 
 Compare current sprint metrics against rolling averages:
 

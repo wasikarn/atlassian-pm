@@ -88,8 +88,6 @@ if [ -f "$PROJECT_DIR/config/project-config.json.template" ]; then
 else
   CONFIG_TEMPLATE="$PROJECT_DIR/.claude/project-config.json.template"
 fi
-TEAM_DETAIL_FILE="$PROJECT_DIR/.claude/project-config-team-detail.json"
-TEAM_DETAIL_TEMPLATE="$PROJECT_DIR/.claude/project-config-team-detail.json.template"
 
 _config_has_placeholder() { grep -qE "acme-corp\.atlassian\.net|YOUR-INSTANCE|YOUR_PROJECT_KEY" "$1" 2>/dev/null; }
 
@@ -104,13 +102,17 @@ if [ ! -f "$CONFIG_FILE" ]; then
   fi
 fi
 
-if [ ! -f "$TEAM_DETAIL_FILE" ]; then
-  if [ -f "$TEAM_DETAIL_TEMPLATE" ]; then
-    cp "$TEAM_DETAIL_TEMPLATE" "$TEAM_DETAIL_FILE"
-    echo "Created .claude/project-config-team-detail.json from template"
-    echo "  → Edit with your team git evidence and velocity history"
-    echo ""
-  fi
+# --- Install run-mcp.sh launcher at stable data dir ---
+if [ -z "$CLAUDE_PLUGIN_DATA" ]; then
+  CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/atlassian-pm-atlassian-pm"
+fi
+RUN_MCP_SRC="$PROJECT_DIR/mcp-servers/atlassian-cache/run-mcp.sh"
+RUN_MCP_DEST="$CLAUDE_PLUGIN_DATA/run-mcp.sh"
+if [ -f "$RUN_MCP_SRC" ]; then
+  mkdir -p "$CLAUDE_PLUGIN_DATA"
+  cp "$RUN_MCP_SRC" "$RUN_MCP_DEST"
+  chmod +x "$RUN_MCP_DEST"
+  echo "Installed run-mcp.sh → $RUN_MCP_DEST"
 fi
 
 # --- 1. Add Atlassian config to ~/.claude/CLAUDE.md ---

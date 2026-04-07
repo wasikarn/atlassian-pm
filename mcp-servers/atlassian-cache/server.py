@@ -496,7 +496,8 @@ async def _lifespan(server: Server):  # noqa: ARG001
     Ensures the SQLite connection is properly closed (stats flushed, WAL
     checkpointed) when the server shuts down, even on SIGTERM.
     """
-    _init()
+    # Run blocking DB init (migrations, model load) off the event loop
+    await asyncio.to_thread(_init)
     try:
         yield
     finally:
@@ -684,7 +685,7 @@ async def handle_cache_get_issue(args: dict) -> str:
             _mark_returned(issue_key)
             issue_data = _compact_issue(cached) if compact else cached
             result = json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
-            raw_size = len(json.dumps({"source": "cache", "issue": cached}, ensure_ascii=False))
+            raw_size = len(json.dumps({"source": "cache", "issue": cached}, ensure_ascii=False)) if compact else len(result)
             _log_token_metrics("cache_get_issue", "hit", raw_size, len(result))
             return result
 
@@ -700,7 +701,7 @@ async def handle_cache_get_issue(args: dict) -> str:
                         _mark_returned(issue_key)
                         issue_data = _compact_issue(stale_cached) if compact else stale_cached
                         result = json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
-                        raw_size = len(json.dumps({"source": "cache", "issue": stale_cached}, ensure_ascii=False))
+                        raw_size = len(json.dumps({"source": "cache", "issue": stale_cached}, ensure_ascii=False)) if compact else len(result)
                         _log_token_metrics("cache_get_issue", "hit", raw_size, len(result))
                         return result
                     logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
@@ -724,7 +725,7 @@ async def handle_cache_get_issue(args: dict) -> str:
         _mark_returned(issue_key)
         issue_data = _compact_issue(issue) if compact else issue
         result = json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
-        raw_size = len(json.dumps({"source": "upstream", "issue": issue}, ensure_ascii=False))
+        raw_size = len(json.dumps({"source": "upstream", "issue": issue}, ensure_ascii=False)) if compact else len(result)
         _log_token_metrics("cache_get_issue", "miss", raw_size, len(result))
         return result
     except Exception as e:
@@ -1033,21 +1034,18 @@ async def handle_cache_similar_issues(args: dict) -> str:
     limit = min(args.get("limit", 5), MAX_SIMILAR_LIMIT)
     exclude = args.get("exclude_keys", [])
 
-    similar = embeddings.find_similar(query, limit=limit, exclude_keys=exclude)
+    # C2: Run CPU-bound embedding + SQLite query off the event loop
+    similar = await asyncio.to_thread(embeddings.find_similar, query, limit=limit, exclude_keys=exclude)
 
-    # Enrich with issue data from cache
-    enriched = []
-    for item in similar:
-        issue = _require_cache().get_issue(item["entity_id"], max_age_hours=_MAX_AGE_MAX)
+    # Enrich with issue data from cache (parallel reads off event loop)
+    c = await _require_cache()
+    async def _enrich(item: dict) -> dict:
+        issue = await asyncio.to_thread(c.get_issue, item["entity_id"], max_age_hours=_MAX_AGE_MAX)
         if issue:
-            enriched.append(
-                {
-                    **item,
-                    "summary": _format_issue_summary(issue),
-                }
-            )
-        else:
-            enriched.append(item)
+            return {**item, "summary": _format_issue_summary(issue)}
+        return item
+
+    enriched = list(await asyncio.gather(*(_enrich(item) for item in similar)))
 
     return json.dumps(
         {

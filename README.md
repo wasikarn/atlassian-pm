@@ -516,7 +516,6 @@ All values in `.claude/project-config.json` (gitignored). Template: `config/proj
 | File | Purpose |
 | --- | --- |
 | `.claude/project-config.json` | Jira fields, team roster, services, environments |
-| `.claude/project-config-team-detail.json` | Velocity history, bus factor (gitignored) |
 
 **Git Filter** — automatic placeholder conversion:
 

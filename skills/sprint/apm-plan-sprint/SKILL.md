@@ -69,7 +69,6 @@ jira_get_sprint_issues(sprint_id="<target>", fields="summary,status,assignee,pri
 ```text
 Read: ../../../references/team-capacity.md
 Read: .claude/project-config.json → team.members[], team.avg_throughput_per_sprint
-Read: .claude/project-config-team-detail.json → review_cost, growth_tracks, bus_factor, velocity.throughput_history
 ```
 
 **Optional:** If backlog has 10+ unplanned issues, offer to run backlog-groomer agent before planning. Issues flagged "Needs AC", "Missing Estimate", or "Blocked" must NOT be committed.
@@ -89,7 +88,7 @@ Already Assigned = sum(timetracking.originalEstimate) of current sprint subtasks
 Net Available = Productive Hours - Review Load - Already Assigned
 ```
 
-> Review Cost: Tech Lead ~15h/sprint, Senior ~4h/sprint. Read `review_cost` from `project-config-team-detail.json`.
+> Review Cost: Tech Lead ~15h/sprint, Senior ~4h/sprint. Factor review load into capacity planning.
 
 **Step 3 — Skill Profile + Complexity:** Read `skill_profile` from config; use complexity-adjusted throughput (see team-capacity.md) for item count limits.
 
@@ -248,7 +247,7 @@ Subtask alignment: [X checked, Y fixed]
 
 # Bad
 /plan-sprint --sprint 47            # ❌ hardcoded without calling jira_get_sprints_from_board first (HR7)
-/plan-sprint                        # ❌ without project-config-team-detail.json — capacity phase fails silently
+/plan-sprint                        # ❌ without adequate team capacity data — may overcommit sprint
 ```
 
 **Common mistakes:** Skip capacity (Phase 2) → over-committed sprint · Hardcode sprint ID (HR7) · Set sprint on subtasks (HR10) · Use MCP assignee instead of acli (HR3) · Skip `sprint_subtask_alignment.py` post-execution (HR8)

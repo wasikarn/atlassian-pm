@@ -35,7 +35,6 @@ Agile Documentation System — skills-based Jira/Confluence automation
 ## Project Settings
 
 Core config: `.claude/project-config.json` (jira fields, team, services, environments) — ALL project-specific values live here only. Never hardcode in skills/agents/hooks.
-Team detail: `.claude/project-config-team-detail.json` _(gitignored — create from template)_
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
 **Prerequisites:** `acli` CLI, MCP (Jira + Confluence), Python 3.x · **MCP:** `atlassian-cache` via `.mcp.json` — never add to `plugin.json`
 

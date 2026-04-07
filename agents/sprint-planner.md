@@ -42,7 +42,7 @@ Before planning:
 
 1. **Sprint state guard** — fetch sprint details. If `sprint.state == "active"`: warn "⚠️ Sprint is already active — replanning a started sprint affects commitments. Proceed? (yes/no)". Wait for confirmation.
 
-2. **Stale capacity check** — for each person in the sprint's assigned issues, verify they appear in `team-capacity.md`. If any assignee is missing: warn "⚠️ [Name] appears in sprint but not in capacity config — their capacity is assumed 0. Update `.claude/project-config-team-detail.json` before planning."
+2. **Stale capacity check** — for each person in the sprint's assigned issues, verify they appear in `team-capacity.md`. If any assignee is missing: warn "⚠️ [Name] appears in sprint but not in capacity config — their capacity is assumed 0. Update team roster in `project-config.json` before planning."
 
 ## Rules
 
@@ -86,7 +86,7 @@ effective_capacity = base_hours × focus_factor × sprint_risk_multiplier
 - −0.05 if sprint contains new technology/service (first time touching that domain)
 - Minimum: 0.65 (never penalize below 65% of base)
 
-Load velocity anomaly data from `.claude/project-config-team-detail.json` `velocity.anomalies[]` and `velocity.member_velocity{}` (written by velocity-tracker).
+Use historical velocity trends from sprint metrics to inform risk-adjusted capacity multiplier.
 
 ## Three Scenario Planning
 

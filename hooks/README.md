@@ -101,7 +101,7 @@ Manage state, tracking, and cross-hook coordination.
 
 | File | Purpose |
 |------|---------|
-| `config_loader.py` | Loads `project-config.json` + `project-config-team-detail.json` |
+| `config_loader.py` | Loads `project-config.json` |
 | `hooks_lib.py` | Shared utilities: read `TOOL_INPUT`, JSON parsing, HR state helpers |
 | `hooks_state.py` | Persistent state store for cross-hook coordination (HR5 parent verify, HR6 queue, etc.) |
 | `hooks.json` | Wire file: maps events + matchers to hook scripts |

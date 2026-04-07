@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Track sprint velocity and update project-config.json automatically.
+"""Track sprint velocity from completed sprints.
 
 Fetches completed issues from a sprint, calculates story points and throughput,
-then updates the velocity history in project-config.json.
+and reports velocity metrics for sprint planning.
 
 Usage:
     # Track a completed sprint (by ID)
@@ -11,11 +11,6 @@ Usage:
     # Track by sprint name
     python velocity_tracker.py --sprint-name "{{PROJECT_KEY}} Sprint-31"
 
-    # Dry run (show data, don't update config)
-    python velocity_tracker.py --sprint-id 607 --dry-run
-
-    # Show current velocity summary
-    python velocity_tracker.py --summary
 
 Exit codes:
     0 = success
@@ -50,7 +45,6 @@ logger = logging.getLogger(__name__)
 
 _CLAUDE_DIR = Path(__file__).parent.parent.parent.parent / ".claude"
 LEAN_CONFIG_PATH = _CLAUDE_DIR / "project-config.json"
-DETAIL_CONFIG_PATH = _CLAUDE_DIR / "project-config-team-detail.json"
 
 
 def create_api() -> JiraAPI:
@@ -64,22 +58,10 @@ def create_api() -> JiraAPI:
     )
 
 
-def load_config() -> tuple[dict, dict]:
-    """Load both config files. Returns (lean_config, detail_config)."""
+def load_config() -> dict:
+    """Load project config."""
     with open(LEAN_CONFIG_PATH) as f:
-        lean = json.load(f)
-    if not DETAIL_CONFIG_PATH.exists():
-        return lean, {}
-    with open(DETAIL_CONFIG_PATH) as f:
-        detail = json.load(f)
-    return lean, detail
-
-
-def save_detail_config(detail: dict) -> None:
-    """Save team-detail config with pretty formatting."""
-    with open(DETAIL_CONFIG_PATH, "w") as f:
-        json.dump(detail, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+        return json.load(f)
 
 
 def get_sprint_info(api: JiraAPI, board_id: int, sprint_id: int) -> dict | None:
@@ -159,116 +141,19 @@ def calculate_velocity(issues: list[dict], sp_field: str) -> dict:
     }
 
 
-def update_config_velocity(detail: dict, sprint: dict, velocity: dict) -> None:
-    """Update velocity history in project-config-team-detail.json."""
-    vel = detail.setdefault("velocity", {})
-    sp_data = vel.setdefault("story_points", {"avg_velocity": None, "sprints_tracked": 0, "history": []})
-    throughput = vel.setdefault("throughput_history", [])
-
-    sprint_name = sprint["name"]
-    sprint_id = sprint["id"]
-    dates = f"{sprint.get('startDate', '?')[:10]} - {sprint.get('endDate', '?')[:10]}"
-
-    # Add to throughput history (avoid duplicates)
-    existing_ids = {entry["id"] for entry in throughput}
-    if sprint_id not in existing_ids:
-        throughput.append(
-            {
-                "sprint": sprint_name,
-                "id": sprint_id,
-                "completed_tickets": velocity["total_tickets"],
-                "completed_sp": velocity["total_sp"] if velocity["tickets_with_sp"] > 0 else None,
-                "dates": dates,
-            }
-        )
-        # Sort by sprint ID
-        throughput.sort(key=lambda x: x["id"])
-
-    # Update SP tracking if meaningful SP data exists (>50% coverage)
-    if velocity["sp_coverage"] >= 50:
-        sp_history = sp_data.setdefault("history", [])
-        existing_sp_ids = {entry["id"] for entry in sp_history}
-        if sprint_id not in existing_sp_ids:
-            sp_history.append(
-                {
-                    "sprint": sprint_name,
-                    "id": sprint_id,
-                    "completed_sp": velocity["total_sp"],
-                    "tickets_with_sp": velocity["tickets_with_sp"],
-                    "total_tickets": velocity["total_tickets"],
-                }
-            )
-            sp_history.sort(key=lambda x: x["id"])
-
-        # Recalculate average velocity from last 5 sprints
-        recent = sp_history[-5:]
-        if recent:
-            avg = sum(s["completed_sp"] for s in recent) / len(recent)
-            sp_data["avg_velocity"] = round(avg, 1)
-            sp_data["sprints_tracked"] = len(recent)
-
-    # Update avg throughput
-    recent_throughput = throughput[-5:]
-    if recent_throughput:
-        avg_tp = sum(t["completed_tickets"] for t in recent_throughput) / len(recent_throughput)
-        vel["avg_throughput_per_sprint"] = round(avg_tp, 1)
 
 
-def print_summary(lean: dict, detail: dict) -> None:
-    """Print current velocity summary."""
-    vel = detail.get("velocity", {})
-
-    print("=" * 60)
-    print("Velocity Summary")
-    print("=" * 60)
-
-    # SP Velocity
-    sp = vel.get("story_points", {})
-    avg_vel = sp.get("avg_velocity")
-    tracked = sp.get("sprints_tracked", 0)
-    if avg_vel:
-        print(f"\nStory Points Velocity: {avg_vel} SP/sprint (from {tracked} sprints)")
-    else:
-        print("\nStory Points Velocity: Not enough data (bootstrap phase)")
-        print("  Need ≥50% SP coverage in sprints to start tracking")
-
-    # Throughput
-    print(f"\nAvg Throughput: {lean['team'].get('avg_throughput_per_sprint', '?')} tickets/sprint")
-
-    # History
-    history = vel.get("throughput_history", [])
-    if history:
-        print("\nSprint History:")
-        print(f"  {'Sprint':<20} {'Tickets':>8} {'SP':>6} {'Dates'}")
-        print(f"  {'-' * 20} {'-' * 8} {'-' * 6} {'-' * 25}")
-        for entry in history[-8:]:
-            sp_str = str(entry.get("completed_sp", "-")) if entry.get("completed_sp") is not None else "-"
-            print(f"  {entry['sprint']:<20} {entry['completed_tickets']:>8} {sp_str:>6} {entry.get('dates', '')}")
-
-    # Team throughput
-    members = lean.get("team", {}).get("members", [])
-    print("\nTeam Members:")
-    print(f"  {'Name':<20} {'Role':<12} {'Focus':>6} {'Throughput':>12}")
-    print(f"  {'-' * 20} {'-' * 12} {'-' * 6} {'-' * 12}")
-    for m in members:
-        ff = f"{m.get('focus_factor', '-')}" if m.get("focus_factor") else "-"
-        tp = f"{m.get('avg_throughput', '-')} t/s" if m.get("avg_throughput") else "-"
-        print(f"  {m['name']:<20} {m['role']:<12} {ff:>6} {tp:>12}")
-
-    print("=" * 60)
 
 
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Track sprint velocity and update project-config.json",
+        description="Calculate and report sprint velocity metrics",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("--sprint-id", type=int, help="Sprint ID to track")
-    group.add_argument("--sprint-name", help="Sprint name to track (e.g., '{{PROJECT_KEY}} Sprint-31')")
-    group.add_argument("--summary", action="store_true", help="Show current velocity summary")
-    parser.add_argument("--dry-run", action="store_true", help="Show data without updating config")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--sprint-id", type=int, help="Sprint ID to analyze")
+    group.add_argument("--sprint-name", help="Sprint name to analyze (e.g., '{{PROJECT_KEY}} Sprint-31')")
     parser.add_argument("--verbose", "-v", action="store_true")
 
     args = parser.parse_args()
@@ -276,15 +161,8 @@ def main() -> int:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    lean, detail = load_config()
+    lean = load_config()
     sp_field = lean["jira"]["custom_fields"]["story_points"]
-
-    if args.summary:
-        print_summary(lean, detail)
-        return 0
-
-    if not args.sprint_id and not args.sprint_name:
-        parser.error("Specify --sprint-id, --sprint-name, or --summary")
 
     # Create API client
     try:
@@ -338,16 +216,6 @@ def main() -> int:
         for name, data in sorted(velocity["per_assignee"].items(), key=lambda x: x[1]["tickets"], reverse=True):
             sp_str = str(data["sp"]) if data["sp"] > 0 else "-"
             print(f"  {name:<25} {data['tickets']:>8} {sp_str:>6}")
-
-    if args.dry_run:
-        print("\nDRY RUN — config not updated")
-        return 0
-
-    # Update config
-    update_config_velocity(detail, sprint, velocity)
-    save_detail_config(detail)
-    print(f"\nUpdated: {DETAIL_CONFIG_PATH}")
-    print("HR6 Action: cache_invalidate may be needed if sprint items were modified")
 
     return 0
 

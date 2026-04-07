@@ -21,7 +21,7 @@ effort: high
 ## Dynamic Context
 
 - **Today:** !`date +%Y-%m-%d`
-- **Team velocity:** `.claude/project-config-team-detail.json` → `velocity.rolling_avg_sp`
+- **Team velocity:** computed from closed sprint data (use velocity history from retrospectives)
 - **Sprint length:** @.claude/project-config.json → `team.sprint_length_days` (default: 10)
 
 ## Context Object
@@ -58,8 +58,8 @@ Display summary table: Epic | Summary | Stories | Total SP
 
 ## Phase 3 — Velocity Calculation
 
-1. Read `.claude/project-config-team-detail.json` velocity section.
-   - Use `rolling_avg_sp` if available; fallback to `project-config.json` `team.avg_throughput_per_sprint` (39 SP)
+1. Use team velocity from `project-config.json` `team.avg_throughput_per_sprint` (default: 39 SP)
+   - If recent sprint history available, compute rolling average from closed sprints
 2. Apply 10% carry-over buffer: `effective_velocity = velocity * 0.9`
 3. `sprints_needed = ceil(total_sp / effective_velocity)`
 4. Map sprint slots from today forward using `sprint_length_days`
@@ -161,7 +161,7 @@ Display: "Fix Version [name] created. [N] epics linked."
 
 - Planning a release before all epics have estimated stories — Phase 3 velocity calculation sums `customfield_10016` SP; unestimated stories show as 0 SP, making the sprint count meaningless.
 - Hardcoding sprint IDs anywhere in the plan — `/plan-release` uses velocity + sprint length to derive slots from today forward; sprint IDs come from `jira_get_sprints_from_board()` at execution time (HR7).
-- Not running `/doctor` before plan-release if `project-config-team-detail.json` is missing — Phase 3 falls back to the 39 SP default, which may not reflect your team's actual velocity.
+- Planning a release without verifying team velocity baseline — Phase 3 uses the 39 SP default from project-config.json, which may not reflect your team's actual velocity. Verify with recent retrospectives if available.
 - Confirming the Jira Fix Version gate (Phase 9) before the Confluence page is reviewed — Fix Version links epics to the release in Jira; reversing it requires unlinking each epic manually.
 
 ## 🎓 Domain Expert Notes

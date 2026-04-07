@@ -1,11 +1,8 @@
 {
   "mcpServers": {
     "atlassian-cache": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/mcp-servers/atlassian-cache/run.sh",
-      "env": {
-        "UV_PROJECT_ENVIRONMENT": "${CLAUDE_PLUGIN_DATA}/venv",
-        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}/scripts"
-      }
+      "command": "bash",
+      "args": ["${HOME}/.claude/plugins/data/atlassian-pm-atlassian-pm/run-mcp.sh"]
     }
   }
 }
