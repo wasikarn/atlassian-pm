@@ -40,7 +40,7 @@ if ! command -v markdownlint-cli2 > /dev/null 2>&1; then
 else
   MD_OUTPUT=$(
     cd "$REPO_ROOT" || exit 0
-    markdownlint-cli2 "**/*.md" 2>&1 || true
+    markdownlint-cli2 "**/*.md" "!.omc/**" "!.claude/**" 2>&1 || true
   )
   MD_ERRORS=$(echo "$MD_OUTPUT" | grep "^Summary:" | grep -oE '[0-9]+' | head -1 || true)
   MD_FILES=$(echo "$MD_OUTPUT" | grep "^Linting:" | grep -oE '[0-9]+' | head -1 || true)

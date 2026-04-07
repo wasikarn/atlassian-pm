@@ -11,7 +11,6 @@ import json
 import os
 import sys
 import time
-import functools
 import hashlib
 from pathlib import Path
 from typing import Any
@@ -93,6 +92,55 @@ def _get_connection(session_id: str, fast_mode: bool = False) -> sqlite3.Connect
     conn.execute("""
         CREATE TABLE IF NOT EXISTS known_subtasks (
             key TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS hr6_pending (
+            key TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS cache_checked (
+            key TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS qmd_searched (
+            collection TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS alignment_suggested (
+            sprint_id TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS risk_assessed (
+            sprint_id TEXT PRIMARY KEY
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS skill_checkpoints (
+            key TEXT PRIMARY KEY,
+            type TEXT,
+            parent TEXT,
+            ts REAL
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS response_sizes (
+            tool TEXT PRIMARY KEY,
+            chars INTEGER,
+            tokens INTEGER,
+            calls INTEGER
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS response_totals (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            chars INTEGER,
+            tokens INTEGER,
+            calls INTEGER
         )
     """)
 
@@ -209,11 +257,47 @@ def merge_deltas(base_value: Any, deltas: list[dict]) -> Any:
 
 # ── Generic State API ──────────────────────────────────
 
-@functools.lru_cache(maxsize=128)
+class _StateCache:
+    """Selective-eviction in-process cache for get_state().
+
+    Replaces @functools.lru_cache so set_state() can invalidate only the
+    affected (session_id, key) pair instead of clearing all 128 entries.
+    """
+    def __init__(self, maxsize: int = 128) -> None:
+        self._cache: dict[str, Any] = {}
+        self._maxsize = maxsize
+
+    def get(self, session_id: str, key: str) -> tuple[bool, Any]:
+        """Returns (hit, value). hit=False means cache miss."""
+        cache_key = f"{session_id}:{key}"
+        if cache_key in self._cache:
+            return True, self._cache[cache_key]
+        return False, None
+
+    def set(self, session_id: str, key: str, value: Any) -> None:
+        cache_key = f"{session_id}:{key}"
+        if cache_key not in self._cache and len(self._cache) >= self._maxsize:
+            # Evict oldest entry (insertion-order dict, Python 3.7+)
+            self._cache.pop(next(iter(self._cache)))
+        self._cache[cache_key] = value
+
+    def invalidate(self, session_id: str, key: str) -> None:
+        self._cache.pop(f"{session_id}:{key}", None)
+
+    def clear(self) -> None:
+        self._cache.clear()
+
+_state_cache = _StateCache()
+
+
 def get_state(session_id: str, key: str) -> Any | None:
     """Get a state value set by set_state. Returns None if expired.
-    L1 Cache: Cached for the duration of the process.
+    L1 Cache: Selective per-key in-process cache (_state_cache).
     """
+    hit, cached = _state_cache.get(session_id, key)
+    if hit:
+        return cached
+
     conn = _get_connection(session_id)
     try:
         # Probabilistic check: Skip DB if Bloom Filter says it's not there
@@ -233,17 +317,17 @@ def get_state(session_id: str, key: str) -> Any | None:
             cursor_deltas = conn.execute("SELECT delta FROM state_deltas WHERE key = ? ORDER BY ts ASC", (key,))
             deltas = [json.loads(d[0]) for d in cursor_deltas.fetchall()]
 
-            if deltas:
-                return merge_deltas(base_val, deltas)
-            return base_val
+            result = merge_deltas(base_val, deltas) if deltas else base_val
+            _state_cache.set(session_id, key, result)
+            return result
         return None
     finally:
         conn.close()
 
 def set_state(session_id: str, key: str, value: Any) -> None:
     """Set a state value with automatic timestamp tracking and delta support."""
-    # Invalidate L1 cache for this key
-    get_state.cache_clear()
+    # Invalidate only this key in the L1 cache (selective eviction)
+    _state_cache.invalidate(session_id, key)
     conn = _get_connection(session_id)
     try:
         # Delta Tracking: If value is a large dict/list, store as delta if base exists
@@ -294,10 +378,10 @@ def cleanup_stale_state(session_id: str) -> None:
     finally:
         conn.close()
 
-# Backward-compatible shim: tests call hooks_state._cache.clear() to reset lru_cache
+# Backward-compatible shim: tests call hooks_state._cache.clear() to reset state cache
 class _CacheCompat:
     def clear(self) -> None:
-        get_state.cache_clear()
+        _state_cache.clear()
 
 _cache = _CacheCompat()
 
@@ -306,7 +390,6 @@ _cache = _CacheCompat()
 def hr6_add_pending(session_id: str, key: str) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS hr6_pending (key TEXT PRIMARY KEY)")
         conn.execute("INSERT OR REPLACE INTO hr6_pending (key) VALUES (?)", (key,))
         conn.commit()
 
@@ -334,7 +417,6 @@ def hr6_get_pending(session_id: str, fast_mode: bool = False) -> set[str]:
     """
     conn = _get_connection(session_id, fast_mode=fast_mode)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS hr6_pending (key TEXT PRIMARY KEY)")
         cursor = conn.execute("SELECT key FROM hr6_pending")
         return set(row[0] for row in cursor.fetchall())
     finally:
@@ -470,7 +552,6 @@ def vs_get_coverage(session_id: str) -> dict:
 def cache_mark_checked(session_id: str, issue_key: str) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS cache_checked (key TEXT PRIMARY KEY)")
         conn.execute("INSERT OR REPLACE INTO cache_checked (key) VALUES (?)", (issue_key,))
         conn.commit()
     finally:
@@ -479,7 +560,6 @@ def cache_mark_checked(session_id: str, issue_key: str) -> None:
 def cache_is_checked(session_id: str, issue_key: str) -> bool:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS cache_checked (key TEXT PRIMARY KEY)")
         cursor = conn.execute("SELECT 1 FROM cache_checked WHERE key = ?", (issue_key,))
         return cursor.fetchone() is not None
     finally:
@@ -500,7 +580,6 @@ def cache_warning_increment(session_id: str) -> None:
 def qmd_mark_collection_searched(session_id: str, collection: str) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS qmd_searched (collection TEXT PRIMARY KEY)")
         conn.execute("INSERT OR REPLACE INTO qmd_searched (collection) VALUES (?)", (collection,))
         conn.commit()
     finally:
@@ -536,7 +615,6 @@ def jira_write_is_occurred(session_id: str) -> bool:
 def alignment_mark_sprint_suggested(session_id: str, sprint_id: str) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS alignment_suggested (sprint_id TEXT PRIMARY KEY)")
         conn.execute("INSERT OR REPLACE INTO alignment_suggested (sprint_id) VALUES (?)", (str(sprint_id),))
         conn.commit()
     finally:
@@ -555,7 +633,6 @@ def alignment_is_sprint_suggested(session_id: str, sprint_id: str) -> bool:
 def risk_mark_sprint_assessed(session_id: str, sprint_id: str) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS risk_assessed (sprint_id TEXT PRIMARY KEY)")
         conn.execute("INSERT OR REPLACE INTO risk_assessed (sprint_id) VALUES (?)", (str(sprint_id),))
         conn.commit()
     finally:
@@ -574,7 +651,6 @@ def risk_is_sprint_assessed(session_id: str, sprint_id: str) -> bool:
 def skill_checkpoint_save(session_id: str, key: str, issue_type: str, parent_key: str | None = None) -> None:
     conn = _get_connection(session_id)
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS skill_checkpoints (key TEXT PRIMARY KEY, type TEXT, parent TEXT, ts REAL)")
         conn.execute(
             "INSERT OR REPLACE INTO skill_checkpoints (key, type, parent, ts) VALUES (?, ?, ?, ?)",
             (key, issue_type, parent_key, time.time())
@@ -656,14 +732,6 @@ def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> 
     conn = _get_connection(session_id)
     try:
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS response_sizes (
-                tool TEXT PRIMARY KEY,
-                chars INTEGER,
-                tokens INTEGER,
-                calls INTEGER
-            )
-        """)
-        conn.execute("""
             INSERT INTO response_sizes (tool, chars, tokens, calls)
             VALUES (?, ?, ?, 1)
             ON CONFLICT(tool) DO UPDATE SET
@@ -672,14 +740,6 @@ def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> 
                 calls = calls + 1
         """, (tool, chars, tokens))
 
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS response_totals (
-                id INTEGER PRIMARY KEY CHECK (id = 1),
-                chars INTEGER,
-                tokens INTEGER,
-                calls INTEGER
-            )
-        """)
         conn.execute("""
             INSERT INTO response_totals (id, chars, tokens, calls)
             VALUES (1, ?, ?, 1)
@@ -696,12 +756,6 @@ def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> 
 def response_size_get_stats(session_id: str) -> dict:
     conn = _get_connection(session_id)
     try:
-        conn.execute("""CREATE TABLE IF NOT EXISTS response_totals (
-            id INTEGER PRIMARY KEY, chars INTEGER DEFAULT 0,
-            tokens INTEGER DEFAULT 0, calls INTEGER DEFAULT 0)""")
-        conn.execute("""CREATE TABLE IF NOT EXISTS response_sizes (
-            tool TEXT PRIMARY KEY, chars INTEGER DEFAULT 0,
-            tokens INTEGER DEFAULT 0, calls INTEGER DEFAULT 0)""")
         totals_row = conn.execute("SELECT chars, tokens, calls FROM response_totals WHERE id = 1").fetchone()
         totals = {"chars": totals_row[0], "tokens": totals_row[1], "calls": totals_row[2]} if totals_row else {"chars": 0, "tokens": 0, "calls": 0}
 
