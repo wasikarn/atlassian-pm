@@ -1,8 +1,26 @@
 #!/usr/bin/env bash
-# Resilient hook runner — skips gracefully if script not found (e.g. stale CLAUDE_PLUGIN_ROOT after version bump)
+# Resilient hook runner with detailed telemetry for root-cause analysis
 SCRIPT="${CLAUDE_PLUGIN_ROOT}/${1}"
+LOG_FILE="${CLAUDE_PLUGIN_DATA}/hooks_telemetry.log"
+
 if [ -f "$SCRIPT" ]; then
-    python3 "$SCRIPT"
+    START_TIME=$(date +%s.%N)
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] START: $1" >> "$LOG_FILE"
+
+    # Use timeout to prevent total hang, but log the failure
+    timeout 30s python3 "$SCRIPT" 2>> "$LOG_FILE"
+    EXIT_CODE=$?
+
+    END_TIME=$(date +%s.%N)
+    DURATION=$(echo "$END_TIME - $START_TIME" | bc)
+
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] END: $1 | Duration: ${DURATION}s | Exit: $EXIT_CODE" >> "$LOG_FILE"
+
+    if [ $EXIT_CODE -eq 124 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1 timed out after 30s" >> "$LOG_FILE"
+    fi
+
+    exit $EXIT_CODE
 else
     exit 0
 fi

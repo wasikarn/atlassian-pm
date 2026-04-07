@@ -163,10 +163,12 @@ confluence: ConfluenceCache | None = None
 
 
 # H6: Safe global accessors (prevent NoneType crashes)
-def _require_cache() -> AtlassianCache:
-    """Get cache or raise RuntimeError."""
+async def _require_cache() -> 'AtlassianCache':
+    """Get the singleton cache instance, ensuring async initialization."""
+    global cache
     if cache is None:
-        raise RuntimeError("Cache not initialized")
+        # Use asyncio.to_thread to avoid blocking the event loop during DB init
+        cache = await asyncio.to_thread(AtlassianCache)
     return cache
 
 
@@ -663,7 +665,7 @@ def _log_token_metrics(tool: str, operation: str, chars_before: int, chars_after
 
 async def handle_cache_get_issue(args: dict) -> str:
     """Get issue: cache-first with upstream fallback + stale fallback."""
-    c = _require_cache()
+    c = await _require_cache()
     try:
         issue_key = _validate_issue_key(args["issue_key"])
         fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority,labels,parent,description"))
@@ -676,28 +678,24 @@ async def handle_cache_get_issue(args: dict) -> str:
 
     # Try cache first (skip if force_refresh)
     if not force_refresh:
-        cached = c.get_issue(issue_key, max_age_hours=max_age)
+        cached = await asyncio.to_thread(c.get_issue, issue_key, max_age_hours=max_age)
         if cached:
             logger.info("Cache HIT: %s", issue_key)
             _mark_returned(issue_key)
             issue_data = _compact_issue(cached) if compact else cached
             result = json.dumps({"source": "cache", "issue": issue_data}, ensure_ascii=False)
-            # Log token metrics: cache hit = full savings
             raw_size = len(json.dumps({"source": "cache", "issue": cached}, ensure_ascii=False))
             _log_token_metrics("cache_get_issue", "hit", raw_size, len(result))
             return result
 
-        # T12: Lazy version-check — if stale by TTL, do a cheap upstream 'updated' check
-        # before committing to a full refresh (~50ms vs full fetch)
         if jira_api:
-            stale_cached = c.get_issue_stale(issue_key)
+            stale_cached = await asyncio.to_thread(c.get_issue_stale, issue_key)
             if stale_cached and "_cached_at" in stale_cached:
                 try:
                     resp = await asyncio.to_thread(jira_api.get_issue, issue_key, fields="updated")
                     upstream_updated = (resp.get("fields") or {}).get("updated", "")
                     cached_at_iso = stale_cached.get("_cached_at_iso", "")
                     if upstream_updated and cached_at_iso and upstream_updated <= cached_at_iso:
-                        # Issue unchanged upstream — serve stale data as cache hit
                         logger.info("Cache LAZY-HIT: %s (upstream unchanged)", issue_key)
                         _mark_returned(issue_key)
                         issue_data = _compact_issue(stale_cached) if compact else stale_cached
@@ -707,53 +705,34 @@ async def handle_cache_get_issue(args: dict) -> str:
                         return result
                     logger.info("Cache LAZY-MISS: %s (upstream changed, full refresh)", issue_key)
                 except Exception:
-                    pass  # On any error, fall through to full refresh
+                    pass
 
-    # Cache miss or force_refresh — fetch upstream
     if not jira_api:
-        # P2-D: Stale fallback when upstream unavailable
-        stale = c.get_issue_stale(issue_key)
+        stale = await asyncio.to_thread(c.get_issue_stale, issue_key)
         if stale:
             _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
-            return json.dumps(
-                {
-                    "source": "stale_cache",
-                    "warning": "Upstream API not available, returning stale data",
-                    "issue": issue_data,
-                },
-                ensure_ascii=False,
-            )
+            return json.dumps({"source": "stale_cache", "warning": "Upstream API not available, returning stale data", "issue": issue_data}, ensure_ascii=False)
         return json.dumps({"error": "Issue not in cache and upstream API not available"})
 
     logger.info("Cache %s: %s — fetching upstream", "REFRESH" if force_refresh else "MISS", issue_key)
     try:
         issue = _timed_upstream(f"get_issue({issue_key})", jira_api.get_issue, issue_key, fields=fields)
-        c.put_issue(issue_key, issue)
-        # C4: Run CPU-bound model inference off the event loop to avoid blocking
+        await asyncio.to_thread(c.put_issue, issue_key, issue)
         if embeddings and embeddings.available:
             await asyncio.to_thread(embeddings.store_embedding, issue_key, _embedding_text(issue))
         _mark_returned(issue_key)
         issue_data = _compact_issue(issue) if compact else issue
         result = json.dumps({"source": "upstream", "issue": issue_data}, ensure_ascii=False)
-        # Log token metrics: miss = upstream call (strip noise savings)
         raw_size = len(json.dumps({"source": "upstream", "issue": issue}, ensure_ascii=False))
         _log_token_metrics("cache_get_issue", "miss", raw_size, len(result))
         return result
     except Exception as e:
-        # P2-D: Stale fallback on upstream error
-        stale = c.get_issue_stale(issue_key)
+        stale = await asyncio.to_thread(c.get_issue_stale, issue_key)
         if stale:
             _mark_returned(issue_key)
             issue_data = _compact_issue(stale) if compact else stale
-            return json.dumps(
-                {
-                    "source": "stale_cache",
-                    "warning": f"Upstream failed ({type(e).__name__}: {str(e)[:200]}), returning stale data",
-                    "issue": issue_data,
-                },
-                ensure_ascii=False,
-            )
+            return json.dumps({"source": "stale_cache", "warning": f"Upstream failed ({type(e).__name__}: {str(e)[:200]}), returning stale data", "issue": issue_data}, ensure_ascii=False)
         return json.dumps({"error": f"Failed to fetch {issue_key}: {type(e).__name__}: {str(e)[:200]}"})
 
 
@@ -1251,10 +1230,10 @@ async def handle_cache_invalidate(args: dict) -> str:
 
 
 async def handle_cache_get_confluence_page(arguments: dict) -> str:
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
     page_id = arguments["page_id"]
     max_age = _clamp_max_age(arguments.get("max_age_hours"), 4.0)
-    result = conf.get_page(page_id, max_age_hours=max_age)
+    result = await asyncio.to_thread(conf.get_page, page_id, max_age_hours=max_age)
     if result is None:
         return json.dumps({"error": "not_cached", "page_id": page_id})
     _mark_returned(page_id)
@@ -1262,19 +1241,19 @@ async def handle_cache_get_confluence_page(arguments: dict) -> str:
 
 
 async def handle_cache_search_confluence(arguments: dict) -> str:
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    results = conf.fts_search(arguments["query"], limit=min(int(arguments.get("limit", 10)), 50))
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
+    results = await asyncio.to_thread(conf.fts_search, arguments["query"], limit=min(int(arguments.get("limit", 10)), 50))
     return json.dumps({"results": results}, ensure_ascii=False)
 
 
 async def handle_cache_get_confluence_children(arguments: dict) -> str:
     page_id = arguments["page_id"]
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    children = conf.get_children(page_id)
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
+    children = await asyncio.to_thread(conf.get_children, page_id)
     if not children and jira_api:
         raw = await asyncio.to_thread(jira_api.get_confluence_children, page_id)
-        conf.put_children(page_id, raw)
-        children = conf.get_children(page_id)
+        await asyncio.to_thread(conf.put_children, page_id, raw)
+        children = await asyncio.to_thread(conf.get_children, page_id)
     return json.dumps({"children": children}, ensure_ascii=False)
 
 
@@ -1302,18 +1281,18 @@ async def handle_cache_cross_search(arguments: dict) -> str:
 
 
 async def handle_cache_invalidate_confluence(arguments: dict) -> str:
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
     page_id = arguments["page_id"]
-    conf.invalidate(page_id)
+    await asyncio.to_thread(conf.invalidate, page_id)
     if embeddings:
-        embeddings.remove_embedding(f"page::{page_id}")
+        await asyncio.to_thread(embeddings.remove_embedding, f"page::{page_id}")
     return json.dumps({"invalidated": page_id})
 
 
 async def handle_cache_refresh_confluence(arguments: dict) -> str:
     page_id = arguments["page_id"]
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    conf.invalidate(page_id)
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
+    await asyncio.to_thread(conf.invalidate, page_id)
     if not jira_api:
         return json.dumps({
             "status": "invalidated",
@@ -1321,7 +1300,7 @@ async def handle_cache_refresh_confluence(arguments: dict) -> str:
             "message": "No upstream API — cache cleared only.",
         })
     page = await asyncio.to_thread(jira_api.get_confluence_page, page_id)
-    conf.put_page(page)
+    await asyncio.to_thread(conf.put_page, page)
     if embeddings and embeddings.available:
         title = page.get("title", "")
         labels_results = page.get("metadata", {}).get("labels", {}).get("results", [])
@@ -1342,16 +1321,16 @@ async def handle_cache_refresh_confluence(arguments: dict) -> str:
 
 
 async def handle_cache_get_confluence_section(arguments: dict) -> str:
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    section = conf.get_section(arguments["section_id"])
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
+    section = await asyncio.to_thread(conf.get_section, arguments["section_id"])
     if section is None:
         return json.dumps({"error": "not_found"})
     return json.dumps(section, ensure_ascii=False)[:MAX_RESPONSE_CHARS]
 
 
 async def handle_cache_sprint_confluence(arguments: dict) -> str:
-    conf = confluence or ConfluenceCache(_require_cache().conn, _require_cache()._lock)
-    pages = conf.get_sprint_pages(int(arguments["sprint_id"]))
+    conf = confluence or await asyncio.to_thread(ConfluenceCache, (await _require_cache()).conn, (await _require_cache())._lock)
+    pages = await asyncio.to_thread(conf.get_sprint_pages, int(arguments["sprint_id"]))
     return json.dumps({"pages": pages}, ensure_ascii=False)
 
 
@@ -1407,18 +1386,18 @@ async def handle_cache_reindex(arguments: dict) -> str:
     """Re-embed all cached entities."""
     entity_type = arguments.get("entity_type", "all")
     count = 0
-    c = _require_cache()
+    c = await _require_cache()
     if embeddings and embeddings.available:
         if entity_type in ("jira", "all"):
-            issues = c.get_all_issues()
+            issues = await asyncio.to_thread(c.get_all_issues)
             count += await asyncio.to_thread(embeddings.store_batch, issues)
         if entity_type in ("sprint", "all"):
-            sprints = c.get_all_sprints()
+            sprints = await asyncio.to_thread(c.get_all_sprints)
             count += await asyncio.to_thread(_reindex_sprints, sprints)
         if entity_type in ("confluence", "all") and confluence:
-            sections = confluence.get_all_sections()
+            sections = await asyncio.to_thread(confluence.get_all_sections)
             count += await asyncio.to_thread(_reindex_sections, sections)
-            pages = confluence.get_all_pages()
+            pages = await asyncio.to_thread(confluence.get_all_pages)
             count += await asyncio.to_thread(_reindex_pages, pages)
     return json.dumps({"reindexed": count, "entity_type": entity_type}, ensure_ascii=False)
 
@@ -1443,8 +1422,8 @@ async def handle_cache_sync(arguments: dict) -> str:
         max_results=200,
     )
     issue_list = issues.get("issues", []) if isinstance(issues, dict) else issues
-    c = _require_cache()
-    c.put_issues_batch(issue_list)
+    c = await _require_cache()
+    await asyncio.to_thread(c.put_issues_batch, issue_list)
     if issue_list and embeddings and embeddings.available:
         await asyncio.to_thread(embeddings.store_batch, issue_list)
     return json.dumps({"synced": len(issue_list), "since_hours": since_hours}, ensure_ascii=False)

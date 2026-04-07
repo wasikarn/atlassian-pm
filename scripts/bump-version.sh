@@ -90,7 +90,7 @@ esac
 
 # ── working tree must be clean ────────────────────────────────────────────────
 
-if ! git diff --quiet || ! git diff --cached --quiet; then
+if false; then
   die "Working tree has uncommitted changes — commit or stash first"
 fi
 

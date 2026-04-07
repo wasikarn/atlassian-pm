@@ -224,8 +224,16 @@ class AtlassianCache:
         return self.conn.execute("PRAGMA user_version").fetchone()[0]
 
     def _init_schema(self) -> None:
-        """Create tables and run migrations via migrations.migrate()."""
+        """Create tables, high-performance indexes, and run migrations via migrations.migrate()."""
         migrate(self.conn)
+
+        # PERFORMANCE: High-impact indexes for O(log N) lookup instead of Full Table Scan
+        # Index for issue key lookups (already PK, but explicitly ensuring for clarity)
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_issues_key ON issues(issue_key)")
+        # Index for updated_at to speed up incremental sync (since_hours)
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_issues_updated ON issues(cached_at)")
+        # Index for sprint lookups
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_sprints_id ON sprints(sprint_id)")
 
         # FTS5 setup (idempotent)
         try:

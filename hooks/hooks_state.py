@@ -66,22 +66,37 @@ def _load(session_id: str) -> dict:
 def _save(session_id: str, state: dict) -> None:
     _ensure_state_dir()
     lock = _lock_file(session_id)
+
+    # Implementation of Non-blocking Lock with Exponential Backoff
+    # Prevents the "stop hooks 7/8" hang by not waiting indefinitely for LOCK_EX
+    max_retries = 5
+    base_delay = 0.05  # 50ms
+
     with open(lock, "a+") as lf:
-        fcntl.flock(lf, fcntl.LOCK_EX)
-        try:
-            # Re-read under lock to merge concurrent writes
-            f = _state_file(session_id)
+        for attempt in range(max_retries):
             try:
-                disk_state = json.loads(f.read_text()) if f.exists() else {}
-            except Exception:
-                disk_state = {}
-            # Merge: our state wins for keys we touched
-            disk_state.update(state)
-            _cache[session_id] = disk_state
-            f.write_text(json.dumps(disk_state))
-            os.chmod(f, 0o600)  # Owner read/write: session state may contain sensitive Jira keys
-        finally:
-            fcntl.flock(lf, fcntl.LOCK_UN)
+                fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                try:
+                    # Re-read under lock to merge concurrent writes
+                    f = _state_file(session_id)
+                    try:
+                        disk_state = json.loads(f.read_text()) if f.exists() else {}
+                    except Exception:
+                        disk_state = {}
+                    # Merge: our state wins for keys we touched
+                    disk_state.update(state)
+                    _cache[session_id] = disk_state
+                    f.write_text(json.dumps(disk_state))
+                    os.chmod(f, 0o600)  # Owner read/write: session state may contain sensitive Jira keys
+                    return # Success!
+                finally:
+                    fcntl.flock(lf, fcntl.LOCK_UN)
+            except (BlockingIOError, IOError):
+                if attempt == max_retries - 1:
+                    # Final attempt failed, log and bail to prevent turn-end hang
+                    log_event("hooks_state_save", "LOCK_TIMEOUT", {"session_id": session_id, "retries": max_retries})
+                    return
+                time.sleep(base_delay * (2 ** attempt)) # Exponential backoff
 
 
 def cleanup_stale_state(session_id: str) -> None:

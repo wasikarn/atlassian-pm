@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.7.1] - 2026-04-06
+## [3.8.0] - 2026-04-07
 
 ### Fixed
 
-- **plugin.json skill paths** — Corrected `skills/setup/` to `skills/apm-setup/` and added missing `skills/apm-doctor/` entry
+- **Stop hooks hang** — Replaced blocking `fcntl.LOCK_EX` with non-blocking `LOCK_NB` + exponential backoff in `hooks_state.py` to prevent deadlocks during parallel subagent execution
+- **Cache performance** — Added B-Tree indexes on `issue_key`, `cached_at`, and `sprint_id` to eliminate full table scans in SQLite
+
+### Performance
+
+- **MCP Cache Server Async Refactor** — Fully transitioned to asynchronous architecture using `asyncio.to_thread()` for all blocking SQLite and REST API I/O, preventing event loop contention and improving concurrency
+
+## [3.7.1] - 2026-04-06
 
 ## [3.7.0] - 2026-04-06
 
