@@ -1,8 +1,3 @@
 {
-  "mcpServers": {
-    "atlassian-cache": {
-      "command": "bash",
-      "args": ["${HOME}/.claude/plugins/data/atlassian-pm-atlassian-pm/run-mcp.sh"]
-    }
-  }
+  "mcpServers": {}
 }
