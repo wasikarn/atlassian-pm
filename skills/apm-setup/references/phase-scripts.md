@@ -66,13 +66,8 @@ fi
 PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 echo "  Python $PY_VER ✓"
 
-# Resolve PLUGIN_ROOT
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
-if [ -z "$PLUGIN_ROOT" ]; then
-  PLUGIN_ROOT=$(find "$HOME/.claude/plugins/cache/atlassian-pm/atlassian-pm" \
-    -maxdepth 1 -mindepth 1 -type d 2>/dev/null | sort -V | tail -1)
-  [ -z "$PLUGIN_ROOT" ] && { echo "Error: plugin not found. Run from inside Claude Code with plugin loaded."; exit 1; }
-fi
+# Resolve PLUGIN_ROOT from Claude Code env var (set automatically for all plugin users)
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:?Error: CLAUDE_PLUGIN_ROOT not set — run this skill from within Claude Code with the plugin loaded}"
 
 SKIP_CONFIG=false
 ENV_OK=false

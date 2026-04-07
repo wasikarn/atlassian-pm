@@ -23,6 +23,8 @@ STATE_DIR = Path("/tmp/claude-hooks-state")
 _STATE_STR = str(STATE_DIR)  # Kept for backward compatibility with tests
 _STATE_DIR_STR = _STATE_STR  # Alias for newer code
 
+
+
 STATE_EXPIRY_SECONDS = 3600  # 1 hour
 
 def _ensure_state_dir() -> None:
@@ -292,6 +294,13 @@ def cleanup_stale_state(session_id: str) -> None:
     finally:
         conn.close()
 
+# Backward-compatible shim: tests call hooks_state._cache.clear() to reset lru_cache
+class _CacheCompat:
+    def clear(self) -> None:
+        get_state.cache_clear()
+
+_cache = _CacheCompat()
+
 # ── HR6: Cache invalidation tracking ──────────────────
 
 def hr6_add_pending(session_id: str, key: str) -> None:
@@ -325,6 +334,7 @@ def hr6_get_pending(session_id: str, fast_mode: bool = False) -> set[str]:
     """
     conn = _get_connection(session_id, fast_mode=fast_mode)
     try:
+        conn.execute("CREATE TABLE IF NOT EXISTS hr6_pending (key TEXT PRIMARY KEY)")
         cursor = conn.execute("SELECT key FROM hr6_pending")
         return set(row[0] for row in cursor.fetchall())
     finally:
@@ -469,6 +479,7 @@ def cache_mark_checked(session_id: str, issue_key: str) -> None:
 def cache_is_checked(session_id: str, issue_key: str) -> bool:
     conn = _get_connection(session_id)
     try:
+        conn.execute("CREATE TABLE IF NOT EXISTS cache_checked (key TEXT PRIMARY KEY)")
         cursor = conn.execute("SELECT 1 FROM cache_checked WHERE key = ?", (issue_key,))
         return cursor.fetchone() is not None
     finally:
@@ -685,6 +696,12 @@ def response_size_track(session_id: str, tool: str, chars: int, tokens: int) -> 
 def response_size_get_stats(session_id: str) -> dict:
     conn = _get_connection(session_id)
     try:
+        conn.execute("""CREATE TABLE IF NOT EXISTS response_totals (
+            id INTEGER PRIMARY KEY, chars INTEGER DEFAULT 0,
+            tokens INTEGER DEFAULT 0, calls INTEGER DEFAULT 0)""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS response_sizes (
+            tool TEXT PRIMARY KEY, chars INTEGER DEFAULT 0,
+            tokens INTEGER DEFAULT 0, calls INTEGER DEFAULT 0)""")
         totals_row = conn.execute("SELECT chars, tokens, calls FROM response_totals WHERE id = 1").fetchone()
         totals = {"chars": totals_row[0], "tokens": totals_row[1], "calls": totals_row[2]} if totals_row else {"chars": 0, "tokens": 0, "calls": 0}
 
