@@ -499,7 +499,9 @@ acli jira auth status
 ---
 
 ## Architecture
+
 Coda-level performance via multi-tier state management:
+
 - **L1 Cache**: Process-level LRU cache for zero-latency reads.
 - **State-Daemon**: RAM-based state management via Unix Domain Sockets (Zero-Disk I/O).
 - **SQLite WAL**: ACID-compliant persistent storage with Write-Ahead Logging, Bloom Filters, and Delta Tracking.

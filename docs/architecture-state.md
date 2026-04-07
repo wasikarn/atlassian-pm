@@ -18,7 +18,7 @@ The system implements a multi-tier storage strategy to eliminate lock contention
 
 - **Purpose**: The "Hot Path." Zero-Disk I/O state management.
 - **Mechanism**: A background daemon manages state in a Python dictionary. Hooks communicate via UDS.
-- **Lifecycle**: 
+- **Lifecycle**:
   - Auto-starts on first hook call.
   - Heartbeat: Exits after 10 minutes of inactivity.
   - PID File: Prevents duplicate daemons per session.
