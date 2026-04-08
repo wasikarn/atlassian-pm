@@ -12,6 +12,8 @@ Usage:
     results = cache.text_search("coupon payment", limit=10)
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging

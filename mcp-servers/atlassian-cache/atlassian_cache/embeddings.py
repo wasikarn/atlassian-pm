@@ -13,6 +13,8 @@ Usage:
     similar = store.find_similar("coupon payment flow", limit=5)
 """
 
+from __future__ import annotations
+
 import logging
 import sqlite3
 import struct

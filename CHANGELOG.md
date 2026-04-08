@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.3] - 2026-04-08
+
+### Fixed
+
+- **macOS `timeout` compatibility** — `hooks/run.sh` now detects `gtimeout` (GNU coreutils) on macOS when `timeout` is unavailable, and falls back to running without timeout if neither exists. Fixes all hooks failing with exit 127 on macOS.
+
+## [3.10.2] - 2026-04-08
+
+### Fixed
+
+- **Python type hint compatibility** — Added `from __future__ import annotations` to atlassian-cache MCP server files to fix `TypeError` with `X | None` union syntax on Python < 3.10:
+  - `atlassian_cache/embeddings.py`
+  - `atlassian_cache/cache.py`
+  - `atlassian_cache/confluence_cache.py`
+  - `tests/conftest.py`
+  - `tests/integration/conftest.py`
+
 ## [3.10.1] - 2026-04-08
 
 ### Fixed

@@ -10,6 +10,8 @@ Usage:
     confluence.put_page(page_dict)
     page = confluence.get_page("12345", max_age_hours=4)
 """
+from __future__ import annotations
+
 import json
 import logging
 import re
