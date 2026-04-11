@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.4] - 2026-04-11
+
+### Fixed
+
+- **`mcp-servers/atlassian-cache/server.py`** — Fixed `AttributeError: 'coroutine' object has no attribute 'invalidate_issue'` (and similar errors for `put_search`, `get_search`, `get_stats`, etc.) caused by missing `await` on `_require_cache()` calls. The helper is `async def` but was being called as if synchronous in 10 locations across the file. All cache MCP tools (`cache_invalidate`, `cache_search`, `cache_sprint_issues`, `cache_stats`, `cache_similar_issues`) were broken — they now work correctly. Also fixed `_log_token_metrics` (sync helper) which was incorrectly trying to `await` from non-async context; switched to using the global `cache` reference directly.
+
 ## [3.10.3] - 2026-04-08
 
 ### Fixed
