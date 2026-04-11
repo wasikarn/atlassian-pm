@@ -655,8 +655,8 @@ def _timed_upstream(label: str, func: Any, *args: Any, **kwargs: Any) -> Any:
 def _log_token_metrics(tool: str, operation: str, chars_before: int, chars_after: int) -> None:
     """Log token metrics to cache (best-effort, non-blocking)."""
     try:
-        c = _require_cache()
-        c.log_token_metrics(tool, operation, chars_before, chars_after)
+        if cache is not None:
+            cache.log_token_metrics(tool, operation, chars_before, chars_after)
     except Exception as e:
         logger.debug("Failed to log token metrics: %s", e)
 
@@ -742,7 +742,7 @@ async def handle_cache_get_issue(args: dict) -> str:
 
 async def handle_cache_get_issues(args: dict) -> str:
     """Batch get multiple issues: cache-first, upstream for misses."""
-    c = _require_cache()
+    c = await _require_cache()
     issue_keys = args.get("issue_keys", [])
     if not issue_keys:
         return json.dumps({"error": "issue_keys is required and must be non-empty"})
@@ -841,7 +841,7 @@ async def handle_cache_get_issues(args: dict) -> str:
 
 async def handle_cache_search(args: dict) -> str:
     """JQL search with caching."""
-    c = _require_cache()
+    c = await _require_cache()
     jql = args["jql"]
     try:
         fields = _sanitize_fields(args.get("fields", "summary,status,assignee,issuetype,priority"))
@@ -908,7 +908,7 @@ async def handle_cache_search(args: dict) -> str:
 
 async def handle_cache_sprint_issues(args: dict) -> str:
     """Get sprint issues with caching."""
-    c = _require_cache()
+    c = await _require_cache()
     sprint_id = args["sprint_id"]
     # S7: Ensure sprint_id is an integer before interpolating into JQL to prevent injection
     if not isinstance(sprint_id, int):
@@ -1008,7 +1008,7 @@ async def handle_cache_sprint_issues(args: dict) -> str:
 
 async def handle_cache_text_search(args: dict) -> str:
     """FTS5 keyword search on cached issues."""
-    c = _require_cache()
+    c = await _require_cache()
     query = args["query"]
     limit = min(args.get("limit", 10), MAX_TEXT_SEARCH_LIMIT)
 
@@ -1074,7 +1074,8 @@ async def handle_cache_similar_sprints(args: dict) -> str:
         except ValueError:
             enriched.append(item)
             continue
-        sprint = _require_cache().get_sprint(sprint_id, max_age_hours=_MAX_AGE_MAX)
+        c_sprint = await _require_cache()
+        sprint = c_sprint.get_sprint(sprint_id, max_age_hours=_MAX_AGE_MAX)
         if sprint:
             enriched.append({**item, "sprint": sprint})
         else:
@@ -1085,7 +1086,7 @@ async def handle_cache_similar_sprints(args: dict) -> str:
 
 async def handle_cache_refresh(args: dict) -> str:
     """Force-refresh from upstream."""
-    c = _require_cache()
+    c = await _require_cache()
     if not jira_api:
         return json.dumps({"error": "Upstream API not available"})
 
@@ -1151,7 +1152,8 @@ async def handle_cache_refresh(args: dict) -> str:
 
 async def handle_cache_stats(args: dict) -> str:
     """Cache statistics."""
-    stats = _require_cache().get_stats()
+    c_stats = await _require_cache()
+    stats = c_stats.get_stats()
     stats["embedding_available"] = bool(embeddings and embeddings.available)
     if embeddings:
         stats["embeddings_count"] = embeddings.count()
@@ -1161,7 +1163,7 @@ async def handle_cache_stats(args: dict) -> str:
 
 async def handle_cache_invalidate(args: dict) -> str:
     """Cache invalidation with optional auto_refresh (P1-G)."""
-    c = _require_cache()
+    c = await _require_cache()
     auto_refresh = args.get("auto_refresh", False)
 
     if args.get("all"):
@@ -1336,7 +1338,8 @@ async def handle_cache_find_related(arguments: dict) -> str:
     """Find semantically similar Jira issues and Confluence sections for an issue."""
     key = _validate_issue_key(arguments["issue_key"])
     limit = min(int(arguments.get("limit", 5)), 20)
-    issue = _require_cache().get_issue(key, max_age_hours=_MAX_AGE_MAX)
+    c_sim = await _require_cache()
+    issue = c_sim.get_issue(key, max_age_hours=_MAX_AGE_MAX)
     if not issue:
         return json.dumps({"error": "not_cached"})
     query = _embedding_text(issue)
