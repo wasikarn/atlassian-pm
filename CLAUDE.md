@@ -6,7 +6,7 @@
 
 Agile Documentation System — skills-based Jira/Confluence automation
 
-**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (27 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (69, aggregated via `aggregator.py`) | `agents/` (20) | `.claude/commands/` (11 chains)
+**Plugin:** `atlassian-pm` · **Structure:** `SKILL.md` → phases → `references/` (27 docs) | `scripts/` (ai/, api/, lib/, sprint/) | `mcp-servers/atlassian-cache/` (MCP) | `hooks/` (11, aggregated via `aggregator.py`) | `agents/` (20) | `.claude/commands/` (11 chains)
 **Skills:** 35 skills · root-level: `skills/{apm-setup,apm-doctor}/SKILL.md` · categorized: `skills/{epic,story,task,sprint,confluence,utilities}/<name>/SKILL.md` · shared refs at `../../../references/` · each has `## 🎓 Domain Expert Notes`
 **Issue hierarchy:** Epic → Task (2 levels). Task carries narrative + ACs + file paths.
 **Templates:** No ADF panels — heading + paragraph + bulletList + table only. Thai headings. Human-readable + AI-parseable.
@@ -31,12 +31,20 @@ Agile Documentation System — skills-based Jira/Confluence automation
 | `cd hooks && uv run pytest tests/ -q` | Run hook tests |
 | `markdownlint-cli2 "**/*.md"` | Lint markdown |
 | `claude --plugin-dir .` | Dev mode (skills namespaced as `/atlassian-pm:<name>`) |
+| `git push` | **NEVER use `--no-verify`** — hooks enforce HR1-HR9, skipping = broken issues |
 
 ## Project Settings
 
 Core config: `.claude/project-config.json` (jira fields, team, services, environments) — ALL project-specific values live here only. Never hardcode in skills/agents/hooks.
 **Dynamic lookup:** Board → `jira_get_agile_boards(project_key=<from config>)` · Sprint → `jira_get_sprints_from_board(board_id, state="future")`
-**Prerequisites:** `acli` CLI, MCP (Jira + Confluence), Python 3.x · **MCP:** `atlassian-cache` via `.mcp.json` — never add to `plugin.json`
+**Prerequisites:** `uv`, `acli` CLI, MCP (Jira + Confluence), Python 3.x · **MCP:** `atlassian-cache` via `.mcp.json` — never add to `plugin.json`
+
+## Prerequisites
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| `uv` | Python package manager | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| `acli` | Atlassian CLI | `npm install -g @atlassian/cli` |
 
 ## create-task Modes
 
