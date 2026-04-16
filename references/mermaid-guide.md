@@ -333,6 +333,32 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 - `troubleshooting.md` → "Mermaid Diagrams", "Expand/Collapse Mechanisms in Confluence", Instance IDs table
 - `scripts/confluence/create_player_architecture_page.py` — reference implementation
 
-## External references
+## ASCII box-drawing palette (hand-draw reference)
 
-- **ASCII box-drawing cheatsheet:** <https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9> — single-line, double-line, shading characters. Useful when hand-drawing beyond the minimal `┌─┐│└┘├┤▶▼` set.
+Use **Unicode code points**, not legacy Extended ASCII — portable across Jira/Confluence/GitHub/Slack/SSH.
+
+**Single line (U+2500–U+253C):** `─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼` · heavy: `━ ┃`
+
+**Double line (U+2550–U+256C):** `═ ║ ╔ ╗ ╚ ╝ ╠ ╣ ╦ ╩ ╬`
+
+**Shading / blocks (U+2580–U+25A0):** `░ ▒ ▓ █ ▄ ▀ ▌ ■`
+
+**Arrows:** `▶ ◀ ▲ ▼` (triangles) · `→ ← ↑ ↓` (U+2190s) · `⇒` (double)
+
+**Example patterns:**
+
+```
+┌───┐          ┌───┐  ┌───┐          ┌───┐
+│   │          │   ├──┤   │          │   │
+└───┘          └───┘  └───┘          └─┬─┘
+                                        │
+ simple box    horizontal connect       ▼
+                                      ┌───┐
+                                      │   │
+                                      └───┘
+                                      tree
+```
+
+**Stroke-weight rule:** use `─` (light) for routine edges, `━` (heavy) for emphasis, `═` (double) for architectural boundaries.
+
+**Drawing tools:** [MonoSketch](https://github.com/tuanchauict/MonoSketch) (free OSS GUI) · [asciiflow.com](https://asciiflow.com) (web) · `monodraw` (Mac, paid).
