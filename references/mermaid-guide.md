@@ -341,6 +341,8 @@ Use **Unicode code points**, not legacy Extended ASCII — portable across Jira/
 
 **Double line (U+2550–U+256C):** `═ ║ ╔ ╗ ╚ ╝ ╠ ╣ ╦ ╩ ╬`
 
+**Mixed single + double junctions (U+255E–U+256B):** `╞ ╟ ╡ ╢ ╤ ╥ ╧ ╨ ╪ ╫` — use when mixing single-line (detail) and double-line (architectural boundary) in the same diagram
+
 **Shading / blocks (U+2580–U+25A0):** `░ ▒ ▓ █ ▄ ▀ ▌ ■`
 
 **Arrows:** `▶ ◀ ▲ ▼` (triangles) · `→ ← ↑ ↓` (U+2190s) · `⇒` (double)
