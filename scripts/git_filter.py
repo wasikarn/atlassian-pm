@@ -32,6 +32,10 @@ def load_values():
         if name:
             member_slots[name] = f"SLOT_{i + 1}"
 
+    envs = c.get("environments", {})
+    staging = envs.get("staging", {})
+    production = envs.get("production", {})
+
     return {
         "PROJECT_KEY": c["jira"]["project_key"],
         "JIRA_SITE": c["jira"]["site"],
@@ -42,6 +46,12 @@ def load_values():
         "COMPANY": c.get("company", "Tathep"),
         "COMPANY_LOWER": c.get("company_lower", "tathep"),
         "MEMBER_SLOTS": member_slots,
+        "STAGING_WEB": staging.get("web", ""),
+        "STAGING_ADMIN": staging.get("admin", ""),
+        "STAGING_API": staging.get("api", ""),
+        "PROD_WEB": production.get("web", ""),
+        "PROD_ADMIN": production.get("admin", ""),
+        "PROD_API": production.get("api", ""),
     }
 
 
@@ -92,6 +102,12 @@ def smudge(content, v):
     # Team member names: {{SLOT_N}} → real name
     for name, slot in v["MEMBER_SLOTS"].items():
         content = content.replace(f"{{{{{slot}}}}}", name)
+
+    # Environment hosts: {{STAGING_*}} / {{PROD_*}} → real hostnames
+    for slot in ("STAGING_WEB", "STAGING_ADMIN", "STAGING_API", "PROD_WEB", "PROD_ADMIN", "PROD_API"):
+        real = v.get(slot, "")
+        if real:
+            content = content.replace(f"{{{{{slot}}}}}", real)
 
     return content
 
@@ -156,6 +172,20 @@ def clean(content, v):
     for name in sorted(v["MEMBER_SLOTS"], key=len, reverse=True):
         slot = v["MEMBER_SLOTS"][name]
         content = content.replace(name, f"{{{{{slot}}}}}")
+
+    # Environment hosts: real hostnames → {{STAGING_*}} / {{PROD_*}}
+    # Sort longest-first so fully-qualified hostnames match before bare-domain substrings.
+    env_slots = [
+        ("STAGING_WEB", v.get("STAGING_WEB", "")),
+        ("STAGING_ADMIN", v.get("STAGING_ADMIN", "")),
+        ("STAGING_API", v.get("STAGING_API", "")),
+        ("PROD_WEB", v.get("PROD_WEB", "")),
+        ("PROD_ADMIN", v.get("PROD_ADMIN", "")),
+        ("PROD_API", v.get("PROD_API", "")),
+    ]
+    for slot, real in sorted(env_slots, key=lambda kv: len(kv[1]), reverse=True):
+        if real:
+            content = content.replace(real, f"{{{{{slot}}}}}")
 
     return content
 

@@ -1,6 +1,8 @@
 # Task Templates (ADF) — Unified
 
 > **Prerequisite:** Read [templates-core.md](templates-core.md) for CREATE/EDIT rules and styling.
+>
+> **Diagram rule (if embedding one in the Task description):** Jira ADF = ASCII code block only. Default `sequenceDiagram` for interaction/branching flows; `flowchart` OK only for linear or 2-branch (upstream bug mashes 3+ branch labels). See [mermaid-guide.md](mermaid-guide.md) + [ascii-box-drawing.md](ascii-box-drawing.md). Same rule as [templates-epic.md](templates-epic.md).
 
 All task types use Jira `"type": "Task"`. Mode is conveyed via summary prefix and content structure — not issue type.
 

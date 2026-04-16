@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.3] - 2026-04-16
+
+### Changed
+
+- **`references/templates-task.md`** — added diagram rule prerequisite note at top. Jira ADF = ASCII code block only; default `sequenceDiagram` for 3+ branch decisions; hand-draw box chars when embedding directly. Mirrors the annotation added to `templates-epic.md` in 3.15.1.
+
+### Rationale
+
+Final audit sweep after 3.15.2. Task-creating skills (`apm-create-task`, `apm-update-task`, `apm-refine-epic`, `apm-vibe-plan`, `apm-spec-to-stories`, `apm-bug-triage`, `apm-create-testplan`) all read `templates-task.md` as their MANDATORY template reference — previously only `templates-epic.md` carried the diagram rule. This closes the last doc gap. All Jira-write paths now propagate the ASCII-only + multi-branch-flowchart-bug convention consistently; Confluence-write paths (`apm-blueprint`, `apm-create-doc`, `apm-update-doc`) are unaffected (Forge Mermaid macro renders natively).
+
+### Migration
+
+- No migration required.
+
 ## [3.15.2] - 2026-04-16
 
 ### Changed
@@ -133,7 +147,7 @@ Compact-file deletion eliminates dual-source maintenance debt — every edit pre
 
 TaThep team (2026-04-16) established binding convention via 4-role debate (Engineering Lead, QA Lead, DevOps/SRE, Product/Delivery) + Team Lead tiebreak: vertical slices ship to production per merge (flag OFF); release (user exposure) = separate PM-approved flag toggle. This eliminates batch-wait-for-all-tickets bottleneck for market velocity.
 
-**Tier 2 MTTR** (< 4h business hours) current; **Tier 1** (< 1h business + < 4h off-hours) when partner billboard owners onboard. Staging at `app.bluedragon.space` + `platform-admin.bluedragon.space`. Pilot #1 = Video Playback Phase 1/2/NVR (active `vs-planned` work); Pilot #2 = {{PROJECT_KEY}}-182/{{PROJECT_KEY}}-183 after calibration.
+**Tier 2 MTTR** (< 4h business hours) current; **Tier 1** (< 1h business + < 4h off-hours) when partner billboard owners onboard. Staging at `{{STAGING_WEB}}` + `{{STAGING_ADMIN}}`. Pilot #1 = Video Playback Phase 1/2/NVR (active `vs-planned` work); Pilot #2 = {{PROJECT_KEY}}-182/{{PROJECT_KEY}}-183 after calibration.
 
 Full binding decision: see `feedback_ship_per_merge_convention.md` (user memory) + `wiki/ship-per-merge-convention.md` (2nd Brain synthesis).
 
