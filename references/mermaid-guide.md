@@ -332,3 +332,7 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 - `/atlassian-pm:apm-pretty-mermaid` — ASCII rendering skill for Jira
 - `troubleshooting.md` → "Mermaid Diagrams", "Expand/Collapse Mechanisms in Confluence", Instance IDs table
 - `scripts/confluence/create_player_architecture_page.py` — reference implementation
+
+## External references
+
+- **ASCII box-drawing cheatsheet:** <https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9> — single-line, double-line, shading characters. Useful when hand-drawing beyond the minimal `┌─┐│└┘├┤▶▼` set.
