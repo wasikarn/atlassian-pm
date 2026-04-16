@@ -44,7 +44,7 @@ effort: medium
 | 4. QG | `qg_score`, `passed_qg` |
 | 5. Create | `epic_key`, `epic_doc_id` |
 
-> **Workflow Patterns:** See [workflow-compact.md](../../../references/workflow-compact.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
+> **Workflow Patterns:** See [workflow-patterns.md](../../../references/workflow-patterns.md) for Gate Levels (AUTO/REVIEW/ITERATE/APPROVAL), QG Scoring, Two-Step, and Explore patterns.
 
 ## Blueprint Handoff Check
 
@@ -278,6 +278,6 @@ See [references/expert-notes.md](references/expert-notes.md)
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Architect Debate Protocol](../../../references/architect-debate-protocol.md) · [Tool Selection](../../../references/tools.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Epic ADF Structure](references/epic-adf-structure.md) · [Examples](references/examples.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Architect Debate Protocol](../../../references/architect-debate-protocol.md) · [Tool Selection](../../../references/tools.md) · [VS Guide](../../../references/vertical-slice-guide.md) · [Epic ADF Structure](references/epic-adf-structure.md) · [Examples](references/examples.md)
 
 After creation: `/verify-issue {{PROJECT_KEY}}-XXX`

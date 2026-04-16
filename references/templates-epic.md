@@ -63,7 +63,7 @@ request · process · handle · manage · review · check · trigger · send · 
 
 ### User Stories = Vertical Slices (NOT Technical Layers)
 
-> **Critical rule — see [vertical-slice-guide.md](vertical-slice-guide.md) / [vs-checklist-compact.md](vs-checklist-compact.md)**
+> **Critical rule — see [vertical-slice-guide.md](vertical-slice-guide.md)**
 
 User Stories ใน Epic MUST be **vertical slices** — end-to-end business-deliverable chunks ที่ QA test เป็น user outcome ได้
 
