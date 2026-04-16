@@ -119,7 +119,7 @@ Compared to [prev_date]: +N added, -M resolved
 <!-- tech-debt-snapshot: {"date":"[today]","total":N,"be":N,"fe-admin":N,"fe-web":N} -->
 ```
 
-Mermaid quadrant chart format:
+Mermaid quadrant chart format (render via `/atlassian-pm:apm-pretty-mermaid` → SVG attachment for Confluence dashboard):
 
 ```mermaid
 quadrantChart

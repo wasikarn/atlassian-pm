@@ -195,4 +195,4 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 ## References
 
-[Sprint Frameworks](../../../references/sprint-frameworks.md) · [Team Capacity](../../../references/team-capacity.md) · [Skill Orchestration](../../../references/skill-orchestration.md) · [Mermaid Guide](../../../references/mermaid-guide.md)
+[Sprint Frameworks](../../../references/sprint-frameworks.md) · [Team Capacity](../../../references/team-capacity.md) · [Skill Orchestration](../../../references/skill-orchestration.md) · [Mermaid Guide](../../../references/mermaid-guide.md) · [apm-pretty-mermaid](../../utilities/apm-pretty-mermaid/SKILL.md) (ASCII for Jira comments, SVG for Confluence review page)

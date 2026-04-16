@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0] - 2026-04-16
+
+### Added
+
+- **`skills/utilities/apm-pretty-mermaid/SKILL.md`** — new skill wrapping `beautiful-mermaid` with APM-aware defaults. ASCII output (default) for Jira ADF code blocks in all issue types (Epic/Task/Bug/Spike/Chore/comment); themed SVG for Confluence attachments. Width discipline ≤ 80 cols. Wraps upstream `beautiful-mermaid` library (15 themes, 5 diagram types).
+- **`.claude/rules/mermaid.md`** — added ASCII-first rule, target matrix (Jira → ASCII, Confluence simple → Forge macro, Confluence complex → SVG, Gantt → SVG only), skill pointer to `apm-pretty-mermaid`.
+- **`references/mermaid-guide.md`** — new `Jira ASCII` section with render command, ADF codeBlock embed pattern, and width rules. Links to `apm-pretty-mermaid` skill.
+- **Discoverability pointers** — `apm-close-sprint`, `apm-plan-release`, `apm-map-dependencies`, `apm-scan-tech-debt` now reference `apm-pretty-mermaid` at their Mermaid generation points.
+
+### Removed
+
+- **`references/workflow-compact.md`** (33 lines) — redundant subset of `workflow-patterns.md`. Four callsites updated in `apm-vibe-plan`, `apm-create-epic`, `templates-epic`.
+- **`references/vs-checklist-compact.md`** (42 lines) — redundant subset of `vertical-slice-guide.md`. Callsites updated.
+
+### Rationale
+
+TaThep team convention (2026-04-16, MEMORY.md → "Jira ASCII Diagrams"): default diagram format in Jira = ASCII code block (monospace, zero-dependency, diff-friendly, renders identically in web/mobile/gh-cli). SVG-in-Jira breaks copy-paste + AI-agent parsing. Confluence SVG attachment preserved for high-fidelity architecture docs.
+
+Compact-file deletion eliminates dual-source maintenance debt — every edit previously required updating 2 files.
+
+### Migration
+
+- No breaking changes — all additive.
+- Existing Epics/Tasks still validate.
+- Skill first-run auto-installs `beautiful-mermaid` (~3 MB); offline environments: `cd skills/utilities/apm-pretty-mermaid && npm install` once.
+
+### Notes
+
+- Upstream library: <https://github.com/imxv/Pretty-mermaid-skills> (641 stars, MIT).
+- ASCII renderer does not support Gantt — use SVG on Confluence for release timelines.
+
 ## [3.13.0] - 2026-04-16
 
 ### Added

@@ -86,7 +86,7 @@ Present as `| Day | Alice | Bob | ... |` swim lane table.
 
 ### Phase 5: Output
 
-**1. Dependency Graph (Mermaid)** — `graph LR` with red fill (`fill:#ff6b6b`) for critical path items.
+**1. Dependency Graph (Mermaid)** — `graph LR` with red fill (`fill:#ff6b6b`) for critical path items. Render via `/atlassian-pm:apm-pretty-mermaid` → ASCII for Jira comment, SVG for Confluence page.
 
 **2. Critical Path Summary** — total duration / sprint duration / buffer / risk level (LOW >2d / MEDIUM 1-2d / HIGH <1d)
 
