@@ -1,11 +1,24 @@
 ---
 paths:
   - "scripts/confluence/**/*.py"
-  - "skills/shared-references/mermaid-guide.md"
+  - "references/mermaid-guide.md"
   - "docs/mermaid/**/*.md"
 ---
 
 ## Mermaid Diagrams
+
+**APM default:** ASCII in Jira (all issue types) · themed SVG in Confluence · raw `.mmd` in Forge Mermaid macro.
+
+**Render via skill:** `/atlassian-pm:apm-pretty-mermaid` — wraps beautiful-mermaid with APM-aware defaults (ASCII = `--format ascii --use-ascii`, Confluence SVG = `--theme tokyo-night`).
+
+| Target | Format | Width |
+| --- | --- | --- |
+| Jira Epic / Task / Bug / Spike / Chore / comment | **ASCII** code block | ≤ 80 cols |
+| Confluence page (simple) | Forge Mermaid macro (raw `.mmd`) | any |
+| Confluence page (complex, high-fidelity) | **SVG attachment** | any |
+| Gantt / release timeline | **SVG only** (ASCII renderer no gantt) | any |
+
+If ASCII exceeds 80 cols: simplify OR split into 2 diagrams OR move to Confluence SVG + Smart Link from Jira.
 
 When creating or editing Mermaid diagrams, read the relevant official docs BEFORE writing diagram code:
 
@@ -16,7 +29,7 @@ When creating or editing Mermaid diagrams, read the relevant official docs BEFOR
 - **Packet**: `docs/mermaid/packet.md` — network packet structure, bit ranges (v11.0.0+)
 - **Gantt**: `docs/mermaid/gantt.md` — tasks, sections, milestones, excludes, compact mode, date formats
 
-Project-specific patterns and Confluence constraints: `skills/shared-references/mermaid-guide.md`
+Project-specific patterns (Confluence + Jira ASCII): `references/mermaid-guide.md`
 
 ### Edge Animation (Flowchart only)
 

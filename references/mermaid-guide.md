@@ -298,7 +298,33 @@ Use `sequenceDiagram` for request/response patterns instead of flowchart.
 | `~~~` everywhere | Fragile layout | Subgraphs first |
 | `&` with edge ID | Only one edge gets ID | Split to separate edges |
 
+## Jira ASCII (default for all Jira issue types)
+
+Jira ADF does not render SVG inline and Forge Mermaid macro is Confluence-only. Default Jira diagram format = **ASCII code block** (monospace, zero-dependency, diff-friendly).
+
+**Render:** `/atlassian-pm:apm-pretty-mermaid` with `--format ascii --use-ascii`
+
+```bash
+node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
+  --input /tmp/x.mmd --format ascii --use-ascii
+```
+
+**Embed in ADF:**
+
+```json
+{ "type": "codeBlock", "attrs": { "language": "text" },
+  "content": [{ "type": "text", "text": "<ASCII output>" }] }
+```
+
+**Rules:**
+
+- Width ≤ 80 cols (iPhone 14 Pro landscape width in Jira mobile).
+- If exceeds: simplify, split into 2 diagrams (zoom-out + zoom-in), or move to Confluence SVG + Smart Link from Jira.
+- `--use-ascii` forces pure `+-|` chars (some Jira fonts render Unicode box chars poorly).
+- Gantt not supported in ASCII — use SVG on Confluence.
+
 ## Related
 
+- `/atlassian-pm:apm-pretty-mermaid` — ASCII / SVG rendering skill
 - `troubleshooting.md` → "Mermaid Diagrams", "Expand/Collapse Mechanisms in Confluence", Instance IDs table
 - `scripts/confluence/create_player_architecture_page.py` — reference implementation
