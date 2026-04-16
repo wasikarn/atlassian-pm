@@ -94,6 +94,7 @@ If no service tag (`[BE]`, `[FE-Admin]`, `[FE-Web]`, `[AI-Agent]`, `[Video]`, `[
 - Follow writing style from `references/writing-style.md`
 - Use panels: Objective (info), Scope (note), AC (success), Technical Notes (warning)
 - AC format: Given/When/Then
+- **Diagrams:** Jira ADF = ASCII code block only. Default `sequenceDiagram` for interaction/branching flows; `flowchart` OK only for linear or 2-branch (upstream bug mashes 3+ branch labels). Hand-draw box chars when embedding directly. See `references/mermaid-guide.md` + `references/ascii-box-drawing.md`.
 - Smart links for issue references: `{"type":"inlineCard","attrs":{"url":"..."}}`
 - HR1: Output must pass QG >= 90% before any Atlassian write
 - CREATE format: projectKey, type, summary, description (NO `issues` key)

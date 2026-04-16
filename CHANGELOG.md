@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.2] - 2026-04-16
+
+### Changed
+
+- **`agents/story-writer.md`** — added explicit diagram rule: Jira ADF = ASCII code block only, default `sequenceDiagram` for 3+ branch decisions (flowchart mashes labels per mermaid-ascii#56), hand-draw box chars when embedding directly. Prevents silent drift when story-writer emits ADF with embedded Mermaid.
+
+### Rationale
+
+Audit found story-writer referenced `templates-core.md` + `templates-task.md` but not `templates-epic.md` (where the diagram convention was documented in 3.15.1). Gap closed by adding the rule directly to story-writer so it applies regardless of which template is loaded.
+
+### Migration
+
+- No migration. Existing generated content unaffected.
+
 ## [3.15.1] - 2026-04-16
 
 ### Documentation
