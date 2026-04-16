@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.0] - 2026-04-16
+
+### Added
+
+- **`references/templates-epic.md`** — new `Scope Disambiguation` H2 section between `สรุปภาพรวม` and `User Flow`; REQUIRED when Epic title contains ambiguous cue words. Captures explicit interpretation + rejected alternatives so QA/PM/Dev see the same scope anchor.
+- **`references/templates-epic.md`** — new `Code Paths Covered` H3 subsection in Technical Reference zone (P6): explicit table of every code path with In-Scope status (`✅ / ❌ / partial`). Enumeration gate before drafting scope.
+- **`references/templates-epic.md`** — new `Coverage Matrix` H3 subsection (P3): REQUIRED when Epic description references another Epic by key (inlineCard / `TP-YYY`). Cross-references which scenarios belong to this Epic vs related vs out-of-scope.
+- **`references/templates-epic.md`** — `User Flow Mermaid — All Branches Rule` (P7): diagrams MUST show all decision branches, each labeled `⭐ {{PROJECT_KEY}}-XXX` (this epic) / `TP-YYY` (related) / `(out of scope)` with color conventions.
+- **`references/architect-debate-protocol.md`** — new file codifying the Competing Interpretations → Recommendation → Risk-if-wrong format (P5). Required when any architect-style analysis runs on ambiguous input. Includes {{PROJECT_KEY}}-182 worked example.
+- **`references/mermaid-guide.md`** — new `Epic User Flow — All Branches Rule` section with style conventions + 3-way decision template + {{PROJECT_KEY}}-182 anti-pattern.
+- **`scripts/lib/adf_validator.py`** — new check `T6: Title Ambiguity Scan` (WARN-level, never FAIL). Scans Epic/Task summary + description for ambiguous cue words (`request · process · handle · manage · review · check · trigger · send · notify · update`). Triggers warning if title has 2+ cues without `Scope Disambiguation` section, or description has cue without explicit `Scope:` / `Trigger:` clarifier. New constant `AMBIGUOUS_CUE_WORDS` exported.
+- **`skills/epic/apm-create-epic/SKILL.md`** — new `Phase 0: Intent Clarification Gate` (P1): pre-draft cue-word scan + code path enumeration + interpretation picker. Runs before Phase 1 Discovery.
+- **`skills/epic/apm-create-epic/SKILL.md`** — new `Phase 1.5: Stakeholder Confirmation Loop` (P2): explicit pause after first draft, asks user for `confirmed` before generating slices.
+- **`skills/epic/apm-update-epic/SKILL.md`** — ambiguity scan added to Phase 2 Impact Analysis and new `Phase 2.5: Stakeholder Confirmation Loop` (P2): pause for `confirmed` before generating update ADF.
+
+### Changed
+
+- **`scripts/lib/adf_validator.py`** — class docstring updated; Epic and Task quality paths now include T6. Check counts: Epic 9 → 10, Task 9 → 10. Threshold still 90%; T6 is WARN-only so existing tickets keep passing.
+
+### Rationale
+
+QA flagged the {{PROJECT_KEY}}-182 scope-ambiguity bug (documented in v3.11.1 case study) as systemic: an ambiguous Epic title (`"Review flow — notification trigger"`) propagated silently through draft → restructure → slices → Mermaid → code review because seven process/tooling gaps never forced the ambiguity to surface. v3.12.0 closes those seven gaps:
+
+- **P1 Intent Clarification Gate** — catch ambiguity at the earliest moment (before draft).
+- **P2 Stakeholder Confirmation Loop** — force an explicit checkpoint before slice generation, because that's when ambiguity locks in.
+- **P3 Coverage Matrix for Epic Pairs** — make cross-Epic coverage machine-readable.
+- **P4 T6 Ambiguity Scan** — static-validator warning so the gap is visible even when humans forget.
+- **P5 Architect Debate Protocol** — require Competing Interpretations before any recommendation.
+- **P6 Code Paths Covered** — enumerate all decision paths so gaps fall through to a table, not production.
+- **P7 All-Branches Mermaid Rule** — every decision node must show every branch with coverage label.
+
+### Migration
+
+- No breaking changes. All new sections are additive.
+- Existing Epics still validate at previous scores (T6 is WARN-only).
+- `Scope Disambiguation`, `Code Paths Covered`, and `Coverage Matrix` are recommended-with-grace-period: new Epics should include them; existing Epics can add them during the next update.
+
+### Notes
+
+- No architect-specific agent file exists in `agents/` — the debate protocol lives in `references/architect-debate-protocol.md` and is referenced by apm-create-epic / apm-update-epic so any agent doing architect-style reasoning can apply it.
+- `scripts/api/validate_adf.py` CLI surface unchanged — existing `--type epic` / `--type task` invocations automatically pick up T6. No new CLI arg needed.
+
 ## [3.11.1] - 2026-04-16
 
 ### Changed

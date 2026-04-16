@@ -25,6 +25,22 @@ VALID_ISSUE_TYPES = frozenset({"story", "subtask", "epic", "qa", "task"})
 SUBTASK_TAGS = ("[BE]", "[FE-Admin]", "[FE-Web]", "[QA]")
 QG_THRESHOLD = 90.0
 
+# T6: Ambiguity cue words — trigger Scope Disambiguation guidance when 2+ appear in title,
+# or 1+ appears in description without explicit "Scope:" / "Trigger:" clarification.
+# See references/templates-epic.md + references/architect-debate-protocol.md.
+AMBIGUOUS_CUE_WORDS = frozenset({
+    "request",
+    "process",
+    "handle",
+    "manage",
+    "review",
+    "check",
+    "trigger",
+    "send",
+    "notify",
+    "update",
+})
+
 _ALL_SECTION_KEYS: frozenset[str] = frozenset({
     "acceptance criteria",
     "user story",
@@ -243,11 +259,14 @@ class AdfValidator:
     """Validate ADF documents against quality gate criteria.
 
     Checks by issue type:
-        Story:   T1-T5 (technical) + S1-S6 (quality)  = 11 checks
-        Subtask: T1-T5 (technical) + ST1-ST5 (quality) = 10 checks
-        Epic:    T1-T5 (technical) + E1-E4 (quality)   = 9 checks
-        QA:      T1-T5 (technical) + QA1-QA5 (quality) = 10 checks
-        Task:    T1-T5 (technical) + TK1-TK4 (quality) = 9 checks
+        Story:   T1-T5 (technical) + S1-S6 (quality)          = 11 checks
+        Subtask: T1-T5 (technical) + ST1-ST5 (quality)        = 10 checks
+        Epic:    T1-T6 (technical, T6 WARN-only) + E1-E4       = 10 checks
+        QA:      T1-T5 (technical) + QA1-QA5 (quality)        = 10 checks
+        Task:    T1-T6 (technical, T6 WARN-only) + TK1-TK4     = 10 checks
+
+    T6 (Title Ambiguity Scan) only runs for Epic + Task types. It is WARN-level so
+    it cannot break existing tickets — scoring still permits PASS at 90% threshold.
 
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
@@ -276,6 +295,11 @@ class AdfValidator:
         report.checks.append(self._check_t3_inline_code(adf))
         report.checks.append(self._check_t4_links(adf, issue_type, _secs))
         report.checks.append(self._check_t5_required_fields(adf, issue_type, wrapper))
+
+        # T6 only applies to Epic + Task (the types most affected by title-scope ambiguity).
+        # Stories/subtasks inherit context from parents so their titles are usually unambiguous.
+        if issue_type in ("epic", "task"):
+            report.checks.append(self._check_t6_ambiguity(adf, wrapper))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
@@ -473,6 +497,69 @@ class AdfValidator:
             return CheckResult("T5", CheckStatus.PASS, "EDIT fields OK")
 
         return CheckResult("T5", CheckStatus.WARN, f"Unknown wrapper format: {fmt}")
+
+    def _check_t6_ambiguity(self, adf: dict, wrapper: dict | None) -> CheckResult:
+        """T6: Title Ambiguity Scan (WARN-level, never FAIL).
+
+        Scans Epic/Task summary + description text for ambiguous cue words. Triggers when:
+          - Title contains 2+ cue words without a Scope Disambiguation section, OR
+          - Description contains a cue word without explicit 'Scope:' or 'Trigger:' clarification.
+
+        See references/templates-epic.md 'Scope Disambiguation' section and
+        references/architect-debate-protocol.md for the resolution workflow.
+        """
+        # Extract title from wrapper if available
+        title = ""
+        if wrapper:
+            title = wrapper.get("summary", "") or ""
+
+        title_lower = title.lower()
+        title_cues = sorted({w for w in AMBIGUOUS_CUE_WORDS if re.search(rf"\b{re.escape(w)}\b", title_lower)})
+
+        # Scan for the Scope Disambiguation heading anywhere in the document
+        has_disambig_section = bool(find_adf_nodes(
+            adf,
+            lambda n: n.get("type") == "heading"
+            and "scope disambiguation" in extract_text(n).lower(),
+        ))
+
+        # Full description plain text (excluding code marks so we don't flag file paths)
+        desc_texts: list[str] = []
+
+        def _collect(n: dict) -> None:
+            if n.get("type") == "text" and "text" in n and not has_code_mark(n):
+                desc_texts.append(n["text"])
+
+        walk_adf(adf, _collect)
+        desc_text = " ".join(desc_texts).lower()
+        desc_has_clarifier = ("scope:" in desc_text) or ("trigger:" in desc_text)
+        desc_cues = sorted({w for w in AMBIGUOUS_CUE_WORDS if re.search(rf"\b{re.escape(w)}\b", desc_text)})
+
+        # Rule 1: Title has 2+ cue words but no Scope Disambiguation section
+        if len(title_cues) >= 2 and not has_disambig_section:
+            return CheckResult(
+                "T6",
+                CheckStatus.WARN,
+                f"Title contains ambiguous cue words: {title_cues}. "
+                "Consider adding Scope Disambiguation section to clarify "
+                "(see templates-epic.md).",
+                fix_hint="Add H2 'Scope Disambiguation' after สรุปภาพรวม with explicit interpretation.",
+            )
+
+        # Rule 2: Description has cue words but no explicit Scope/Trigger clarifier and no section
+        if desc_cues and not desc_has_clarifier and not has_disambig_section:
+            # Only flag if description is substantive (avoid false-positive on stubs)
+            if len(desc_text.split()) > 50:
+                return CheckResult(
+                    "T6",
+                    CheckStatus.WARN,
+                    f"Description contains ambiguous cue words: {desc_cues} "
+                    "without explicit 'Scope:' or 'Trigger:' clarification. "
+                    "Consider adding Scope Disambiguation section (see templates-epic.md).",
+                    fix_hint="Add Scope Disambiguation section OR inline 'Scope:' / 'Trigger:' lines.",
+                )
+
+        return CheckResult("T6", CheckStatus.PASS, "No title/description ambiguity detected")
 
     # ───────────────────────────────────────────────────────
     # Story Quality Checks (S1–S6)

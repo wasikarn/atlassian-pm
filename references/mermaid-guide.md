@@ -220,6 +220,41 @@ Blocks inside Expand still count toward `guest-params > index`. `mermaid_diagram
 | Architecture diagrams | Untested | `architecture-beta` (v11.1.0+) |
 | Packet diagrams | Untested | `packet` (v11.0.0+) |
 
+## Epic User Flow — All Branches Rule (v3.12.0)
+
+> **Context:** Epic User Flow Mermaid diagrams MUST show all decision branches, not only the happy path. Each branch is labeled by coverage.
+
+| Label | Meaning | Style |
+| --- | --- | --- |
+| `⭐ {{PROJECT_KEY}}-XXX` | Covered by this Epic | `fill:#d4edda, stroke:#28a745` |
+| `TP-YYY` | Covered by a related Epic | `fill:#cce5ff, stroke:#004085` |
+| `(out of scope)` | Not covered anywhere in this release | `fill:#e9ecef, stroke:#6c757d, stroke-dasharray: 5 5` |
+
+### Template — 3-way decision
+
+```mermaid
+flowchart TD
+    START([User action]) --> DECIDE{Condition?}
+    DECIDE -->|Path A| A[⭐ Handle in this Epic]
+    DECIDE -->|Path B| B[Handled by TP-YYY]
+    DECIDE -->|Path C| C[Out of scope]
+    A --> END([Success outcome])
+    B --> END
+    C --> END
+    style A fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style B fill:#cce5ff,stroke:#004085,stroke-width:2px
+    style C fill:#e9ecef,stroke:#6c757d,stroke-dasharray: 5 5
+```
+
+**Rules:**
+
+- Every `{decision}` diamond MUST have all outgoing branches rendered — no silent happy-path-only.
+- Every terminal node MUST carry a coverage label (`⭐ {{PROJECT_KEY}}-XXX`, plain `TP-YYY`, or `(out of scope)`).
+- If a branch is covered by multiple Epics, list them: `⭐ {{PROJECT_KEY}}-XXX + TP-YYY`.
+- Link labels (`-->|"label"|`) MAY be used for the transition condition, but the terminal node is the source of truth for coverage.
+
+**Anti-pattern (from {{PROJECT_KEY}}-182):** diagram shows only AI-review path, QA-review path omitted — reader cannot tell if QA-review is out of scope or just forgotten.
+
 ## Common Patterns
 
 ### State Machine

@@ -69,6 +69,46 @@ Skip interview questions in Phase 1 for information already documented.
 
 ## Phases
 
+### 0. Intent Clarification Gate (NEW in v3.12.0)
+
+> **Runs before Phase 1 Discovery.** Prevents {{PROJECT_KEY}}-182-class scope ambiguity from propagating into drafts.
+
+**Step 0a — Scan title for ambiguous cue words:**
+
+```text
+request · process · handle · manage · review · check · trigger · send · notify · update
+```
+
+- **0 cue words** → skip to Phase 1 Discovery.
+- **1 cue word + clear domain context** → proceed but keep an eye on scope.
+- **2+ cue words** OR **1 cue word with multiple codebase meanings** → **MANDATORY** pre-draft disambiguation (steps 0b + 0c).
+
+**Step 0b — Code path enumeration (if Epic relates to existing code):**
+
+- Use Grep / Read / QMD to open the relevant module/service.
+- Enumerate ALL decision paths (switch statements, early returns, status guards, queue triggers).
+- Write a short list of candidate interpretations mapped to code paths.
+- Follow the [architect-debate-protocol.md](../../../references/architect-debate-protocol.md) format: **Competing Interpretations → Recommendation → Risk if wrong**.
+
+**Step 0c — Ask the user to pick (when confidence < 95%):**
+
+```text
+Your Epic title contains ambiguous terms: [cues].
+I found these candidate interpretations:
+
+A. [name] — [reading + scope implication]
+B. [name] — [reading + scope implication]
+C. [name] — [reading + scope implication]
+
+My recommendation: [X] because [rationale]. Risk if wrong: [impact].
+
+Please confirm A / B / C, or describe a 4th option, before I draft.
+```
+
+**⛔ GATE — DO NOT PROCEED** to Phase 1 until user picks an interpretation. The picked interpretation becomes the `Scope Disambiguation` section in the Epic ADF (see `templates-epic.md`).
+
+> **Vibe + Thorough both run this gate.** Vibe mode skips it only when title has 0 cue words and description is unambiguous. No shortcut allowed if cue words are present — the 3 seconds saved cost 3 hours of restructure in {{PROJECT_KEY}}-182.
+
 ### 1. Discovery
 
 #### Vibe Mode (Default)
@@ -78,7 +118,7 @@ Skip interview questions in Phase 1 for information already documented.
   - **VS Planning:** Auto-identify vertical slices from description keywords
 - If existing docs available → read context silently
 - Ask only if description is too vague to infer problem narrative (max 1 question)
-- **No GATE** — proceed to Phase 2 immediately
+- **No GATE** — proceed to Phase 1.5 immediately
 
 #### --thorough Mode
 
@@ -89,6 +129,26 @@ Skip interview questions in Phase 1 for information already documented.
 - **Narrative Arc:** Summarize as `[Current situation] → [Problem] → [This Epic solves it by...]`
 - **VS Planning:** Identify potential vertical slices (what distinct user flows exist?)
 - **⛔ GATE — DO NOT PROCEED** without stakeholder confirmation of problem narrative + VS planning.
+
+### 1.5 Stakeholder Confirmation Loop (NEW in v3.12.0)
+
+> **Runs after first draft of scope + narrative, before Phase 2 RICE / Phase 3 slices.**
+
+After drafting the initial scope outline (problem narrative + high-level scope + candidate slices list), the skill MUST pause and confirm:
+
+```text
+Draft ready — please confirm scope matches your intent before I generate
+User Stories / slices. Reply 'confirmed' to proceed or describe corrections.
+
+Draft summary:
+- Problem: [...]
+- Scope (in): [...]
+- Scope (out): [...]
+- Candidate slices: [list]
+- Interpretation anchor: [from Phase 0]
+```
+
+**⛔ GATE — DO NOT PROCEED** to Phase 2/3 without an explicit `confirmed` (or correction) from the user. This gate exists because the restructure in {{PROJECT_KEY}}-182 happened precisely at the slice-generation step — once slices were written, the ambiguity was locked in.
 
 ### 2. RICE Prioritization
 
@@ -218,6 +278,6 @@ See [references/expert-notes.md](references/expert-notes.md)
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Tool Selection](../../../references/tools.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Epic ADF Structure](references/epic-adf-structure.md) · [Examples](references/examples.md)
+[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Architect Debate Protocol](../../../references/architect-debate-protocol.md) · [Tool Selection](../../../references/tools.md) · [VS Checklist](../../../references/vs-checklist-compact.md) · [Epic ADF Structure](references/epic-adf-structure.md) · [Examples](references/examples.md)
 
 After creation: `/verify-issue {{PROJECT_KEY}}-XXX`

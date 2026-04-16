@@ -8,25 +8,58 @@
 
 > **Narrative tone:** สรุปภาพรวม และ คุณค่าทางธุรกิจ ต้องเขียนให้ PM, designer, หรือ stakeholder ที่ไม่ใช่ developer อ่านเข้าใจได้ทันที — ห้ามใช้ system term, acronym, หรือ tech jargon ใน 2 section นี้
 
+## Ambiguous Title Cue Words
+
+> **Pre-draft check:** ก่อนเริ่มเขียน Epic ให้ scan title หา cue words เหล่านี้. ถ้ามี **2 คำขึ้นไป** หรือคำที่มีหลายความหมายใน context ของ codebase — **REQUIRED:** ใส่ section `Scope Disambiguation` ก่อน `User Flow`.
+
+```text
+request · process · handle · manage · review · check · trigger · send · notify · update
+```
+
+**Example — ambiguous:** `"Review flow — notification trigger"` มี `review`, `trigger` → ต้องใส่ Scope Disambiguation เพื่อชี้ว่า `review` หมายถึง AI-review, manual-review, หรือ QA-review
+
+**Example — unambiguous:** `"Billboard owner dashboard — export CSV"` → cue word ไม่มี, ข้าม Scope Disambiguation ได้
+
 ## Epic Template (ADF) - CREATE
 
 > Used with `acli jira workitem create --from-json`
 >
 > **Content Budget** → see [writing-style.md](writing-style.md#content-budget-per-section)
 
-**All 7 business sections are required. Technical Reference section is optional (include when Epic has heavy technical detail).**
+**All 7 business sections are required. Scope Disambiguation is REQUIRED when title contains ambiguous cue words. Technical Reference section is optional (include when Epic has heavy technical detail).**
 
 ### Business Zone (ทีมทุกคนอ่าน — QA, PM, Stakeholder)
 
 > **Language rule:** ห้าม class name, file path, method signature, code pattern (เช่น `whereIn` / `findBy`), i18n key, SQL query ใน Business Zone — ทุกอย่างต้องเขียนเป็น user-observable behavior. รายละเอียด technical ไปใส่ใน Technical Reference Zone.
 
 1. **สรุปภาพรวม** — **3 lines max** (Problem → Solution → ใครได้ประโยชน์); ใช้ persona names (billboard owner, advertiser) ห้ามใช้ technical terms
-2. **User Flow — ภาพรวมการทำงาน** — step-by-step scenario ภาษา business; ใช้ `orderedList` + `panel` (info/success/warning/note) + Mermaid flow diagram (`codeBlock` with `language: "mermaid"`)
-3. **คุณค่าทางธุรกิจ** — **3 bullets max**; ผลลัพธ์เป็นตัวเลข/พฤติกรรม ไม่ใช่ architecture
-4. **ลูกค้าเห็นอะไร?** — UX perspective; include Before vs After table + example notification copy (TH/EN titles เท่านั้น — i18n keys ไปที่ Technical Reference)
-5. **ขอบเขตงาน** — Included / Excluded bullets, **1 line/item**; user-observable features ("เพิ่มการแจ้งเตือน") ไม่ใช่ "สร้าง `AiFooNotifiable` class"; wrap key scope boundary in `panel` (info)
-6. **เงื่อนไขที่ต้องผ่าน** — Epic-level ACs เขียนเป็น observable outcome ("เจ้าของป้ายเห็น notification") ไม่ใช่ implementation detail ("ใช้ `whereIn` pattern")
-7. **ความเสี่ยงและวิธีรับมือ** — business impact language ("ป้ายหลายเจ้าของ อาจมีบางคนไม่ได้รับแจ้งเตือน") ไม่ใช่ code-level risk ("`findBy` returns first match"); `panel` (warning) highlighting High-impact + Risk/Impact/Mitigation table
+2. **Scope Disambiguation** *(REQUIRED when title has ambiguous cue words)* — single explicit interpretation + rejected alternatives; see template below
+3. **User Flow — ภาพรวมการทำงาน** — step-by-step scenario ภาษา business; ใช้ `orderedList` + `panel` (info/success/warning/note) + Mermaid flow diagram (`codeBlock` with `language: "mermaid"`) — **MUST show all decision branches** (see P7 rule below)
+4. **คุณค่าทางธุรกิจ** — **3 bullets max**; ผลลัพธ์เป็นตัวเลข/พฤติกรรม ไม่ใช่ architecture
+5. **ลูกค้าเห็นอะไร?** — UX perspective; include Before vs After table + example notification copy (TH/EN titles เท่านั้น — i18n keys ไปที่ Technical Reference)
+6. **ขอบเขตงาน** — Included / Excluded bullets, **1 line/item**; user-observable features ("เพิ่มการแจ้งเตือน") ไม่ใช่ "สร้าง `AiFooNotifiable` class"; wrap key scope boundary in `panel` (info)
+7. **เงื่อนไขที่ต้องผ่าน** — Epic-level ACs เขียนเป็น observable outcome ("เจ้าของป้ายเห็น notification") ไม่ใช่ implementation detail ("ใช้ `whereIn` pattern")
+8. **ความเสี่ยงและวิธีรับมือ** — business impact language ("ป้ายหลายเจ้าของ อาจมีบางคนไม่ได้รับแจ้งเตือน") ไม่ใช่ code-level risk ("`findBy` returns first match"); `panel` (warning) highlighting High-impact + Risk/Impact/Mitigation table
+
+### Scope Disambiguation Template (markdown preview of ADF output)
+
+> Insert as H2 section between `สรุปภาพรวม` and `User Flow`. Renders as paragraphs + bulletList in ADF.
+
+```markdown
+## Scope Disambiguation
+
+**Title interpretation:** [pick ONE explicit meaning; quote any cue words]
+
+**Why this interpretation (not alternative):**
+[brief reasoning + link to code paths / file references]
+
+**Alternative interpretations rejected:**
+
+- [alt 1] — [reason rejected]
+- [alt 2] — [reason rejected]
+```
+
+**Authoring rule:** เมื่อ Epic title มี cue word ให้เขียน section นี้ก่อน ห้ามข้ามไป draft scope จนกว่า interpretation จะ explicit. ถ้าไม่มั่นใจ — **ถาม user** ก่อน draft (see `apm-create-epic` pre-draft gate).
 
 ### User Stories = Vertical Slices (NOT Technical Layers)
 
@@ -72,10 +105,12 @@ Below the separator use H3 headings:
 
 - Current Flow Gap
 - Technical Design — Backend / Frontend / Admin
+- **Code Paths Covered** *(REQUIRED — see P6 rule below)*
+- **Coverage Matrix** *(REQUIRED when Epic references another Epic by key — see P3 rule below)*
 - Edge Cases
 - Dependencies / Estimation / Labels
 
-**Rule:** Technical sections NEVER appear above business sections. If Epic has no technical detail, omit the Technical Reference zone entirely.
+**Rule:** Technical sections NEVER appear above business sections. If Epic has no technical detail, omit the Technical Reference zone entirely — but `Code Paths Covered` still required when Epic touches existing code.
 
 **What goes here (moved from Business Zone):**
 
@@ -84,6 +119,64 @@ Below the separator use H3 headings:
 - i18n keys (`ADVERTISEMENT.FOO.TITLE`)
 - Retry/concurrency implementation details
 - Refactor tasks (e.g. "extract `FooService`")
+
+### Code Paths Covered (REQUIRED subsection)
+
+> **P6 rule:** Every code path relevant to this Epic MUST be listed — in-scope, out-of-scope, or partial. Gaps fall through to production; this table catches them.
+
+```markdown
+### Code Paths Covered
+
+| Code Path | File:Function | In Scope | Notes |
+| --- | --- | --- | --- |
+| [path name] | `path/file.ts:FunctionName` | ✅ / ❌ / partial | [covered by {{PROJECT_KEY}}-XXX / out of scope reason] |
+```
+
+**Authoring rule:** ก่อนเขียน — อ่าน module/service ที่เกี่ยวข้อง (use QMD, Grep, Read) เพื่อ enumerate ALL decision paths. ถ้า Epic ส่วนหนึ่งของ pair/trio ใช้ `Coverage Matrix` ด้านล่างแทน เพื่อ cross-reference กับ Epic อื่น.
+
+### Coverage Matrix (REQUIRED when Epic references another Epic)
+
+> **P3 rule:** ถ้า Epic description อ้างถึง Epic อื่นด้วย key (`inlineCard` หรือ `TP-YYY`) — Coverage Matrix REQUIRED เพื่อให้ชัดว่า scenario ไหนอยู่ใน Epic นี้ vs Epic ที่เชื่อม vs out-of-scope ทั้งหมด.
+
+```markdown
+### Coverage Matrix
+
+| Scenario / Code Path | This Epic | Related Epic(s) | Out of Scope |
+| --- | --- | --- | --- |
+| [path 1] | ✅ | ❌ | — |
+| [path 2] | ❌ | ✅ [TP-YYY] | — |
+| [path 3] | — | — | ✅ |
+```
+
+**Authoring rule:** แต่ละ row = scenario/code-path. Exactly one column ต่อ row ต้องเป็น ✅ — ห้าม ambiguous. ใส่ Epic key ใน `Related Epic(s)` column เพื่อให้ QA/PM follow the chain.
+
+### User Flow Mermaid — All Branches Rule
+
+> **P7 rule:** Mermaid diagram ใน User Flow MUST show all decision branches, not only happy path. แต่ละ branch ติด label ชัดเจน:
+>
+> - `⭐ {{PROJECT_KEY}}-XXX` — covered by this Epic (style: green fill `#d4edda`, stroke `#28a745`)
+> - `TP-YYY` — covered by related Epic (normal style, stroke `#004085`)
+> - `(out of scope)` — not covered (dashed stroke `stroke-dasharray: 5 5`, gray fill `#e9ecef`)
+
+**Template example — 3-way decision:**
+
+```mermaid
+flowchart TD
+    START([User action]) --> DECIDE{Condition?}
+    DECIDE -->|Path A| A[⭐ Handle in this Epic]
+    DECIDE -->|Path B| B[Handled by TP-YYY]
+    DECIDE -->|Path C| C[Out of scope]
+    A --> END([Success outcome])
+    B --> END
+    C --> END
+    style A fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style B fill:#cce5ff,stroke:#004085,stroke-width:2px
+    style C fill:#e9ecef,stroke:#6c757d,stroke-dasharray: 5 5
+```
+
+**Authoring rule:** ถ้า flow มีแค่ 1 path — diagram ไม่ต้องก็ได้ (ASCII อธิบายพอ). ถ้ามี decision → ต้องมี Mermaid + ทุก branch ต้อง label. ห้ามแสดงแค่ happy path แล้วละเลย edge case — QA ไม่รู้ว่า edge case อยู่ใน scope หรือไม่.
+
+### Full ADF CREATE Template
 
 ```json
 {
@@ -98,6 +191,16 @@ Below the separator use H3 headings:
       {"type": "paragraph", "content": [{"type": "text", "text": "[Problem: สถานการณ์ปัจจุบัน → ปัญหาที่เกิดขึ้น]"}]},
       {"type": "paragraph", "content": [{"type": "text", "text": "[Solution: Epic นี้แก้ด้วย...]", "marks": [{"type": "strong"}]}]},
       {"type": "paragraph", "content": [{"type": "text", "text": "[ใครได้ประโยชน์: ผู้ใช้/ทีม/ธุรกิจ ได้อะไร]"}]},
+
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Scope Disambiguation"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "Title interpretation: ", "marks": [{"type": "strong"}]}, {"type": "text", "text": "[one explicit meaning; quote any cue words]"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "Why this interpretation (not alternative):", "marks": [{"type": "strong"}]}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "[brief reasoning + code path references]"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "Alternative interpretations rejected:", "marks": [{"type": "strong"}]}]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[alt 1] — [reason rejected]"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[alt 2] — [reason rejected]"}]}]}
+      ]},
 
       {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "User Flow — ภาพรวมการทำงาน"}]},
       {"type": "panel", "attrs": {"panelType": "info"}, "content": [
@@ -191,6 +294,21 @@ Below the separator use H3 headings:
       {"type": "bulletList", "content": [
         {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[class/module/file — "}, {"type": "text", "text": "path/to/file.ts", "marks": [{"type": "code"}]}, {"type": "text", "text": "]"}]}]}
       ]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Code Paths Covered"}]},
+      {"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+        {"type": "tableRow", "content": [
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Code Path"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "File:Function"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "In Scope"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Notes"}]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[path name]"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "path/file.ts:FunctionName", "marks": [{"type": "code"}]}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "✅ / ❌ / partial"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[covered by {{PROJECT_KEY}}-XXX / reason]"}]}]}
+        ]}
+      ]},
       {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Edge Cases"}]},
       {"type": "bulletList", "content": [
         {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[edge case + handling]"}]}]}
@@ -215,6 +333,13 @@ Below the separator use H3 headings:
       {"type": "paragraph", "content": [{"type": "text", "text": "[Problem statement]"}]},
       {"type": "paragraph", "content": [{"type": "text", "text": "[Solution summary]", "marks": [{"type": "strong"}]}]},
       {"type": "paragraph", "content": [{"type": "text", "text": "[Who benefits]"}]},
+
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Scope Disambiguation"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "Title interpretation: ", "marks": [{"type": "strong"}]}, {"type": "text", "text": "[one explicit meaning]"}]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "Alternative interpretations rejected:", "marks": [{"type": "strong"}]}]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[alt 1] — [reason]"}]}]}
+      ]},
 
       {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "User Flow — ภาพรวมการทำงาน"}]},
       {"type": "panel", "attrs": {"panelType": "info"}, "content": [
@@ -290,6 +415,21 @@ Below the separator use H3 headings:
       {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Technical Design — Backend"}]},
       {"type": "bulletList", "content": [
         {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[technical detail]"}]}]}
+      ]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Code Paths Covered"}]},
+      {"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [
+        {"type": "tableRow", "content": [
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Code Path"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "File:Function"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "In Scope"}]}]},
+          {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Notes"}]}]}
+        ]},
+        {"type": "tableRow", "content": [
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[path]"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "path/file.ts:FunctionName", "marks": [{"type": "code"}]}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "✅"}]}]},
+          {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[notes]"}]}]}
+        ]}
       ]}
     ]
   }

@@ -53,7 +53,30 @@ effort: medium
 | RICE update | ❌ No impact | May reprioritize |
 | Format only | ❌ No impact | ❌ No impact |
 
+**Ambiguity scan (NEW in v3.12.0):**
+Before presenting impact, scan the change request for ambiguous cue words
+(`request · process · handle · manage · review · check · trigger · send · notify · update`).
+If the change introduces ambiguity (e.g. "simplify review flow"), run the
+[architect-debate-protocol.md](../../../references/architect-debate-protocol.md) to
+surface Competing Interpretations before drafting the update.
+
 **⛔ GATE — DO NOT PROCEED** without user confirmation of changes.
+
+### 2.5 Stakeholder Confirmation Loop (NEW in v3.12.0)
+
+> Runs after Impact Analysis summary, before generating update ADF.
+
+```text
+Draft impact analysis ready — please confirm the intended scope change before I
+generate the update. Reply 'confirmed' to proceed or describe corrections.
+
+- Change type: [add scope / remove scope / RICE / format]
+- Interpretation anchor: [from ambiguity scan, if any]
+- Tasks impacted: [list of child TP-YYY keys]
+- Expected outcome: [one line]
+```
+
+**⛔ GATE — DO NOT PROCEED** to Phase 3 without explicit `confirmed` from the user.
 
 ### 3. Preserve Intent
 
@@ -140,4 +163,4 @@ See [references/expert-notes.md](references/expert-notes.md)
 
 ## References
 
-[Update Workflow Patterns](../../../references/update-workflow.md) · [ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Tool Selection](../../../references/tools.md)
+[Update Workflow Patterns](../../../references/update-workflow.md) · [ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Architect Debate Protocol](../../../references/architect-debate-protocol.md) · [Tool Selection](../../../references/tools.md)

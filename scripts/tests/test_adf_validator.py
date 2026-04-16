@@ -658,6 +658,73 @@ class TestFullValidation:
         t1 = next(c for c in report.checks if c.check_id == "T1")
         assert t1.status == CheckStatus.FAIL
 
+    # ───────────────────────────────────────────────────────
+    # T6: Title Ambiguity Scan (v3.12.0)
+    # ───────────────────────────────────────────────────────
+
+    def test_t6_ambiguous_title_without_disambiguation_section_warns(self):
+        adf = _doc(_paragraph(_text("ระบบ billboard owners")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t6 = next(c for c in report.checks if c.check_id == "T6")
+        assert t6.status == CheckStatus.WARN
+        assert "review" in t6.message.lower()
+        assert "trigger" in t6.message.lower()
+
+    def test_t6_unambiguous_title_passes(self):
+        adf = _doc(_paragraph(_text("ระบบ export CSV")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Billboard owner dashboard — export CSV",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t6 = next(c for c in report.checks if c.check_id == "T6")
+        assert t6.status == CheckStatus.PASS
+
+    def test_t6_ambiguous_title_with_disambiguation_section_passes(self):
+        adf = _doc(
+            _heading("Scope Disambiguation"),
+            _paragraph(_text("QA-review trigger interpretation")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t6 = next(c for c in report.checks if c.check_id == "T6")
+        assert t6.status == CheckStatus.PASS
+
+    def test_t6_only_runs_for_epic_and_task(self):
+        adf = _doc(_paragraph(_text("x")))
+        for t in ("story", "subtask", "qa"):
+            report = self.v.validate(adf, t)
+            assert all(c.check_id != "T6" for c in report.checks), f"{t} should not have T6"
+        for t in ("epic", "task"):
+            report = self.v.validate(adf, t)
+            assert any(c.check_id == "T6" for c in report.checks), f"{t} should have T6"
+
+    def test_t6_never_fails_only_warns(self):
+        """T6 is documented as WARN-level; verify no FAIL path exists."""
+        adf = _doc(_paragraph(_text("review handle process trigger " * 20)))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "review handle process trigger send notify update check",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t6 = next(c for c in report.checks if c.check_id == "T6")
+        assert t6.status != CheckStatus.FAIL
+
     def test_story_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "story")
         assert len(report.checks) == 11
@@ -668,7 +735,13 @@ class TestFullValidation:
 
     def test_epic_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "epic")
-        assert len(report.checks) == 9
+        # v3.12.0: T6 ambiguity scan added for epic (WARN-only). T1-T6 + E1-E4 = 10.
+        assert len(report.checks) == 10
+
+    def test_task_check_count(self):
+        report = self.v.validate(_doc(_paragraph(_text("x"))), "task")
+        # v3.12.0: T6 ambiguity scan added for task (WARN-only). T1-T6 + TK1-TK4 = 10.
+        assert len(report.checks) == 10
 
     def test_qa_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "qa")
