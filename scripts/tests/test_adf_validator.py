@@ -735,13 +735,15 @@ class TestFullValidation:
 
     def test_epic_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "epic")
-        # v3.12.0: T6 ambiguity scan added for epic (WARN-only). T1-T6 + E1-E4 = 10.
-        assert len(report.checks) == 10
+        # v3.12.1: T7 (canonical disambig), T8 (decision-path qualifier), T9 (bilateral
+        # Epic ref) added as WARN-only. T1-T9 + E1-E4 = 13.
+        assert len(report.checks) == 13
 
     def test_task_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "task")
-        # v3.12.0: T6 ambiguity scan added for task (WARN-only). T1-T6 + TK1-TK4 = 10.
-        assert len(report.checks) == 10
+        # v3.12.1: T7 (canonical disambig) + T8 (decision-path qualifier) added for task.
+        # T9 is Epic-only. T1-T8 + TK1-TK4 = 12.
+        assert len(report.checks) == 12
 
     def test_qa_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "qa")
@@ -759,3 +761,227 @@ class TestFullValidation:
         assert isinstance(d["issues"], list)
         assert d["total_checks"] == 11
         assert d["passed"] + d["warned"] + d["failed"] == d["total_checks"]
+
+
+# ═══════════════════════════════════════════════════════════
+# T7: Canonical Scope Disambiguation Heading (v3.12.1 — G1)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT7CanonicalDisambig:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_title_without_cues_passes_na(self):
+        """Title with <2 cue words → T7 N/A (PASS)."""
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "Export CSV dashboard", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status == CheckStatus.PASS
+        assert "N/A" in t7.message
+
+    def test_canonical_heading_passes(self):
+        adf = _doc(
+            _heading("Scope Disambiguation", 2),
+            _paragraph(_text("interpretation")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status == CheckStatus.PASS
+
+    def test_canonical_heading_with_th_subtitle_passes(self):
+        """Canonical heading allows `—` or `:` subtitle separator."""
+        adf = _doc(_heading("Scope Disambiguation — การทบทวน AI", 2))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status == CheckStatus.PASS
+
+    def test_near_miss_heading_warns(self):
+        adf = _doc(_heading("Scope Clarification", 2))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status == CheckStatus.WARN
+        assert "near-miss" in t7.message.lower() or "canonical" in t7.message.lower()
+
+    def test_missing_heading_when_cues_present_warns(self):
+        adf = _doc(_paragraph(_text("nothing")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "Review flow — notification trigger",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status == CheckStatus.WARN
+        assert "canonical" in t7.message.lower()
+
+    def test_t7_never_fails(self):
+        """T7 is WARN-only — never FAIL."""
+        adf = _doc(_heading("Something Entirely Different", 2))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Epic",
+            "summary": "review trigger process handle",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "epic", wrapper)
+        t7 = next(c for c in report.checks if c.check_id == "T7")
+        assert t7.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T8: Decision-Path Qualifier (v3.12.1 — G3)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT8DecisionPathQualifier:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_no_decision_verb_passes(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "Add CSV export", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status == CheckStatus.PASS
+
+    def test_thai_qualified_passes(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "AI auto-อนุมัติสื่อ", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status == CheckStatus.PASS
+
+    def test_thai_unqualified_warns(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "AI อนุมัติสื่อ", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status == CheckStatus.WARN
+        assert "อนุมัติ" in t8.message
+
+    def test_english_unqualified_warns(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "Admin approve media", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status == CheckStatus.WARN
+
+    def test_english_qualified_passes(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Admin manual-approve media",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status == CheckStatus.PASS
+
+    def test_t8_never_fails(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "approve reject decide", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t8 = next(c for c in report.checks if c.check_id == "T8")
+        assert t8.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T9: Bilateral Epic Reference (v3.12.1 — G6)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT9BilateralEpicRef:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_no_inline_card_passes(self):
+        adf = _doc(_paragraph(_text("no refs")))
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "Solo epic", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t9 = next(c for c in report.checks if c.check_id == "T9")
+        assert t9.status == CheckStatus.PASS
+
+    def test_inline_card_without_matrix_warns(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "Linked epic", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t9 = next(c for c in report.checks if c.check_id == "T9")
+        assert t9.status == CheckStatus.WARN
+        assert "TP-183" in t9.message
+
+    def test_inline_card_with_matrix_and_related_column_passes(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+            _heading("Coverage Matrix", 3),
+            _paragraph(_text("Scenario | This Epic | Related Epic(s) | Out of Scope")),
+            _paragraph(_text("path | ✅ | TP-183 | —")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "Linked epic", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t9 = next(c for c in report.checks if c.check_id == "T9")
+        assert t9.status == CheckStatus.PASS
+
+    def test_inline_card_with_matrix_missing_related_column_warns(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+            _heading("Coverage Matrix", 3),
+            _paragraph(_text("Scenario | This Epic | Out of Scope")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "Linked epic", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t9 = next(c for c in report.checks if c.check_id == "T9")
+        assert t9.status == CheckStatus.WARN
+
+    def test_t9_only_runs_for_epic(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+        )
+        # Task should NOT have T9
+        report = self.v.validate(adf, "task", {"projectKey": "TP", "type": "Task", "summary": "x"})
+        assert all(c.check_id != "T9" for c in report.checks)
+        # Epic should have T9
+        report = self.v.validate(adf, "epic", {"projectKey": "TP", "type": "Epic", "summary": "x"})
+        assert any(c.check_id == "T9" for c in report.checks)
+
+    def test_t9_never_fails(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Epic", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "epic", wrapper)
+        t9 = next(c for c in report.checks if c.check_id == "T9")
+        assert t9.status != CheckStatus.FAIL

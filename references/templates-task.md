@@ -4,6 +4,54 @@
 
 All task types use Jira `"type": "Task"`. Mode is conveyed via summary prefix and content structure — not issue type.
 
+## Title Discipline (v3.12.1)
+
+### Decision-Path Qualifier Rule (G3)
+
+> **Rule:** Task/slice titles that describe a decision path (approve, reject, decide, process, Thai: อนุมัติ / ปฏิเสธ / ตัดสิน) MUST include an explicit qualifier — `auto-` (system-decided) / `manual-` or `admin-` (human-decided). A bare verb is ambiguous.
+
+**Enforcement:** validator `T8` (WARN-level, Epic + Task) warns when a title contains a decision-path verb without a qualifier.
+
+**Examples:**
+
+- ❌ `"AI อนุมัติสื่อ"` — ambiguous (auto-approve? admin-approve via AI-assist?)
+- ✅ `"AI auto-อนุมัติสื่อ"` — explicit: system decides without human
+- ✅ `"Admin manual-อนุมัติสื่อ"` — explicit: human decides, AI recommends
+- ❌ `"Approve media"` — missing qualifier
+- ✅ `"Auto-approve media"` / `"Admin manual-approve media"` — qualified
+
+**Authoring rule:** ถ้า title มี verb ว่า `approve / reject / decide / process` หรือ Thai `อนุมัติ / ปฏิเสธ / ตัดสิน` — ใส่ qualifier ทันที. ถ้าไม่แน่ใจ auto vs manual → scope ยัง ambiguous → ย้อนไปอ่าน Epic's Scope Disambiguation section ก่อน create slice.
+
+### Test File Declaration (G4 — Sibling Consistency)
+
+> **Rule:** Tasks/slices under the same Epic MUST declare test-file path in the `ขอบเขตไฟล์` table. If a sibling task declares a test file, this task MUST also declare one (`CREATE`, `MODIFY`, or explicit `NONE` with reason).
+
+**Why:** {{PROJECT_KEY}}-183 audit found sibling slices inconsistently declared test files — one had `tests/integration/ai-review.spec.ts` in scope, another omitted tests entirely. QA couldn't tell if missing test file meant "no tests needed" or "forgot to declare". Consistency across siblings forces explicit decisions.
+
+**Template pattern (in `ขอบเขตไฟล์` section):**
+
+```markdown
+| Action | File |
+| --- | --- |
+| CREATE | tests/integration/<feature>/<slice-name>.spec.ts |
+| MODIFY | app/Services/FooService.ts |
+| REF    | app/Models/Billboard.ts |
+```
+
+If the slice genuinely needs no new/changed tests (rare — usually only for doc-only or config-only slices):
+
+```markdown
+| Action | File |
+| --- | --- |
+| NONE (tests) | Reason: slice only adds i18n keys; covered by existing `tests/unit/i18n.spec.ts` |
+```
+
+**Authoring checklist:**
+
+- [ ] Each sibling slice has an explicit test-file row (CREATE / MODIFY / NONE+reason)
+- [ ] Test file path matches the slice's feature scope (e.g. `tests/integration/ai-review/slice-a-single-owner.spec.ts`)
+- [ ] If sibling Slice A declares `CREATE tests/...` → Slice B must also declare something; missing = inconsistency warning
+
 **Jira Fields (set after create via MCP `jira_update_issue`):**
 
 | Field | Jira ID | Value | Required |

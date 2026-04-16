@@ -101,6 +101,55 @@ Each slice contains partial work across all layers (lookup + notifiable + i18n +
 
 **Priority within sprint:** Blockers (enablers) → High-value VS (vs2, vs3) → Lower-value VS → Polish
 
+## Shared Resource Coordination
+
+> **v3.12.1 — G5 (from {{PROJECT_KEY}}-182/{{PROJECT_KEY}}-183 audit):** When 2+ slices touch the same shared component (helper, service, util, shared model), they MUST coordinate to avoid merge conflicts + duplicated commits.
+
+### Coordination Pattern: First-Merged Owns Upgrade
+
+Each slice's AC (or Technical Reference note) MUST include a coordination statement:
+
+> Before implementing `[component]` changes, check if sibling slice `TP-YYY` already merged.
+>
+> - If merged → `[component]` is already upgraded; this slice only adds tests/coverage.
+> - If not merged → this slice implements the upgrade; the sibling slice will later add tests only.
+
+### When to apply
+
+| Signal | Apply? |
+| --- | --- |
+| 2 slices in same Epic modify the same service | ✅ yes |
+| 2 slices across paired Epics modify the same helper | ✅ yes |
+| Slice depends on artifact from another slice but doesn't modify it | Add dependency link instead (no coordination needed) |
+| Only one slice touches the component | No (coordination adds noise) |
+
+### Example — {{PROJECT_KEY}}-197 ↔ {{PROJECT_KEY}}-200
+
+{{PROJECT_KEY}}-197 (Slice B of {{PROJECT_KEY}}-182) and {{PROJECT_KEY}}-200 (Slice B of {{PROJECT_KEY}}-183) both upgrade `BillboardOwnerLookupService` to `whereIn` pattern. Each ticket includes:
+
+**In {{PROJECT_KEY}}-197 AC list:**
+
+> **Coordination AC:** Before modifying `BillboardOwnerLookupService`, check if {{PROJECT_KEY}}-200 has merged. If {{PROJECT_KEY}}-200 merged → skip lookup-service code change; only add multi-owner integration test. Otherwise → this slice upgrades the service + {{PROJECT_KEY}}-200 adds its test later.
+
+**In {{PROJECT_KEY}}-200 AC list (mirror):**
+
+> **Coordination AC:** Before modifying `BillboardOwnerLookupService`, check if {{PROJECT_KEY}}-197 has merged. If {{PROJECT_KEY}}-197 merged → skip lookup-service code change; only add auto-decision multi-owner test. Otherwise → this slice upgrades the service + {{PROJECT_KEY}}-197 adds its test later.
+
+### Checklist
+
+- [ ] Epic has `Shared Resources` table listing components touched by 2+ slices (see templates-epic.md)
+- [ ] Each slice that touches a shared component has a coordination AC
+- [ ] Coordination AC references the sibling slice by TP-key (not "the other slice")
+- [ ] Mirror: sibling slice has the reverse coordination AC
+
+### Anti-pattern: Silent Shared Upgrade
+
+**Symptom:** Two slices both merge code changes to `FooService.ts`. Second PR fails CI due to merge conflict OR overwrites first PR's logic OR duplicates the same change.
+
+**Root cause:** Neither slice's AC mentions the other; no one realized they were touching the same file.
+
+**Fix:** Declare shared resource in Epic, add coordination ACs to both slices.
+
 ## Horizontal Split Recovery
 
 Symptoms: stories blocked waiting on others, touch only one layer, no direct user value.

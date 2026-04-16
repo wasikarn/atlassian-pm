@@ -150,6 +150,59 @@ Below the separator use H3 headings:
 
 **Authoring rule:** แต่ละ row = scenario/code-path. Exactly one column ต่อ row ต้องเป็น ✅ — ห้าม ambiguous. ใส่ Epic key ใน `Related Epic(s)` column เพื่อให้ QA/PM follow the chain.
 
+### Bilateral Epic Reference Rule (G6 — v3.12.1)
+
+> **Rule:** When Epic A references Epic B via `inlineCard` (e.g. ลิงก์ไป `TP-YYY` ใน description) — Epic B MUST also reference Epic A back. One-way references leave the sibling Epic reader blind to the relationship.
+
+**Enforcement:**
+
+- Validator `T9` (Epic-only) warns when: Epic description has `inlineCard` pointing to another {{PROJECT_KEY}}-XXX key AND Coverage Matrix is missing OR lacks `Related Epic(s)` column.
+- Coverage Matrix `Related Epic(s)` column MUST list every Epic key referenced via inlineCard (or `—` if explicitly scoped out).
+- When you edit Epic A to cite Epic B, immediately EDIT Epic B to cite Epic A back (via `acli jira workitem edit`).
+
+**Example ({{PROJECT_KEY}}-182 ↔ {{PROJECT_KEY}}-183 audit):**
+
+- {{PROJECT_KEY}}-182 description cites `{{PROJECT_KEY}}-183` in Coverage Matrix. ✅
+- {{PROJECT_KEY}}-183 description MUST cite `{{PROJECT_KEY}}-182` back — not just in the Mermaid diagram, but in the Coverage Matrix row with `Related Epic(s) = {{PROJECT_KEY}}-182`.
+- Audit gap: {{PROJECT_KEY}}-183 originally referenced {{PROJECT_KEY}}-182 only in Mermaid (human-readable) but not in a machine-checkable Coverage Matrix row → validator could not detect the one-way state.
+
+### Vocabulary Collision Rule (G2 — Epic Pairs/Trios)
+
+> **Rule:** When an Epic forms a pair/trio with a sibling Epic, each Epic's slice titles MUST use DISTINCT keywords. Vocabulary overlap confuses readers (which Epic owns which scope?) and allows cross-Epic AC drift to slip past review.
+
+**How collisions happen:**
+
+Epic A keyword: `ตรวจสอบ` (review/inspect) — e.g. route-to-review scope
+Epic B sibling slice ❌ `AI ตรวจสอบสื่อ` — reuses Epic A keyword, implies Epic A ownership
+Epic B sibling slice ✅ `AI auto-decision` or `AI auto-อนุมัติ` — distinct vocabulary, clear ownership
+
+**Agent discipline when creating a slice:**
+
+1. Read parent Epic summary + all sibling Epic summaries (grep Jira for Epics linked via `customfield_10014`).
+2. Extract keywords from each sibling Epic's title/summary (strip filler words).
+3. Slice title MUST NOT reuse a sibling Epic's distinguishing keyword.
+4. If slice genuinely covers the sibling's keyword — that's a scope-boundary smell. Revisit Coverage Matrix and confirm which Epic owns the scope before creating the slice.
+
+**Audit finding ({{PROJECT_KEY}}-183):**
+
+{{PROJECT_KEY}}-183 had a sibling slice titled `"AI ตรวจสอบสื่อ"` — reused {{PROJECT_KEY}}-182's keyword `ตรวจสอบ`. Reviewers assumed it was a {{PROJECT_KEY}}-182 slice, not noticing it belonged to {{PROJECT_KEY}}-183's auto-decision branch. v3.12.1 closes this by documenting the rule here and guiding agents to check sibling vocabularies before drafting slice titles.
+
+### Shared Resource Declaration (G5 — v3.12.1)
+
+> **Rule:** When Epic's slices (or slices across paired Epics) will touch the same shared component (helper, service, util, shared model), Epic description MUST declare it in a `Shared Resources` subsection under Technical Reference zone. This feeds the [Shared Resource Coordination pattern](vertical-slice-guide.md#shared-resource-coordination) at slice level.
+
+**Template snippet (add under Technical Reference):**
+
+```markdown
+### Shared Resources
+
+| Component | File | Sibling Slices That Touch It | Coordination Note |
+| --- | --- | --- | --- |
+| BillboardOwnerLookupService | `app/Services/BillboardOwnerLookupService.ts` | {{PROJECT_KEY}}-197 ({{PROJECT_KEY}}-182 Slice B), {{PROJECT_KEY}}-200 ({{PROJECT_KEY}}-183 Slice B) | `whereIn` upgrade — first-merged owns; second adds tests only |
+```
+
+**Authoring rule:** ก่อน split เป็น slices, enumerate shared components. ถ้า 2+ slices แก้ไฟล์เดียวกัน — declare here + add mirror coordination notes to each slice AC. Missing declaration → merge conflicts + duplicated commits.
+
 ### User Flow Mermaid — All Branches Rule
 
 > **P7 rule:** Mermaid diagram ใน User Flow MUST show all decision branches, not only happy path. แต่ละ branch ติด label ชัดเจน:

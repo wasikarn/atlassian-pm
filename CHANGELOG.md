@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.1] - 2026-04-16
+
+### Added
+
+- **`scripts/lib/adf_validator.py`** — three new WARN-level checks closing prevention gaps from {{PROJECT_KEY}}-183 audit:
+  - `T7: Canonical Scope Disambiguation heading` (Epic + Task) — verifies the disambiguation section uses the exact canonical H2 `Scope Disambiguation` (allowing `— subtitle` / `: subtitle`). Catches near-miss variants like `Scope Clarification` that T6 would have silently accepted.
+  - `T8: Decision-Path Qualifier` (Epic + Task) — warns when a title contains a decision-path verb (`approve · reject · decide · process` / Thai `อนุมัติ · ปฏิเสธ · ตัดสิน`) without an explicit `auto-` / `manual-` / `admin-` qualifier. An unqualified verb is ambiguous (auto-decision? manual admin action?).
+  - `T9: Bilateral Epic Reference` (Epic-only) — when Epic description references another Epic key via `inlineCard`, validator requires a `Coverage Matrix` section with `Related Epic(s)` column. Missing matrix or column → WARN. Forces cross-Epic references to be machine-checkable, not just prose-only.
+- **`references/templates-epic.md`** — three new subsections:
+  - `Bilateral Epic Reference Rule` — inlineCard to sibling Epic MUST be mirrored in sibling's Coverage Matrix (G6).
+  - `Vocabulary Collision Rule` — slice titles under paired Epics MUST use distinct keywords; sibling Epic's keyword must not leak into this Epic's slices (G2).
+  - `Shared Resource Declaration` — Epic description MUST list shared components in a `Shared Resources` table when 2+ slices touch the same file (G5, feeds slice-level coordination).
+- **`references/templates-task.md`** — two new rules under `Title Discipline`:
+  - `Decision-Path Qualifier Rule` (G3) — documents `auto-` / `manual-` / `admin-` prefix requirement matching T8 validator.
+  - `Test File Declaration` (G4) — sibling slices under same Epic MUST declare test-file path consistently in `ขอบเขตไฟล์` table (`CREATE` / `MODIFY` / explicit `NONE` with reason).
+- **`references/vertical-slice-guide.md`** — new `Shared Resource Coordination` section with the First-Merged-Owns-Upgrade pattern + {{PROJECT_KEY}}-197 ↔ {{PROJECT_KEY}}-200 worked example + anti-pattern `Silent Shared Upgrade` (G5).
+- **`scripts/tests/test_adf_validator.py`** — 17 new tests across three classes (`TestT7CanonicalDisambig`, `TestT8DecisionPathQualifier`, `TestT9BilateralEpicRef`) + updated `test_epic_check_count` (10→13) and `test_task_check_count` (10→12).
+
+### Changed
+
+- **`scripts/lib/adf_validator.py`** — class docstring updated; Epic now has 13 checks (T1-T9 + E1-E4), Task now has 12 checks (T1-T8 + TK1-TK4). T7-T9 are WARN-only so existing tickets still pass at 90% threshold.
+
+### Rationale
+
+v3.12.0 introduced 7 prevention fixes (P1-P7) after the {{PROJECT_KEY}}-182 ambiguity incident. A follow-up audit on {{PROJECT_KEY}}-183 and its 6 child slices uncovered 6 more gaps that let inconsistencies slip through even with v3.12.0 in place:
+
+- **G1 (T7)** — {{PROJECT_KEY}}-183 used a near-canonical heading (`Scope Clarification` instead of `Scope Disambiguation`). T6 didn't fire because *some* disambiguation text existed, but readers couldn't grep the canonical anchor across epics.
+- **G2 (vocabulary collision)** — a {{PROJECT_KEY}}-183 sibling slice titled `AI ตรวจสอบสื่อ` reused {{PROJECT_KEY}}-182's keyword `ตรวจสอบ`. Reviewers assumed it was a {{PROJECT_KEY}}-182 slice. Paired Epics need distinct keyword spaces.
+- **G3 (T8)** — slice titled `AI อนุมัติสื่อ` was ambiguous: auto-approve by AI, or admin-approve with AI assist? An explicit `auto-` / `manual-` / `admin-` qualifier removes the ambiguity.
+- **G4 (test-file consistency)** — {{PROJECT_KEY}}-183 sibling slices inconsistently declared test files; some had a `tests/...spec.ts` scope row, others omitted it. QA couldn't tell "no tests needed" from "forgot to declare".
+- **G5 (shared resource)** — {{PROJECT_KEY}}-197 (Slice B of {{PROJECT_KEY}}-182) and {{PROJECT_KEY}}-200 (Slice B of {{PROJECT_KEY}}-183) both upgraded `BillboardOwnerLookupService`. No coordination AC existed → merge-conflict risk + duplicated commits. Now each slice mentions the sibling slice and uses First-Merged-Owns-Upgrade pattern.
+- **G6 (T9 bilateral ref)** — {{PROJECT_KEY}}-182 Coverage Matrix referenced {{PROJECT_KEY}}-183 but {{PROJECT_KEY}}-183 originally only mentioned {{PROJECT_KEY}}-182 in its Mermaid diagram, not in a machine-checkable Coverage Matrix row. One-way references let readers on the sibling side miss the relationship.
+
+### Migration
+
+- No breaking changes. T7-T9 are WARN-only and do not affect pass/fail at the 90% threshold.
+- Existing Epics and Tasks continue to validate. Recommended-with-grace-period:
+  - `Scope Disambiguation` heading text should be canonical (fix during next Epic edit).
+  - Decision-path slice titles should gain `auto-` / `manual-` / `admin-` qualifiers.
+  - Bilateral Epic references should gain mirror entries in both Coverage Matrices.
+
+### Notes
+
+- Validator test suite grew from 74 → 91 passing tests.
+- `scripts/api/validate_adf.py` CLI unchanged; existing `--type epic` / `--type task` invocations automatically pick up T7-T9.
+- `references/mermaid-guide.md` already covers the all-branches rule (v3.12.0); no change needed for v3.12.1.
+
 ## [3.12.0] - 2026-04-16
 
 ### Added

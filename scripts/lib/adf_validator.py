@@ -41,6 +41,29 @@ AMBIGUOUS_CUE_WORDS = frozenset({
     "update",
 })
 
+# T7: Canonical Scope Disambiguation heading regex (v3.12.1 — G1).
+# Allows `Scope Disambiguation`, `Scope Disambiguation — TH subtitle`, `Scope Disambiguation: ...`.
+# Reject near-miss variants like `Scope Clarification` / `Disambiguation Notes` so agents
+# converge on one canonical heading (QA can grep for it across epics).
+CANONICAL_DISAMBIG_RE = re.compile(r"^scope\s+disambiguation(?:\s*[—:\-].*)?$", re.IGNORECASE)
+
+# T9: Jira issue key pattern inside inlineCard URLs (v3.12.1 — G6 bilateral ref rule).
+JIRA_KEY_IN_URL_RE = re.compile(r"/browse/([A-Z][A-Z0-9]+-\d+)")
+
+# G3: Decision-path verbs that need an explicit qualifier (auto- / manual- / admin-)
+# when they appear in slice/task titles. Documented in templates-task.md + templates-epic.md.
+DECISION_PATH_VERBS = frozenset({
+    "approve",
+    "reject",
+    "decide",
+    "process",
+    # Thai equivalents used in slice titles
+    "อนุมัติ",
+    "ปฏิเสธ",
+    "ตัดสิน",
+})
+DECISION_PATH_QUALIFIERS_RE = re.compile(r"\b(auto|manual|admin)-", re.IGNORECASE)
+
 _ALL_SECTION_KEYS: frozenset[str] = frozenset({
     "acceptance criteria",
     "user story",
@@ -259,14 +282,17 @@ class AdfValidator:
     """Validate ADF documents against quality gate criteria.
 
     Checks by issue type:
-        Story:   T1-T5 (technical) + S1-S6 (quality)          = 11 checks
-        Subtask: T1-T5 (technical) + ST1-ST5 (quality)        = 10 checks
-        Epic:    T1-T6 (technical, T6 WARN-only) + E1-E4       = 10 checks
-        QA:      T1-T5 (technical) + QA1-QA5 (quality)        = 10 checks
-        Task:    T1-T6 (technical, T6 WARN-only) + TK1-TK4     = 10 checks
+        Story:   T1-T5 (technical) + S1-S6 (quality)                     = 11 checks
+        Subtask: T1-T5 (technical) + ST1-ST5 (quality)                   = 10 checks
+        Epic:    T1-T9 (T6-T9 WARN-only) + E1-E4                          = 13 checks
+        QA:      T1-T5 (technical) + QA1-QA5 (quality)                   = 10 checks
+        Task:    T1-T8 (T6-T8 WARN-only) + TK1-TK4                        = 12 checks
 
-    T6 (Title Ambiguity Scan) only runs for Epic + Task types. It is WARN-level so
-    it cannot break existing tickets — scoring still permits PASS at 90% threshold.
+    T6-T9 are WARN-only so they cannot break existing tickets — scoring still permits
+    PASS at 90% threshold.
+
+    v3.12.1 (G1/G2/G6): T7 canonical Scope Disambiguation heading, T8 decision-path
+    qualifier, T9 bilateral Epic reference rule added for Epic/Task types.
 
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
@@ -296,10 +322,14 @@ class AdfValidator:
         report.checks.append(self._check_t4_links(adf, issue_type, _secs))
         report.checks.append(self._check_t5_required_fields(adf, issue_type, wrapper))
 
-        # T6 only applies to Epic + Task (the types most affected by title-scope ambiguity).
+        # T6-T9 only apply to Epic + Task (the types most affected by title-scope ambiguity).
         # Stories/subtasks inherit context from parents so their titles are usually unambiguous.
         if issue_type in ("epic", "task"):
             report.checks.append(self._check_t6_ambiguity(adf, wrapper))
+            report.checks.append(self._check_t7_canonical_disambig(adf, wrapper))
+            report.checks.append(self._check_t8_decision_path_qualifier(wrapper))
+        if issue_type == "epic":
+            report.checks.append(self._check_t9_bilateral_epic_ref(adf))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
@@ -560,6 +590,143 @@ class AdfValidator:
                 )
 
         return CheckResult("T6", CheckStatus.PASS, "No title/description ambiguity detected")
+
+    def _check_t7_canonical_disambig(self, adf: dict, wrapper: dict | None) -> CheckResult:
+        """T7: Canonical Scope Disambiguation heading (WARN-level, v3.12.1 — G1).
+
+        When title has ambiguous cue words, T6 warns that *some* disambiguation is missing.
+        T7 goes further: the section MUST use the canonical heading `Scope Disambiguation`
+        (allowing TH subtitle separator `—` / `:`), not near-miss variants like
+        `Scope Clarification` or `Disambiguation Notes`. A canonical heading lets QA grep
+        across all epics and ensures readers converge on one known anchor.
+        """
+        title = (wrapper or {}).get("summary", "") or ""
+        title_lower = title.lower()
+        title_cues = sorted({w for w in AMBIGUOUS_CUE_WORDS if re.search(rf"\b{re.escape(w)}\b", title_lower)})
+
+        if len(title_cues) < 2:
+            # T7 only fires when T6 would also have fired on the title — otherwise N/A.
+            return CheckResult("T7", CheckStatus.PASS, "T7 N/A (title has <2 cue words)")
+
+        headings = find_headings(adf, level=2)
+        canonical = False
+        near_miss: list[str] = []
+        for h in headings:
+            heading_text = extract_text(h).strip()
+            if CANONICAL_DISAMBIG_RE.match(heading_text):
+                canonical = True
+                break
+            low = heading_text.lower()
+            if ("disambiguation" in low or "scope clarif" in low) and not canonical:
+                near_miss.append(heading_text)
+
+        if canonical:
+            return CheckResult("T7", CheckStatus.PASS, "Canonical 'Scope Disambiguation' heading found")
+        if near_miss:
+            return CheckResult(
+                "T7",
+                CheckStatus.WARN,
+                f"Near-miss heading '{near_miss[0]}' — use canonical 'Scope Disambiguation' "
+                "(allows TH subtitle separator '—' or ':').",
+                fix_hint="Rename H2 heading to exactly 'Scope Disambiguation'.",
+            )
+        return CheckResult(
+            "T7",
+            CheckStatus.WARN,
+            f"Title cue words {title_cues} require canonical 'Scope Disambiguation' H2 heading; none found.",
+            fix_hint="Add H2 'Scope Disambiguation' section after สรุปภาพรวม (see templates-epic.md).",
+        )
+
+    def _check_t8_decision_path_qualifier(self, wrapper: dict | None) -> CheckResult:
+        """T8: Decision-path qualifier (WARN-level, v3.12.1 — G3).
+
+        Tasks/slices that describe AI or system decision paths (approve, reject, decide,
+        process, Thai: อนุมัติ/ปฏิเสธ/ตัดสิน) should include an explicit qualifier:
+        `auto-` / `manual-` / `admin-`. An unqualified verb is ambiguous — could be auto
+        decision or manual admin action. See templates-task.md `Decision-Path Qualifier Rule`.
+        """
+        title = (wrapper or {}).get("summary", "") or ""
+        if not title:
+            return CheckResult("T8", CheckStatus.PASS, "T8 N/A (no title)")
+
+        title_lower = title.lower()
+        matched_verbs: list[str] = []
+        for v in DECISION_PATH_VERBS:
+            is_english = bool(re.fullmatch(r"[A-Za-z]+", v))
+            if is_english:
+                if re.search(rf"\b{re.escape(v)}\b", title_lower):
+                    matched_verbs.append(v)
+            else:
+                # Thai: no word boundary (Thai lacks ASCII word boundaries)
+                if v in title:
+                    matched_verbs.append(v)
+        matched_verbs = sorted(set(matched_verbs))
+
+        if not matched_verbs:
+            return CheckResult("T8", CheckStatus.PASS, "No decision-path verb in title")
+
+        if DECISION_PATH_QUALIFIERS_RE.search(title):
+            return CheckResult("T8", CheckStatus.PASS, f"Decision-path verb {matched_verbs} has qualifier")
+
+        return CheckResult(
+            "T8",
+            CheckStatus.WARN,
+            f"Title contains decision-path verb {matched_verbs} without explicit qualifier "
+            "(auto- / manual- / admin-). Ambiguous — is it automatic or human action?",
+            fix_hint="Prefix the verb with 'auto-' (system-decided) or 'manual-'/'admin-' (human-decided). "
+            "Example: 'AI auto-อนุมัติสื่อ' or 'Admin manual-อนุมัติสื่อ' (see templates-task.md).",
+        )
+
+    def _check_t9_bilateral_epic_ref(self, adf: dict) -> CheckResult:
+        """T9: Bilateral Epic Reference (WARN-level, Epic-only, v3.12.1 — G6).
+
+        When an Epic references another Epic via `inlineCard`, the Coverage Matrix must
+        include a `Related Epic(s)` column with explicit keys (or `—`). Validator cannot
+        fetch the sibling Epic to confirm the mirror reference, so it checks the local
+        signal: if Epic description cites other TP-XXX keys via inlineCard AND has a
+        Coverage Matrix, the matrix must include a `Related Epic` column entry.
+        """
+        inline_cards = find_adf_nodes(adf, lambda n: n.get("type") == "inlineCard")
+        referenced_keys: list[str] = []
+        for card in inline_cards:
+            url = card.get("attrs", {}).get("url", "") or ""
+            m = JIRA_KEY_IN_URL_RE.search(url)
+            if m:
+                referenced_keys.append(m.group(1))
+
+        if not referenced_keys:
+            return CheckResult("T9", CheckStatus.PASS, "T9 N/A (no inlineCard Epic references)")
+
+        # Look for Coverage Matrix section (H3 in Technical Reference zone)
+        headings = find_headings(adf)
+        matrix_heading = None
+        for h in headings:
+            if "coverage matrix" in extract_text(h).lower():
+                matrix_heading = h
+                break
+
+        if not matrix_heading:
+            return CheckResult(
+                "T9",
+                CheckStatus.WARN,
+                f"Epic references other keys {sorted(set(referenced_keys))} via inlineCard but "
+                "no 'Coverage Matrix' section found. Bilateral references require a Coverage Matrix "
+                "with 'Related Epic(s)' column (see templates-epic.md P3 rule).",
+                fix_hint="Add H3 'Coverage Matrix' table with columns: Scenario | This Epic | Related Epic(s) | Out of Scope.",
+            )
+
+        # Check the doc text for 'Related Epic' column header phrase
+        full_text = extract_text(adf).lower()
+        if "related epic" not in full_text:
+            return CheckResult(
+                "T9",
+                CheckStatus.WARN,
+                "Coverage Matrix found but missing 'Related Epic(s)' column — bilateral reference "
+                f"rule requires explicit keys for {sorted(set(referenced_keys))} (or `—`).",
+                fix_hint="Add a 'Related Epic(s)' column to the Coverage Matrix with each referenced Epic key.",
+            )
+
+        return CheckResult("T9", CheckStatus.PASS, f"Bilateral refs documented for {sorted(set(referenced_keys))}")
 
     # ───────────────────────────────────────────────────────
     # Story Quality Checks (S1–S6)
