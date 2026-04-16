@@ -300,7 +300,7 @@ Use `sequenceDiagram` for request/response patterns instead of flowchart.
 
 ## Jira ASCII (default for all Jira issue types)
 
-Jira ADF does not render SVG inline and Forge Mermaid macro is Confluence-only. Default Jira diagram format = **ASCII code block** (monospace, zero-dependency, diff-friendly).
+Jira ADF does not render Mermaid natively. Default Jira diagram format = **ASCII code block** (monospace, zero-dependency, diff-friendly). Confluence uses the native Forge Mermaid macro — paste raw `.mmd` and it renders.
 
 **Render:** `/atlassian-pm:apm-pretty-mermaid` with `--format ascii --use-ascii`
 
@@ -319,9 +319,9 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 **Rules:**
 
 - Width ≤ 80 cols (iPhone 14 Pro landscape width in Jira mobile).
-- If exceeds: simplify, split into 2 diagrams (zoom-out + zoom-in), or move to Confluence SVG + Smart Link from Jira.
+- If exceeds: simplify, split into 2 diagrams (zoom-out + zoom-in), or move to Confluence Forge Mermaid macro + Smart Link from Jira.
 - `--use-ascii` forces pure `+-|` chars (some Jira fonts render Unicode box chars poorly).
-- Gantt not supported in ASCII — use SVG on Confluence.
+- Gantt not supported in ASCII — render in Confluence Forge Mermaid macro.
 
 ### ⚠️ Multi-branch decision flowchart — KNOWN BUG
 
@@ -329,6 +329,6 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 
 ## Related
 
-- `/atlassian-pm:apm-pretty-mermaid` — ASCII / SVG rendering skill
+- `/atlassian-pm:apm-pretty-mermaid` — ASCII rendering skill for Jira
 - `troubleshooting.md` → "Mermaid Diagrams", "Expand/Collapse Mechanisms in Confluence", Instance IDs table
 - `scripts/confluence/create_player_architecture_page.py` — reference implementation

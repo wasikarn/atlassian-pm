@@ -7,18 +7,17 @@ paths:
 
 ## Mermaid Diagrams
 
-**APM default:** ASCII in Jira (all issue types) · themed SVG in Confluence · raw `.mmd` in Forge Mermaid macro.
+**APM default:** ASCII in Jira (all issue types) · raw `.mmd` in Confluence Forge Mermaid macro.
 
-**Render via skill:** `/atlassian-pm:apm-pretty-mermaid` — wraps beautiful-mermaid with APM-aware defaults (ASCII = `--format ascii --use-ascii`, Confluence SVG = `--theme tokyo-night`).
+**Render via skill:** `/atlassian-pm:apm-pretty-mermaid` — wraps beautiful-mermaid with APM defaults (`--format ascii --use-ascii`). Confluence renders `.mmd` natively via Forge, no skill needed.
 
 | Target | Format | Width |
 | --- | --- | --- |
 | Jira Epic / Task / Bug / Spike / Chore / comment | **ASCII** code block | ≤ 80 cols |
-| Confluence page (simple) | Forge Mermaid macro (raw `.mmd`) | any |
-| Confluence page (complex, high-fidelity) | **SVG attachment** | any |
-| Gantt / release timeline | **SVG only** (ASCII renderer no gantt) | any |
+| Confluence page | Forge Mermaid macro (raw `.mmd`) | any |
+| Gantt / release timeline | Forge Mermaid macro on Confluence (ASCII renderer does not support gantt) | any |
 
-If ASCII exceeds 80 cols: simplify OR split into 2 diagrams OR move to Confluence SVG + Smart Link from Jira.
+If ASCII exceeds 80 cols: simplify OR split into 2 diagrams OR move to Confluence Forge Mermaid macro + Smart Link from Jira.
 
 **⚠️ 3+ branch flowchart broken in ASCII** (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)). Fix: **hand-draw ASCII** with box chars (`┌─┐│└┘├┤▶▼`), or convert to `sequenceDiagram`. Sequence/state/ER/class unaffected.
 

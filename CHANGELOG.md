@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.0] - 2026-04-16
+
+### Changed
+
+- **`apm-pretty-mermaid` skill scope narrowed to ASCII-only for Jira.** Confluence rendering path removed from documentation — Confluence uses native Forge Mermaid macro (raw `.mmd` paste), no skill needed. Rationale: team preference for simpler stack; Forge renders Mermaid natively, so the wrapper adds no value for Confluence.
+- SKILL.md rewritten: removed `Confluence SVG` Quick Start, `Pattern B` (Confluence SVG), `Pattern C` (cross-platform), `Themes (SVG only)` section, SVG-related options (`--theme`, `--transparent`, `--bg`/`--fg`/`--accent`, `--font`, `--output`), SVG examples, and SVG domain-expert note.
+- Downstream SKILL references updated to "raw `.mmd` in Forge Mermaid macro" for Confluence outputs: `apm-close-sprint`, `apm-plan-release`, `apm-map-dependencies`, `apm-scan-tech-debt`.
+- `references/mermaid-guide.md`: target matrix now lists Jira ASCII + Confluence Forge Mermaid macro only; Gantt redirected to Forge macro.
+- `.claude/rules/mermaid.md`: same matrix update; removed `--theme tokyo-night` reference.
+- `references/templates-core.md`: ADF schema takeaways updated — `mediaSingle` no longer documented as SVG path (APM convention does not use attachment-based diagrams).
+- `skills/README.md`: `apm-pretty-mermaid` entry now states ASCII-only for Jira.
+
+### Removed
+
+- **`skills/utilities/apm-pretty-mermaid/references/THEMES.md`** — SVG theme catalog, orphaned after SVG path removal.
+
+### Rationale
+
+Back-to-basic simplification. Confluence Forge Mermaid plugin already renders `.mmd` natively with no attachment step, no version drift, and no theme configuration. Maintaining an SVG path in the skill duplicated that capability and added dependencies (beautiful-mermaid theme config, `--transparent`/`--font`/etc.) with no production benefit. The skill's only remaining job — ASCII for Jira ADF code blocks — is its original, uncontested use case.
+
+Script files (`scripts/render.mjs`, `scripts/batch.mjs`, `scripts/themes.mjs`) still support SVG output if invoked directly; only the documentation stops advertising it. Future version may drop SVG-only code paths if no internal users are found.
+
+### Migration
+
+- If you had local scripts invoking `apm-pretty-mermaid` with `--format svg --theme <name>`, replace the step with: paste the raw `.mmd` into a Forge Mermaid macro on the target Confluence page.
+- Gantt timelines on Confluence release pages: same replacement — Forge macro renders `gantt` natively.
+
 ## [3.14.1] - 2026-04-16
 
 ### Documentation

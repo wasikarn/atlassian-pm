@@ -170,4 +170,4 @@ See [references/expert-notes.md](references/expert-notes.md)
 
 ## References
 
-[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Mermaid Guide](../../../references/mermaid-guide.md) · [apm-pretty-mermaid](../../utilities/apm-pretty-mermaid/SKILL.md) (Gantt timeline → SVG attachment on Confluence release page)
+[ADF Core Rules](../../../references/templates-core.md) · [Epic Template](../../../references/templates-epic.md) · [Sprint Frameworks](../../../references/sprint-frameworks.md) · [Mermaid Guide](../../../references/mermaid-guide.md) · [apm-pretty-mermaid](../../utilities/apm-pretty-mermaid/SKILL.md) (Gantt timeline → Forge Mermaid macro on Confluence release page)

@@ -1,18 +1,18 @@
 ---
 name: apm-pretty-mermaid
 description: |
-  Render Mermaid diagrams into ASCII (default, for Jira ADF code blocks) or themed SVG (for Confluence). Wraps beautiful-mermaid with APM-aware defaults: zero-dependency ASCII fits Jira Epic/Task/Bug/Spike descriptions; SVG targets Confluence attachments.
+  Render Mermaid diagrams to ASCII for Jira ADF code blocks. Wraps beautiful-mermaid with APM-aware defaults: zero-dependency ASCII fits Jira Epic/Task/Bug/Spike descriptions.
 
   Trigger phrases:
   - "render mermaid", "pretty mermaid", "beautify diagram"
   - "ascii diagram", "jira diagram", "terminal diagram"
-  - "mermaid for jira", "mermaid for confluence"
+  - "mermaid for jira"
   - "สร้าง mermaid", "วาด diagram", "diagram ASCII"
 
-  Use this skill when a Jira issue (any type) or Confluence page needs a diagram.
-  Default output = ASCII in a code block — zero dependency, renders identically in Jira, gh-cli, terminal.
+  Use this skill when a Jira issue (any type) needs a rendered diagram.
+  Confluence uses the native Forge Mermaid macro with raw `.mmd` — no skill needed there.
 x-compatibility: []
-argument-hint: "[diagram.mmd | --code] [--format ascii|svg] [--theme <name>] [--jira|--confluence]"
+argument-hint: "[diagram.mmd | --code]"
 effort: low
 user-invocable: true
 ---
@@ -20,47 +20,30 @@ user-invocable: true
 # APM Pretty Mermaid
 
 **Role:** Developer / Tech Lead / PM
-**Default output:** ASCII (Jira-friendly, zero-dependency)
-**Fallback output:** SVG (Confluence attachment, themed)
+**Output:** ASCII only (Jira ADF code blocks)
 
-> **APM convention:** Jira ASCII-first (see `feedback_jira_ascii_diagrams.md`). Width ≤ 80 cols. Complex diagrams → render SVG + attach to Confluence + Smart Link from Jira.
+> **APM convention:** Jira diagram = ASCII in a code block (see `feedback_jira_ascii_diagrams.md`). Width ≤ 80 cols. Confluence = raw `.mmd` in Forge Mermaid macro — not this skill.
 
-## When to use which format
+## When to use
 
-| Target | Format | Reason |
-| --- | --- | --- |
-| Jira Epic / Task / Bug / Spike / Chore description | **ASCII** (default) | Code block renders identically · zero plugin dependency · diff-friendly · ≤ 80 cols |
-| Jira comment | **ASCII** | Same as above |
-| Confluence page (simple, inline) | Mermaid macro (raw `.mmd`) | Forge Mermaid plugin renders natively — see `references/mermaid-guide.md` |
-| Confluence page (complex, high-fidelity) | **SVG attachment** | Themed, scalable, presentation-ready |
-| Presentation / slide / external share | **SVG** | Theme selection, transparent bg |
+| Target | Format |
+| --- | --- |
+| Jira Epic / Task / Bug / Spike / Chore description or comment | **ASCII** via this skill, or hand-draw |
+| Confluence page | Forge Mermaid macro (raw `.mmd` paste) — see `references/mermaid-guide.md` |
 
 ## Quick Start
 
-### 1. Jira ASCII (default)
-
 ```bash
-# From .mmd file
+# From .mmd file → ASCII to stdout
 node scripts/render.mjs \
   --input diagram.mmd \
   --format ascii \
   --use-ascii
 
-# Copy output into Jira code block (```) in the ADF description
+# Copy output into a Jira code block in the ADF description.
 ```
 
-### 2. Confluence SVG
-
-```bash
-node scripts/render.mjs \
-  --input diagram.mmd \
-  --output diagram.svg \
-  --format svg \
-  --theme tokyo-night \
-  --transparent
-```
-
-### 3. Batch (multiple Jira issues)
+Batch (multiple diagrams):
 
 ```bash
 node scripts/batch.mjs \
@@ -73,10 +56,8 @@ node scripts/batch.mjs \
 
 ## APM Workflow
 
-### Pattern A — Jira issue (any type)
-
-1. Decide diagram type (flowchart / sequence / state / class / ER).
-2. Write `.mmd` file (templates in `assets/example_diagrams/`).
+1. Decide diagram type (`sequenceDiagram` / `erDiagram` / `classDiagram` / `stateDiagram-v2` / linear `flowchart`).
+2. Write `.mmd` (templates in `assets/example_diagrams/`).
 3. Render ASCII:
 
    ```bash
@@ -85,7 +66,7 @@ node scripts/batch.mjs \
      --format ascii --use-ascii > /tmp/diagram.txt
    ```
 
-4. Embed in ADF description as code block:
+4. Embed in ADF description as a code block:
 
    ```json
    {
@@ -98,27 +79,6 @@ node scripts/batch.mjs \
 5. Run QG: `uv run scripts/api/validate_adf.py <file> --type task --json` (≥ 90).
 6. Create/update via `acli --from-json` or MCP.
 
-### Pattern B — Confluence page
-
-1. Write `.mmd`.
-2. Render SVG with theme:
-
-   ```bash
-   node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
-     --input /tmp/diagram.mmd \
-     --output /tmp/diagram.svg \
-     --theme tokyo-night --transparent
-   ```
-
-3. Upload via `confluence_upload_attachment` → embed `<ac:image>` in storage format.
-4. For raw Mermaid macro (Forge plugin): see `references/mermaid-guide.md`.
-
-### Pattern C — Complex diagram spanning Jira + Confluence
-
-1. Render SVG → attach to Confluence.
-2. Render ASCII preview (simplified) → embed in Jira.
-3. Add Smart Link in Jira pointing to Confluence page.
-
 ## Diagram Types
 
 See [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md). Quick pick:
@@ -130,9 +90,9 @@ See [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md). Quick pick:
 | Class / object relationship | `classDiagram` | ✅ |
 | State machine | `stateDiagram-v2` | ✅ (2-branch), ⚠️ (3+) |
 | Linear workflow / 2-branch decision | `flowchart` | ✅ |
-| **3+ branch decision flow** | `flowchart` | ❌ **broken** — use `sequenceDiagram` (see Known Issues) |
+| **3+ branch decision flow** | `flowchart` | ❌ **broken** — see Known Issues |
 | Sprint dependency graph | `flowchart LR` with subgraphs | ⚠️ width blow-up |
-| Release timeline | `gantt` | SVG only — ASCII renderer does not support gantt |
+| Gantt / release timeline | `gantt` | ❌ not supported in ASCII — render in Confluence Forge Mermaid macro instead |
 
 ## Known Issues
 
@@ -140,33 +100,14 @@ See [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md). Quick pick:
 
 **Fix:** hand-draw ASCII in the Jira code block using box chars (`┌─┐│└┘├┤▶▼`). Author-controlled layout always fits ≤ 80 cols. Alternatively convert to `sequenceDiagram` and render via this skill.
 
-## Themes (SVG only)
-
-```bash
-node scripts/themes.mjs
-```
-
-Recommended for Confluence:
-
-- **Dark pages:** `tokyo-night` (default), `github-dark`, `dracula`
-- **Light pages:** `github-light`, `zinc-light`, `catppuccin-latte`
-- **Print / export:** `zinc-light`, `solarized-light`
-
-Full theme reference: [references/THEMES.md](references/THEMES.md)
-
 ## Options
 
 | Flag | Purpose | Default |
 | --- | --- | --- |
 | `--input` | Source `.mmd` file | required |
-| `--output` | Destination file (SVG) | stdout (ASCII) |
-| `--format` | `svg` \| `ascii` | `svg` |
-| `--theme` | Theme name | none |
+| `--format` | `ascii` | `ascii` |
 | `--use-ascii` | Pure ASCII (no Unicode box chars) | false |
 | `--padding-x` / `--padding-y` | ASCII spacing | auto |
-| `--transparent` | Transparent SVG bg | false |
-| `--bg` / `--fg` / `--accent` | Override theme colors | theme |
-| `--font` | SVG font family | Inter |
 | `--workers` | Batch parallelism | 4 |
 
 ## Examples
@@ -178,11 +119,6 @@ Full theme reference: [references/THEMES.md](references/THEMES.md)
 node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
   --input /tmp/tp-182-arch.mmd --format ascii --use-ascii
 
-# Confluence release page (SVG, dark theme, transparent)
-node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
-  --input /tmp/release-flow.mmd --output /tmp/release-flow.svg \
-  --theme tokyo-night --transparent
-
 # Batch-render 12 sprint dependency diagrams as ASCII
 node skills/utilities/apm-pretty-mermaid/scripts/batch.mjs \
   --input-dir .scratch/sprint-deps --output-dir .scratch/ascii \
@@ -192,22 +128,19 @@ node skills/utilities/apm-pretty-mermaid/scripts/batch.mjs \
 ### ❌ Bad
 
 ```bash
-# SVG in Jira ADF description — not rendered, waste of bytes
-# Fix: use --format ascii
-
 # ASCII wider than 80 cols in Jira code block — horizontal scroll hell
-# Fix: simplify graph OR render SVG + attach to Confluence + Smart Link
+# Fix: simplify graph OR hand-draw OR move to Confluence Forge Mermaid macro
 
-# Using pretty-mermaid for Confluence Forge Mermaid macro
-# Fix: write raw .mmd into the macro — Forge renders natively
+# Using this skill for Confluence pages
+# Fix: paste raw .mmd into the Forge Mermaid macro — Confluence renders natively
 ```
 
 ## Common Mistakes
 
-- Embedding SVG in Jira — Jira ADF does not render SVG inline; use ASCII or attach as file.
 - ASCII > 80 cols — breaks code block on narrow screens; either simplify or move to Confluence.
 - Forgetting `--use-ascii` — default ASCII uses Unicode box characters, which some Jira fonts render poorly; `--use-ascii` forces pure `+-|` style.
 - Running without `node_modules/beautiful-mermaid` — first run auto-installs; CI/sandbox should pre-run `npm install` in the skill dir.
+- Trying to render Gantt as ASCII — unsupported; use Forge Mermaid macro on a Confluence page.
 
 ## Prerequisites
 
@@ -217,22 +150,20 @@ node skills/utilities/apm-pretty-mermaid/scripts/batch.mjs \
 ## References
 
 - [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md) — syntax guide
-- [references/THEMES.md](references/THEMES.md) — theme catalog
-- `assets/example_diagrams/` — 5 starter templates (flowchart, sequence, state, class, er)
-- Project rule: `.claude/rules/mermaid.md` — when to consult official Mermaid docs
-- Confluence + Jira ASCII patterns: `references/mermaid-guide.md`
+- `assets/example_diagrams/` — starter templates (flowchart, sequence, state, class, er)
+- Project rule: `.claude/rules/mermaid.md`
+- Jira + Confluence patterns: `references/mermaid-guide.md`
 - Jira convention: `MEMORY.md` → "Jira ASCII Diagrams"
 
 ## 🎓 Domain Expert Notes
 
-**Why ASCII-first for Jira:** Jira ADF code blocks render in monospace across web, mobile, and gh-cli. SVG requires attachment + inline image, which breaks copy-paste, search, and AI-agent parsing. ASCII survives compaction, grep, and the agent-readable ticket convention (see MEMORY.md → "AI-Agent-Readable Tickets").
+**Why ASCII for Jira:** Jira ADF code blocks render in monospace across web, mobile, and gh-cli. ASCII survives copy-paste, search, grep, and AI-agent parsing. Attachment-based images break the agent-readable ticket convention (see MEMORY.md → "AI-Agent-Readable Tickets").
 
-**Why themed SVG for Confluence:** Confluence pages are read for review and presentation; visual density and theme consistency matter. Attachment-based SVG keeps the page source clean and allows re-render without touching page storage.
+**Why Forge Mermaid macro for Confluence:** Confluence renders Mermaid natively via the Forge plugin. Pasting raw `.mmd` into the macro keeps the page source clean and re-rendering is free — no attachment upload step, no version drift between source and rendered output.
 
-**Width discipline:** 80 cols ≈ iPhone 14 Pro landscape width in Jira mobile. Going wider hides half the diagram behind horizontal scroll. If the graph doesn't fit, it's a signal to split into 2 diagrams (zoom out + zoom in) or promote to Confluence SVG.
+**Width discipline:** 80 cols ≈ iPhone 14 Pro landscape width in Jira mobile. Going wider hides half the diagram behind horizontal scroll. If the graph doesn't fit, it's a signal to split into 2 diagrams or promote to a Confluence page.
 
 **Failure modes:**
 
 - Node.js missing in CI → batch script silently produces 0 files; gate with `node --version` precheck.
 - Mermaid syntax error → `beautiful-mermaid` throws on parse; run on <https://mermaid.live/> to debug before re-running.
-- Theme name typo → script falls back to default palette with no warning; validate against `node scripts/themes.mjs` output.

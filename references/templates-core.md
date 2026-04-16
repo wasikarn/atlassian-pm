@@ -136,7 +136,7 @@ OR reinterpret the existing `Done` state = `Released` and add a `Shipped (flag-o
 
 - `codeBlock` — free-string `language` attr (no `mermaid` enum), plain text content only, `marks: maxItems 0`. What APM uses for ASCII diagrams.
 - `extension` / `bodiedExtension` — ADF's official diagram-rendering path (Mermaid, draw.io). Requires a marketplace app to render; parameters object is schema-free.
-- `mediaSingle` with `type: "external"` — allows external image URL (SVG possible), subject to Jira CSP / trusted-domain policy.
+- `mediaSingle` — attachment-based images only; APM convention does not use this path for diagrams (Jira = ASCII code block; Confluence = Forge Mermaid macro).
 - `panel` — 7 `panelType` values (`info`, `note`, `tip`, `warning`, `error`, `success`, `custom`); may contain `codeBlock`, `media`, `extension`.
 - `expand` / `nestedExpand` — collapsible block; useful for hiding long diagrams or appendices.
 - No native `diagram`, `mermaid`, `flowchart`, `chart`, `drawio`, or `excalidraw` node — all delegated to `extension`.
