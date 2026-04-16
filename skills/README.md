@@ -76,7 +76,7 @@ Invoke skills as slash commands: `/atlassian-pm:<name>` (or `/<name>` when runni
 | scan-tech-debt | `/atlassian-pm:apm-scan-tech-debt` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Aggregate tech-debt/chore/spike issues into priority matrix dashboard on Confluence. Effort vs impact quadrant, trend tracking. |
 | release-notes | `/atlassian-pm:apm-release-notes` | 6 | atlassian-cache, mcp-atlassian, mcp-confluence | Generate Confluence release notes from a Jira Fix Version. Groups issues by type (features/bugfixes/improvements). Supports `--dry-run`. |
 | atlassian-scripts | `/atlassian-pm:atlassian-scripts` | — | — | Thin wrapper pointing to `scripts/api/`. Python scripts for Confluence/Jira REST API when MCP has limitations (macros, code blocks, parent fields). |
-| apm-pretty-mermaid | `/atlassian-pm:apm-pretty-mermaid` | — | node 18+ | Render Mermaid → ASCII (default, for Jira ADF code blocks) or themed SVG (for Confluence). Wraps beautiful-mermaid with APM-aware defaults. ⚠️ 3+ branch flowchart has upstream ASCII bug — see SKILL.md Known Issues (use `sequenceDiagram` instead). |
+| apm-pretty-mermaid | `/atlassian-pm:apm-pretty-mermaid` | — | node 18+ | Render Mermaid → ASCII (Jira) or themed SVG (Confluence). ⚠️ 3+ branch flowchart ASCII broken — hand-draw or use `sequenceDiagram`. See SKILL.md Known Issues. |
 | status | `/atlassian-pm:apm-status` | 4 | atlassian-cache, mcp-atlassian | Session navigator — active sprint status, team WIP, pending HR violations, and suggested next action. Use at session start or to resume after a break. |
 
 ## Compatibility Legend

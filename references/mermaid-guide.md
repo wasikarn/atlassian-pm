@@ -325,13 +325,7 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 
 ### ⚠️ Multi-branch decision flowchart — KNOWN BUG
 
-`beautiful-mermaid` ASCII renderer has an unpatched upstream bug ([mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)) that mashes edge labels when a decision node has 3+ outgoing edges (example: `Branch-C:auncertainw/crequires-reviewhigh`). Does NOT affect `sequenceDiagram`, `stateDiagram-v2`, `erDiagram`, `classDiagram`, or 2-branch flowcharts.
-
-**Default for 3+ branch decisions in Jira = `sequenceDiagram`** with `alt / else` blocks (typical width 85–100 cols, labels clean, Thai-safe).
-
-Alternatives: `graph-easy` (Perl, DOT input) renders labels correctly but width 150–200 cols for 3-branch; ultra-short labels (≤ 4 chars) + legend table fits ≤ 80 cols but sacrifices readability.
-
-Full workaround matrix + empirical widths: `skills/utilities/apm-pretty-mermaid/SKILL.md` → Known Issues.
+3+ branch flowchart ASCII renders broken (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)). **Fix: hand-draw ASCII** in the code block using box chars (`┌─┐│└┘├┤▶▼`). For interaction flows, `sequenceDiagram` also works. Sequence/state/ER/class diagrams unaffected.
 
 ## Related
 

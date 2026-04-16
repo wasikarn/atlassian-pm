@@ -130,39 +130,15 @@ See [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md). Quick pick:
 | Class / object relationship | `classDiagram` | ✅ |
 | State machine | `stateDiagram-v2` | ✅ (2-branch), ⚠️ (3+) |
 | Linear workflow / 2-branch decision | `flowchart` | ✅ |
-| **3+ branch decision flow** | `flowchart` | ❌ **broken** — use `sequenceDiagram` or graph-easy (see Known Issues) |
+| **3+ branch decision flow** | `flowchart` | ❌ **broken** — use `sequenceDiagram` (see Known Issues) |
 | Sprint dependency graph | `flowchart LR` with subgraphs | ⚠️ width blow-up |
 | Release timeline | `gantt` | SVG only — ASCII renderer does not support gantt |
 
 ## Known Issues
 
-### ❌ Multi-branch flowchart label overlap (beautiful-mermaid / mermaid-ascii bug)
+**Flowchart with 3+ branches from one decision node renders broken ASCII** (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56), unpatched) — edge labels mash into gibberish. Sequence/state/ER/class diagrams unaffected.
 
-**Symptom:** flowchart with 3+ outgoing edges from one decision node → edge labels mash into gibberish (e.g., `Branch-C:auncertainw/crequires-reviewhigh`). Upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56), unpatched, no forks fix.
-
-**Verified workarounds:**
-
-1. **Convert to `sequenceDiagram`** (preferred) — linear time axis, no collision. Typical width: **85–100 cols**. Example: actor → actor interactions with `alt / else` blocks for branches.
-2. **Switch renderer to `graph-easy`** (Perl) — pipe DOT input → `graph-easy --as=boxart`. Labels render correctly but width typically **150–200 cols** for 3-branch (exceeds 80-col rule). Install: `cpanm Graph::Easy`.
-3. **Ultra-short labels + legend** — node labels ≤ 4 chars (e.g., `AP`, `RJ`), edge labels ≤ 3 chars, full names in a legend table below. Fits ≤ 80 cols but sacrifices readability.
-
-**Empirical width table** (3-branch decision, 8-node flow):
-
-| Approach | Width | Readable |
-| --- | --- | --- |
-| `sequenceDiagram` | 85–100 | ✅ |
-| `graph-easy` medium labels | 164–190 | ✅ |
-| `graph-easy` short labels + legend | 71–73 | ⚠️ cryptic |
-| `graph-easy` LR direction | 220–295 | ✅ but too wide |
-| `beautiful-mermaid` flowchart | 200+ | ❌ labels mash |
-
-**Decision rule:**
-
-```
-diagram is interaction / has branches?
-├── yes → sequenceDiagram (default for Jira)
-└── no  → flowchart OK (linear or 2-branch only)
-```
+**Fix:** hand-draw ASCII in the Jira code block using box chars (`┌─┐│└┘├┤▶▼`). Author-controlled layout always fits ≤ 80 cols. Alternatively convert to `sequenceDiagram` and render via this skill.
 
 ## Themes (SVG only)
 

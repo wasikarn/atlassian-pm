@@ -9,15 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
-- **`skills/utilities/apm-pretty-mermaid/SKILL.md`** — added "Known Issues" section documenting upstream [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56) bug: flowchart with 3+ outgoing edges from one decision node mashes edge labels into gibberish when rendered to ASCII. Added empirical width table comparing 5 approaches (sequenceDiagram 85–100 cols, graph-easy medium 164–190, ultra-short + legend 71–73, LR layout 220–295, beautiful-mermaid flowchart 200+ broken). Added decision rule: interaction/branching flow → `sequenceDiagram` default.
-- **`references/mermaid-guide.md`** — added "⚠️ Multi-branch decision flowchart — KNOWN BUG" subsection in Jira ASCII section. Recommends `sequenceDiagram` as default for 3+ branch decisions. Lists `graph-easy` (Perl, DOT → boxart) as alternative renderer with width tradeoff.
-- **`.claude/rules/mermaid.md`** — added inline ⚠️ warning after width rule. Auto-loaded rule propagates guidance to all Mermaid-related hooks and agents.
-- **`references/templates-epic.md`** — annotated the 3-way decision flowchart template (lines 337–353) with Jira ASCII rendering warning. Template still valid for Confluence Forge Mermaid macro; Jira ADF embedding requires conversion to `sequenceDiagram` or `graph-easy` fallback.
-- **`skills/README.md`** — appended Known Issues pointer to the `apm-pretty-mermaid` table entry.
+- Documented upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56): 3+ branch `flowchart` renders broken ASCII (edge labels mash). **Fix: hand-draw ASCII** in Jira code block with box chars (`┌─┐│└┘├┤▶▼`), or convert to `sequenceDiagram`. Sequence/state/ER/class unaffected.
+- Updated: `skills/utilities/apm-pretty-mermaid/SKILL.md` (Known Issues), `references/mermaid-guide.md`, `.claude/rules/mermaid.md`, `references/templates-epic.md`, `skills/README.md`.
 
 ### Rationale
 
-Empirical testing ({{PROJECT_KEY}}-182, {{PROJECT_KEY}}-183 descriptions, 2026-04-16) confirmed the upstream bug affects every flowchart with 3+ outgoing edges from a single node. Multiple render attempts (TD, LR, `--use-ascii`, flag combinations) did not avoid the overlap. Sequence diagrams and 2-branch flowcharts render cleanly. This patch propagates that finding across all APM docs that previously recommended flowchart without the caveat.
+Empirical testing ({{PROJECT_KEY}}-182, {{PROJECT_KEY}}-183, 2026-04-16) confirmed the bug affects every flowchart with 3+ outgoing edges. Simplest fix = hand-draw ASCII (author controls width, always fits ≤ 80 cols).
 
 ### Migration
 
