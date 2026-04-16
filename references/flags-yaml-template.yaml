@@ -1,0 +1,43 @@
+# .flags.yaml — Feature flag registry per repo
+#
+# Binding convention: TaThep ship-per-merge (2026-04-16). See rules C5/C6/C12.
+# Place this file at repo root. CI MUST scan daily and fail if any flag past `expiry`.
+#
+# Rules:
+#   - expiry: MAX 30 days post-epic-complete. Extensions require Eng Lead + PM approval.
+#   - owner : MUST be a valid GitHub handle (single human, not a team alias).
+#   - status: active → released → scheduled-for-removal → removed (flag + dead code deleted).
+#   - name  : format `feat/{epic-key}/s{slice-num}` (e.g. `feat/TP-182/s1`).
+#   - epic  : Jira Epic key this flag scopes to (one Epic per flag group).
+#
+# Status lifecycle:
+#   - active                 — flag registered, default OFF, slice shipped to prod flag-off
+#   - released               — PM approved flag-on, exposed to users (ring or full)
+#   - scheduled-for-removal  — release stabilized, flag pending code cleanup
+#   - removed                — flag + all related dead-code branches deleted from repo
+#
+# CI enforcement (suggested cron job):
+#   - Daily:  fail build if any `active` or `released` flag is past `expiry`
+#   - Weekly: warn if `scheduled-for-removal` flag hasn't transitioned to `removed` in 14 days
+
+flags:
+  - name: feat/TP-XXX/s1
+    owner: '@username'
+    created: 2026-04-16
+    expiry: 2026-05-16  # 30 days post-epic-complete
+    epic: TP-XXX
+    description: "Billboard owner receives AI review request notification"
+    default: off
+    status: active  # active | released | scheduled-for-removal | removed
+    rollback_runbook: {{CONFLUENCE_HOST}}/wiki/spaces/ENG/pages/XXXX/rollback-runbook
+
+  - name: feat/TP-YYY/s1
+    owner: '@another-user'
+    created: 2026-04-01
+    expiry: 2026-05-01
+    epic: TP-YYY
+    description: "Auto-decision path for high-confidence AI reviews"
+    default: off
+    status: released  # flag-on in prod, waiting cleanup
+    released_at: 2026-04-10
+    rollback_runbook: {{CONFLUENCE_HOST}}/wiki/spaces/ENG/pages/YYYY/rollback-runbook

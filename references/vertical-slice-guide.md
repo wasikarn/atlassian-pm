@@ -150,6 +150,42 @@ Each slice's AC (or Technical Reference note) MUST include a coordination statem
 
 **Fix:** Declare shared resource in Epic, add coordination ACs to both slices.
 
+## Ship Strategy (ship-per-merge default)
+
+Per TaThep binding convention (2026-04-16): each slice ships to prod per merge with flag OFF. Release (user exposure) = separate PM-approved flag toggle. See `~/.claude/memory/feedback_ship_per_merge_convention.md` for the full 13-rule / 8-verdict contract.
+
+### Ship Gates (in order)
+
+1. **Pre-merge** — unit + contract tests green, ADR linked from parent Epic, flag registered in `.flags.yaml` (C5, C6, C9, C10).
+2. **Pre-prod** — coverage ≥80% → auto-deploy pipeline (D1, D7); <80% → slower lane (staging + QA sign-off).
+3. **Canary** — 5% (15 min) → 25% (15 min) → 100% (C8 observability guards each step).
+4. **Post-deploy** — 30-min QA watch (error rate, p99, SLI) — dark verify with flag still OFF (D6).
+5. **Release** — PM approves flag-on toggle → `vs-released` label; release = PM's call (C12), deploy = engineers' call (C2).
+
+### Carve-outs (manual-gate, not auto)
+
+Per D5, these services route to the slower lane even when coverage ≥80%:
+
+- `tathep-ai-agent-python` — LangGraph graph state, needs drain before redeploy
+- `tathep-video-processing` — long-running jobs, queue drain required
+
+Re-audit the carve-out list at Day 60 post-pilot. Goal: shrink carve-outs as services harden.
+
+### Shipped vs Released — labels + workflow
+
+- `vs-planned` — slice planned, not started
+- `vs-shipped-dark` — shipped to prod (Phase 1 complete, flag OFF)
+- `vs-released` — flag ON, user-visible (Phase 4 complete)
+- `carve-out-manual-gate` — service in the carve-out list above
+
+### See also
+
+- [templates-epic.md — Slicing Plan section](templates-epic.md#slicing-plan-ship-per-merge)
+- [flags-yaml-template.yaml](flags-yaml-template.yaml)
+- [templates-core.md — Jira Workflow (TaThep — ship-per-merge)](templates-core.md#jira-workflow-tathep--ship-per-merge)
+- Skill: `apm-slice-ship` — walks Phase 0-5 for a given slice ticket
+- Binding decision: `~/.claude/memory/feedback_ship_per_merge_convention.md`
+
 ## Horizontal Split Recovery
 
 Symptoms: stories blocked waiting on others, touch only one layer, no direct user value.

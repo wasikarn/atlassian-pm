@@ -743,9 +743,9 @@ class TestFullValidation:
 
     def test_task_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "task")
-        # v3.12.2: T10, T12, T13, T14 + T11 (Estimate), T15 (Out of Scope) added for Task.
-        # T9 is Epic-only. T1-T8 + T10-T15 + TK1-TK4 = 18.
-        assert len(report.checks) == 18
+        # v3.13.0: T16 (Flag Discipline) added for Task.
+        # T9 is Epic-only. T1-T8 + T10-T16 + TK1-TK4 = 19.
+        assert len(report.checks) == 19
 
     def test_qa_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "qa")
@@ -1338,3 +1338,112 @@ class TestT15OutOfScopeForSlice:
         report = self.v.validate(adf, "task", wrapper)
         t15 = next(c for c in report.checks if c.check_id == "T15")
         assert t15.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T16: Flag Discipline for Ship-per-Merge Slices (v3.13.0, Task-only)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT16FlagDiscipline:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_non_slice_title_passes_na(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Add CSV export endpoint",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.PASS
+        assert "N/A" in t16.message
+
+    def test_slice_with_flag_name_passes(self):
+        adf = _doc(
+            _heading("Context"),
+            _paragraph(_text("Gated behind feat/TP-182/s1 until QA verifies.")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice A — single owner notification",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.PASS
+
+    def test_slice_with_hardening_note_passes(self):
+        adf = _doc(
+            _heading("Context"),
+            _paragraph(_text("Retry hardening — no flag (hardening).")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice C — retry hardening",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.PASS
+
+    def test_slice_without_flag_or_hardening_warns(self):
+        adf = _doc(_heading("Context"), _paragraph(_text("no flag ref here")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice A — first slice",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.WARN
+
+    def test_vs_label_without_flag_warns(self):
+        adf = _doc(_heading("Context"), _paragraph(_text("no flag reference in body")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "vs1-skeleton — first slice",
+            "description": adf,
+            "labels": ["vs1-skeleton"],
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.WARN
+
+    def test_t16_only_runs_for_task(self):
+        adf = _doc(_paragraph(_text("x")))
+        report = self.v.validate(adf, "epic", {"projectKey": "TP", "type": "Epic", "summary": "Slice A"})
+        assert all(c.check_id != "T16" for c in report.checks)
+        report = self.v.validate(adf, "task", {"projectKey": "TP", "type": "Task", "summary": "Slice A"})
+        assert any(c.check_id == "T16" for c in report.checks)
+
+    def test_t16_never_fails(self):
+        adf = _doc(_paragraph(_text("no flag anywhere")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice A — no flag at all",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status != CheckStatus.FAIL
+
+    def test_thai_hardening_note_passes(self):
+        adf = _doc(_paragraph(_text("สไลซ์นี้ ไม่ใช้ flag (hardening) — retry only.")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice C — hardening",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t16 = next(c for c in report.checks if c.check_id == "T16")
+        assert t16.status == CheckStatus.PASS

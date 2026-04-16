@@ -75,6 +75,42 @@ Mark file paths, routes, functions: `{"type": "text", "text": "src/file.tsx", "m
 
 **Authoring rule:** copy-paste reveals lazy references — ถ้าเห็น bare `handle()` ใน inline code → เติม class name (`AiMediaAnalysisJob.handle()`) หรือ full path. ช่วย QA grep ได้จริงข้าม epic/ticket.
 
+## Jira Workflow (TaThep — ship-per-merge)
+
+Binding convention (2026-04-16, rules C1-C13 + verdicts D1-D8). Ship = flag-OFF deploy to prod; Release = PM-approved flag-on.
+
+Workflow states (preferred order):
+
+```text
+Backlog → In Progress → Shipped (flag-off) → Ready for QA → Released (flag-on) → Done
+```
+
+OR reinterpret the existing `Done` state = `Released` and add a `Shipped (flag-off)` intermediate state. The key invariant: **deploy and release are two events, not one**.
+
+### Labels (convention)
+
+| Label | When applied | Phase |
+| --- | --- | --- |
+| `vs-planned` | Slice planned in Epic, not started | pre-P0 |
+| `vs-shipped-dark` | Shipped to prod, flag OFF | Phase 1 complete |
+| `vs-released` | Flag ON, user-visible | Phase 4 complete |
+| `carve-out-manual-gate` | Service in AI-agent / video carve-out (D5) | tagged at ticket creation |
+
+### Phases (see skill `apm-slice-ship` for the full walkthrough)
+
+1. Phase 0 — pre-ship checklist (flag registered, coverage ≥80%, rollback runbook, contract tests green)
+2. Phase 1 — deploy to prod (flag OFF) — auto if eligible, staging + QA sign-off if not
+3. Phase 2 — observability smoke (30-min post-deploy watch)
+4. Phase 3 — QA verify on prod with flag OFF (dark)
+5. Phase 4 — PM approves flag-on toggle → Release
+6. Phase 5 — ticket → `Released` / `Done`; flag → 30-day TTL cleanup
+
+### See also
+
+- [vertical-slice-guide.md — Ship Strategy](vertical-slice-guide.md#ship-strategy-ship-per-merge-default)
+- [flags-yaml-template.yaml](flags-yaml-template.yaml)
+- Skill: `apm-slice-ship`
+
 ## Common Mistakes
 
 | Mistake | Fix |

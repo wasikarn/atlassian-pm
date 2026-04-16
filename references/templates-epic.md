@@ -97,6 +97,52 @@ Each slice = minimal E2E working feature, testable in isolation by QA, deployabl
 - [ ] Size ≤ sprint / 1-5 days?
 - [ ] มี VS label (`vs1-*`, `vs-enabler-*`)?
 
+### Slicing Plan (ship-per-merge)
+
+> **v3.13.0 — TaThep binding convention (2026-04-16):** Every Epic slicing into multiple slices MUST declare its ship strategy, slice order, flag strategy, shared resources, and rollback plan. Feeds directly into the `apm-slice-ship` workflow.
+
+Insert this section between `User Stories` and `Technical Reference Zone`. Required for any Epic planned for ship-per-merge (default). If the Epic is a carve-out batch ship (AI-agent, video-processing), still fill this section and justify the carve-out explicitly.
+
+```markdown
+## Slicing Plan (ship-per-merge)
+
+**Ship strategy:** [ship-per-merge | batch (carve-out, justify)]
+
+**Slice order:**
+
+1. Slice A (`vs1-skeleton`): [user-value deliverable] — ship date target
+2. Slice B (`vs2-*`): [user-value deliverable] — ships after Slice A
+3. Slice C (`vs3-*`): [hardening] — ships after Slice B
+
+**Flag strategy:**
+
+- Slice A flag: `feat/{epic-key}/s1` — release when happy path verified in prod
+- Slice B flag: `feat/{epic-key}/s2` — gated on Slice A released
+- Slice C flag: none (hardening; always on)
+
+**Shared resources:**
+
+| Component | Touched by slices | Coordination owner |
+| --- | --- | --- |
+| [helper/service] | Slice A, B | First-merged owns upgrade |
+
+**Rollback plan:**
+
+- Slice A rollback: flag-off in < 5 min; DB migrations expand-only
+- Slice B rollback: flag-off in < 5 min; depends on Slice A stable
+- Slice C rollback: hotfix (no flag)
+```
+
+**Authoring rules:**
+
+- `Ship strategy` MUST be `ship-per-merge` unless the service is on the carve-out list (AI-agent, video-processing per D5). Carve-outs MUST justify why batch shipping is safer for this specific Epic.
+- Every numbered slice MUST cite a VS label (`vs{N}-*` or `vs-enabler-*`) matching its child Task titles.
+- Flag names MUST follow `feat/{epic-key}/s{slice-num}` format (C6). Document "no flag (hardening)" explicitly when a slice is guardrail-only.
+- Shared resources table mirrors the `Shared Resources` subsection under Technical Reference (G5) — they describe the same components. Either both reference each other or remove the duplicate.
+- Rollback plan MUST commit to flag-off < 5 min per C4 (or justify a hotfix path for no-flag slices).
+
+**Enforcement:** validator `T16` (WARN-level, Task) — when a slice Task references a `vs-*` label or slice marker, the description should reference `.flags.yaml` (via flag name) or include an explicit "no flag (hardening)" note. See `scripts/lib/adf_validator.py _check_t16_flag_discipline`.
+
 ### Technical Reference Zone (Dev-only, optional)
 
 Use H2 separator `📘 Technical Reference (สำหรับ Dev)` + info panel explaining "stakeholders/QA สามารถข้ามไปที่ User Stories หรือ Acceptance Criteria ด้านบนได้"

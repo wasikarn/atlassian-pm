@@ -60,6 +60,15 @@ SLICE_MARKER_RE = re.compile(r"(?:\bSlice\s+[A-Z]\b|\bvs\d+-|\bvs-enabler-)", re
 # Matches inline code text that is a lowercase-initial word followed by `()` with nothing else.
 BARE_METHOD_RE = re.compile(r"^[a-z][a-zA-Z0-9_]*\(\)$")
 
+# T16: Flag discipline for ship-per-merge slices (v3.13.0).
+# Slice tickets (vs-*) should reference `.flags.yaml` entry via flag name OR
+# include an explicit "no flag (hardening)" note. Flag naming convention: `feat/{epic-key}/s{N}`.
+FLAG_NAME_RE = re.compile(r"\bfeat/[A-Z][A-Z0-9]+-\d+/s\d+\b")
+HARDENING_NOTE_RE = re.compile(
+    r"no\s+flag\s*\(\s*hardening\s*\)|hardening\s+slice\s*[—:-]\s*no\s+flag|ไม่ใช้\s*flag\s*\(\s*hardening\s*\)",
+    re.IGNORECASE,
+)
+
 # T14: Vague AC phrase dictionary (G11 INVEST-T).
 VAGUE_AC_PHRASES: tuple[str, ...] = (
     "should work",
@@ -316,9 +325,9 @@ class AdfValidator:
         Subtask: T1-T5 (technical) + ST1-ST5 (quality)                   = 10 checks
         Epic:    T1-T10, T12, T13, T14 (T6-T14 WARN-only) + E1-E4         = 17 checks
         QA:      T1-T5 (technical) + QA1-QA5 (quality)                   = 10 checks
-        Task:    T1-T8, T10-T15 (T6-T15 WARN-only) + TK1-TK4               = 18 checks
+        Task:    T1-T8, T10-T16 (T6-T16 WARN-only) + TK1-TK4               = 19 checks
 
-    T6-T15 are WARN-only so they cannot break existing tickets — scoring still permits
+    T6-T16 are WARN-only so they cannot break existing tickets — scoring still permits
     PASS at 90% threshold.
 
     v3.12.1 (G1/G2/G6): T7 canonical Scope Disambiguation heading, T8 decision-path
@@ -377,6 +386,7 @@ class AdfValidator:
         if issue_type == "task":
             report.checks.append(self._check_t11_estimate(adf, _secs))
             report.checks.append(self._check_t15_out_of_scope_for_slice(adf, wrapper))
+            report.checks.append(self._check_t16_flag_discipline(adf, wrapper))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
@@ -999,6 +1009,45 @@ class AdfValidator:
             "deferred work).",
             fix_hint="Add H2 'ไม่รวมงานนี้ (Out of Scope)' with bullets citing sibling TP-keys "
             "or 'deferred' markers (see templates-task.md G12 rule).",
+        )
+
+    def _check_t16_flag_discipline(self, adf: dict, wrapper: dict | None) -> CheckResult:
+        """T16: Flag Discipline for Ship-per-Merge Slices (WARN-level, Task-only, v3.13.0).
+
+        When Task is a vertical slice (title matches Slice markers OR labels include `vs*`),
+        the description SHOULD reference either:
+          - a flag name matching `feat/{epic-key}/s{N}` (registered in `.flags.yaml`), or
+          - an explicit "no flag (hardening)" note.
+
+        Enforces the ship-per-merge convention (C5/C6): every slice must declare flag
+        discipline at creation time so shipping pipelines know how to gate exposure.
+        """
+        title = (wrapper or {}).get("summary", "") or ""
+        labels = (wrapper or {}).get("labels", []) or []
+
+        is_slice = bool(SLICE_MARKER_RE.search(title)) or any(
+            str(label).lower().startswith("vs") for label in labels
+        )
+
+        if not is_slice:
+            return CheckResult("T16", CheckStatus.PASS, "T16 N/A (not a vertical slice)")
+
+        body_text = extract_text(adf)
+        has_flag_ref = bool(FLAG_NAME_RE.search(body_text))
+        has_hardening_note = bool(HARDENING_NOTE_RE.search(body_text))
+
+        if has_flag_ref or has_hardening_note:
+            reason = "flag name referenced" if has_flag_ref else "hardening (no flag) declared"
+            return CheckResult("T16", CheckStatus.PASS, f"Slice flag discipline present ({reason})")
+
+        return CheckResult(
+            "T16",
+            CheckStatus.WARN,
+            f"Slice title '{title[:40]}' missing flag reference or 'no flag (hardening)' note. "
+            "Ship-per-merge slices MUST declare a `.flags.yaml` entry via `feat/{epic-key}/s{N}` "
+            "or explicitly mark as hardening (no flag).",
+            fix_hint="Add flag reference (e.g. `feat/TP-182/s1`) in description, OR add "
+            "explicit 'no flag (hardening)' note. See references/flags-yaml-template.yaml.",
         )
 
     # ───────────────────────────────────────────────────────

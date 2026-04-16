@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.0] - 2026-04-16
+
+### Added
+
+- **`skills/task/apm-slice-ship/SKILL.md`** — new skill guiding per-slice ship workflow (pre-ship checklist → deploy → observability smoke → QA verify → PM release approval). 5-phase gate enforces TaThep ship-per-merge convention.
+- **`references/templates-epic.md`** — new required `Slicing Plan` section for epics using ship-per-merge (ship strategy, slice order, flag strategy, shared resources, rollback plan per slice).
+- **`references/flags-yaml-template.yaml`** — new canonical feature flag registry template. Enforces: flag naming (`feat/{epic-key}/{slice-number}`), TTL ≤ 30 days post-epic-complete, owner + status (`active` → `released` → `scheduled-for-removal`).
+- **`references/vertical-slice-guide.md`** — new `Ship Strategy` section documenting ship-per-merge gates (pre-merge → coverage-tiered deploy → canary 5%/25%/100% → QA watch → PM release approval) + carve-outs (AI-agent, video-processing).
+- **`references/templates-core.md`** — new `Jira Workflow (TaThep)` section documenting workflow states (Backlog → In Progress → Shipped flag-off → Ready for QA → Released flag-on → Done) + labels (`vs-planned`, `vs-shipped-dark`, `vs-released`, `carve-out-manual-gate`).
+- **`scripts/lib/adf_validator.py`** — new check `T16: Slice Flag Discipline` (WARN-level). Slice tickets (`vs-*` label or "Slice" marker) should reference a flag in `.flags.yaml` OR explicit "no flag (hardening)" note.
+- **Tests** — 8 new T16 tests in `TestT16SliceFlagDiscipline` class. Total validator tests: 120 → 128.
+
+### Rationale
+
+TaThep team (2026-04-16) established binding convention via 4-role debate (Engineering Lead, QA Lead, DevOps/SRE, Product/Delivery) + Team Lead tiebreak: vertical slices ship to production per merge (flag OFF); release (user exposure) = separate PM-approved flag toggle. This eliminates batch-wait-for-all-tickets bottleneck for market velocity.
+
+**Tier 2 MTTR** (< 4h business hours) current; **Tier 1** (< 1h business + < 4h off-hours) when partner billboard owners onboard. Staging at `app.bluedragon.space` + `platform-admin.bluedragon.space`. Pilot #1 = Video Playback Phase 1/2/NVR (active `vs-planned` work); Pilot #2 = {{PROJECT_KEY}}-182/{{PROJECT_KEY}}-183 after calibration.
+
+Full binding decision: see `feedback_ship_per_merge_convention.md` (user memory) + `wiki/ship-per-merge-convention.md` (2nd Brain synthesis).
+
+### Migration
+
+- No breaking changes — all additive.
+- Existing Epics/Tasks still validate (T16 WARN-only).
+- `Slicing Plan` section required only for epics explicitly using ship-per-merge (opt-in via `vs-*` labels or team decision).
+- `.flags.yaml` deployment per repo is a Week 0 prerequisite — not enforced by plugin yet.
+
+### Notes
+
+- `apm-slice-ship` skill references external infrastructure (Unleash OSS self-host recommended; fallback PostHog managed).
+- Carve-out services (`tathep-ai-agent-python`, `tathep-video-processing`) use manual CI gate — re-audit Day 60 after convention activates.
+- T16 Thai label support matches existing TK1-T15 bilingual convention.
+
 ## [3.12.2] - 2026-04-16
 
 ### Added
