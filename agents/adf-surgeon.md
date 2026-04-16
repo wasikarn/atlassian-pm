@@ -103,3 +103,13 @@ File: [path] — updated ✅
 - If no issues found → output "No structural issues found — ADF appears Jira-compatible"
 - Read site from `.claude/project-config.json` for QUIRK-2 URL expansion
 - If file not found → "File not found at [path]. Verify path before invoking."
+
+## Schema reference
+
+When uncertain about a node's allowed attrs, content model, or mark set, consult the authoritative ADF JSON schema:
+
+- **ADF JSON Schema** — <http://go.atlassian.com/adf-json-schema> (short link → versioned `@atlaskit/adf-schema` on unpkg)
+- **ADF node docs** — <https://developer.atlassian.com/cloud/jira/platform/apis/document/nodes/>
+- **ADF mark docs** — <https://developer.atlassian.com/cloud/jira/platform/apis/document/marks/>
+
+Full APM summary of relevant node constraints: `references/templates-core.md` → External References.

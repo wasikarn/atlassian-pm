@@ -124,3 +124,19 @@ OR reinterpret the existing `Done` state = `Released` and add a `Shipped (flag-o
 | `blockquote` node | Replace with `panel` (info/note) |
 | Panel overuse (>2 per section) | Convert to plain paragraph + bold |
 | Technical sections above business sections (Epic) | Reorder: User Flow / Business Value first, technical reference last |
+
+## External References
+
+- **ADF JSON Schema (authoritative)** — <http://go.atlassian.com/adf-json-schema> — short link redirects to the versioned `@atlaskit/adf-schema` JSON schema on unpkg. Use when validating ADF structure, debugging `acli --from-json` payloads, or adding new node types.
+- **ADF overview + examples** — <https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/>
+- **ADF node reference** — <https://developer.atlassian.com/cloud/jira/platform/apis/document/nodes/>
+- **ADF mark reference** — <https://developer.atlassian.com/cloud/jira/platform/apis/document/marks/>
+
+### Key schema takeaways (from v52.5.0, 2026-04-16)
+
+- `codeBlock` — free-string `language` attr (no `mermaid` enum), plain text content only, `marks: maxItems 0`. What APM uses for ASCII diagrams.
+- `extension` / `bodiedExtension` — ADF's official diagram-rendering path (Mermaid, draw.io). Requires a marketplace app to render; parameters object is schema-free.
+- `mediaSingle` with `type: "external"` — allows external image URL (SVG possible), subject to Jira CSP / trusted-domain policy.
+- `panel` — 7 `panelType` values (`info`, `note`, `tip`, `warning`, `error`, `success`, `custom`); may contain `codeBlock`, `media`, `extension`.
+- `expand` / `nestedExpand` — collapsible block; useful for hiding long diagrams or appendices.
+- No native `diagram`, `mermaid`, `flowchart`, `chart`, `drawio`, or `excalidraw` node — all delegated to `extension`.
