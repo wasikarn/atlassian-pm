@@ -12,7 +12,7 @@ description: |
   Use this skill when a Jira issue (any type) needs a rendered diagram.
   Confluence uses the native Forge Mermaid macro with raw `.mmd` — no skill needed there.
 x-compatibility: []
-argument-hint: "[diagram.mmd | --code]"
+argument-hint: "diagram.mmd [--code <inline mermaid>]"
 effort: low
 user-invocable: true
 ---
@@ -22,7 +22,7 @@ user-invocable: true
 **Role:** Developer / Tech Lead / PM
 **Output:** ASCII only (Jira ADF code blocks)
 
-> **APM convention:** Jira diagram = ASCII in a code block (see `feedback_jira_ascii_diagrams.md`). Width ≤ 80 cols. Confluence = raw `.mmd` in Forge Mermaid macro — not this skill.
+> **APM convention:** Jira diagram = ASCII in a code block. Width ≤ 80 cols. Confluence = raw `.mmd` in Forge Mermaid macro — not this skill. See `.claude/rules/mermaid.md` + `references/mermaid-guide.md`.
 
 ## When to use
 
@@ -104,11 +104,12 @@ See [references/DIAGRAM_TYPES.md](references/DIAGRAM_TYPES.md). Quick pick:
 
 | Flag | Purpose | Default |
 | --- | --- | --- |
-| `--input` | Source `.mmd` file | required |
-| `--format` | `ascii` | `ascii` |
+| `--input` | Source `.mmd` file | required unless `--code` |
+| `--code` / `-c` | Inline Mermaid source (string) instead of a file | — |
+| `--format ascii` | Output format (only ASCII is part of the documented surface) | `ascii` |
 | `--use-ascii` | Pure ASCII (no Unicode box chars) | false |
 | `--padding-x` / `--padding-y` | ASCII spacing | auto |
-| `--workers` | Batch parallelism | 4 |
+| `--workers` | Batch parallelism (batch.mjs only) | 4 |
 
 ## Examples
 
@@ -153,11 +154,11 @@ node skills/utilities/apm-pretty-mermaid/scripts/batch.mjs \
 - `assets/example_diagrams/` — starter templates (flowchart, sequence, state, class, er)
 - Project rule: `.claude/rules/mermaid.md`
 - Jira + Confluence patterns: `references/mermaid-guide.md`
-- Jira convention: `MEMORY.md` → "Jira ASCII Diagrams"
+- Team convention lives in the user's project memory (APM instance-specific)
 
 ## 🎓 Domain Expert Notes
 
-**Why ASCII for Jira:** Jira ADF code blocks render in monospace across web, mobile, and gh-cli. ASCII survives copy-paste, search, grep, and AI-agent parsing. Attachment-based images break the agent-readable ticket convention (see MEMORY.md → "AI-Agent-Readable Tickets").
+**Why ASCII for Jira:** Jira ADF code blocks render in monospace across web, mobile, and gh-cli. ASCII survives copy-paste, search, grep, and AI-agent parsing. Attachment-based images break the agent-readable ticket convention.
 
 **Why Forge Mermaid macro for Confluence:** Confluence renders Mermaid natively via the Forge plugin. Pasting raw `.mmd` into the macro keeps the page source clean and re-rendering is free — no attachment upload step, no version drift between source and rendered output.
 

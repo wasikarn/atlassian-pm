@@ -352,7 +352,7 @@ flowchart TD
 
 **Authoring rule:** ถ้า flow มีแค่ 1 path — diagram ไม่ต้องก็ได้ (ASCII อธิบายพอ). ถ้ามี decision → ต้องมี Mermaid + ทุก branch ต้อง label. ห้ามแสดงแค่ happy path แล้วละเลย edge case — QA ไม่รู้ว่า edge case อยู่ใน scope หรือไม่.
 
-> ⚠️ **Jira ASCII:** template ข้างบนใช้ได้เฉพาะ Confluence. 3+ branch `flowchart` render เป็น ASCII ใน Jira จะ mash labels (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)). **Jira → hand-draw ASCII** ด้วย box chars (`┌─┐│└┘├┤▶▼`) หรือ convert เป็น `sequenceDiagram`.
+> ⚠️ **Jira ASCII:** template ข้างบนใช้ได้เฉพาะ Confluence (Forge Mermaid macro). 3+ branch `flowchart` render เป็น ASCII ใน Jira จะ mash labels (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)). **Jira → hand-draw ASCII** ด้วย box chars (`┌─┐│└┘├┤▶▼`) หรือ convert เป็น `sequenceDiagram`. ดู `skills/utilities/apm-pretty-mermaid/SKILL.md` → Known Issues.
 >
 > ดูรายละเอียด + empirical width table: `skills/utilities/apm-pretty-mermaid/SKILL.md` → Known Issues, และ `references/mermaid-guide.md` → Multi-branch decision flowchart.
 
