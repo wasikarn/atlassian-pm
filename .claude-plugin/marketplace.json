@@ -1,22 +1,28 @@
 {
-	"name": "atlassian-pm",
-	"owner": {
-		"name": "Tathep"
-	},
-	"plugins": [
-		{
-			"name": "atlassian-pm",
-			"source": "./",
-			"description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
-			"version": "3.13.0",
-			"author": {
-				"name": "Tathep"
-			},
-			"keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
-			"category": "productivity",
-			"homepage": "https://github.com/wasikarn/atlassian-pm",
-			"repository": "https://github.com/wasikarn/atlassian-pm",
-			"license": "MIT"
-		}
-	]
+  "name": "atlassian-pm",
+  "owner": {
+    "name": "Tathep"
+  },
+  "plugins": [
+    {
+      "name": "atlassian-pm",
+      "source": "./",
+      "description": "Create Epics, Stories, Sub-tasks and plan Sprints using natural language. Enforces quality gates via hook-based guardrails.",
+      "version": "3.14.0",
+      "author": {
+        "name": "Tathep"
+      },
+      "keywords": [
+        "jira",
+        "confluence",
+        "atlassian",
+        "agile",
+        "sprint"
+      ],
+      "category": "productivity",
+      "homepage": "https://github.com/wasikarn/atlassian-pm",
+      "repository": "https://github.com/wasikarn/atlassian-pm",
+      "license": "MIT"
+    }
+  ]
 }

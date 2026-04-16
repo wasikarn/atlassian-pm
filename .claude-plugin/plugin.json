@@ -1,23 +1,29 @@
 {
-	"name": "atlassian-pm",
-	"version": "3.13.0",
-	"description": "Agile Jira/Confluence automation: story creation, sprint planning, quality gates, HR enforcement",
-	"author": {
-		"name": "Tathep"
-	},
-	"homepage": "https://github.com/wasikarn/atlassian-pm",
-	"repository": "https://github.com/wasikarn/atlassian-pm",
-	"license": "MIT",
-	"keywords": ["jira", "confluence", "atlassian", "agile", "sprint"],
-	"mcpServers": "./.mcp.json",
-	"skills": [
-		"./skills/apm-setup/",
-		"./skills/apm-doctor/",
-		"./skills/epic/",
-		"./skills/story/",
-		"./skills/task/",
-		"./skills/sprint/",
-		"./skills/confluence/",
-		"./skills/utilities/"
-	]
+  "name": "atlassian-pm",
+  "version": "3.14.0",
+  "description": "Agile Jira/Confluence automation: story creation, sprint planning, quality gates, HR enforcement",
+  "author": {
+    "name": "Tathep"
+  },
+  "homepage": "https://github.com/wasikarn/atlassian-pm",
+  "repository": "https://github.com/wasikarn/atlassian-pm",
+  "license": "MIT",
+  "keywords": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "agile",
+    "sprint"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": [
+    "./skills/apm-setup/",
+    "./skills/apm-doctor/",
+    "./skills/epic/",
+    "./skills/story/",
+    "./skills/task/",
+    "./skills/sprint/",
+    "./skills/confluence/",
+    "./skills/utilities/"
+  ]
 }
