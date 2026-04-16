@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.1] - 2026-04-16
+
+### Documentation
+
+- **`skills/utilities/apm-pretty-mermaid/SKILL.md`** — added "Known Issues" section documenting upstream [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56) bug: flowchart with 3+ outgoing edges from one decision node mashes edge labels into gibberish when rendered to ASCII. Added empirical width table comparing 5 approaches (sequenceDiagram 85–100 cols, graph-easy medium 164–190, ultra-short + legend 71–73, LR layout 220–295, beautiful-mermaid flowchart 200+ broken). Added decision rule: interaction/branching flow → `sequenceDiagram` default.
+- **`references/mermaid-guide.md`** — added "⚠️ Multi-branch decision flowchart — KNOWN BUG" subsection in Jira ASCII section. Recommends `sequenceDiagram` as default for 3+ branch decisions. Lists `graph-easy` (Perl, DOT → boxart) as alternative renderer with width tradeoff.
+- **`.claude/rules/mermaid.md`** — added inline ⚠️ warning after width rule. Auto-loaded rule propagates guidance to all Mermaid-related hooks and agents.
+- **`references/templates-epic.md`** — annotated the 3-way decision flowchart template (lines 337–353) with Jira ASCII rendering warning. Template still valid for Confluence Forge Mermaid macro; Jira ADF embedding requires conversion to `sequenceDiagram` or `graph-easy` fallback.
+- **`skills/README.md`** — appended Known Issues pointer to the `apm-pretty-mermaid` table entry.
+
+### Rationale
+
+Empirical testing ({{PROJECT_KEY}}-182, {{PROJECT_KEY}}-183 descriptions, 2026-04-16) confirmed the upstream bug affects every flowchart with 3+ outgoing edges from a single node. Multiple render attempts (TD, LR, `--use-ascii`, flag combinations) did not avoid the overlap. Sequence diagrams and 2-branch flowcharts render cleanly. This patch propagates that finding across all APM docs that previously recommended flowchart without the caveat.
+
+### Migration
+
+- No breaking changes — all additive documentation. Existing Mermaid sources continue to work; only ASCII rendering of 3+ branch flowcharts is affected, and only for Jira embedding (Confluence Mermaid macro renders fine).
+- Teams with existing 3+ branch flowchart diagrams embedded in Jira descriptions should re-render as `sequenceDiagram` when next updated.
+
 ## [3.14.0] - 2026-04-16
 
 ### Added

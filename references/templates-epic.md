@@ -352,6 +352,14 @@ flowchart TD
 
 **Authoring rule:** ถ้า flow มีแค่ 1 path — diagram ไม่ต้องก็ได้ (ASCII อธิบายพอ). ถ้ามี decision → ต้องมี Mermaid + ทุก branch ต้อง label. ห้ามแสดงแค่ happy path แล้วละเลย edge case — QA ไม่รู้ว่า edge case อยู่ใน scope หรือไม่.
 
+> ⚠️ **Jira ASCII rendering:** Template ข้างบน render ถูกต้องใน Confluence Forge Mermaid macro แต่ `flowchart` ที่มี 3+ branches จาก decision node เดียว **จะ mash edge labels เมื่อ render เป็น ASCII สำหรับ Jira** (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56)). เมื่อต้อง embed ใน Jira ADF ให้:
+>
+> 1. **แปลงเป็น `sequenceDiagram`** (default, 85–100 cols clean) — actor → actor + `alt / else` blocks per branch. Keep color convention via `Note` blocks or suffix markers (`⭐`, `*`).
+> 2. หรือ render ผ่าน `graph-easy` (DOT → boxart, 150–200 cols) — labels clean แต่กว้างกว่า.
+> 3. หรือ render SVG แล้ว attach Confluence + Smart Link จาก Jira (rich diagram exception).
+>
+> ดูรายละเอียด + empirical width table: `skills/utilities/apm-pretty-mermaid/SKILL.md` → Known Issues, และ `references/mermaid-guide.md` → Multi-branch decision flowchart.
+
 ### Full ADF CREATE Template
 
 ```json

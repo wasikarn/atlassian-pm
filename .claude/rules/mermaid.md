@@ -20,6 +20,8 @@ paths:
 
 If ASCII exceeds 80 cols: simplify OR split into 2 diagrams OR move to Confluence SVG + Smart Link from Jira.
 
+**⚠️ 3+ branch flowchart = broken in ASCII** (upstream bug [mermaid-ascii#56](https://github.com/AlexanderGrooff/mermaid-ascii/issues/56) mashes edge labels). For decisions with 3+ branches in Jira → use `sequenceDiagram` with `alt / else` blocks (85–100 cols, clean labels). Sequence/state/ER/class diagrams = unaffected. Full workarounds: `skills/utilities/apm-pretty-mermaid/SKILL.md` → Known Issues, plus `references/mermaid-guide.md` → Multi-branch decision flowchart.
+
 When creating or editing Mermaid diagrams, read the relevant official docs BEFORE writing diagram code:
 
 - **Flowchart**: `docs/mermaid/flowchart.md` — nodes, edges, subgraphs, styling, curves, ELK renderer
