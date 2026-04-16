@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] - 2026-04-16
+
+### Added
+
+- **Epic template business-first structure** — new required section `User Flow — ภาพรวมการทำงาน` between Overview and Business Value, expanded `ลูกค้าเห็นอะไร?` with Before/After table + example message copy, optional `📘 Technical Reference (สำหรับ Dev)` H2 separator for epics with heavy technical detail. Rationale: QA feedback — Epic descriptions were too technical, hurting onboarding time for PM/QA/stakeholders.
+- **Business Zone language rule** — formal rule that Scope, User Stories, Acceptance Criteria, and Risks sections MUST use user-observable behavior language. No class names, file paths, method signatures, code patterns (e.g. `whereIn`/`findBy`), i18n keys, or SQL queries in Business Zone — these move to Technical Reference Zone. Rationale: agents were mixing technical and business content in Business Zone, making it unreadable for QA/PM/stakeholders.
+- **Mermaid flow diagrams** — Epic User Flow section now recommends `codeBlock` with `language: "mermaid"` instead of ASCII text art. Leverages Jira Cloud's native Mermaid rendering for cleaner, readable diagrams.
+- **Panel node support** — `panel` with `panelType: info/success/warning/note` moved from Forbidden to Allowed. Previously workarounds (emoji + bold paragraph) were used inconsistently across agents.
+- **Emoji allowed in H2 headings** for section zone markers (e.g. `📘 Technical Reference`). Previously banned — agents had no clean way to separate business/technical zones.
+- **Business-first ordering rule** — Epic section ordering is now formally specified: Business Zone (User Flow, Business Value, Customer Experience, Scope, User Stories, AC, Risks) always precedes Technical Reference Zone (Current Flow Gap, Technical Design, Edge Cases, Dependencies).
+
+### Changed
+
+- **`references/templates-core.md`** — rewrote ADF Principles + Allowed/Forbidden Node Types tables. Added new `Panel Usage` section documenting when to use each `panelType`.
+- **`references/templates-epic.md`** — CREATE/EDIT templates regenerated with User Flow, before/after table, example message copy, warning panel over risks, optional Technical Reference separator.
+
+### Notes
+
+- Agents previously made inconsistent decisions (some used `panel`, others used emoji+bold workaround) because `templates-core.md` forbid panels but `validate_adf.py` did not enforce it. This release aligns documentation with validator reality.
+- No breaking changes — existing Epic descriptions still validate at 100%. New structure is additive guidance for future epics.
+
 ## [3.10.4] - 2026-04-11
 
 ### Fixed
