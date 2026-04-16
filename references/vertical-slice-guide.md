@@ -70,11 +70,26 @@
 | --- | --- | --- |
 | Shell-only | UI exists, no logic/API | Add minimal happy path |
 | Layer-split | BE story + FE story separate | Combine into one VS story |
+| Component-split | `[BE] Create FooService` + `[BE] Create BarNotifiable` + `[BE] Hook trigger` as separate stories (all one-layer, each no standalone value) | Combine into VS by business flow; see Case Study below |
 | Tab-split | "Active tab" / "History tab" as stories | Split by business rule instead |
 | Scope creep | VS grows beyond sprint | Re-split into smaller VS |
 | Event-split | Domain event lifecycle split across 2 VS | One VS handles full command→event flow |
 | Consumer-no-emitter | Story consumes event but emitter not in scope | Link to producer VS or add dependency |
 | Orphaned event | Event emitted but no consumer VS | Validate downstream VS or defer event |
+
+## Case Study — Component-split → Vertical Slice ({{PROJECT_KEY}}-182/183, 2026-04-16)
+
+**Original (wrong):** AI notification Epic broken into 11 technical tasks (lookup service, notifiable class, i18n keys, hook, tests, FE mapping — each single-layer). QA cannot test any task standalone — all just code components. Full 4+ tasks must merge before QA sees working notification.
+
+**Restructured (correct):** 6 vertical slices:
+
+- **Slice A** — single owner TH happy path (1 E2E working feature)
+- **Slice B** — multi-owner + EN i18n
+- **Slice C** — retry dedup + failure safety
+
+Each slice contains partial work across all layers (lookup + notifiable + i18n + hook + test) but minimal for that specific business outcome. QA tests each slice independently; each slice deployable standalone.
+
+**Lesson:** When tempted to split by code component (`[BE] Create X`, `[BE] Add Y`), check whether the split creates tasks with standalone business value. If no → it's Component-split anti-pattern — merge back into vertical slices by flow.
 
 ## Sprint Assignment
 

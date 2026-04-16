@@ -28,6 +28,42 @@
 6. **เงื่อนไขที่ต้องผ่าน** — Epic-level ACs เขียนเป็น observable outcome ("เจ้าของป้ายเห็น notification") ไม่ใช่ implementation detail ("ใช้ `whereIn` pattern")
 7. **ความเสี่ยงและวิธีรับมือ** — business impact language ("ป้ายหลายเจ้าของ อาจมีบางคนไม่ได้รับแจ้งเตือน") ไม่ใช่ code-level risk ("`findBy` returns first match"); `panel` (warning) highlighting High-impact + Risk/Impact/Mitigation table
 
+### User Stories = Vertical Slices (NOT Technical Layers)
+
+> **Critical rule — see [vertical-slice-guide.md](vertical-slice-guide.md) / [vs-checklist-compact.md](vs-checklist-compact.md)**
+
+User Stories ใน Epic MUST be **vertical slices** — end-to-end business-deliverable chunks ที่ QA test เป็น user outcome ได้
+
+**❌ Anti-pattern (Layer-split) — อย่าทำ:**
+
+```text
+- [BE] Create FooNotifiable class
+- [BE] Add i18n keys
+- [BE] Hook trigger in FooJob
+- [BE] Unit tests
+- [FE-Web] Update notification mapping
+```
+
+Problem: QA test ทีละ task ไม่ได้ (ไม่มี business value standalone), cycle time ยาว, ต้อง merge ทั้งหมดก่อนเห็น feature
+
+**✅ Correct (Vertical Slice):**
+
+```text
+- Slice A (vs1-skeleton): Billboard owner ได้รับ notification เมื่อ AI เริ่ม review (single owner, TH)
+- Slice B (vs2-multi-i18n): รองรับ billboard หลาย owner + EN language
+- Slice C (vs3-hardening): Retry dedup + failure safety
+```
+
+Each slice = minimal E2E working feature, testable in isolation by QA, deployable standalone
+
+**Checklist ก่อนเขียน User Story:**
+
+- [ ] Story = business outcome (user observable)? ไม่ใช่ technical component?
+- [ ] Deployable standalone (ไม่ depend story อื่น)?
+- [ ] QA test E2E ได้ด้วย business AC?
+- [ ] Size ≤ sprint / 1-5 days?
+- [ ] มี VS label (`vs1-*`, `vs-enabler-*`)?
+
 ### Technical Reference Zone (Dev-only, optional)
 
 Use H2 separator `📘 Technical Reference (สำหรับ Dev)` + info panel explaining "stakeholders/QA สามารถข้ามไปที่ User Stories หรือ Acceptance Criteria ด้านบนได้"

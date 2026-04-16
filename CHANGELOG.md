@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.1] - 2026-04-16
+
+### Changed
+
+- **`references/templates-epic.md`** — User Stories section now explicitly forbids layer-split anti-pattern (`[BE] Create X` / `[FE] Update Y`) and requires vertical slices. Links to `vertical-slice-guide.md` + `vs-checklist-compact.md`. Includes ❌/✅ example pair + pre-write checklist.
+- **`references/vertical-slice-guide.md`** — added `Component-split` anti-pattern row (splitting by code component where each task has no standalone business value). Added Case Study: {{PROJECT_KEY}}-182/183 restructure 11 technical tasks → 6 vertical slices driven by QA feedback.
+
+### Rationale
+
+Plugin v3.11.0 introduced business-first Epic structure but did not enforce vertical slice decomposition. Agents continued creating layer-split tasks (one task per class/component) under Epics, forcing manual restructure. This release closes the gap by teaching the rule in the Epic template itself, linking to the existing `vertical-slice-guide.md`.
+
+Case study in vertical-slice-guide.md documents the {{PROJECT_KEY}}-182/183 restructure (11 tasks → 6 slices) so agents recognize the pattern.
+
 ## [3.11.0] - 2026-04-16
 
 ### Added
