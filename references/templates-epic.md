@@ -187,6 +187,83 @@ Epic B sibling slice ✅ `AI auto-decision` or `AI auto-อนุมัติ` �
 
 {{PROJECT_KEY}}-183 had a sibling slice titled `"AI ตรวจสอบสื่อ"` — reused {{PROJECT_KEY}}-182's keyword `ตรวจสอบ`. Reviewers assumed it was a {{PROJECT_KEY}}-182 slice, not noticing it belonged to {{PROJECT_KEY}}-183's auto-decision branch. v3.12.1 closes this by documenting the rule here and guiding agents to check sibling vocabularies before drafting slice titles.
 
+### Regression ACs for Paired Epics (G9 — v3.12.2)
+
+> **Rule:** When an Epic forms a pair (Epic A ↔ Epic B) via the Coverage Matrix, every child slice/task of Epic A MUST include at least one regression AC that guards Epic B's scope. Without mirrored regression ACs, a slice can silently re-trigger the other epic's paths (auto-approve running during manual review, or vice versa).
+
+**Why:** {{PROJECT_KEY}}-196 (Slice A of {{PROJECT_KEY}}-182 "route-to-review") included AC3 `"regression — auto-approve case ไม่ trigger review request"` mirroring {{PROJECT_KEY}}-183's auto-decision scope. Without this AC a reviewer could not tell whether the slice accidentally crossed the pair boundary. Paired epics need bilateral regression guards at the slice level, not only at the Epic coverage matrix level.
+
+**Template (add one ❌ regression AC per slice when parent Epic is paired):**
+
+```markdown
+## เงื่อนไขที่ต้องผ่าน (Slice ACs)
+
+- ✅ AC1: [primary happy path owned by this Epic]
+- ⚠️ AC2: [edge case within this Epic's scope]
+- ❌ AC3: regression — [paired-Epic scope] does NOT trigger this Epic's new behavior
+  (Example: "auto-approve path ไม่ trigger review request — route-to-review logic guarded by status check")
+```
+
+**Enforcement:** validator `T12` (WARN-level, Task) — when a Task description mentions a paired-epic key (e.g. via parent Epic's Coverage Matrix), validator expects the task body to reference that paired-epic key at least once (regression marker). Missing → WARN. See `scripts/lib/adf_validator.py _check_t12_*`.
+
+**Authoring checklist:**
+
+- [ ] Parent Epic has a Coverage Matrix with `Related Epic(s)` populated?
+- [ ] Each child slice lists ≥ 1 regression AC guarding the Related Epic's scope?
+- [ ] Regression AC uses ❌ prefix + explicit paired-Epic key in text (for machine + human grep)?
+
+### AC Quality Rules (G11 — INVEST-T: Testable)
+
+> **Rule:** Acceptance Criteria MUST be testable. Vague phrases ("should work correctly", "ทำงานได้ดี", "handle properly") are not Testable — QA cannot write a pass/fail case from them.
+
+**❌ Vague phrases to avoid:**
+
+- `should work correctly` / `works correctly` / `works properly`
+- `ทำงานได้ดี` / `ทำงานถูกต้อง` / `ทำงานเหมาะสม`
+- `handle properly` / `handles correctly`
+- `จัดการได้` / `จัดการถูกต้อง`
+- `user-friendly` / `ใช้งานง่าย`
+- `perform well` / `ทำงานเร็ว`
+- `as expected` / `ตามที่คาดหวัง`
+
+**✅ Testable phrasing:**
+
+- `Given X, When Y, Then Z` with observable outcome
+- Specific values (status codes, timestamps, DB state), time bounds (within 2s), visible UI state (toast text, empty-state copy)
+- Regression: `Existing flow Z continues unchanged — [specific assertion]`
+
+**Example rewrite:**
+
+- ❌ `"System handles multi-owner billboards properly"`
+- ✅ `"Given billboard with 3 owners, When AI review starts, Then all 3 owners receive notification within 5s (database row in notifications table per owner)"`
+
+**Enforcement:** validator `T14` (WARN-level, Epic + Task) scans AC / `เงื่อนไขที่ต้องผ่าน` / `fix criteria` sections for vague phrase dictionary. Match → WARN with suggested rephrase. WARN-only so existing tickets still validate.
+
+### Explicit Jira Dependency Links (G7 — v3.12.2)
+
+> **Rule:** When Technical Reference / Scope / AC mentions another ticket (e.g. `{{PROJECT_KEY}}-XXX`) as a dependency, reuse, or blocker, the reference MUST render as a Jira `inlineCard` (machine-linkable), not as plain text. Prose-only references do not show up in Jira's Issue Links panel and slip past agents browsing the dependency graph.
+
+**Jira link types to use (set via `acli jira workitem link` after creation):**
+
+| Relationship | Link type | Example |
+| --- | --- | --- |
+| This ticket depends on another shipping first | `Is blocked by` | Slice B `Is blocked by` Slice A |
+| This ticket blocks another | `Blocks` | Shared-service upgrade blocks consumer slices |
+| Loose dependency / shared context | `Relates to` | {{PROJECT_KEY}}-182 `Relates to` {{PROJECT_KEY}}-183 (paired epic) |
+| Runtime dependency (data/service) | `Depends on` | Feature slice `Depends on` platform slice |
+
+**ADF pattern (REQUIRED when {{PROJECT_KEY}}-XXX appears in description text):**
+
+```json
+{"type": "inlineCard", "attrs": {"url": "https://{{JIRA_SITE}}/browse/TP-XXX"}}
+```
+
+**Forbidden pattern:** `{"type": "text", "text": "reuse from {{PROJECT_KEY}}-XXX"}` — not linked, not indexable, violates G7.
+
+**Enforcement:** validator `T10` (WARN-level, Epic + Task) — scans `text` nodes for `TP-\d+` regex; if the key does not appear on the same paragraph as a matching `inlineCard` URL, WARN. Note: validator operates on ADF only — it cannot verify the actual Jira issue link was created. Add the link via `acli jira workitem link --key SRC --target DST --type "Blocks"` after creation.
+
+**Authoring rule:** ทุกการ mention `{{PROJECT_KEY}}-XXX` ใน description → ต้องเป็น `inlineCard` + ต้องสร้าง Jira link type ที่เหมาะสม (`Blocks` / `Is blocked by` / `Relates to` / `Depends on`). Plain text reference = broken dependency graph.
+
 ### Shared Resource Declaration (G5 — v3.12.1)
 
 > **Rule:** When Epic's slices (or slices across paired Epics) will touch the same shared component (helper, service, util, shared model), Epic description MUST declare it in a `Shared Resources` subsection under Technical Reference zone. This feeds the [Shared Resource Coordination pattern](vertical-slice-guide.md#shared-resource-coordination) at slice level.

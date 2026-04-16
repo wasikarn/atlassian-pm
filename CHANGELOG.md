@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.2] - 2026-04-16
+
+### Added
+
+- **`scripts/lib/adf_validator.py`** — six new WARN-level checks closing proactive prevention gaps (G7-G12). Unlike v3.12.1 (which closed audit-reactive gaps found in {{PROJECT_KEY}}-183), v3.12.2 closes gaps identified through proactive analysis before they cause future incidents:
+  - `T10: Explicit Jira Dependency Links` (Epic + Task) — warns when `{{PROJECT_KEY}}-XXX` appears as plain text without an accompanying `inlineCard` URL. Jira's Issue Links panel only picks up `inlineCard` references; prose-only mentions leave the dependency graph blind. New constant `JIRA_KEY_IN_TEXT_RE`.
+  - `T11: Estimate Declaration` (Task-only) — warns when Task description lacks an `Estimate` / `ประมาณการ` section or Story Points mention. Forces explicit size reasoning inline (not only via Jira field that's easy to skip).
+  - `T12: Paired-Epic Regression ACs` (Epic + Task) — when description references another TP-key (via `inlineCard` or plain text), AC section must mention that key at least once as a regression marker. Prevents silent cross-boundary behavior between paired epics.
+  - `T13: Code Reference Format` (Epic + Task) — warns when inline `code`-marked text is a bare method call (`handle()`, `run()`, `process()`) without a class prefix. Ambiguous across sibling tickets; suggests `ClassName.method()` or full path form. New constant `BARE_METHOD_RE`.
+  - `T14: Vague AC Phrase Scan` (Epic + Task) — scans AC / `เงื่อนไขที่ต้องผ่าน` / done-criteria / fix-criteria sections for a dictionary of non-testable phrases (`should work correctly`, `ทำงานได้ดี`, `user-friendly`, `as expected`, etc.). Suggests Given/When/Then rephrase. New constant `VAGUE_AC_PHRASES`.
+  - `T15: Out of Scope Required for Slices` (Task-only) — when Task title contains vertical-slice markers (`Slice A/B/C`, `vs1-`, `vs-enabler-`) or labels include `vs*`, requires an `Out of Scope` / `ไม่รวมงานนี้` section. Forces explicit sibling-slice boundary at creation time. New constant `SLICE_MARKER_RE`.
+- **`references/templates-epic.md`** — three new subsections under pair/shared guidance:
+  - `Regression ACs for Paired Epics` (G9) — documents the mirrored-regression-AC rule matching T12.
+  - `AC Quality Rules (INVEST-T: Testable)` (G11) — vague-phrase dictionary + Given/When/Then rewrite examples matching T14.
+  - `Explicit Jira Dependency Links` (G7) — `inlineCard` pattern + link-type matrix (`Blocks` / `Is blocked by` / `Relates to` / `Depends on`) matching T10.
+- **`references/templates-task.md`** — five new rule sections:
+  - `Estimate Declaration` (G8) — `ประมาณการ` H2 pattern with SP + days + confidence table matching T11.
+  - `Out of Scope REQUIRED for Vertical Slices` (G12) — explicit boundary declaration for slices matching T15.
+  - `Regression ACs for Paired-Epic Slices` (G9) — mirrors Epic-level rule at slice granularity.
+  - `AC Quality Rules (INVEST-T: Testable)` (G11) — vague-phrase list matching T14.
+  - `Explicit Jira Dependency Links` (G7) — `inlineCard` rule + post-create `acli jira workitem link` command matching T10.
+- **`references/templates-core.md`** — new `Code Reference Format` section (G10) — canonical shapes for code references (full path / class.method / bare function) matching T13.
+- **`scripts/tests/test_adf_validator.py`** — 29 new tests across six classes (`TestT10ExplicitJiraLinks`, `TestT11Estimate`, `TestT12PairedEpicRegression`, `TestT13CodeReferenceFormat`, `TestT14VagueAcPhrases`, `TestT15OutOfScopeForSlice`) + updated `test_epic_check_count` (13→17) and `test_task_check_count` (12→18).
+
+### Changed
+
+- **`scripts/lib/adf_validator.py`** — class docstring updated; Epic now has 17 checks (T1-T10, T12-T14 + E1-E4), Task now has 18 checks (T1-T8, T10-T15 + TK1-TK4). T10-T15 are WARN-only so existing tickets still pass at 90% threshold.
+- **`README.md`** — version badge refreshed from stale `3.10.4` to `3.12.2`.
+
+### Rationale
+
+v3.12.1 closed six gaps surfaced during the {{PROJECT_KEY}}-183 audit (audit-reactive). v3.12.2 closes six gaps identified through proactive analysis — patterns that *could* cause future incidents but haven't broken any specific ticket yet. The distinction matters: reactive fixes close a known wound; proactive fixes prevent a wound from opening.
+
+- **G7 — Jira dependency links visible in UI (T10)** — slices reference siblings via prose ("reuse from {{PROJECT_KEY}}-XXX") instead of `inlineCard`. Dev looking at the slice in Jira UI can't see the dependency because it doesn't appear in the Issue Links panel. Forcing `inlineCard` + an actual Jira link type keeps the dependency graph authoritative.
+- **G8 — inline effort declaration (T11)** — Jira Story Points field is easy to skip when creating a ticket. Requiring a `ประมาณการ` section in the description forces explicit size reasoning AND surfaces scope creep when slices grow past 5 SP.
+- **G9 — regression ACs for paired epics (T12)** — paired epics ({{PROJECT_KEY}}-182 route-to-review ↔ {{PROJECT_KEY}}-183 auto-decision) rely on each side guarding the other's scope path. Without mirrored regression ACs, a slice can silently absorb sibling scope at implementation time.
+- **G10 — canonical code reference format (T13)** — same code path written as `AiMediaAnalysisJob.handle()` in one ticket and `handle()` in a sibling breaks grep-based cross-reference. Bare `handle()` is especially ambiguous (which class?). Canonical shapes keep QA and Dev grep-searches authoritative.
+- **G11 — vague AC phrases break INVEST-T (T14)** — phrases like "should work correctly" / "ทำงานได้ดี" are not testable. QA cannot write a pass/fail case from them. A static dictionary scan catches these before creation.
+- **G12 — Out of Scope surfaces boundary decisions (T15)** — slices without an explicit `Out of Scope` section implicitly absorb sibling scope at implementation time. Forcing the author to list what's NOT in scope exposes overlap at creation time.
+
+### Migration
+
+- No breaking changes. T10-T15 are WARN-only and do not affect pass/fail at the 90% threshold.
+- Existing Epics and Tasks continue to validate. Recommended-with-grace-period:
+  - `{{PROJECT_KEY}}-XXX` mentions should migrate from plain text to `inlineCard` during next edit.
+  - New vertical slices should include `Out of Scope` + `Estimate` sections from creation.
+  - Paired-epic tasks should add regression ACs at next edit.
+  - AC sections with vague phrases should rephrase to Given/When/Then during next refinement pass.
+
+### Notes
+
+- Validator test suite grew from 91 → 120 passing tests.
+- `scripts/api/validate_adf.py` CLI unchanged; existing `--type epic` / `--type task` invocations automatically pick up T10-T15.
+- This release is PROACTIVE (not audit-reactive) — it closes gaps found through analysis before a specific ticket breaks, distinguishing it from v3.12.0 (systemic gaps after {{PROJECT_KEY}}-182 incident) and v3.12.1 ({{PROJECT_KEY}}-183 audit findings).
+
 ## [3.12.1] - 2026-04-16
 
 ### Added

@@ -52,6 +52,107 @@ If the slice genuinely needs no new/changed tests (rare — usually only for doc
 - [ ] Test file path matches the slice's feature scope (e.g. `tests/integration/ai-review/slice-a-single-owner.spec.ts`)
 - [ ] If sibling Slice A declares `CREATE tests/...` → Slice B must also declare something; missing = inconsistency warning
 
+### Estimate Declaration (G8 — v3.12.2)
+
+> **Rule:** Every Task/slice MUST declare an effort estimate in the description body (not only in the Jira `Story Points` field, which is easy to skip). Explicit `Estimate` section forces the author to reason about size before creation.
+
+**Template pattern (add as H2 `ประมาณการ` / `Estimate`):**
+
+```markdown
+## ประมาณการ (Estimate)
+
+| Story Points | Days | Confidence |
+| --- | --- | --- |
+| 3 | 1-2 | High |
+```
+
+**Anti-pattern:** Slice with `8+ story points` or `> 5 days` → likely needs SPIDR split; reason in description or split before creation. A 13-SP slice signals scope creep almost every time.
+
+**Enforcement:** validator `T11` (WARN-level, Task) — WARN when Task description lacks an `Estimate` / `ประมาณการ` section OR declares `≥ 8` story points without a `split-justified` note. WARN-only so existing tickets still validate.
+
+**Authoring checklist:**
+
+- [ ] `Estimate` section in description (not only Jira field)?
+- [ ] Story points ≤ 5 OR explicit justification for larger size?
+- [ ] Days range matches story points (rough rule: 1 SP ≈ half-day)?
+
+### Out of Scope REQUIRED for Vertical Slices (G12 — v3.12.2)
+
+> **Rule:** Tasks that are vertical slices (indicated by `vs{N}-*` label, `Slice [A-Z]` in title, or explicit slice marker) MUST include an `Out of Scope` / `ไม่รวมงานนี้` section. Without it, scope creep + sibling-slice boundary collisions slip past review.
+
+**Template pattern:**
+
+```markdown
+## ไม่รวมงานนี้ (Out of Scope)
+
+- Scope belongs to sibling slice (TP-YYY): [what belongs there]
+- Scope belongs to paired epic (TP-ZZZ): [what belongs there]
+- Deferred to future slice (TP-WWW or undefined): [what + why deferred]
+```
+
+**Why:** {{PROJECT_KEY}}-196 / {{PROJECT_KEY}}-197 restructure uncovered that slices without an explicit `Out of Scope` section implicitly absorbed sibling scope at implementation time. Forcing the author to list what's NOT in scope surfaces overlap at creation time — QA and reviewers see the boundary decision instead of inferring it.
+
+**Enforcement:** validator `T15` (WARN-level, Task) — when Task title contains `Slice [A-Z]`, `vs\d+-`, or labels include `vs*`, require `Out of Scope` / `ไม่รวมงานนี้` section. Missing → WARN.
+
+**Authoring checklist:**
+
+- [ ] Slice markers detected (title contains `Slice A/B/C` or `vs1-*` / `vs-enabler-*`)?
+- [ ] `ไม่รวมงานนี้` / `Out of Scope` section present with ≥ 1 explicit item?
+- [ ] Each out-of-scope item cites a sibling TP-key or a "deferred" marker (no silent omissions)?
+
+### Regression ACs for Paired-Epic Slices (G9 — v3.12.2)
+
+> **Rule:** When this slice's parent Epic is paired with another Epic (declared via parent Epic's Coverage Matrix `Related Epic(s)` column), the slice MUST include at least one regression AC guarding the paired Epic's scope path.
+
+**Template addition (inside `เงื่อนไขที่ต้องผ่าน`):**
+
+```markdown
+- ❌ AC_N: regression — [paired-Epic scope path] does NOT trigger this slice's new behavior
+  (Paired Epic: TP-ZZZ. Example: "auto-approve case ไม่ trigger review request")
+```
+
+**Enforcement:** validator `T12` (WARN-level, Task) — when description references a paired-epic key via inlineCard OR text, validator expects the AC section to contain that key at least once (regression marker). Missing → WARN.
+
+### AC Quality Rules (G11 — INVEST-T: Testable)
+
+> **Rule:** Same as templates-epic — every AC must be testable. Vague phrases break INVEST-T.
+
+**❌ Vague phrases to avoid:**
+
+- `should work correctly` / `works correctly` / `works properly`
+- `ทำงานได้ดี` / `ทำงานถูกต้อง` / `ทำงานเหมาะสม`
+- `handle properly` / `handles correctly`
+- `จัดการได้` / `จัดการถูกต้อง`
+- `user-friendly` / `ใช้งานง่าย`
+- `perform well` / `ทำงานเร็ว`
+- `as expected` / `ตามที่คาดหวัง`
+
+**✅ Testable phrasing:** `Given X, When Y, Then Z` with observable outcome, specific values, time bounds, or visible UI state.
+
+**Enforcement:** validator `T14` (WARN-level, Task) scans AC panels / `เงื่อนไขที่ต้องผ่าน` / `fix criteria` sections for vague phrases → WARN with rephrase hint.
+
+### Explicit Jira Dependency Links (G7 — v3.12.2)
+
+> **Rule:** Any {{PROJECT_KEY}}-XXX mention in Task description MUST use `inlineCard` (not plain text) AND have a corresponding Jira issue link (`Blocks` / `Is blocked by` / `Relates to` / `Depends on`) set via `acli jira workitem link`.
+
+**Why:** Prose-only references like `"reuse from {{PROJECT_KEY}}-196"` don't appear in Jira's Issue Links panel. Dev looking at the slice in Jira UI misses the dependency. `inlineCard` renders as a preview card and feeds Jira's dependency graph.
+
+**ADF pattern (REQUIRED when {{PROJECT_KEY}}-XXX appears in description):**
+
+```json
+{"type": "inlineCard", "attrs": {"url": "https://{{JIRA_SITE}}/browse/TP-XXX"}}
+```
+
+**After create, set the actual Jira link:**
+
+```bash
+acli jira workitem link --key {{PROJECT_KEY}}-200 --target {{PROJECT_KEY}}-197 --type "Is blocked by"
+```
+
+**Enforcement:** validator `T10` (WARN-level, Task) — WARN when `TP-\d+` text appears without a sibling `inlineCard` URL in same section.
+
+**Authoring rule:** ทุก {{PROJECT_KEY}}-XXX ใน description body → ต้องเป็น `inlineCard` + ต้องสร้าง Jira link ตาม semantics (`Is blocked by` ถ้า sibling ต้อง merge ก่อน, `Relates to` ถ้าเป็น paired epic ทั่วไป).
+
 **Jira Fields (set after create via MCP `jira_update_issue`):**
 
 | Field | Jira ID | Value | Required |

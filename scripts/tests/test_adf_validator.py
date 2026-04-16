@@ -735,15 +735,17 @@ class TestFullValidation:
 
     def test_epic_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "epic")
-        # v3.12.1: T7 (canonical disambig), T8 (decision-path qualifier), T9 (bilateral
-        # Epic ref) added as WARN-only. T1-T9 + E1-E4 = 13.
-        assert len(report.checks) == 13
+        # v3.12.2: T10 (explicit Jira links), T12 (paired-epic regression),
+        # T13 (code reference), T14 (vague AC phrases) added for Epic.
+        # T11 + T15 are Task-only. T9 is Epic-only.
+        # T1-T10 + T12-T14 + E1-E4 = 17.
+        assert len(report.checks) == 17
 
     def test_task_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "task")
-        # v3.12.1: T7 (canonical disambig) + T8 (decision-path qualifier) added for task.
-        # T9 is Epic-only. T1-T8 + TK1-TK4 = 12.
-        assert len(report.checks) == 12
+        # v3.12.2: T10, T12, T13, T14 + T11 (Estimate), T15 (Out of Scope) added for Task.
+        # T9 is Epic-only. T1-T8 + T10-T15 + TK1-TK4 = 18.
+        assert len(report.checks) == 18
 
     def test_qa_check_count(self):
         report = self.v.validate(_doc(_paragraph(_text("x"))), "qa")
@@ -985,3 +987,354 @@ class TestT9BilateralEpicRef:
         report = self.v.validate(adf, "epic", wrapper)
         t9 = next(c for c in report.checks if c.check_id == "T9")
         assert t9.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T10: Explicit Jira Dependency Links (v3.12.2 — G7)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT10ExplicitJiraLinks:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_no_tp_keys_passes(self):
+        adf = _doc(_paragraph(_text("plain description")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t10 = next(c for c in report.checks if c.check_id == "T10")
+        assert t10.status == CheckStatus.PASS
+
+    def test_plain_text_tp_key_warns(self):
+        adf = _doc(_paragraph(_text("reuse from TP-196 helper")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t10 = next(c for c in report.checks if c.check_id == "T10")
+        assert t10.status == CheckStatus.WARN
+        assert "TP-196" in t10.message
+
+    def test_inline_card_tp_key_passes(self):
+        adf = _doc(
+            _paragraph(
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-196"}},
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t10 = next(c for c in report.checks if c.check_id == "T10")
+        assert t10.status == CheckStatus.PASS
+
+    def test_t10_never_fails(self):
+        adf = _doc(_paragraph(_text("TP-1 TP-2 TP-3 TP-4")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t10 = next(c for c in report.checks if c.check_id == "T10")
+        assert t10.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T11: Estimate Declaration (v3.12.2 — G8, Task-only)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT11Estimate:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_missing_estimate_warns(self):
+        adf = _doc(_heading("Context"), _paragraph(_text("no estimate")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t11 = next(c for c in report.checks if c.check_id == "T11")
+        assert t11.status == CheckStatus.WARN
+
+    def test_estimate_section_passes(self):
+        adf = _doc(
+            _heading("ประมาณการ (Estimate)"),
+            _paragraph(_text("3 SP, 1-2 days")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t11 = next(c for c in report.checks if c.check_id == "T11")
+        assert t11.status == CheckStatus.PASS
+
+    def test_story_points_mention_passes(self):
+        adf = _doc(_paragraph(_text("This slice is 3 Story Points of work")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t11 = next(c for c in report.checks if c.check_id == "T11")
+        assert t11.status == CheckStatus.PASS
+
+    def test_t11_only_runs_for_task(self):
+        adf = _doc(_paragraph(_text("x")))
+        report = self.v.validate(adf, "epic", {"projectKey": "TP", "type": "Epic", "summary": "x"})
+        assert all(c.check_id != "T11" for c in report.checks)
+        report = self.v.validate(adf, "task", {"projectKey": "TP", "type": "Task", "summary": "x"})
+        assert any(c.check_id == "T11" for c in report.checks)
+
+
+# ═══════════════════════════════════════════════════════════
+# T12: Paired-Epic Regression ACs (v3.12.2 — G9)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT12PairedEpicRegression:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_no_paired_key_passes(self):
+        adf = _doc(_heading("Acceptance Criteria"), _paragraph(_text("happy path AC")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t12 = next(c for c in report.checks if c.check_id == "T12")
+        assert t12.status == CheckStatus.PASS
+        assert "N/A" in t12.message
+
+    def test_paired_key_without_ac_mention_warns(self):
+        adf = _doc(
+            _paragraph(
+                _text("Paired with "),
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("AC1 happy path only")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t12 = next(c for c in report.checks if c.check_id == "T12")
+        assert t12.status == CheckStatus.WARN
+        assert "TP-183" in t12.message
+
+    def test_paired_key_with_ac_mention_passes(self):
+        adf = _doc(
+            _paragraph(
+                _text("Paired with "),
+                {"type": "inlineCard", "attrs": {"url": "https://x.atlassian.net/browse/TP-183"}},
+            ),
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("AC3 regression: TP-183 auto-approve does NOT trigger review")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t12 = next(c for c in report.checks if c.check_id == "T12")
+        assert t12.status == CheckStatus.PASS
+
+    def test_t12_never_fails(self):
+        adf = _doc(
+            _paragraph(_text("TP-183 TP-184 TP-185")),
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("nothing")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t12 = next(c for c in report.checks if c.check_id == "T12")
+        assert t12.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T13: Code Reference Format (v3.12.2 — G10)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT13CodeReferenceFormat:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_bare_method_warns(self):
+        adf = _doc(_paragraph(_text("Call "), _text("handle()", marks=[{"type": "code"}])))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t13 = next(c for c in report.checks if c.check_id == "T13")
+        assert t13.status == CheckStatus.WARN
+        assert "handle()" in t13.message
+
+    def test_class_method_passes(self):
+        adf = _doc(
+            _paragraph(
+                _text("Call "),
+                _text("AiMediaAnalysisJob.handle()", marks=[{"type": "code"}]),
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t13 = next(c for c in report.checks if c.check_id == "T13")
+        assert t13.status == CheckStatus.PASS
+
+    def test_full_path_passes(self):
+        adf = _doc(
+            _paragraph(
+                _text("Edit "),
+                _text("app/Jobs/Foo.ts:Foo.handle()", marks=[{"type": "code"}]),
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t13 = next(c for c in report.checks if c.check_id == "T13")
+        assert t13.status == CheckStatus.PASS
+
+    def test_no_code_marks_passes(self):
+        adf = _doc(_paragraph(_text("plain text handle() in prose")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t13 = next(c for c in report.checks if c.check_id == "T13")
+        assert t13.status == CheckStatus.PASS
+
+    def test_t13_never_fails(self):
+        adf = _doc(
+            _paragraph(
+                _text("run()", marks=[{"type": "code"}]),
+                _text("handle()", marks=[{"type": "code"}]),
+            ),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t13 = next(c for c in report.checks if c.check_id == "T13")
+        assert t13.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T14: Vague AC Phrase Scan (v3.12.2 — G11)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT14VagueAcPhrases:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_no_ac_section_passes_na(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t14 = next(c for c in report.checks if c.check_id == "T14")
+        assert t14.status == CheckStatus.PASS
+
+    def test_testable_ac_passes(self):
+        adf = _doc(
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("Given 3 owners, When AI starts, Then all 3 get notification in 5s")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t14 = next(c for c in report.checks if c.check_id == "T14")
+        assert t14.status == CheckStatus.PASS
+
+    def test_vague_phrase_english_warns(self):
+        adf = _doc(
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("System should work correctly in all cases")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t14 = next(c for c in report.checks if c.check_id == "T14")
+        assert t14.status == CheckStatus.WARN
+
+    def test_vague_phrase_thai_warns(self):
+        adf = _doc(
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("ระบบต้องทำงานได้ดีในทุก scenario")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t14 = next(c for c in report.checks if c.check_id == "T14")
+        assert t14.status == CheckStatus.WARN
+
+    def test_t14_never_fails(self):
+        adf = _doc(
+            _heading("Acceptance Criteria"),
+            _paragraph(_text("should work handles properly user-friendly ทำงานได้ดี as expected")),
+        )
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "x", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t14 = next(c for c in report.checks if c.check_id == "T14")
+        assert t14.status != CheckStatus.FAIL
+
+
+# ═══════════════════════════════════════════════════════════
+# T15: Out of Scope Required for Slices (v3.12.2 — G12, Task-only)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestT15OutOfScopeForSlice:
+    def setup_method(self):
+        self.v = AdfValidator()
+
+    def test_non_slice_title_passes_na(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {"projectKey": "TP", "type": "Task", "summary": "Add CSV export endpoint", "description": adf}
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status == CheckStatus.PASS
+        assert "N/A" in t15.message
+
+    def test_slice_title_without_oos_warns(self):
+        adf = _doc(_heading("Context"), _paragraph(_text("no oos")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice A — single owner notification",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status == CheckStatus.WARN
+
+    def test_vs_label_without_oos_warns(self):
+        adf = _doc(_heading("Context"), _paragraph(_text("no oos")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "vs1-skeleton — first slice",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status == CheckStatus.WARN
+
+    def test_slice_with_thai_oos_passes(self):
+        adf = _doc(
+            _heading("ไม่รวมงานนี้ (Out of Scope)"),
+            _paragraph(_text("Belongs to TP-200")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice B — multi-owner",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status == CheckStatus.PASS
+
+    def test_slice_with_english_oos_passes(self):
+        adf = _doc(
+            _heading("Out of Scope"),
+            _paragraph(_text("Belongs to TP-200")),
+        )
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice B — multi-owner",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status == CheckStatus.PASS
+
+    def test_t15_only_runs_for_task(self):
+        adf = _doc(_paragraph(_text("x")))
+        report = self.v.validate(adf, "epic", {"projectKey": "TP", "type": "Epic", "summary": "Slice A"})
+        assert all(c.check_id != "T15" for c in report.checks)
+        report = self.v.validate(adf, "task", {"projectKey": "TP", "type": "Task", "summary": "Slice A"})
+        assert any(c.check_id == "T15" for c in report.checks)
+
+    def test_t15_never_fails(self):
+        adf = _doc(_paragraph(_text("x")))
+        wrapper = {
+            "projectKey": "TP",
+            "type": "Task",
+            "summary": "Slice A — no oos section at all",
+            "description": adf,
+        }
+        report = self.v.validate(adf, "task", wrapper)
+        t15 = next(c for c in report.checks if c.check_id == "T15")
+        assert t15.status != CheckStatus.FAIL

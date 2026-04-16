@@ -50,6 +50,36 @@ CANONICAL_DISAMBIG_RE = re.compile(r"^scope\s+disambiguation(?:\s*[—:\-].*)?$"
 # T9: Jira issue key pattern inside inlineCard URLs (v3.12.1 — G6 bilateral ref rule).
 JIRA_KEY_IN_URL_RE = re.compile(r"/browse/([A-Z][A-Z0-9]+-\d+)")
 
+# T10: Jira key in plain text — detects `TP-XXX` appearing as text not wrapped in inlineCard.
+JIRA_KEY_IN_TEXT_RE = re.compile(r"\b([A-Z][A-Z0-9]+-\d+)\b")
+
+# T11: Vertical slice markers in Task title — `Slice A`, `vs1-`, `vs-enabler-`.
+SLICE_MARKER_RE = re.compile(r"(?:\bSlice\s+[A-Z]\b|\bvs\d+-|\bvs-enabler-)", re.IGNORECASE)
+
+# T13: Bare method-call pattern: `handle()`, `run()`, `process()` — no class prefix.
+# Matches inline code text that is a lowercase-initial word followed by `()` with nothing else.
+BARE_METHOD_RE = re.compile(r"^[a-z][a-zA-Z0-9_]*\(\)$")
+
+# T14: Vague AC phrase dictionary (G11 INVEST-T).
+VAGUE_AC_PHRASES: tuple[str, ...] = (
+    "should work",
+    "works correctly",
+    "works properly",
+    "ทำงานได้ดี",
+    "ทำงานถูกต้อง",
+    "ทำงานเหมาะสม",
+    "handle properly",
+    "handles correctly",
+    "จัดการได้",
+    "จัดการถูกต้อง",
+    "user-friendly",
+    "ใช้งานง่าย",
+    "perform well",
+    "ทำงานเร็ว",
+    "as expected",
+    "ตามที่คาดหวัง",
+)
+
 # G3: Decision-path verbs that need an explicit qualifier (auto- / manual- / admin-)
 # when they appear in slice/task titles. Documented in templates-task.md + templates-epic.md.
 DECISION_PATH_VERBS = frozenset({
@@ -284,15 +314,20 @@ class AdfValidator:
     Checks by issue type:
         Story:   T1-T5 (technical) + S1-S6 (quality)                     = 11 checks
         Subtask: T1-T5 (technical) + ST1-ST5 (quality)                   = 10 checks
-        Epic:    T1-T9 (T6-T9 WARN-only) + E1-E4                          = 13 checks
+        Epic:    T1-T10, T12, T13, T14 (T6-T14 WARN-only) + E1-E4         = 17 checks
         QA:      T1-T5 (technical) + QA1-QA5 (quality)                   = 10 checks
-        Task:    T1-T8 (T6-T8 WARN-only) + TK1-TK4                        = 12 checks
+        Task:    T1-T8, T10-T15 (T6-T15 WARN-only) + TK1-TK4               = 18 checks
 
-    T6-T9 are WARN-only so they cannot break existing tickets — scoring still permits
+    T6-T15 are WARN-only so they cannot break existing tickets — scoring still permits
     PASS at 90% threshold.
 
     v3.12.1 (G1/G2/G6): T7 canonical Scope Disambiguation heading, T8 decision-path
     qualifier, T9 bilateral Epic reference rule added for Epic/Task types.
+
+    v3.12.2 (G7-G12): T10 explicit Jira dependency links (inlineCard for TP-keys),
+    T11 Estimate section (Task-only), T12 paired-epic regression AC (Task-only),
+    T13 code reference format (bare method check), T14 vague AC phrase scan,
+    T15 Out of Scope required for vertical slices (Task-only).
 
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
@@ -330,6 +365,18 @@ class AdfValidator:
             report.checks.append(self._check_t8_decision_path_qualifier(wrapper))
         if issue_type == "epic":
             report.checks.append(self._check_t9_bilateral_epic_ref(adf))
+
+        # v3.12.2 (G7-G12): T10-T15 WARN-only checks.
+        # T10 (explicit Jira links), T12 (paired-epic regression), T13 (code reference format),
+        # T14 (vague AC phrases) — Epic + Task. T11 (Estimate) + T15 (Out of Scope) — Task only.
+        if issue_type in ("epic", "task"):
+            report.checks.append(self._check_t10_explicit_jira_links(adf))
+            report.checks.append(self._check_t12_paired_epic_regression(adf, _secs))
+            report.checks.append(self._check_t13_code_reference_format(adf))
+            report.checks.append(self._check_t14_vague_ac_phrases(adf, _secs))
+        if issue_type == "task":
+            report.checks.append(self._check_t11_estimate(adf, _secs))
+            report.checks.append(self._check_t15_out_of_scope_for_slice(adf, wrapper))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
@@ -727,6 +774,232 @@ class AdfValidator:
             )
 
         return CheckResult("T9", CheckStatus.PASS, f"Bilateral refs documented for {sorted(set(referenced_keys))}")
+
+    # ───────────────────────────────────────────────────────
+    # v3.12.2 Proactive Prevention Checks (T10–T15, all WARN-only)
+    # ───────────────────────────────────────────────────────
+
+    def _check_t10_explicit_jira_links(self, adf: dict) -> CheckResult:
+        """T10: Explicit Jira Dependency Links (WARN-level, v3.12.2 — G7).
+
+        When `TP-XXX` appears in description text (not inside inlineCard), warn — the
+        reference must use `inlineCard` so Jira renders a link preview + dependency
+        graph picks it up. Plain text references slip past reviewers and aren't
+        machine-checkable.
+
+        Validator operates on ADF only; it cannot confirm the actual Jira issue
+        link exists. This check only enforces the textual convention.
+        """
+        inline_cards = find_adf_nodes(adf, lambda n: n.get("type") == "inlineCard")
+        carded_keys: set[str] = set()
+        for card in inline_cards:
+            url = card.get("attrs", {}).get("url", "") or ""
+            m = JIRA_KEY_IN_URL_RE.search(url)
+            if m:
+                carded_keys.add(m.group(1))
+
+        plain_keys: set[str] = set()
+
+        def _scan_text(n: dict) -> None:
+            if n.get("type") == "text" and "text" in n and not has_code_mark(n) and not has_link_mark(n):
+                for match in JIRA_KEY_IN_TEXT_RE.finditer(n["text"]):
+                    plain_keys.add(match.group(1))
+
+        walk_adf(adf, _scan_text)
+
+        unlinked = sorted(plain_keys - carded_keys)
+        if not unlinked:
+            return CheckResult("T10", CheckStatus.PASS, f"Jira key references properly linked ({len(carded_keys)} cards)")
+
+        return CheckResult(
+            "T10",
+            CheckStatus.WARN,
+            f"Plain-text Jira key(s) {unlinked} not rendered as inlineCard — "
+            "dependency graph won't pick them up. Wrap each key in inlineCard AND "
+            "set a Jira link type (Blocks / Is blocked by / Relates to / Depends on).",
+            fix_hint="Replace {text: 'TP-XXX'} with inlineCard {url: '.../browse/TP-XXX'} "
+            "and run `acli jira workitem link --key SRC --target DST --type 'Blocks'`.",
+        )
+
+    def _check_t11_estimate(self, adf: dict, _secs: dict) -> CheckResult:
+        """T11: Estimate Declaration (WARN-level, Task-only, v3.12.2 — G8).
+
+        Task description should declare an estimate (Story Points + days) in a
+        dedicated section — not only via Jira field. Forces explicit size reasoning
+        + prevents scope creep (>8 SP slices signal split-needed).
+        """
+        full_text_lower = extract_text(adf).lower()
+
+        # Look for H2 heading with estimate-keyword, OR a table containing "story points" label.
+        headings = find_headings(adf, level=2)
+        heading_match = False
+        for h in headings:
+            h_text = extract_text(h).lower().strip()
+            if "estimate" in h_text or "ประมาณการ" in h_text:
+                heading_match = True
+                break
+
+        has_story_points = "story points" in full_text_lower or "story point" in full_text_lower
+
+        if heading_match or has_story_points:
+            return CheckResult("T11", CheckStatus.PASS, "Estimate declared in description")
+
+        return CheckResult(
+            "T11",
+            CheckStatus.WARN,
+            "No Estimate / ประมาณการ section in description — slice size not declared inline. "
+            "Add H2 'ประมาณการ (Estimate)' with story points + days table.",
+            fix_hint="Add section with `| Story Points | Days | Confidence |` table; "
+            "slices with 8+ SP should be split (SPIDR).",
+        )
+
+    def _check_t12_paired_epic_regression(self, adf: dict, _secs: dict) -> CheckResult:
+        """T12: Paired-Epic Regression ACs (WARN-level, v3.12.2 — G9).
+
+        When description references another Epic/Task via inlineCard, AC section
+        should mention that key at least once — a regression marker guarding the
+        paired-epic scope. Prevents silent cross-boundary behavior.
+        """
+        inline_cards = find_adf_nodes(adf, lambda n: n.get("type") == "inlineCard")
+        referenced_keys: set[str] = set()
+        for card in inline_cards:
+            url = card.get("attrs", {}).get("url", "") or ""
+            m = JIRA_KEY_IN_URL_RE.search(url)
+            if m:
+                referenced_keys.add(m.group(1))
+
+        # Also consider text-plain TP keys so we don't silently miss cases T10 flagged.
+        def _scan_plain_keys(n: dict) -> None:
+            if n.get("type") == "text" and "text" in n:
+                for match in JIRA_KEY_IN_TEXT_RE.finditer(n["text"]):
+                    referenced_keys.add(match.group(1))
+
+        walk_adf(adf, _scan_plain_keys)
+
+        if not referenced_keys:
+            return CheckResult("T12", CheckStatus.PASS, "T12 N/A (no paired-epic keys referenced)")
+
+        ac_section = (
+            _secs.get("acceptance criteria") or _secs.get("done criteria") or _secs.get("fix criteria") or []
+        )
+        ac_text = extract_text(ac_section) if ac_section else ""
+
+        referenced_in_ac = {k for k in referenced_keys if k in ac_text}
+        if referenced_in_ac:
+            return CheckResult(
+                "T12",
+                CheckStatus.PASS,
+                f"Regression AC(s) reference paired key(s) {sorted(referenced_in_ac)}",
+            )
+
+        return CheckResult(
+            "T12",
+            CheckStatus.WARN,
+            f"Description references paired key(s) {sorted(referenced_keys)} but AC section "
+            "does not mention them — add a regression AC (❌ prefix) guarding the paired scope.",
+            fix_hint="Add `❌ AC_N: regression — [paired-Epic scope] does NOT trigger this slice's behavior "
+            "(Paired: TP-XXX)` to Acceptance Criteria.",
+        )
+
+    def _check_t13_code_reference_format(self, adf: dict) -> CheckResult:
+        """T13: Code Reference Format (WARN-level, v3.12.2 — G10).
+
+        Inline `code`-marked text that looks like a bare method call (`handle()`,
+        `run()`, `process()`) without a class prefix is too ambiguous across
+        sibling tickets. Warn and suggest class.method() or full path form.
+        """
+        bare_methods: list[str] = []
+
+        def _scan(n: dict) -> None:
+            if n.get("type") != "text" or "text" not in n:
+                return
+            if not has_code_mark(n):
+                return
+            text = n["text"].strip()
+            if BARE_METHOD_RE.match(text):
+                bare_methods.append(text)
+
+        walk_adf(adf, _scan)
+
+        if not bare_methods:
+            return CheckResult("T13", CheckStatus.PASS, "Code references use class/path context")
+
+        sample = sorted(set(bare_methods))[:3]
+        return CheckResult(
+            "T13",
+            CheckStatus.WARN,
+            f"Bare method reference(s) in inline code: {sample} — add class prefix "
+            "(e.g. `AiMediaAnalysisJob.handle()`) or full path (`app/Jobs/Foo.ts:Foo.handle()`). "
+            "Bare `handle()` is ambiguous across sibling tickets.",
+            fix_hint="Change inline code `handle()` → `ClassName.handle()` or full path form "
+            "(see templates-core.md Code Reference Format).",
+        )
+
+    def _check_t14_vague_ac_phrases(self, adf: dict, _secs: dict) -> CheckResult:
+        """T14: Vague AC Phrase Scan (WARN-level, v3.12.2 — G11).
+
+        Scans AC / `เงื่อนไขที่ต้องผ่าน` / done-criteria / fix-criteria sections
+        for vague phrases that break INVEST-Testable. Warn with suggested rephrase.
+        """
+        sections_to_scan: list[dict] = []
+        for key in ("acceptance criteria", "done criteria", "fix criteria"):
+            sections_to_scan.extend(_secs.get(key, []) or [])
+
+        if not sections_to_scan:
+            return CheckResult("T14", CheckStatus.PASS, "T14 N/A (no AC section to scan)")
+
+        ac_text_lower = extract_text(sections_to_scan).lower()
+        matched: list[str] = [phrase for phrase in VAGUE_AC_PHRASES if phrase.lower() in ac_text_lower]
+
+        if not matched:
+            return CheckResult("T14", CheckStatus.PASS, "AC phrasing testable (no vague phrases)")
+
+        return CheckResult(
+            "T14",
+            CheckStatus.WARN,
+            f"Vague phrase(s) in AC section: {matched[:3]} — not testable. "
+            "Replace with Given/When/Then + specific values, time bounds, or observable UI state.",
+            fix_hint="Example rewrite: 'System handles properly' → "
+            "'Given X, When Y, Then Z (specific assertion with values)'.",
+        )
+
+    def _check_t15_out_of_scope_for_slice(self, adf: dict, wrapper: dict | None) -> CheckResult:
+        """T15: Out of Scope REQUIRED for Vertical Slices (WARN-level, Task-only, v3.12.2 — G12).
+
+        When Task title indicates it is a vertical slice (`Slice A/B/C`, `vs1-`,
+        `vs-enabler-`) or labels include `vs*`, the description MUST have an
+        `Out of Scope` / `ไม่รวมงานนี้` section to force explicit boundary decisions.
+        """
+        title = (wrapper or {}).get("summary", "") or ""
+        labels = (wrapper or {}).get("labels", []) or []
+
+        is_slice = bool(SLICE_MARKER_RE.search(title)) or any(
+            str(label).lower().startswith("vs") for label in labels
+        )
+
+        if not is_slice:
+            return CheckResult("T15", CheckStatus.PASS, "T15 N/A (not a vertical slice)")
+
+        headings = find_headings(adf, level=2)
+        has_oos_section = False
+        for h in headings:
+            h_text = extract_text(h).lower().strip()
+            if "out of scope" in h_text or "ไม่รวมงานนี้" in h_text or "ไม่รวม" in h_text:
+                has_oos_section = True
+                break
+
+        if has_oos_section:
+            return CheckResult("T15", CheckStatus.PASS, "Out of Scope section present for slice")
+
+        return CheckResult(
+            "T15",
+            CheckStatus.WARN,
+            f"Slice title '{title[:40]}' missing 'Out of Scope' / 'ไม่รวมงานนี้' section. "
+            "Vertical slices MUST list explicit boundary (sibling slice scope, paired-epic scope, "
+            "deferred work).",
+            fix_hint="Add H2 'ไม่รวมงานนี้ (Out of Scope)' with bullets citing sibling TP-keys "
+            "or 'deferred' markers (see templates-task.md G12 rule).",
+        )
 
     # ───────────────────────────────────────────────────────
     # Story Quality Checks (S1–S6)

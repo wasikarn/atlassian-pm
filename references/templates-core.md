@@ -59,6 +59,22 @@ Panels create visual emphasis beyond plain paragraphs. Use sparingly (1-2 per se
 
 Mark file paths, routes, functions: `{"type": "text", "text": "src/file.tsx", "marks": [{"type": "code"}]}`
 
+## Code Reference Format (G10 — v3.12.2)
+
+> **Rule:** When referencing code in `Technical Reference`, `Code Paths Covered`, or any Task/Epic description, use one of these canonical shapes. Bare method names are ambiguous across sibling tickets and break cross-ticket searchability.
+
+| Form | Example | When |
+| --- | --- | --- |
+| Full path | `app/Jobs/AiMediaAnalysisJob.ts:AiMediaAnalysisJob.handle()` | Preferred — anchors file + class + method |
+| Class + method | `AiMediaAnalysisJob.handle()` | When file path already stated in same row/sentence |
+| Class only | `AiMediaAnalysisJob` | Referring to the class as an entity, not a specific behavior |
+| Function only | `fooHelper()` | Module-level function (no enclosing class) — acceptable |
+| Bare method | ❌ `handle()` | Forbidden — too ambiguous across ticket bodies |
+
+**Enforcement:** validator `T13` (WARN-level, Epic + Task) warns when an inline `code`-marked text looks like a bare method call (e.g. `handle()`, `run()`, `process()`) without a class prefix. Either add the class (`AiMediaAnalysisJob.handle()`) or use the full path form.
+
+**Authoring rule:** copy-paste reveals lazy references — ถ้าเห็น bare `handle()` ใน inline code → เติม class name (`AiMediaAnalysisJob.handle()`) หรือ full path. ช่วย QA grep ได้จริงข้าม epic/ticket.
+
 ## Common Mistakes
 
 | Mistake | Fix |
