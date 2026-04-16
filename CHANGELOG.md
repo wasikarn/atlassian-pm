@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.1] - 2026-04-16
+
+### Documentation
+
+- **Post-3.15.0 consistency sweep** (`40c498c`) — marketplace.json + README.md badge bumped to 3.15.0 (missed by manual bump); dropped orphaned Theming section from `skills/utilities/apm-pretty-mermaid/references/DIAGRAM_TYPES.md`; fixed `--format` row in Options table; documented `--code` / `-c` inline input flag; softened 3 cross-repo references to private MEMORY.md files; removed dangling "empirical width table" reference in `references/templates-epic.md`.
+- **`references/ascii-box-drawing.md`** (new) — dedicated hand-draw palette reference with full Unicode tables (char + U+ codepoint + name) for each category:
+  - Single line (U+2500–U+253C)
+  - Heavy line full set (U+2501–U+254B): corners, T-junctions, cross
+  - Double line (U+2550–U+256C)
+  - Mixed single+double junctions (U+255E–U+256B) for mixing detail + architectural boundaries
+  - Arc corners (U+256D–U+2570): rounded alternatives for softer UI-style diagrams
+  - Dashed / dotted (U+2504–U+250B, U+254C–U+254F) for optional paths, feature-flag edges, pending integrations
+  - Shading / blocks (U+2580–U+25A0), arrows (U+25B6/U+2190s/U+21D2)
+  - Example patterns (simple box, horizontal connect, tree), stroke-weight rule, drawing tool pointers (MonoSketch, asciiflow.com, monodraw)
+- **`references/mermaid-guide.md`** — replaced earlier external gist link with a compact glyph list + pointer to `ascii-box-drawing.md` for the full tables. Self-contained, no external dependency.
+
+### Rationale
+
+Ship-able reference improvements that accumulated after 3.15.0. All docs-only, no behavior change. Inline palette makes the mermaid guide self-contained — gist deletions or URL changes no longer break the reference.
+
+### Migration
+
+- No migration required. Existing diagrams and skill invocations unchanged.
+
 ## [3.15.0] - 2026-04-16
 
 ### Changed

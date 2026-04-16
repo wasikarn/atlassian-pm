@@ -335,32 +335,17 @@ node skills/utilities/apm-pretty-mermaid/scripts/render.mjs \
 
 ## ASCII box-drawing palette (hand-draw reference)
 
-Use **Unicode code points**, not legacy Extended ASCII — portable across Jira/Confluence/GitHub/Slack/SSH.
+Full palette with Unicode code points + names + example patterns + drawing tools: **[`ascii-box-drawing.md`](ascii-box-drawing.md)**.
 
-**Single line (U+2500–U+253C):** `─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼` · heavy: `━ ┃`
+Quick glyph list for copy-paste:
 
-**Double line (U+2550–U+256C):** `═ ║ ╔ ╗ ╚ ╝ ╠ ╣ ╦ ╩ ╬`
+- Single line: `─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼`
+- Heavy line: `━ ┃ ┏ ┓ ┗ ┛ ┣ ┫ ┳ ┻ ╋`
+- Double line: `═ ║ ╔ ╗ ╚ ╝ ╠ ╣ ╦ ╩ ╬`
+- Mixed single+double junctions: `╞ ╟ ╡ ╢ ╤ ╥ ╧ ╨ ╪ ╫`
+- Arc corners: `╭ ╮ ╯ ╰`
+- Dashed / dotted: `┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ╌ ╍ ╎ ╏`
+- Shading / blocks: `░ ▒ ▓ █ ▄ ▀ ▌ ■`
+- Arrows: `▶ ◀ ▲ ▼ → ← ↑ ↓ ⇒`
 
-**Mixed single + double junctions (U+255E–U+256B):** `╞ ╟ ╡ ╢ ╤ ╥ ╧ ╨ ╪ ╫` — use when mixing single-line (detail) and double-line (architectural boundary) in the same diagram
-
-**Shading / blocks (U+2580–U+25A0):** `░ ▒ ▓ █ ▄ ▀ ▌ ■`
-
-**Arrows:** `▶ ◀ ▲ ▼` (triangles) · `→ ← ↑ ↓` (U+2190s) · `⇒` (double)
-
-**Example patterns:**
-
-```
-┌───┐          ┌───┐  ┌───┐          ┌───┐
-│   │          │   ├──┤   │          │   │
-└───┘          └───┘  └───┘          └─┬─┘
-                                        │
- simple box    horizontal connect       ▼
-                                      ┌───┐
-                                      │   │
-                                      └───┘
-                                      tree
-```
-
-**Stroke-weight rule:** use `─` (light) for routine edges, `━` (heavy) for emphasis, `═` (double) for architectural boundaries.
-
-**Drawing tools:** [MonoSketch](https://github.com/tuanchauict/MonoSketch) (free OSS GUI) · [asciiflow.com](https://asciiflow.com) (web) · `monodraw` (Mac, paid).
+**Rendering rule:** use Unicode code points, not legacy Extended ASCII — portable across Jira/Confluence/GitHub/Slack/SSH.
