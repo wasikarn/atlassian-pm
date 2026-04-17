@@ -38,7 +38,7 @@ request · process · handle · manage · review · check · trigger · send · 
 4. **คุณค่าทางธุรกิจ** — **3 bullets max**; ผลลัพธ์เป็นตัวเลข/พฤติกรรม ไม่ใช่ architecture
 5. **ลูกค้าเห็นอะไร?** — UX perspective; include Before vs After table + example notification copy (TH/EN titles เท่านั้น — i18n keys ไปที่ Technical Reference)
 6. **ขอบเขตงาน** — Included / Excluded bullets, **1 line/item**; user-observable features ("เพิ่มการแจ้งเตือน") ไม่ใช่ "สร้าง `AiFooNotifiable` class"; wrap key scope boundary in `panel` (info)
-7. **เงื่อนไขที่ต้องผ่าน** — Epic-level ACs เขียนเป็น observable outcome ("เจ้าของป้ายเห็น notification") ไม่ใช่ implementation detail ("ใช้ `whereIn` pattern")
+7. **เงื่อนไขที่ต้องผ่าน** — Dual-zone ACs: H3 "Acceptance Criteria — Business" (observable outcomes, no tech jargon) + H3 "Acceptance Criteria — Developer" (testable specs with SLA numbers, service names, Given/When/Then). Both zones REQUIRED for Epic. See [Dual-Zone AC Convention](#dual-zone-acceptance-criteria-convention-v3160) below.
 8. **ความเสี่ยงและวิธีรับมือ** — business impact language ("ป้ายหลายเจ้าของ อาจมีบางคนไม่ได้รับแจ้งเตือน") ไม่ใช่ code-level risk ("`findBy` returns first match"); `panel` (warning) highlighting High-impact + Risk/Impact/Mitigation table
 
 ### Scope Disambiguation Template (markdown preview of ADF output)
@@ -285,6 +285,77 @@ Epic B sibling slice ✅ `AI auto-decision` or `AI auto-อนุมัติ` �
 
 **Enforcement:** validator `T14` (WARN-level, Epic + Task) scans AC / `เงื่อนไขที่ต้องผ่าน` / `fix criteria` sections for vague phrase dictionary. Match → WARN with suggested rephrase. WARN-only so existing tickets still validate.
 
+### Dual-Zone Acceptance Criteria Convention (v3.16.0)
+
+> **Rule:** Every `เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)` H2 section MUST contain two H3 subsections. One zone for business/PM/QA audience — observable outcomes only. One zone for dev/QA/AI-agent audience — concrete, testable specs.
+
+#### Zone Definitions and Language Rules
+
+**H3 "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"**
+
+- bulletList of observable user outcomes
+- Language rule: NO implementation detail. Banned tokens: numeric SLA (`30s`, `p95`), service names (Pusher, S3, Redis, Kafka, SQS, SNS, RabbitMQ, Postgres, MySQL, MongoDB), patterns (async, fire-and-forget, debounce, throttle, dedupe, idempotent, retry, backoff, circuit-breaker), method/class names (`FooService.bar()`), field names (`{{START_DATE_FIELD}}`).
+- Outcomes only — what the user/PM observes.
+
+**H3 "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"**
+
+- bulletList of testable/executable specs
+- Language rule: MUST be concrete. SLA numbers allowed, service/channel names allowed, patterns allowed, test hooks allowed. Given/When/Then optional but encouraged.
+- Must reference corresponding Business AC IDs (e.g., `derived from B-AC1, B-AC2`).
+- Must have at least 1 bullet.
+
+#### Per-Type Requirement Matrix
+
+| Type | Business AC | Developer AC |
+| --- | --- | --- |
+| Epic | required | required |
+| Story | required | required |
+| Task | optional (required if user-facing) | required |
+| Subtask | inherit parent (skip) | required |
+| Bug | required (symptom + expected) | required (repro + fix acceptance) |
+| Chore / Tech-debt | optional | required |
+
+#### Cross-Reference Rule
+
+Developer AC items MUST cite the Business AC IDs they implement. Format: `Dev-AC1: [spec] (derived from B-AC1, B-AC2)`. This makes the mapping machine-readable for QA coverage tools.
+
+#### Worked Example (Epic — AI Review Notification)
+
+```markdown
+## เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)
+
+### Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)
+
+- B-AC1: Owner ได้รับคำขอ review อย่างรวดเร็วเมื่อ AI ต้องการความช่วยเหลือ
+- B-AC2: Owner สามารถตรวจสอบสถานะการแจ้งเตือนได้ทุกช่องทางที่ใช้งาน
+- B-AC3: เมื่อ owner ยืนยัน review แล้ว ระบบแสดงผลลัพธ์ให้ทันที
+
+### Acceptance Criteria — Developer (มุม dev/QA/AI agent)
+
+- Dev-AC1: Notification delivered within 30s p95 via in-app + email + Pusher channel `presence-review-{billboard_id}` (derived from B-AC1)
+- Dev-AC2: `notification_logs` table row created per owner; `status` = `sent` within 5s of trigger; idempotency key prevents duplicate delivery on retry (derived from B-AC1, B-AC2)
+- Dev-AC3: GET `/api/notifications?billboard_id=X` returns `200` with array including new entry within 1s of delivery (derived from B-AC2)
+- Dev-AC4: Given owner confirms review via POST `/api/reviews/{id}/confirm`, When response is `200`, Then `billboard_reviews.status` = `reviewed` and FE polling detects change within 2s (derived from B-AC3)
+```
+
+#### ADF Structure for Dual-Zone AC
+
+```json
+{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)"}]},
+{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"}]},
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC1: [observable user outcome — no tech jargon]"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC2: [observable user outcome]"}]}]}
+]},
+{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"}]},
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC1: [concrete spec with SLA/service/GWT] (derived from B-AC1)"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC2: [concrete spec] (derived from B-AC1, B-AC2)"}]}]}
+]}
+```
+
+**Enforcement:** validator `S8` (ERROR for missing required zone, WARN for language leaks) — see `scripts/lib/adf_validator.py _check_s8_dual_zone_ac`. Default mode is warn-only (grandfather mode) until `--dual-zone-strict` flag enabled in v3.17.0.
+
 ### Explicit Jira Dependency Links (G7 — v3.12.2)
 
 > **Rule:** When Technical Reference / Scope / AC mentions another ticket (e.g. `{{PROJECT_KEY}}-XXX`) as a dependency, reuse, or blocker, the reference MUST render as a Jira `inlineCard` (machine-linkable), not as plain text. Prose-only references do not show up in Jira's Issue Links panel and slip past agents browsing the dependency graph.
@@ -437,11 +508,18 @@ flowchart TD
         {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[Excluded 2]"}]}]}
       ]},
 
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน"}]},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)"}]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"}]},
       {"type": "bulletList", "content": [
-        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[AC 1 — high-level outcome, not implementation detail]"}]}]},
-        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[AC 2]"}]}]},
-        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[AC 3]"}]}]}
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC1: [observable user outcome — no service names, no SLA numbers, no patterns]"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC2: [observable user outcome]"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC3: [observable user outcome]"}]}]}
+      ]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"}]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC1: [concrete spec — SLA/service/GWT allowed] (derived from B-AC1)"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC2: [concrete spec] (derived from B-AC1, B-AC2)"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC3: [concrete spec] (derived from B-AC3)"}]}]}
       ]},
 
       {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "ความเสี่ยงและวิธีรับมือ"}]},
@@ -565,10 +643,16 @@ flowchart TD
         {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[Excluded 1]"}]}]}
       ]},
 
-      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน"}]},
+      {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)"}]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"}]},
       {"type": "bulletList", "content": [
-        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[AC 1 — high level]"}]}]},
-        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "[AC 2]"}]}]}
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC1: [observable user outcome — no service names, no SLA numbers, no patterns]"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC2: [observable user outcome]"}]}]}
+      ]},
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"}]},
+      {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC1: [concrete spec — SLA/service/GWT allowed] (derived from B-AC1)"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC2: [concrete spec] (derived from B-AC1, B-AC2)"}]}]}
       ]},
 
       {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "ความเสี่ยงและวิธีรับมือ"}]},

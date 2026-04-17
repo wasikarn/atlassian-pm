@@ -133,6 +133,54 @@ If the slice genuinely needs no new/changed tests (rare — usually only for doc
 
 **Enforcement:** validator `T14` (WARN-level, Task) scans AC panels / `เงื่อนไขที่ต้องผ่าน` / `fix criteria` sections for vague phrases → WARN with rephrase hint.
 
+### Dual-Zone Acceptance Criteria Convention (v3.16.0)
+
+> **Rule:** Task AC section MUST contain Developer AC zone. Business AC zone is optional but required when the task is user-facing (UI change, notification, user-visible behavior).
+
+**Per-type requirement (Task):**
+
+| Zone | Requirement |
+| --- | --- |
+| Business AC | optional (required if user-facing) |
+| Developer AC | required |
+
+**Language rules:**
+
+- Business zone: no SLA numbers, no service names (Pusher/S3/Redis), no patterns (async/retry/dedupe), no method names — observable outcomes only
+- Developer zone: SLA numbers, service names, patterns all allowed; Given/When/Then encouraged; must cite B-AC IDs when business zone present
+
+**Worked example:**
+
+```markdown
+## เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)
+
+### Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)
+
+- B-AC1: เจ้าของป้ายเห็นสถานะ "ส่งแจ้งเตือนแล้ว" ใน dashboard ทันที
+
+### Acceptance Criteria — Developer (มุม dev/QA/AI agent)
+
+- Dev-AC1: POST `/api/notifications` returns 201; `notification_logs` row `status=sent` within 5s (derived from B-AC1)
+- Dev-AC2: regression — Slice A happy path still returns 200 (no flag guard regression)
+```
+
+**ADF structure for Task dual-zone AC:**
+
+```json
+{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)"}]},
+{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"}]},
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "B-AC1: [observable user outcome — omit if non-user-facing task]"}]}]}
+]},
+{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"}]},
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC1: [concrete spec — Given/When/Then] (derived from B-AC1)"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Dev-AC2: regression — [related path] still works correctly"}]}]}
+]}
+```
+
+**Enforcement:** validator `S8` (WARN for missing developer zone, WARN for language leaks) — default grandfather mode until `--dual-zone-strict`.
+
 ### Explicit Jira Dependency Links (G7 — v3.12.2)
 
 > **Rule:** Any {{PROJECT_KEY}}-XXX mention in Task description MUST use `inlineCard` (not plain text) AND have a corresponding Jira issue link (`Blocks` / `Is blocked by` / `Relates to` / `Depends on`) set via `acli jira workitem link`.
@@ -179,7 +227,7 @@ acli jira workitem link --key {{PROJECT_KEY}}-200 --target {{PROJECT_KEY}}-197 -
 | Section | Required | Notes |
 | --- | --- | --- |
 | สิ่งที่ผู้ใช้ต้องการ | Yes | As a / I want / So that, or plain narrative |
-| เงื่อนไขที่ต้องผ่าน | Yes | Given/When/Then with ✅/⚠️/❌ prefix per AC |
+| เงื่อนไขที่ต้องผ่าน | Yes | Dual-zone: Business AC (optional, required if user-facing) + Developer AC (required). See [Dual-Zone AC Convention](templates-epic.md#dual-zone-acceptance-criteria-convention) |
 | ขอบเขตไฟล์ | Optional (AI) | Table: Action \| File path |
 | คำแนะนำการพัฒนา | Optional (AI/vibe) | Table: Field \| Value |
 

@@ -7,6 +7,19 @@ Scoring: pass=1, warn=0.5, fail=0. Overall >=90% = pass.
 Usage (via scripts/validate_adf.py):
     python validate_adf.py tasks/story.json --type story
     python validate_adf.py tasks/story.json --type story --fix
+    python validate_adf.py tasks/story.json --type story --dual-zone-strict
+
+Checks by issue type (v3.16.0):
+    Story:   T1-T5 + S1-S7, S8                                         = 13 checks
+    Subtask: T1-T5 + ST1-ST5                                           = 10 checks
+    Epic:    T1-T10, T12, T13, T14 + E1-E4 + S7, S8                   = 19 checks
+    QA:      T1-T5 + QA1-QA5                                           = 10 checks
+    Task:    T1-T8, T10-T16 + TK1-TK4 + S7, S8                        = 21 checks
+
+S7: Markdown-in-text scan (ERROR) — detects raw markdown syntax inside ADF text nodes.
+S8: Dual-zone AC check (ERROR for missing required zone; WARN for language leaks) —
+    verifies Business + Developer H3 zones present per per-type matrix.
+    Default mode: grandfather (warn-only). Strict mode: --dual-zone-strict.
 """
 
 import re
@@ -68,6 +81,51 @@ HARDENING_NOTE_RE = re.compile(
     r"no\s+flag\s*\(\s*hardening\s*\)|hardening\s+slice\s*[—:-]\s*no\s+flag|ไม่ใช้\s*flag\s*\(\s*hardening\s*\)",
     re.IGNORECASE,
 )
+
+# S7: Markdown-in-text patterns — ADF text nodes must NOT contain raw markdown syntax.
+# These patterns signal the agent emitted markdown prose instead of ADF structural blocks.
+MARKDOWN_IN_TEXT_PARA_BREAK_RE = re.compile(r"\n\n")
+MARKDOWN_IN_TEXT_TABLE_ROW_RE = re.compile(r"^\|.+\|", re.MULTILINE)
+MARKDOWN_IN_TEXT_BULLET_RE = re.compile(r"^[•\-\*] ", re.MULTILINE)
+MARKDOWN_IN_TEXT_HEADING_RE = re.compile(r"^#{1,6} ", re.MULTILINE)
+
+# S8: Dual-zone AC heading patterns.
+# Business zone heading contains "business" or "มุมธุรกิจ" (case-insensitive).
+# Developer zone heading contains "developer" or "มุม dev" or "dev/qa" (case-insensitive).
+S8_BUSINESS_ZONE_RE = re.compile(r"business|มุมธุรกิจ", re.IGNORECASE)
+S8_DEVELOPER_ZONE_RE = re.compile(r"developer|มุม\s*dev|dev/qa", re.IGNORECASE)
+
+# S8: Banned jargon tokens in Business AC zone.
+S8_BANNED_SLA_RE = re.compile(r"\b\d+\s*(?:ms|s|sec|seconds|minutes)\b", re.IGNORECASE)
+S8_BANNED_SERVICE_RE = re.compile(
+    r"\b(?:Pusher|Redis|Kafka|S3|SQS|SNS|RabbitMQ|Postgres|MySQL|MongoDB)\b",
+    re.IGNORECASE,
+)
+S8_BANNED_PATTERN_RE = re.compile(
+    r"\b(?:async|sync|fire-and-forget|debounce|throttle|dedupe|idempotent|retry|backoff|circuit-breaker)\b",
+    re.IGNORECASE,
+)
+S8_BANNED_METHOD_RE = re.compile(r"\w+\.\w+\(")
+S8_BANNED_FIELD_RE = re.compile(r"customfield_\d+")
+
+# S8: Per-type requirement matrix.
+# Values: "required", "optional", "skip".
+S8_BUSINESS_ZONE_REQUIRED: dict[str, str] = {
+    "epic": "required",
+    "story": "required",
+    "task": "optional",  # required if user-facing — enforced by language-leak check
+    "subtask": "skip",
+    "bug": "required",
+    "qa": "optional",
+}
+S8_DEVELOPER_ZONE_REQUIRED: dict[str, str] = {
+    "epic": "required",
+    "story": "required",
+    "task": "required",
+    "subtask": "required",
+    "bug": "required",
+    "qa": "optional",
+}
 
 # T14: Vague AC phrase dictionary (G11 INVEST-T).
 VAGUE_AC_PHRASES: tuple[str, ...] = (
@@ -321,11 +379,11 @@ class AdfValidator:
     """Validate ADF documents against quality gate criteria.
 
     Checks by issue type:
-        Story:   T1-T5 (technical) + S1-S6 (quality)                     = 11 checks
+        Story:   T1-T5 (technical) + S1-S8 (quality)                     = 13 checks
         Subtask: T1-T5 (technical) + ST1-ST5 (quality)                   = 10 checks
-        Epic:    T1-T10, T12, T13, T14 (T6-T14 WARN-only) + E1-E4         = 17 checks
+        Epic:    T1-T10, T12, T13, T14 (T6-T14 WARN-only) + E1-E4 + S7, S8 = 19 checks
         QA:      T1-T5 (technical) + QA1-QA5 (quality)                   = 10 checks
-        Task:    T1-T8, T10-T16 (T6-T16 WARN-only) + TK1-TK4               = 19 checks
+        Task:    T1-T8, T10-T16 (T6-T16 WARN-only) + TK1-TK4 + S7, S8    = 21 checks
 
     T6-T16 are WARN-only so they cannot break existing tickets — scoring still permits
     PASS at 90% threshold.
@@ -338,12 +396,19 @@ class AdfValidator:
     T13 code reference format (bare method check), T14 vague AC phrase scan,
     T15 Out of Scope required for vertical slices (Task-only).
 
+    v3.16.0: S7 markdown-in-text scan (ERROR — raw markdown syntax inside text nodes),
+    S8 dual-zone AC check (ERROR for missing required zone, WARN for language leaks).
+    S8 defaults to grandfather/warn-only mode; pass dual_zone_strict=True for ERROR.
+
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
+        dual_zone_strict: When True, S8 emits FAIL for missing zones instead of WARN.
+            Defaults to False (grandfather mode). Flip to True in v3.17.0.
     """
 
-    def __init__(self, threshold: float = QG_THRESHOLD) -> None:
+    def __init__(self, threshold: float = QG_THRESHOLD, dual_zone_strict: bool = False) -> None:
         self.threshold = threshold
+        self.dual_zone_strict = dual_zone_strict
 
     def _extract_sections(self, adf: dict) -> dict[str, list[dict]]:
         """Pre-extract all known sections in one pass. Returns {heading_pattern: content_nodes}."""
@@ -387,6 +452,11 @@ class AdfValidator:
             report.checks.append(self._check_t11_estimate(adf, _secs))
             report.checks.append(self._check_t15_out_of_scope_for_slice(adf, wrapper))
             report.checks.append(self._check_t16_flag_discipline(adf, wrapper))
+
+        # S7 + S8: markdown-in-text and dual-zone AC — apply to Story, Epic, Task.
+        if issue_type in ("story", "epic", "task"):
+            report.checks.append(self._check_s7_markdown_in_text(adf))
+            report.checks.append(self._check_s8_dual_zone_ac(adf, issue_type))
 
         # Type-specific quality checks
         quality_map: dict[str, list[Callable]] = {
@@ -551,6 +621,7 @@ class AdfValidator:
 
     def _check_t5_required_fields(self, adf: dict, issue_type: str, wrapper: dict | None) -> CheckResult:
         """T5: Required fields in wrapper JSON."""
+        del issue_type
         if not wrapper:
             # Raw ADF — can only check description not empty
             if not adf.get("content"):
@@ -838,6 +909,7 @@ class AdfValidator:
         dedicated section — not only via Jira field. Forces explicit size reasoning
         + prevents scope creep (>8 SP slices signal split-needed).
         """
+        del _secs
         full_text_lower = extract_text(adf).lower()
 
         # Look for H2 heading with estimate-keyword, OR a table containing "story points" label.
@@ -951,6 +1023,7 @@ class AdfValidator:
         Scans AC / `เงื่อนไขที่ต้องผ่าน` / done-criteria / fix-criteria sections
         for vague phrases that break INVEST-Testable. Warn with suggested rephrase.
         """
+        del adf
         sections_to_scan: list[dict] = []
         for key in ("acceptance criteria", "done criteria", "fix criteria"):
             sections_to_scan.extend(_secs.get(key, []) or [])
@@ -1049,6 +1122,193 @@ class AdfValidator:
             fix_hint="Add flag reference (e.g. `feat/TP-182/s1`) in description, OR add "
             "explicit 'no flag (hardening)' note. See references/flags-yaml-template.yaml.",
         )
+
+    # ───────────────────────────────────────────────────────
+    # Cross-Type Quality Checks (S7–S8, v3.16.0)
+    # ───────────────────────────────────────────────────────
+
+    def _check_s7_markdown_in_text(self, adf: dict) -> CheckResult:
+        """S7: Markdown-in-text scan (ERROR, v3.16.0).
+
+        ADF text nodes must NOT contain raw markdown syntax. Agents sometimes emit
+        markdown prose (paragraph breaks, pipe-table rows, bullet prefixes, heading
+        markers) inside text nodes — these render as raw literal characters in Jira,
+        not as structured content.
+
+        Patterns flagged:
+          - ``\\n\\n`` sequences (paragraph break inside a text node)
+          - Lines matching ``^|...|`` (pipe-markdown table rows)
+          - Lines starting with ``• `` or ``- `` or ``* `` (bullet prefixes)
+          - Lines starting with ``# `` through ``###### `` (markdown headings)
+
+        Fix: replace the text node with proper ADF structural blocks
+        (paragraph, bulletList, table, heading).
+
+        See references/templates-epic.md 'ADF Text Purity' rule and
+        agents/story-writer.md 'ADF Text Purity' rule card.
+        """
+        offending: list[str] = []
+
+        def _scan(node: dict) -> None:
+            if node.get("type") != "text" or "text" not in node:
+                return
+            if has_code_mark(node):
+                return  # code-marked text is allowed to contain raw chars
+            text = node["text"]
+            local_id = node.get("localId", "")
+            label = f"localId={local_id}" if local_id else f"text[:40]={text[:40]!r}"
+
+            if MARKDOWN_IN_TEXT_PARA_BREAK_RE.search(text):
+                offending.append(f"para-break in {label}")
+            elif MARKDOWN_IN_TEXT_TABLE_ROW_RE.search(text):
+                offending.append(f"pipe-table row in {label}")
+            elif MARKDOWN_IN_TEXT_BULLET_RE.search(text):
+                offending.append(f"bullet prefix in {label}")
+            elif MARKDOWN_IN_TEXT_HEADING_RE.search(text):
+                offending.append(f"markdown heading in {label}")
+
+        walk_adf(adf, _scan)
+
+        if not offending:
+            return CheckResult("S7", CheckStatus.PASS, "No markdown-in-text found")
+
+        sample = offending[:3]
+        return CheckResult(
+            "S7",
+            CheckStatus.FAIL,
+            f"{len(offending)} text node(s) contain raw markdown syntax: {sample}. "
+            "ADF text nodes must not embed markdown — use structural ADF blocks "
+            "(paragraph, bulletList, table, heading, codeBlock).",
+            fix_hint="Replace inline markdown with proper ADF nodes. "
+            "See agents/story-writer.md 'ADF Text Purity' rule card and "
+            "agents/adf-surgeon.md QUIRK-NEW for repair instructions.",
+        )
+
+    def _check_s8_dual_zone_ac(self, adf: dict, issue_type: str) -> CheckResult:
+        """S8: Dual-Zone AC Check (ERROR/WARN, v3.16.0).
+
+        Verifies the ``เงื่อนไขที่ต้องผ่าน`` H2 section contains two H3 subsections:
+          - Business zone: heading matches S8_BUSINESS_ZONE_RE
+          - Developer zone: heading matches S8_DEVELOPER_ZONE_RE
+
+        Per-type matrix (S8_BUSINESS_ZONE_REQUIRED, S8_DEVELOPER_ZONE_REQUIRED):
+          - Epic/Story/Bug: both required
+          - Task: developer required; business optional (no zone check, only language)
+          - Subtask: business=skip (inherits); developer required
+          - QA/Chore: both optional
+
+        Language leak check (Business zone):
+          Scans business zone bullet text for banned tokens:
+          SLA numbers, service names, patterns, method calls, field names.
+          Always WARN regardless of strict mode.
+
+        Strict mode (dual_zone_strict=True):
+          Missing required zone → FAIL instead of WARN.
+          Default: grandfather mode (warn-only). Flip to True via --dual-zone-strict.
+
+        See references/templates-epic.md 'Dual-Zone Acceptance Criteria Convention'.
+        """
+        biz_required = S8_BUSINESS_ZONE_REQUIRED.get(issue_type, "optional")
+        dev_required = S8_DEVELOPER_ZONE_REQUIRED.get(issue_type, "optional")
+
+        # Both optional → pass
+        if biz_required == "optional" and dev_required == "optional":
+            return CheckResult("S8", CheckStatus.PASS, "S8 N/A (both zones optional for this type)")
+
+        # Find the AC H2 section
+        ac_section = get_section_content(adf, "เงื่อนไขที่ต้องผ่าน")
+        if not ac_section:
+            # Also try English heading
+            ac_section = get_section_content(adf, "acceptance criteria")
+
+        if not ac_section:
+            if biz_required == "required" or dev_required == "required":
+                missing_status = CheckStatus.FAIL if self.dual_zone_strict else CheckStatus.WARN
+                return CheckResult(
+                    "S8",
+                    missing_status,
+                    "No AC section found — cannot verify dual-zone structure. "
+                    "Add H2 'เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)' with Business + Developer H3 zones.",
+                    fix_hint="Add AC H2 with two H3 subsections: "
+                    "'Acceptance Criteria — Business' and 'Acceptance Criteria — Developer'.",
+                )
+            return CheckResult("S8", CheckStatus.PASS, "S8 N/A (no required AC section)")
+
+        # Find H3 headings inside AC section
+        h3_nodes = find_adf_nodes(
+            {"type": "doc", "version": 1, "content": ac_section},
+            lambda n: n.get("type") == "heading" and n.get("attrs", {}).get("level") == 3,
+        )
+
+        biz_zone_node: dict | None = None
+        dev_zone_node: dict | None = None
+        for h in h3_nodes:
+            text = extract_text(h)
+            if S8_BUSINESS_ZONE_RE.search(text):
+                biz_zone_node = h
+            if S8_DEVELOPER_ZONE_RE.search(text):
+                dev_zone_node = h
+
+        issues: list[str] = []
+        missing_status = CheckStatus.FAIL if self.dual_zone_strict else CheckStatus.WARN
+
+        if biz_required == "required" and biz_zone_node is None:
+            issues.append(
+                f"Missing Business AC zone (H3 'Acceptance Criteria — Business') — required for {issue_type}"
+            )
+        if dev_required == "required" and dev_zone_node is None:
+            issues.append(
+                f"Missing Developer AC zone (H3 'Acceptance Criteria — Developer') — required for {issue_type}"
+            )
+
+        if issues:
+            return CheckResult(
+                "S8",
+                missing_status,
+                f"Dual-zone AC incomplete: {'; '.join(issues)}. "
+                "See references/templates-epic.md 'Dual-Zone Acceptance Criteria Convention'.",
+                fix_hint="Add missing H3 zone(s) under the AC H2. "
+                "Business zone: observable outcomes only. Developer zone: testable specs with SLA/service/GWT.",
+            )
+
+        # Language leak check: business zone must not contain banned jargon.
+        if biz_zone_node is not None:
+            # Extract text between business H3 and next H3/H2
+            biz_text = ""
+            in_biz = False
+            for node in ac_section:
+                if node is biz_zone_node:
+                    in_biz = True
+                    continue
+                if in_biz and node.get("type") == "heading":
+                    break
+                if in_biz:
+                    biz_text += extract_text(node) + " "
+
+            leaks: list[str] = []
+            if S8_BANNED_SLA_RE.search(biz_text):
+                leaks.append("SLA number (e.g. '30s', 'p95')")
+            if S8_BANNED_SERVICE_RE.search(biz_text):
+                leaks.append("service name (Pusher/S3/Redis/Kafka/…)")
+            if S8_BANNED_PATTERN_RE.search(biz_text):
+                leaks.append("pattern name (async/retry/debounce/…)")
+            if S8_BANNED_METHOD_RE.search(biz_text):
+                leaks.append("method call (ClassName.method())")
+            if S8_BANNED_FIELD_RE.search(biz_text):
+                leaks.append("field name (customfield_NNNNN)")
+
+            if leaks:
+                return CheckResult(
+                    "S8",
+                    CheckStatus.WARN,
+                    f"Business AC zone contains tech jargon: {leaks}. "
+                    "Business zone must use observable outcomes only — move technical detail to Developer zone.",
+                    fix_hint="Remove banned tokens from Business AC zone. "
+                    "Allowed: user-observable outcomes. "
+                    "Move SLA/service/pattern details to Developer AC zone.",
+                )
+
+        return CheckResult("S8", CheckStatus.PASS, "Dual-zone AC structure valid")
 
     # ───────────────────────────────────────────────────────
     # Story Quality Checks (S1–S6)
@@ -1268,6 +1528,7 @@ class AdfValidator:
 
     def _check_st4_tag_summary(self, adf: dict, wrapper: dict | None) -> CheckResult:
         """ST4: Tag & Summary — summary starts with [BE], [FE-Admin], [FE-Web], or [QA]."""
+        del adf
         if not wrapper:
             return CheckResult("ST4", CheckStatus.WARN, "No wrapper — cannot check summary")
 

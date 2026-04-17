@@ -43,6 +43,47 @@ Repair ADF JSON structure for Jira compatibility. Applied after quality-gate ide
 | QUIRK-8 | Nested panels → inner content may be lost | Flatten to sequential panels — see QUIRK-8 guard below |
 | QUIRK-9 | `hardBreak` at doc root or inside panel → render error | Wrap in paragraph node |
 | QUIRK-10 | `listItem` with direct text node → inconsistent rendering | Wrap text in paragraph within listItem |
+| QUIRK-NEW | Text node contains raw markdown syntax (`\n\n`, `\|...\|`, `•`, `#`) → renders as literal characters | Decompose into proper ADF structural blocks — see QUIRK-NEW repair rules below |
+
+## QUIRK-NEW: Markdown-in-Text Decomposition
+
+**Trigger:** Quality-gate check S7 fails OR surgeon detects text node containing `\n\n`, pipe-table rows (`|col|col|`), bullet prefixes (`•`, `-`, `*` at line start), or markdown headings (`#` through `######` at line start).
+
+**Repair rules:**
+
+| Pattern detected | ADF replacement |
+| --- | --- |
+| `\n\n` inside text node | Split at `\n\n` → separate `paragraph` nodes, each wrapping a `text` node |
+| `^• text` or `^- text` or `^* text` lines | Convert block to `bulletList` → `listItem` → `paragraph` → `text` |
+| `^\| col1 \| col2 \|` rows | Convert block to `table` → `tableRow` → `tableCell` → `paragraph` → `text`; first row with `tableHeader` if it looks like a header |
+| `^#{1,6} heading text` | Convert to `heading` node with `level` = number of `#` signs |
+
+**Procedure:**
+
+1. Identify all text nodes where S7 patterns are detected (use `localId` if present for location).
+2. For each offending text node:
+   a. Determine parent container (paragraph, listItem, tableCell, panel).
+   b. Parse the text string line-by-line to identify pattern spans.
+   c. Replace the single text node (and its parent paragraph if needed) with an array of proper ADF structural nodes.
+   d. Preserve any marks (`strong`, `em`, `code`, `link`) on non-markdown portions of the text.
+3. Do NOT change content meaning — only restructure.
+4. If the markdown is deeply interleaved (mixed patterns on same line): set `unfixable: true` with reason "mixed markdown patterns on same line — requires manual restructuring".
+
+**Example repair:**
+
+```json
+// BEFORE (QUIRK-NEW — bullet prefix in text node):
+{"type": "paragraph", "content": [
+  {"type": "text", "text": "• First item\n• Second item\n• Third item"}
+]}
+
+// AFTER (repaired to bulletList):
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "First item"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Second item"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Third item"}]}]}
+]}
+```
 
 ## Quality-Gate Check ID → QUIRK Mapping
 
@@ -55,7 +96,8 @@ When quality-gate passes `checks_failed[].id` values, use this table to identify
 | T4 (Code Block) | QUIRK-5 | Language capitalization |
 | T5 (Links/Mentions) | QUIRK-2, QUIRK-6 | Relative URLs or missing mention IDs |
 | T1 (Doc Structure) | QUIRK-4, QUIRK-9 | h1 in description or root-level hardBreak |
-| ST* (Semantic) | None — content issues, not structural | Do not attempt to fix — flag for human |
+| S7 (Markdown-in-text) | QUIRK-NEW | Raw markdown syntax inside text nodes — decompose to ADF structural blocks |
+| ST* / S8 (Semantic) | None — content issues, not structural | Do not attempt to fix — flag for human |
 
 If no check IDs provided → run full QUIRK-1 through QUIRK-10 scan independently.
 

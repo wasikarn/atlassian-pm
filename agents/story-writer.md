@@ -100,6 +100,62 @@ If no service tag (`[BE]`, `[FE-Admin]`, `[FE-Web]`, `[AI-Agent]`, `[Video]`, `[
 - CREATE format: projectKey, type, summary, description (NO `issues` key)
 - EDIT format: issues, description (NO projectKey, type, summary)
 
+## Dual-Zone AC Emission (v3.16.0)
+
+Every `เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)` H2 section MUST emit two H3 subsections:
+
+**H3 "Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"**
+
+- ADF: `{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)"}]}`
+- Language rule: observable user outcomes ONLY. Banned: SLA numbers (`30s`, `p95`), service names (Pusher/S3/Redis/Kafka/SQS/SNS/RabbitMQ/Postgres/MySQL/MongoDB), patterns (async/fire-and-forget/debounce/throttle/dedupe/idempotent/retry/backoff/circuit-breaker), method/class names (`FooService.bar()`), field names (`{{START_DATE_FIELD}}`).
+- Format: `B-AC1: [observable outcome]`, `B-AC2: [observable outcome]`, …
+
+**H3 "Acceptance Criteria — Developer (มุม dev/QA/AI agent)"**
+
+- ADF: `{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Acceptance Criteria — Developer (มุม dev/QA/AI agent)"}]}`
+- Language rule: MUST be concrete — SLA numbers, service/channel names, patterns, test hooks all allowed. Given/When/Then encouraged.
+- Must cite Business AC IDs: `Dev-AC1: [spec] (derived from B-AC1)`.
+- At least 1 bullet required.
+
+**Per-type requirement:**
+
+| Type | Business AC | Developer AC |
+| --- | --- | --- |
+| Story | required | required |
+| Task | optional (required if user-facing) | required |
+| Subtask | skip (inherit parent) | required |
+| Bug | required | required |
+
+**Cross-reference pattern (REQUIRED):** `Dev-ACN: [spec] (derived from B-ACN[, B-ACM])`.
+
+Validator `S8` checks both zones. Missing required zone → WARN (grandfather mode) or FAIL (--dual-zone-strict).
+
+## ADF Text Purity (v3.16.0)
+
+ADF text nodes MUST NOT contain raw markdown syntax. Emitting markdown prose inside text nodes causes Jira to display literal characters instead of structured content.
+
+**Banned in text nodes:**
+
+- `\n\n` — paragraph break (use separate `paragraph` nodes instead)
+- `|col1|col2|` — pipe-table row (use ADF `table` node instead)
+- `• text` or `- text` or `* text` at line start — bullet prefix (use ADF `bulletList`/`listItem` instead)
+- `# Heading` or `## Heading` — markdown heading (use ADF `heading` node instead)
+
+**Always use ADF structural blocks:**
+
+```json
+// WRONG — markdown inside text node:
+{"type": "text", "text": "• First item\n• Second item"}
+
+// CORRECT — ADF bulletList:
+{"type": "bulletList", "content": [
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "First item"}]}]},
+  {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Second item"}]}]}
+]}
+```
+
+Validator `S7` scans all text nodes for these patterns → ERROR if found.
+
 ## Self-Critique Pass
 
 After generating ADF, before returning:
@@ -109,6 +165,8 @@ After generating ADF, before returning:
 3. Check: are method names/endpoints specific or generic? ("call API" → must be specific endpoint)
 4. Check: does language mix Thai narrative + English technical terms correctly?
 5. Check: service-aware defaults applied? (auth AC for [BE], error toast for [FE-Admin])
+6. Check (S7): do any text nodes contain `\n\n`, `|...|`, `•`, `-`, `*`, or `#` at line start? If yes → convert to ADF structural blocks.
+7. Check (S8): does the AC section have both Business H3 and Developer H3 zones? Business zone has no tech jargon? Developer zone cites B-AC IDs?
 
 If any check fails → fix inline. Do not return ADF with known issues.
 

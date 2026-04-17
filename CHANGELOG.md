@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.16.0] - 2026-04-17
+
+### Added
+
+- **Dual-Zone Acceptance Criteria convention** — every issue's AC section now requires two H3 subsections under `เงื่อนไขที่ต้องผ่าน (Acceptance Criteria)`:
+  - `Acceptance Criteria — Business (มุมธุรกิจ/PM/ผู้ใช้)`: observable user outcomes, no tech jargon
+  - `Acceptance Criteria — Developer (มุม dev/QA/AI agent)`: testable specs with SLA/service/pattern; cites B-AC IDs
+- **Per-type requirement matrix:** Epic/Story/Bug — both zones required. Task — developer required, business optional (required if user-facing). Subtask — inherit parent (business skip), developer required.
+- **`references/templates-epic.md`** — added `Dual-Zone AC Convention` section (G-DZ) with zone definitions, language rules, worked example, ADF structure, and per-type matrix. Updated H2 item 7 description. Updated both CREATE/EDIT ADF JSON blocks to use two H3 zones.
+- **`references/templates-story.md`** (new) — Story-specific template with dual-zone AC convention, worked example, and full ADF structure.
+- **`references/templates-subtask.md`** (new) — Subtask-specific template: business zone skipped (inherit parent), developer zone required.
+- **`references/templates-bug.md`** (new) — Bug-specific template: business zone = symptom + expected behavior; developer zone = repro + fix acceptance + regression guard.
+- **`references/templates-task.md`** — added `Dual-Zone AC Convention (v3.16.0)` section with per-type requirement, worked example, and ADF structure for dual-zone Task AC.
+- **Validator `S7` — markdown-in-text scan** (`scripts/lib/adf_validator.py`): recursively scans all text nodes (excluding code-marked); flags `\n\n` sequences, `|...|` pipe-table rows, `•`/`-`/`*` bullet prefixes, and `#` markdown headings. Severity: ERROR. Applies to Story, Epic, Task.
+- **Validator `S8` — dual-zone AC check** (`scripts/lib/adf_validator.py`): finds AC H2 section; verifies Business and Developer H3 zones present per matrix; checks Business zone for banned jargon tokens (SLA numbers, service names, patterns, method calls, field names). Severity: ERROR for missing required zone (grandfather/warn-only mode by default), WARN for language leaks. Applies to Story, Epic, Task. CLI flag `--dual-zone-strict` (default false) flips missing-zone to FAIL; will become default true in v3.17.0.
+- **`agents/story-writer.md`** — added two rule cards: `Dual-Zone AC Emission` (two H3 subsections, language rules, cross-ref pattern, per-type matrix) and `ADF Text Purity` (never emit markdown syntax inside text nodes; always use ADF structural blocks). Updated self-critique checklist with S7 and S8 checks.
+- **`agents/adf-surgeon.md`** — added `QUIRK-NEW` (markdown-in-text decomposition): detect raw markdown in text nodes and decompose into proper ADF structural blocks. Added detailed repair rules (para-break split, bullet→bulletList, pipe-table→table, heading→heading node). Updated QG check mapping table.
+
+### Breaking
+
+- Epic/Story AC now requires two H3 zones. **Existing tickets grandfathered** — validator S8 defaults to warn-only mode for 1 sprint. Set `--dual-zone-strict` to enforce errors. Will flip to strict by default in v3.17.0.
+
+### Migration
+
+- No immediate action required. New tickets should use dual-zone structure from templates.
+- Run `python validate_adf.py <file> --type epic` to preview S8 warnings on existing epics.
+- To opt into strict validation now: `python validate_adf.py <file> --type epic --dual-zone-strict`.
+
 ## [3.15.3] - 2026-04-16
 
 ### Changed
