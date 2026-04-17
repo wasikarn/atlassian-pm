@@ -2,9 +2,30 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.15.3-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.16.1-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
+
+---
+
+## 🆕 What's New in v3.16.x
+
+**v3.16.0 — Dual-Zone Acceptance Criteria** (2026-04-17)
+Every Jira ticket's AC now splits into two first-class H3 zones:
+
+- **Business (มุมธุรกิจ/PM/ผู้ใช้)** — observable outcomes only; IDs `B-AC1..N`
+- **Developer (มุม dev/QA/AI agent)** — testable specs with SLA/channels/patterns; IDs `Dev-AC1..N` with `(derived from B-ACx)` cross-refs
+
+Applies to all create/update skills for Epic / Story / Task / Subtask / Bug. Ends business-vs-technical AC debate — PM gets clean zone, AI agent + dev + QA get unambiguous executable spec.
+
+**v3.16.1 — Hotfix: Grandfather for Existing Users** (2026-04-17)
+
+- New validator check `S7` (markdown-in-text) now defaults to **WARN** instead of ERROR — existing tickets with legacy text blobs won't suddenly fail
+- Opt into strict mode: `AdfValidator(markdown_strict=True)` or CLI `--markdown-strict`
+- `S8` (dual-zone AC structure) also warn-only by default; CLI `--dual-zone-strict`
+- Defaults flip to ERROR in **v3.17.0** — plan your migration window
+
+See [CHANGELOG.md](./CHANGELOG.md) for full details + migration notes.
 
 ---
 
