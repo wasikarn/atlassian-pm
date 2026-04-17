@@ -137,6 +137,17 @@ Exit codes: 0=pass, 1=fail, 2=error
         metavar="N",
         help="QG pass threshold 0-100 (default: 90). Use 85 for vibe mode.",
     )
+    parser.add_argument(
+        "--dual-zone-strict",
+        action="store_true",
+        help="S8: emit FAIL for missing AC zones instead of WARN (grandfather mode off).",
+    )
+    parser.add_argument(
+        "--markdown-strict",
+        action="store_true",
+        help="S7: emit FAIL for markdown-in-text instead of WARN (grandfather mode off). "
+        "Default flips to FAIL in v3.17.0.",
+    )
 
     args = parser.parse_args()
 
@@ -162,7 +173,11 @@ Exit codes: 0=pass, 1=fail, 2=error
     wrapper = data if fmt in ("create", "edit") else None
 
     # Validate
-    validator = AdfValidator(threshold=args.threshold)
+    validator = AdfValidator(
+        threshold=args.threshold,
+        dual_zone_strict=args.dual_zone_strict,
+        markdown_strict=args.markdown_strict,
+    )
     report = validator.validate(adf, args.type, wrapper)
 
     # JSON output mode

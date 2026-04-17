@@ -8,15 +8,19 @@ Usage (via scripts/validate_adf.py):
     python validate_adf.py tasks/story.json --type story
     python validate_adf.py tasks/story.json --type story --fix
     python validate_adf.py tasks/story.json --type story --dual-zone-strict
+    python validate_adf.py tasks/story.json --type story --markdown-strict
 
-Checks by issue type (v3.16.0):
+Checks by issue type (v3.16.1):
     Story:   T1-T5 + S1-S7, S8                                         = 13 checks
     Subtask: T1-T5 + ST1-ST5                                           = 10 checks
     Epic:    T1-T10, T12, T13, T14 + E1-E4 + S7, S8                   = 19 checks
     QA:      T1-T5 + QA1-QA5                                           = 10 checks
     Task:    T1-T8, T10-T16 + TK1-TK4 + S7, S8                        = 21 checks
 
-S7: Markdown-in-text scan (ERROR) — detects raw markdown syntax inside ADF text nodes.
+S7: Markdown-in-text scan — detects raw markdown syntax inside ADF text nodes.
+    Severity: WARN by default (grandfather mode, v3.16.1 hotfix).
+    Set markdown_strict=True (or --markdown-strict) to get FAIL/ERROR behaviour.
+    Default flips to FAIL in v3.17.0.
 S8: Dual-zone AC check (ERROR for missing required zone; WARN for language leaks) —
     verifies Business + Developer H3 zones present per per-type matrix.
     Default mode: grandfather (warn-only). Strict mode: --dual-zone-strict.
@@ -400,15 +404,29 @@ class AdfValidator:
     S8 dual-zone AC check (ERROR for missing required zone, WARN for language leaks).
     S8 defaults to grandfather/warn-only mode; pass dual_zone_strict=True for ERROR.
 
+    v3.16.1 hotfix: S7 demoted to WARN by default so existing tickets with legacy text
+    blobs are not suddenly broken after users pull the update. Pass markdown_strict=True
+    (or --markdown-strict CLI flag) to restore ERROR behaviour. Default flips back to
+    FAIL in v3.17.0.
+
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
         dual_zone_strict: When True, S8 emits FAIL for missing zones instead of WARN.
             Defaults to False (grandfather mode). Flip to True in v3.17.0.
+        markdown_strict: When True, S7 emits FAIL for markdown-in-text violations
+            instead of WARN. Defaults to False (grandfather mode). Flip to True in
+            v3.17.0.
     """
 
-    def __init__(self, threshold: float = QG_THRESHOLD, dual_zone_strict: bool = False) -> None:
+    def __init__(
+        self,
+        threshold: float = QG_THRESHOLD,
+        dual_zone_strict: bool = False,
+        markdown_strict: bool = False,
+    ) -> None:
         self.threshold = threshold
         self.dual_zone_strict = dual_zone_strict
+        self.markdown_strict = markdown_strict
 
     def _extract_sections(self, adf: dict) -> dict[str, list[dict]]:
         """Pre-extract all known sections in one pass. Returns {heading_pattern: content_nodes}."""
@@ -1173,12 +1191,15 @@ class AdfValidator:
             return CheckResult("S7", CheckStatus.PASS, "No markdown-in-text found")
 
         sample = offending[:3]
+        status = CheckStatus.FAIL if self.markdown_strict else CheckStatus.WARN
         return CheckResult(
             "S7",
-            CheckStatus.FAIL,
+            status,
             f"{len(offending)} text node(s) contain raw markdown syntax: {sample}. "
             "ADF text nodes must not embed markdown — use structural ADF blocks "
-            "(paragraph, bulletList, table, heading, codeBlock).",
+            "(paragraph, bulletList, table, heading, codeBlock). "
+            "(v3.16.1: warn-only default; set markdown_strict=True or pass --markdown-strict to enforce; "
+            "flips to ERROR default in v3.17.0)",
             fix_hint="Replace inline markdown with proper ADF nodes. "
             "See agents/story-writer.md 'ADF Text Purity' rule card and "
             "agents/adf-surgeon.md QUIRK-NEW for repair instructions.",

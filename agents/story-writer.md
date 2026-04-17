@@ -154,7 +154,7 @@ ADF text nodes MUST NOT contain raw markdown syntax. Emitting markdown prose ins
 ]}
 ```
 
-Validator `S7` scans all text nodes for these patterns → ERROR if found.
+Validator `S7` scans all text nodes for these patterns → WARN by default (ERROR in v3.17.0 with `--markdown-strict`; pass `markdown_strict=True` to enforce now).
 
 ## Self-Critique Pass
 
