@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import time
-import subprocess
-import json
 import os
 import statistics
-from pathlib import Path
+import subprocess
+import time
+
 
 def benchmark_stop_hooks():
     print("🚀 Starting Stop-Hooks Performance Benchmark...")
@@ -23,10 +22,10 @@ def benchmark_stop_hooks():
 
     # Mock session ID
     session_id = "bench_session_123"
-    os.environ["session_id"] = session_id
+    os.environ["SESSION_ID"] = session_id
     os.environ["ATLASSIAN_PM_INTERNAL"] = "true"
 
-    for i in range(iterations):
+    for _ in range(iterations):
         start_time = time.perf_counter()
 
         for hook in hooks:
@@ -39,7 +38,7 @@ def benchmark_stop_hooks():
     min_time = min(results)
     max_time = max(results)
 
-    print(f"\n--- Results ---")
+    print("\n--- Results ---")
     print(f"Iterations: {iterations}")
     print(f"Average execution time: {avg_time:.2f} ms")
     print(f"Minimum execution time: {min_time:.2f} ms")

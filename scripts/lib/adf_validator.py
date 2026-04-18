@@ -723,9 +723,7 @@ class AdfValidator:
             )
 
         # Rule 2: Description has cue words but no explicit Scope/Trigger clarifier and no section
-        if desc_cues and not desc_has_clarifier and not has_disambig_section:
-            # Only flag if description is substantive (avoid false-positive on stubs)
-            if len(desc_text.split()) > 50:
+        if desc_cues and not desc_has_clarifier and not has_disambig_section and len(desc_text.split()) > 50:
                 return CheckResult(
                     "T6",
                     CheckStatus.WARN,

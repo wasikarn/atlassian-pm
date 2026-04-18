@@ -163,11 +163,11 @@ def _compute_keyword_risk(
     tag_carry_sum_w: float,
     allowlist: set[str],
 ) -> dict:
-    """Weighted odds ratio with Laplace α=1 for allowlisted keywords."""
+    """Weighted odds ratio with Laplace a=1 for allowlisted keywords."""
     alpha = 1.0
     # Collect per-keyword (is_carry_over, weight) pairs
     kw_entries: dict[str, list[tuple[bool, float]]] = {}
-    for r, w in zip(group_records, group_weights):
+    for r, w in zip(group_records, group_weights, strict=False):
         for kw in r["keywords"]:
             if kw not in allowlist:
                 continue
@@ -279,7 +279,7 @@ def run_calibration(
     # for lock files). mode 0o600: lock file holds no sensitive data but should not be
     # world-readable per least-privilege principle.
     try:
-        lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))
+        lock_fd = open(lock_file, "a", opener=lambda p, f: os.open(p, f, 0o600))  # noqa: SIM115 — context manager not suitable here (fd must outlive the block)
     except OSError:
         timer.cancel()
         return None
@@ -296,7 +296,7 @@ def run_calibration(
             return None
 
         lines = outcomes_path.read_text().splitlines()
-        current_count = sum(1 for l in lines if l.strip())
+        current_count = sum(1 for line in lines if line.strip())
 
         existing_cal = load_calibration(calibration_path)
         if not force and not _should_run(current_count, existing_cal):
@@ -324,7 +324,7 @@ def run_calibration(
             if sum_w == 0:
                 continue
 
-            carry_sum_w = sum(w for r, w in zip(grp, weights) if r["is_carry_over"])
+            carry_sum_w = sum(w for r, w in zip(grp, weights, strict=False) if r["is_carry_over"])
             carry_over_rate = carry_sum_w / sum_w
             decay_weight_mean = sum_w / len(weights)
             eff_n = _effective_n(weights)

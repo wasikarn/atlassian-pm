@@ -96,7 +96,7 @@ def main() -> None:
         issues = json.loads(args.issues_json)
     except json.JSONDecodeError as e:
         print(f"[story_outcome_record] ERROR: --issues-json is not valid JSON: {e}")
-        raise SystemExit(1)
+        raise SystemExit(1) from e
 
     if not isinstance(issues, list):
         print("[story_outcome_record] ERROR: --issues-json must be a JSON array")
@@ -145,14 +145,14 @@ def main() -> None:
         if calibrate_path.exists():
             log_path = DATA_DIR / "calibrate.log"
             try:
-                log_fd = open(log_path, "a")
-                subprocess.Popen(
-                    [sys.executable, str(calibrate_path)],
-                    start_new_session=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=log_fd,
-                )
-                log_fd.close()  # Child has its own copy via dup2 — safe to close parent fd
+                with open(log_path, "a") as log_fd:
+                    subprocess.Popen(
+                        [sys.executable, str(calibrate_path)],
+                        start_new_session=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=log_fd,
+                    )
+                # log_fd closed by context manager; child inherits the fd via dup2 before close
             except OSError:
                 pass  # Spawn is fire-and-forget — never crash main()
 

@@ -132,7 +132,7 @@ def main():
         work_items.append((key, update_fields, field_desc, summary, issue_type, size_letter))
 
     # Phase B: Print plan (always sequential — no I/O)
-    for key, update_fields, field_desc, summary, issue_type, size_letter in work_items:
+    for key, _, field_desc, summary, issue_type, size_letter in work_items:
         marker = "  ->" if dry_run else "  ⏳"
         print(f"{marker} {key:<10} {issue_type:<10} Size={size_letter or '-':<3} | {field_desc}")
         print(f"     {summary}")

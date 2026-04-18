@@ -3,15 +3,15 @@
 
 Tests the actual stop hooks with and without state to measure improvement.
 """
-import time
-import subprocess
 import json
 import os
 import statistics
-import tempfile
+import subprocess
+import time
 from pathlib import Path
 
-def run_stop_hook(hook_path: str, session_id: str = None) -> tuple[float, dict]:
+
+def run_stop_hook(hook_path: str, session_id: str | None = None) -> tuple[float, dict]:
     """Run a stop hook and return execution time + result."""
     env = os.environ.copy()
     env["ATLASSIAN_PM_INTERNAL"] = "true"
@@ -69,7 +69,7 @@ def benchmark_with_empty_state():
 
     import sys
     sys.path.insert(0, "hooks")
-    from hooks_state import _get_connection, hr6_add_pending, hr6_clear_all_pending, hr5_add_pending, STATE_DIR
+    from hooks_state import STATE_DIR, _get_connection
 
     session_id = "benchmark_empty_state"
 
@@ -111,7 +111,7 @@ def benchmark_with_pending():
 
     import sys
     sys.path.insert(0, "hooks")
-    from hooks_state import hr6_add_pending, hr6_clear_all_pending, hr5_add_pending, STATE_DIR
+    from hooks_state import STATE_DIR, hr5_add_pending, hr6_add_pending, hr6_clear_all_pending
 
     session_id = "benchmark_with_pending"
 
@@ -125,7 +125,7 @@ def benchmark_with_pending():
             "hooks/plugin/guards/stop_hr6_unflushed_check.py",
             session_id
         )
-        print(f"\nHR6 with pending items:")
+        print("\nHR6 with pending items:")
         print(f"  Time: {elapsed:.2f}ms")
         print(f"  Output: {output}")
         print(f"  {'PASS' if elapsed < 100 else 'FAIL'} (target < 100ms)")
@@ -134,7 +134,7 @@ def benchmark_with_pending():
             "hooks/plugin/session/stop_hr5_pending_check.py",
             session_id
         )
-        print(f"\nHR5 with pending items:")
+        print("\nHR5 with pending items:")
         print(f"  Time: {elapsed:.2f}ms")
         print(f"  Output: {output}")
         print(f"  {'PASS' if elapsed < 100 else 'FAIL'} (target < 100ms)")
@@ -170,10 +170,10 @@ def benchmark_pgrep_comparison():
         Path("/tmp/atlassian-cache.pid").exists()
         times_new.append((time.perf_counter() - start) * 1000)
 
-    print(f"\nOld (pgrep -f):")
+    print("\nOld (pgrep -f):")
     print(f"  Avg: {statistics.mean(times_old):.2f}ms | Max: {max(times_old):.2f}ms")
 
-    print(f"\nNew (lock file check):")
+    print("\nNew (lock file check):")
     print(f"  Avg: {statistics.mean(times_new):.4f}ms | Max: {max(times_new):.4f}ms")
 
     speedup = statistics.mean(times_old) / statistics.mean(times_new)
