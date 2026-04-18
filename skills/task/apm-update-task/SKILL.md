@@ -14,7 +14,7 @@ description: |
   Triggers: "update task", "edit task", "adjust task", "แก้ไข task", "fix task description"
   Use when: editing a standalone Task's format, details, or type template
   Do NOT use for: story updates (use update-story); subtask updates (use update-subtask)
-argument-hint: "{{PROJECT_KEY}}-XXX [changes]"
+argument-hint: "{{PROJECT_KEY}}-XXX [changes] [--quick]"
 effort: medium
 ---
 
@@ -22,6 +22,53 @@ effort: medium
 
 **Role:** Developer / Tech Lead
 **Output:** Updated Jira Task
+
+## Phase 0: Complexity Check
+
+Classify the request **before** doing anything else.
+
+| Class | Definition | Action |
+| --- | --- | --- |
+| TRIVIAL | Single find/replace, title-only, version bump, priority change | Call `jira_batch_update.py` directly with `--quiet`. Skip all phases. Report success in one line. |
+| SIMPLE | Single section update, add one field or AC | Activate `--quick` mode. Skip Phase 5 (Quality Gate review output) and Phase 2 interaction. |
+| COMPLEX | Multiple sections, new ACs, scope change, structural change | Full 6-phase workflow. |
+
+**Classification examples:**
+
+```text
+Request: "/update-task {{PROJECT_KEY}}-88 change priority to High"
+→ TRIVIAL — single field change, no ADF needed
+→ uv run scripts/api/jira_batch_update.py --config priority-update.json --quiet
+→ ✅ Done: priority updated on {{PROJECT_KEY}}-88
+
+Request: "/update-task {{PROJECT_KEY}}-88 add 2 acceptance criteria to the AC section"
+→ SIMPLE — single section addition, content provided
+→ --quick mode, proceed directly to Generate + Apply, skip Review gate
+
+Request: "/update-task {{PROJECT_KEY}}-88 migrate from Wiki markup to ADF and add full AC section with 6 items"
+→ COMPLEX — format migration + new content, high risk
+→ Full 6-phase workflow
+```
+
+## Quick Mode
+
+Invoke: `/apm-update-task --quick {{PROJECT_KEY}}-XXX [changes]`
+
+**What gets skipped:** Phase 2 confirmation interaction and the Review gate in Phase 4.
+
+**What runs:** Phase 1 (Fetch) → Phase 3 (Preserve) → Phase 4 (Generate) → Phase 5 (QG, AUTO only) → Phase 6 (Apply).
+
+**When to use:**
+
+- Simple find/replace or single field update
+- Title-only changes
+- Adding a single AC or reference link where context is clear
+
+**When NOT to use:**
+
+- Any structural change (new sections, reordering)
+- New acceptance criteria that change scope
+- Scope changes or type template switches
 
 ## Context Object (accumulated across phases)
 

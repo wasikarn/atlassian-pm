@@ -11,7 +11,7 @@ description: |
   Triggers: "update doc", "edit doc", "update confluence", "move page", "แก้ไข confluence", "edit confluence page"
   Use when: updating or moving an existing Confluence page
   Do NOT use for: creating new pages (use create-doc)
-argument-hint: "[page-id or title] [--move parent-id]"
+argument-hint: "[page-id or title] [--move parent-id] [--quick]"
 effort: medium
 ---
 
@@ -19,6 +19,74 @@ effort: medium
 
 **Role:** Developer / Tech Lead
 **Output:** Updated Confluence Page
+
+<!-- LITE-MODE: BEGIN -->
+## Lite Mode
+
+Triggered automatically when the request is a single, unambiguous operation
+(e.g. "change title of page X to Y", "append paragraph to section Z",
+"find and replace text A with B on page ID 123456789").
+
+**How to use:** The skill detects lite mode from the request content — no flag needed.
+You may also invoke explicitly: `/apm-update-doc --quick <page-id> <operation>`.
+
+**What happens in Lite Mode:**
+
+1. Classify the request. If TRIVIAL (see Phase 0 below), skip all 5 phases.
+2. Call the matching script directly with `--quiet`:
+
+| Operation | Script |
+| --- | --- |
+| Find & replace | `uv run scripts/api/update_confluence_page.py --page-id ID --find X --replace Y --quiet` |
+| Move page | `uv run scripts/api/move_confluence_page.py --page-id ID --parent-id PID --quiet` |
+| Storage format update | `uv run scripts/api/update_page_storage.py --page-id ID --content-file F --quiet` |
+| Fix code blocks | `uv run scripts/api/fix_confluence_code_blocks.py --page-id ID --quiet` |
+
+1. Return a single-line success status: `✅ Done: <operation> on page <id>`.
+
+**What is skipped:** Discovery interaction, Fetch Current (full read), Generate Updates review, Review phase, verbose output.
+
+**When to use Lite Mode:**
+
+- Single find/replace with exact strings provided
+- Title-only change
+- Single paragraph append to a named section
+- Moving a page to a known parent ID
+
+**When NOT to use Lite Mode:**
+
+- Any structural change (adding/removing sections, new ACs)
+- Multi-step updates touching more than one section
+- Content you haven't verified exists in the page
+- Any update where wrong-page risk is non-trivial (title search instead of ID)
+<!-- LITE-MODE: END -->
+
+## Phase 0: Complexity Check
+
+Classify the request **before** doing anything else.
+
+| Class | Definition | Action |
+| --- | --- | --- |
+| TRIVIAL | Single find/replace, title-only, version bump, move to known parent ID | Call script directly with `--quiet`. Skip all phases. Report success in one line. |
+| SIMPLE | Single section update, status change, add one paragraph | Activate `--quick` mode. Skip Phase 4 (Review). |
+| COMPLEX | Multiple sections, new ACs, structural change, ambiguous scope | Full 5-phase workflow. |
+
+**Classification examples:**
+
+```text
+Request: "Change 'v1.2' to 'v1.3' on page 123456789"
+→ TRIVIAL — exact find/replace, page ID known
+→ uv run scripts/api/update_confluence_page.py --page-id 123456789 --find "v1.2" --replace "v1.3" --quiet
+→ ✅ Done: find/replace on page 123456789
+
+Request: "Add a new 'Known Issues' section to page 123456789 with these 3 bullet points"
+→ SIMPLE — single new section, content provided
+→ --quick mode, skip Review phase
+
+Request: "Refactor the Architecture page to split it into 3 child pages and update all cross-links"
+→ COMPLEX — multiple pages, structural change
+→ Full 5-phase workflow
+```
 
 ## Update Types
 
@@ -204,6 +272,26 @@ uv run scripts/api/move_confluence_page.py \
 
 🔗 [View in Confluence](URL)
 ```
+
+## Quick Mode
+
+Invoke: `/apm-update-doc --quick [page-id] [operation]`
+
+**What gets skipped:** Phase 4 (Review) — the user approval gate before applying.
+
+**What runs:** Phases 1–3 (Discovery, Fetch Current, Generate Updates) then directly Phase 5 (Update).
+
+**When to use:**
+
+- Simple find/replace with well-understood content
+- Title-only updates
+- Single-section additions where the change is low-risk
+
+**When NOT to use:**
+
+- Any structural change (new sections, reorganization)
+- New acceptance criteria or scope changes
+- When the current page content has not been verified recently
 
 ## Decision Flow
 

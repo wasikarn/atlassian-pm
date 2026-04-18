@@ -12,7 +12,7 @@ description: |
   Trigger phrases: "update epic", "edit epic", "adjust epic", "change epic", "modify epic", "แก้ไข epic", "update RICE", "fix epic scope"
   
   This skill should NOT be used for creating new epics (use create-epic) or task updates (use update-task).
-argument-hint: "[issue-key] [changes]"
+argument-hint: "[issue-key] [changes] [--quick]"
 effort: medium
 ---
 
@@ -20,6 +20,54 @@ effort: medium
 
 **Role:** Senior Product Manager
 **Output:** Updated Epic
+
+## Phase 0: Complexity Check
+
+Classify the request **before** doing anything else.
+
+| Class | Definition | Action |
+| --- | --- | --- |
+| TRIVIAL | RICE number update, version bump, single metric change | Call `jira_batch_update.py` directly with `--quiet`. Skip all phases. Report success in one line. |
+| SIMPLE | Single section update (add success metric, update one objective) | Activate `--quick` mode. Skip Phase 2.5 Stakeholder Confirmation and Review gate. |
+| COMPLEX | Scope change, multiple sections, new ACs, structural change, ambiguity scan triggered | Full 6-phase workflow including stakeholder confirmation. |
+
+**Classification examples:**
+
+```text
+Request: "/update-epic {{PROJECT_KEY}}-50 update RICE confidence 70% → 85%"
+→ TRIVIAL — single numeric field change, no scope impact
+→ uv run scripts/api/jira_batch_update.py --config rice-update.json --quiet
+→ ✅ Done: RICE confidence updated on {{PROJECT_KEY}}-50
+
+Request: "/update-epic {{PROJECT_KEY}}-50 add 2 success metrics to the metrics section"
+→ SIMPLE — single section addition, no scope change
+→ --quick mode, skip Phase 2.5 and Review gate
+
+Request: "/update-epic {{PROJECT_KEY}}-50 remove payment gateway scope, add refund flow, update all ACs"
+→ COMPLEX — scope change + child task impact + multiple sections
+→ Full 6-phase workflow with stakeholder confirmation
+```
+
+## Quick Mode
+
+Invoke: `/apm-update-epic --quick {{PROJECT_KEY}}-XXX [changes]`
+
+**What gets skipped:** Phase 2.5 (Stakeholder Confirmation Loop) and the Review gate in Phase 4.
+
+**What runs:** Phase 1 (Fetch) → Phase 2 (Impact Analysis, brief) → Phase 3 (Preserve) → Phase 4 (Generate) → Phase 5 (QG, AUTO) → Phase 6 (Apply).
+
+**When to use:**
+
+- RICE score updates with no scope change
+- Adding success metrics or clarifying wording
+- Single-section updates where intent is unambiguous
+
+**When NOT to use:**
+
+- Any scope change (add/remove features)
+- New acceptance criteria
+- Any structural change that affects child tasks
+- When the ambiguity scan in Phase 2 fires
 
 ## Context Object (accumulated across phases)
 

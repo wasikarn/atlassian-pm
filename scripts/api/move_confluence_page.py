@@ -69,11 +69,21 @@ Examples:
     parser.add_argument("--parent-id", required=True, help="Target parent page ID")
     parser.add_argument("--dry-run", action="store_true", help="Preview changes without applying")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--quiet", "-q",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Suppress informational output; keep only ERROR and final status line",
+    )
 
     args = parser.parse_args()
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    def log(msg: str) -> None:
+        if not args.quiet:
+            print(msg)
 
     # Get list of pages to move
     if args.page_ids:
@@ -93,7 +103,7 @@ Examples:
     # Get parent page info
     try:
         parent = api.get_page(args.parent_id)
-        print(f"\n📁 Target Parent: {parent['title']} (ID: {args.parent_id})")
+        log(f"\n📁 Target Parent: {parent['title']} (ID: {args.parent_id})")
     except PageNotFoundError:
         logger.error("Parent page not found: %s", args.parent_id)
         return 1
@@ -101,9 +111,9 @@ Examples:
         logger.error("Error getting parent page: %s", e)
         return 1
 
-    print(f"\n{'=' * 60}")
-    print(f"Moving {len(page_ids)} page(s) to parent: {parent['title']}")
-    print("=" * 60)
+    log(f"\n{'=' * 60}")
+    log(f"Moving {len(page_ids)} page(s) to parent: {parent['title']}")
+    log("=" * 60)
 
     success_count = 0
     fail_count = 0
@@ -116,36 +126,36 @@ Examples:
             ancestors = page.get("ancestors", [])
             current_parent = ancestors[-1].get("title", "Root") if ancestors else "Root"
 
-            print(f"\n📄 {title}")
-            print(f"   ID: {page_id}")
-            print(f"   Current parent: {current_parent}")
-            print(f"   → New parent: {parent['title']}")
+            log(f"\n📄 {title}")
+            log(f"   ID: {page_id}")
+            log(f"   Current parent: {current_parent}")
+            log(f"   → New parent: {parent['title']}")
 
             if args.dry_run:
-                print("   🔍 DRY RUN - no changes applied")
+                log("   🔍 DRY RUN - no changes applied")
                 success_count += 1
                 continue
 
             # Move the page
             api.move_page(page_id, args.parent_id)
-            print("   ✅ Moved successfully")
+            print(f"moved page_id={page_id} title={title!r} parent_id={args.parent_id}")
             success_count += 1
 
         except PageNotFoundError:
-            print(f"   ❌ Page not found: {page_id}")
+            print(f"ERROR page_id={page_id} reason=not_found")
             fail_count += 1
         except APIError as e:
-            print(f"   ❌ API Error: {e.status_code} - {e.reason}")
-            if e.details:
+            print(f"ERROR page_id={page_id} status={e.status_code} reason={e.reason}")
+            if e.details and not args.quiet:
                 print(f"      Details: {e.details[:200]}")
             fail_count += 1
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            print(f"ERROR page_id={page_id} reason={e}")
             fail_count += 1
 
-    print(f"\n{'=' * 60}")
-    print(f"Summary: {success_count} succeeded, {fail_count} failed")
-    print("=" * 60)
+    log(f"\n{'=' * 60}")
+    print(f"summary pages={len(page_ids)} succeeded={success_count} failed={fail_count}")
+    log("=" * 60)
 
     return 0 if fail_count == 0 else 1
 

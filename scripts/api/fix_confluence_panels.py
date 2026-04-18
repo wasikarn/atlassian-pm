@@ -120,10 +120,16 @@ def main():
     group.add_argument("--page-ids", help="Comma-separated page IDs to fix")
     parser.add_argument("--dry-run", action="store_true", help="Report only, don't update pages")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--quiet", "-q",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Suppress informational output; keep only ERROR and final status line",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO,
+        level=logging.DEBUG if args.verbose else (logging.WARNING if args.quiet else logging.INFO),
         format="%(message)s",
     )
 
@@ -152,6 +158,8 @@ def main():
 
     action = "Would fix" if args.dry_run else "Fixed"
     logger.info(f"\n{action} {total_fixed} panel(s) across {len(page_ids)} page(s)")
+    if args.quiet:
+        print(f"summary pages={len(page_ids)} panels_fixed={total_fixed} dry_run={args.dry_run}")
 
 
 if __name__ == "__main__":

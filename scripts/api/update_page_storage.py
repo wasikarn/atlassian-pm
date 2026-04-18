@@ -35,13 +35,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def create_api() -> ConfluenceAPI:
+def create_api(retry_on_conflict: bool = True) -> ConfluenceAPI:
     """Create configured Confluence API client."""
     creds = load_credentials()
     return ConfluenceAPI(
         base_url=creds["CONFLUENCE_URL"],
         auth_header=get_auth_header(creds["CONFLUENCE_USERNAME"], creds["CONFLUENCE_API_TOKEN"]),
         ssl_context=create_ssl_context(),
+        retry_on_conflict=retry_on_conflict,
     )
 
 
@@ -69,11 +70,27 @@ Examples:
     parser.add_argument("--title", help="New title (optional, keeps existing if not specified)")
     parser.add_argument("--dry-run", action="store_true", help="Preview without saving")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--quiet", "-q",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Suppress informational output; keep only ERROR and final status line",
+    )
+    parser.add_argument(
+        "--no-retry-on-conflict",
+        action="store_true",
+        default=False,
+        help="Disable automatic retry on HTTP 409 version conflict (default: retry once)",
+    )
 
     args = parser.parse_args()
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    def log(msg: str) -> None:
+        if not args.quiet:
+            print(msg)
 
     # Get content
     if args.content_file:
@@ -90,7 +107,7 @@ Examples:
         return 1
 
     try:
-        api = create_api()
+        api = create_api(retry_on_conflict=not args.no_retry_on_conflict)
     except CredentialsError as e:
         logger.error("Credentials error: %s", e)
         return 1
@@ -101,23 +118,23 @@ Examples:
         title = args.title or page["title"]
         version = page["version"]["number"]
 
-        print(f"📄 Page: {title}")
-        print(f"   ID: {args.page_id}")
-        print(f"   Current version: {version}")
+        log(f"📄 Page: {title}")
+        log(f"   ID: {args.page_id}")
+        log(f"   Current version: {version}")
 
         if args.dry_run:
-            print("\n🔍 DRY RUN - Storage content preview:")
-            print("=" * 60)
-            print(storage_content[:500])
+            log("\n🔍 DRY RUN - Storage content preview:")
+            log("=" * 60)
+            log(storage_content[:500])
             if len(storage_content) > 500:
-                print(f"... ({len(storage_content) - 500} more characters)")
-            print("=" * 60)
+                log(f"... ({len(storage_content) - 500} more characters)")
+            log("=" * 60)
             return 0
 
         # Update the page
         result = api.update_page(args.page_id, title, storage_content, version)
-        print(f"✅ Updated to version {result['version']['number']}")
-        print(f"   URL: {api.get_page_url(args.page_id)}")
+        print(f"updated page_id={args.page_id} title={title!r} version={result['version']['number']}")
+        log(f"   URL: {api.get_page_url(args.page_id)}")
 
         return 0
 

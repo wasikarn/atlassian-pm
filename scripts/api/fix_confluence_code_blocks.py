@@ -48,7 +48,7 @@ def create_api() -> ConfluenceAPI:
     )
 
 
-def process_page(api: ConfluenceAPI, page_id: str, dry_run: bool = False) -> bool:
+def process_page(api: ConfluenceAPI, page_id: str, dry_run: bool = False, quiet: bool = False) -> bool:
     """Process a single page to fix code blocks.
 
     Args:
@@ -59,6 +59,10 @@ def process_page(api: ConfluenceAPI, page_id: str, dry_run: bool = False) -> boo
     Returns:
         True if page was fixed or would be fixed (dry run), False otherwise.
     """
+    def log(msg: str) -> None:
+        if not quiet:
+            print(msg)
+
     try:
         # Get current page
         page = api.get_page(page_id)
@@ -66,42 +70,41 @@ def process_page(api: ConfluenceAPI, page_id: str, dry_run: bool = False) -> boo
         current_content = page["body"]["storage"]["value"]
         version = page["version"]["number"]
 
-        print(f"\n📄 {title}")
-        print(f"   ID: {page_id}")
-        print(f"   Current version: {version}")
+        log(f"\n📄 {title}")
+        log(f"   ID: {page_id}")
+        log(f"   Current version: {version}")
 
         # Check if needs fixing
         if '<pre class="highlight">' not in current_content:
-            print("   ⏭️ No code blocks need fixing (already using structured macros)")
+            log("   ⏭️ No code blocks need fixing (already using structured macros)")
             return False
 
         # Count blocks that need fixing
         original_count = current_content.count('<pre class="highlight">')
-        print(f"   Found {original_count} code block(s) that need fixing...")
+        log(f"   Found {original_count} code block(s) that need fixing...")
 
         # Fix code blocks
         fixed_content = fix_code_blocks(current_content)
 
         if dry_run:
-            print("   🔍 DRY RUN - no changes applied")
+            log("   🔍 DRY RUN - no changes applied")
             return True
 
         # Update page
         result = api.update_page(page_id, title, fixed_content, version)
-        print(f"   ✅ Fixed {original_count} code blocks, updated to version {result['version']['number']}")
-
+        print(f"fixed page_id={page_id} title={title!r} blocks={original_count} version={result['version']['number']}")
         return True
 
     except PageNotFoundError:
-        print(f"   ❌ Page not found: {page_id}")
+        print(f"ERROR page_id={page_id} reason=not_found")
         return False
     except APIError as e:
-        print(f"   ❌ API Error: {e.status_code} - {e.reason}")
-        if e.details:
+        print(f"ERROR page_id={page_id} status={e.status_code} reason={e.reason}")
+        if e.details and not quiet:
             print(f"      Details: {e.details[:200]}")
         return False
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"ERROR page_id={page_id} reason={e}")
         return False
 
 
@@ -127,6 +130,12 @@ Examples:
     parser.add_argument("--page-ids", help="Comma-separated list of page IDs to fix")
     parser.add_argument("--dry-run", action="store_true", help="Preview changes without applying")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--quiet", "-q",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Suppress informational output; keep only ERROR and final status line",
+    )
 
     args = parser.parse_args()
 
@@ -148,27 +157,31 @@ Examples:
         logger.error("Credentials error: %s", e)
         return 1
 
-    print("Confluence Code Block Fixer")
-    print("=" * 60)
-    print(f"Processing {len(page_ids)} page(s)...")
+    def log(msg: str) -> None:
+        if not args.quiet:
+            print(msg)
+
+    log("Confluence Code Block Fixer")
+    log("=" * 60)
+    log(f"Processing {len(page_ids)} page(s)...")
 
     fixed_count = 0
     skipped_count = 0
 
     for page_id in page_ids:
-        result = process_page(api, page_id, args.dry_run)
+        result = process_page(api, page_id, args.dry_run, quiet=args.quiet)
         if result:
             fixed_count += 1
         else:
             skipped_count += 1
 
-    print(f"\n{'=' * 60}")
-    print("SUMMARY")
-    print("=" * 60)
+    log(f"\n{'=' * 60}")
+    log("SUMMARY")
+    log("=" * 60)
     if args.dry_run:
-        print(f"Would fix: {fixed_count}, Already OK: {skipped_count}")
+        print(f"summary pages={len(page_ids)} would_fix={fixed_count} already_ok={skipped_count}")
     else:
-        print(f"Fixed: {fixed_count}, Skipped: {skipped_count}")
+        print(f"summary pages={len(page_ids)} fixed={fixed_count} skipped={skipped_count}")
 
     return 0
 

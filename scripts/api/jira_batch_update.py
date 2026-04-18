@@ -233,11 +233,21 @@ def main() -> int:
     parser.add_argument("--config", required=True, help="Path to updates JSON config file")
     parser.add_argument("--dry-run", action="store_true", help="Validate and preview, no writes")
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument(
+        "--quiet", "-q",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Suppress informational output; keep only ERROR and final status line",
+    )
 
     args = parser.parse_args()
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    def log(msg: str) -> None:
+        if not args.quiet:
+            print(msg)
 
     # Load config
     config_path = Path(args.config)
@@ -263,20 +273,20 @@ def main() -> int:
     updates = config["updates"]
     total_issues = sum(len(u["keys"]) for u in updates)
 
-    print(f"{'=' * 60}")
-    print(f"Batch Update: {len(updates)} groups, {total_issues} issues")
+    log(f"{'=' * 60}")
+    log(f"Batch Update: {len(updates)} groups, {total_issues} issues")
     if args.dry_run:
-        print("MODE: DRY RUN (no writes)")
-    print(f"{'=' * 60}")
+        log("MODE: DRY RUN (no writes)")
+    log(f"{'=' * 60}")
 
     if args.dry_run:
         # Preview mode
         for i, update in enumerate(updates):
             keys = update["keys"]
             field_names = [k for k in update if k != "keys"]
-            print(f"\n  Group {i + 1}: {', '.join(keys)}")
-            print(f"    Fields: {', '.join(field_names)}")
-        print(f"\n\u2705 DRY RUN \u2014 config valid, {total_issues} issues would be updated")
+            log(f"\n  Group {i + 1}: {', '.join(keys)}")
+            log(f"    Fields: {', '.join(field_names)}")
+        print(f"summary groups={len(updates)} issues={total_issues} dry_run=True")
         return 0
 
     # Execute updates
@@ -296,7 +306,7 @@ def main() -> int:
 
     for i, update in enumerate(updates):
         keys = update["keys"]
-        print(f"\n[Group {i + 1}/{len(updates)}] {', '.join(keys)}")
+        log(f"\n[Group {i + 1}/{len(updates)}] {', '.join(keys)}")
 
         # Build per-key payloads, skipping keys with no applicable fields
         key_fields: dict[str, dict] = {}
@@ -304,7 +314,7 @@ def main() -> int:
             is_subtask = subtask_flags.get(key, False)
             fields = build_fields_payload(update, custom_fields, is_subtask)
             if not fields:
-                print(f"  {key}: no applicable fields (skipped)")
+                log(f"  {key}: no applicable fields (skipped)")
             else:
                 key_fields[key] = fields
 
@@ -321,23 +331,23 @@ def main() -> int:
                 key, success, error_msg = future.result()
                 if success:
                     field_names = list(key_fields[key].keys())
-                    print(f"  {key}: {', '.join(field_names)} \u2705")
+                    log(f"  {key}: {', '.join(field_names)} \u2705")
                     succeeded += 1
                     all_keys.append(key)
                 else:
-                    print(f"  {key}: FAILED \u2014 {error_msg}")
+                    print(f"ERROR key={key} reason={error_msg}")
                     failed += 1
 
     # Summary
-    print(f"\n{'=' * 60}")
-    print(f"Results: {succeeded} succeeded, {failed} failed")
+    log(f"\n{'=' * 60}")
+    print(f"summary groups={len(updates)} succeeded={succeeded} failed={failed}")
 
     if all_keys:
-        print(f"\nHR6 Action: cache_invalidate for {len(all_keys)} issues:")
+        log(f"\nHR6 Action: cache_invalidate for {len(all_keys)} issues:")
         for key in all_keys:
-            print(f"  cache_invalidate('{key}')")
+            log(f"  cache_invalidate('{key}')")
 
-    print(f"{'=' * 60}")
+    log(f"{'=' * 60}")
 
     return 1 if failed > 0 else 0
 
