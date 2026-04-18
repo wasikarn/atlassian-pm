@@ -2,7 +2,7 @@
 
 > Claude Code plugin for AI-powered Jira & Confluence automation — create Epics, Tasks, and manage Scrumban flow using natural language.
 
-[![Version](https://img.shields.io/badge/version-3.16.1-blue.svg)](https://github.com/wasikarn/atlassian-pm)
+[![Version](https://img.shields.io/badge/version-3.17.0-blue.svg)](https://github.com/wasikarn/atlassian-pm)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-orange.svg)](https://claude.ai/claude-code)
 
@@ -23,7 +23,7 @@ Applies to all create/update skills for Epic / Story / Task / Subtask / Bug. End
 - New validator check `S7` (markdown-in-text) now defaults to **WARN** instead of ERROR — existing tickets with legacy text blobs won't suddenly fail
 - Opt into strict mode: `AdfValidator(markdown_strict=True)` or CLI `--markdown-strict`
 - `S8` (dual-zone AC structure) also warn-only by default; CLI `--dual-zone-strict`
-- Defaults flip to ERROR in **v3.17.0** — plan your migration window
+- Defaults flip to ERROR in **v3.18.0** — plan your migration window
 
 See [CHANGELOG.md](./CHANGELOG.md) for full details + migration notes.
 

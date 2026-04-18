@@ -354,7 +354,7 @@ Developer AC items MUST cite the Business AC IDs they implement. Format: `Dev-AC
 ]}
 ```
 
-**Enforcement:** validator `S8` (ERROR for missing required zone, WARN for language leaks) — see `scripts/lib/adf_validator.py _check_s8_dual_zone_ac`. Default mode is warn-only (grandfather mode) until `--dual-zone-strict` flag enabled in v3.17.0.
+**Enforcement:** validator `S8` (ERROR for missing required zone, WARN for language leaks) — see `scripts/lib/adf_validator.py _check_s8_dual_zone_ac`. Default mode is warn-only (grandfather mode) until `--dual-zone-strict` flag enabled in v3.18.0.
 
 ### Explicit Jira Dependency Links (G7 — v3.12.2)
 

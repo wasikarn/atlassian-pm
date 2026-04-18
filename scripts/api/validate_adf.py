@@ -146,7 +146,7 @@ Exit codes: 0=pass, 1=fail, 2=error
         "--markdown-strict",
         action="store_true",
         help="S7: emit FAIL for markdown-in-text instead of WARN (grandfather mode off). "
-        "Default flips to FAIL in v3.17.0.",
+        "Default flips to FAIL in v3.18.0.",
     )
 
     args = parser.parse_args()

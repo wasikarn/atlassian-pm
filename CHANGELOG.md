@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.16.2] - 2026-04-18
+## [3.17.0] - 2026-04-18
 
 ### Added
 
@@ -40,21 +40,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - No breaking changes. `--quiet` / `--quick` / `--insert-after-section` / `--append-section` / `--no-retry-on-conflict` are all opt-in; default behavior unchanged.
 - Scripts still take precedence over MCP for Confluence writes per new HR11 — see README Hard Rules section.
-- v3.17.0 will flip S7 + S8 defaults to FAIL (breaking) — retrofit {{PROJECT_KEY}}-9/{{PROJECT_KEY}}-10/{{PROJECT_KEY}}-11 and 12 more open tickets first. See `.omc/plans/v3.17.0-release.md` (if present locally).
+- v3.18.0 will flip S7 + S8 defaults to FAIL (breaking) — retrofit {{PROJECT_KEY}}-9/{{PROJECT_KEY}}-10/{{PROJECT_KEY}}-11 and 12 more open tickets first. See `.omc/plans/v3.18.0-release.md` (if present locally).
 
 ## [3.16.1] - 2026-04-17
 
 ### Fixed
 
-- **Hotfix — Grandfather S7 as WARN by default** (`scripts/lib/adf_validator.py`): S7 (markdown-in-text) was introduced in v3.16.0 as `ERROR`/`FAIL`. This caused all existing tickets with legacy text blobs to fail immediately after upgrade. S7 now emits `WARN` by default (grandfather mode). Pass `markdown_strict=True` or `--markdown-strict` to restore `FAIL` behaviour. Default flips back to `FAIL` in v3.17.0.
+- **Hotfix — Grandfather S7 as WARN by default** (`scripts/lib/adf_validator.py`): S7 (markdown-in-text) was introduced in v3.16.0 as `ERROR`/`FAIL`. This caused all existing tickets with legacy text blobs to fail immediately after upgrade. S7 now emits `WARN` by default (grandfather mode). Pass `markdown_strict=True` or `--markdown-strict` to restore `FAIL` behaviour. Default flips back to `FAIL` in v3.18.0.
 - **`scripts/api/validate_adf.py`**: added `--dual-zone-strict` and `--markdown-strict` CLI flags, wired to `AdfValidator` constructor so both grandfather modes are controllable from the CLI.
-- **`agents/story-writer.md`**, **`agents/adf-surgeon.md`**: added v3.16.1 note that S7 is WARN by default until v3.17.0.
+- **`agents/story-writer.md`**, **`agents/adf-surgeon.md`**: added v3.16.1 note that S7 is WARN by default until v3.18.0.
 
 ### Migration Notes
 
 - **S7 grandfather behaviour**: S7 violations are now `WARN` (non-blocking) by default. No immediate action required — existing tickets with legacy markdown-in-text will pass the quality gate.
 - **S8 grandfather behaviour** (from v3.16.0): S8 missing-zone violations are `WARN` by default. Pass `--dual-zone-strict` to enforce errors.
-- **v3.17.0 rollover**: both S7 and S8 grandfather modes will flip to `FAIL`/`ERROR` by default. Migrate tickets before upgrading to v3.17.0.
+- **v3.18.0 rollover**: both S7 and S8 grandfather modes will flip to `FAIL`/`ERROR` by default. Migrate tickets before upgrading to v3.18.0.
 
 ## [3.16.0] - 2026-04-17
 
@@ -70,13 +70,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`references/templates-bug.md`** (new) — Bug-specific template: business zone = symptom + expected behavior; developer zone = repro + fix acceptance + regression guard.
 - **`references/templates-task.md`** — added `Dual-Zone AC Convention (v3.16.0)` section with per-type requirement, worked example, and ADF structure for dual-zone Task AC.
 - **Validator `S7` — markdown-in-text scan** (`scripts/lib/adf_validator.py`): recursively scans all text nodes (excluding code-marked); flags `\n\n` sequences, `|...|` pipe-table rows, `•`/`-`/`*` bullet prefixes, and `#` markdown headings. Severity: ERROR. Applies to Story, Epic, Task.
-- **Validator `S8` — dual-zone AC check** (`scripts/lib/adf_validator.py`): finds AC H2 section; verifies Business and Developer H3 zones present per matrix; checks Business zone for banned jargon tokens (SLA numbers, service names, patterns, method calls, field names). Severity: ERROR for missing required zone (grandfather/warn-only mode by default), WARN for language leaks. Applies to Story, Epic, Task. CLI flag `--dual-zone-strict` (default false) flips missing-zone to FAIL; will become default true in v3.17.0.
+- **Validator `S8` — dual-zone AC check** (`scripts/lib/adf_validator.py`): finds AC H2 section; verifies Business and Developer H3 zones present per matrix; checks Business zone for banned jargon tokens (SLA numbers, service names, patterns, method calls, field names). Severity: ERROR for missing required zone (grandfather/warn-only mode by default), WARN for language leaks. Applies to Story, Epic, Task. CLI flag `--dual-zone-strict` (default false) flips missing-zone to FAIL; will become default true in v3.18.0.
 - **`agents/story-writer.md`** — added two rule cards: `Dual-Zone AC Emission` (two H3 subsections, language rules, cross-ref pattern, per-type matrix) and `ADF Text Purity` (never emit markdown syntax inside text nodes; always use ADF structural blocks). Updated self-critique checklist with S7 and S8 checks.
 - **`agents/adf-surgeon.md`** — added `QUIRK-NEW` (markdown-in-text decomposition): detect raw markdown in text nodes and decompose into proper ADF structural blocks. Added detailed repair rules (para-break split, bullet→bulletList, pipe-table→table, heading→heading node). Updated QG check mapping table.
 
 ### Breaking
 
-- Epic/Story AC now requires two H3 zones. **Existing tickets grandfathered** — validator S8 defaults to warn-only mode for 1 sprint. Set `--dual-zone-strict` to enforce errors. Will flip to strict by default in v3.17.0.
+- Epic/Story AC now requires two H3 zones. **Existing tickets grandfathered** — validator S8 defaults to warn-only mode for 1 sprint. Set `--dual-zone-strict` to enforce errors. Will flip to strict by default in v3.18.0.
 
 ### Migration
 

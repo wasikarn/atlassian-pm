@@ -20,7 +20,7 @@ Checks by issue type (v3.16.1):
 S7: Markdown-in-text scan — detects raw markdown syntax inside ADF text nodes.
     Severity: WARN by default (grandfather mode, v3.16.1 hotfix).
     Set markdown_strict=True (or --markdown-strict) to get FAIL/ERROR behaviour.
-    Default flips to FAIL in v3.17.0.
+    Default flips to FAIL in v3.18.0.
 S8: Dual-zone AC check (ERROR for missing required zone; WARN for language leaks) —
     verifies Business + Developer H3 zones present per per-type matrix.
     Default mode: grandfather (warn-only). Strict mode: --dual-zone-strict.
@@ -407,15 +407,15 @@ class AdfValidator:
     v3.16.1 hotfix: S7 demoted to WARN by default so existing tickets with legacy text
     blobs are not suddenly broken after users pull the update. Pass markdown_strict=True
     (or --markdown-strict CLI flag) to restore ERROR behaviour. Default flips back to
-    FAIL in v3.17.0.
+    FAIL in v3.18.0.
 
     Args:
         threshold: QG pass threshold (0-100). Defaults to QG_THRESHOLD (90.0).
         dual_zone_strict: When True, S8 emits FAIL for missing zones instead of WARN.
-            Defaults to False (grandfather mode). Flip to True in v3.17.0.
+            Defaults to False (grandfather mode). Flip to True in v3.18.0.
         markdown_strict: When True, S7 emits FAIL for markdown-in-text violations
             instead of WARN. Defaults to False (grandfather mode). Flip to True in
-            v3.17.0.
+            v3.18.0.
     """
 
     def __init__(
@@ -1197,7 +1197,7 @@ class AdfValidator:
             "ADF text nodes must not embed markdown — use structural ADF blocks "
             "(paragraph, bulletList, table, heading, codeBlock). "
             "(v3.16.1: warn-only default; set markdown_strict=True or pass --markdown-strict to enforce; "
-            "flips to ERROR default in v3.17.0)",
+            "flips to ERROR default in v3.18.0)",
             fix_hint="Replace inline markdown with proper ADF nodes. "
             "See agents/story-writer.md 'ADF Text Purity' rule card and "
             "agents/adf-surgeon.md QUIRK-NEW for repair instructions.",

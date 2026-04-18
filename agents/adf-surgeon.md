@@ -96,7 +96,7 @@ When quality-gate passes `checks_failed[].id` values, use this table to identify
 | T4 (Code Block) | QUIRK-5 | Language capitalization |
 | T5 (Links/Mentions) | QUIRK-2, QUIRK-6 | Relative URLs or missing mention IDs |
 | T1 (Doc Structure) | QUIRK-4, QUIRK-9 | h1 in description or root-level hardBreak |
-| S7 (Markdown-in-text) | QUIRK-NEW | Raw markdown syntax inside text nodes — decompose to ADF structural blocks (v3.16.1: WARN by default; ERROR in v3.17.0 or with `--markdown-strict`) |
+| S7 (Markdown-in-text) | QUIRK-NEW | Raw markdown syntax inside text nodes — decompose to ADF structural blocks (v3.16.1: WARN by default; ERROR in v3.18.0 or with `--markdown-strict`) |
 | ST* / S8 (Semantic) | None — content issues, not structural | Do not attempt to fix — flag for human |
 
 If no check IDs provided → run full QUIRK-1 through QUIRK-10 scan independently.
