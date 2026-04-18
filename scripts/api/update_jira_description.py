@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update Jira issue descriptions via ADF text replacement.
+"""Update Jira issue descriptions via ADF text replacement or section append.
 
 Uses Jira REST API v3 to manipulate ADF (Atlassian Document Format) directly,
 preserving all formatting (panels, tables, marks, code blocks, etc.)
@@ -16,6 +16,10 @@ Usage:
     python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \
         --find "old1" --replace "new1" \
         --find "old2" --replace "new2"
+
+    # Append a new section after an existing heading
+    python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \
+        --append-section "Technical Notes" --content "New paragraph text here"
 
     # Dry run (preview only)
     python update_jira_description.py --config fixes.json --dry-run
@@ -36,7 +40,9 @@ import argparse
 import json
 import logging
 import sys
+from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path for lib imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -95,6 +101,101 @@ def load_config(config_path: str) -> dict[str, list[tuple[str, str]]]:
     return fixes
 
 
+def _extract_heading_text(node: dict[str, Any]) -> str:
+    """Extract plain text from an ADF heading node."""
+    texts: list[str] = []
+    for child in node.get("content", []):
+        if child.get("type") == "text":
+            texts.append(child.get("text", ""))
+    return "".join(texts).strip()
+
+
+def _make_paragraph_adf(text: str) -> dict[str, Any]:
+    """Build a minimal ADF paragraph node from plain text."""
+    return {
+        "type": "paragraph",
+        "content": [{"type": "text", "text": text}],
+    }
+
+
+def append_after_section(
+    description_adf: dict[str, Any],
+    section_title: str,
+    content_text: str,
+) -> dict[str, Any]:
+    """Append a paragraph ADF node after the last child block of a named section.
+
+    Locates the first heading node whose text matches ``section_title``
+    (exact first, case-insensitive fallback), then appends ``content_text``
+    as a paragraph node after the section's last child block — i.e., before
+    the next heading at the same or higher level, or at end of document.
+
+    Args:
+        description_adf: ADF document dict (modified in-place on a deep copy).
+        section_title: Heading text to locate (case-insensitive fallback).
+        content_text: Plain text to append as a paragraph node.
+
+    Returns:
+        Modified ADF document (deep copy).
+
+    Raises:
+        ValueError: If the section is not found. Error includes fuzzy suggestions.
+    """
+    doc = deepcopy(description_adf)
+    top_content: list[dict[str, Any]] = doc.get("content", [])
+
+    # Collect all headings for suggestions on failure
+    all_headings = [
+        _extract_heading_text(node)
+        for node in top_content
+        if node.get("type") == "heading"
+    ]
+
+    # Locate target heading — exact then case-insensitive
+    target_idx: int | None = None
+    for idx, node in enumerate(top_content):
+        if node.get("type") == "heading" and _extract_heading_text(node) == section_title:
+            target_idx = idx
+            break
+
+    if target_idx is None:
+        lower_title = section_title.lower()
+        for idx, node in enumerate(top_content):
+            if node.get("type") == "heading" and _extract_heading_text(node).lower() == lower_title:
+                target_idx = idx
+                break
+
+    if target_idx is None:
+        title_words = set(section_title.lower().split())
+        suggestions = [h for h in all_headings if title_words & set(h.lower().split())]
+        hint = ""
+        if suggestions:
+            quoted = ", ".join(f'"{s}"' for s in suggestions[:5])
+            hint = f" Did you mean: {quoted}?"
+        raise ValueError(
+            f"Section '{section_title}' not found in ADF headings.{hint}"
+            f" Available headings: {all_headings}"
+        )
+
+    # Determine the heading level so we stop before a heading at same/higher level
+    heading_level = top_content[target_idx].get("attrs", {}).get("level", 1)
+
+    # Find the insertion point: after the last block belonging to this section
+    insert_idx = target_idx + 1
+    while insert_idx < len(top_content):
+        node = top_content[insert_idx]
+        if node.get("type") == "heading":
+            node_level = node.get("attrs", {}).get("level", 1)
+            if node_level <= heading_level:
+                break
+        insert_idx += 1
+    # insert_idx now points to the next heading (or end of doc) — insert before it
+
+    top_content.insert(insert_idx, _make_paragraph_adf(content_text))
+    doc["content"] = top_content
+    return doc
+
+
 def process_issue(
     api: JiraAPI,
     issue_key: str,
@@ -133,10 +234,68 @@ def process_issue(
     return "success"
 
 
+def process_append_section(
+    api: JiraAPI,
+    issue_key: str,
+    section_title: str,
+    content_text: str,
+    dry_run: bool = False,
+) -> str:
+    """Append content after a named section in a Jira issue description.
+
+    Args:
+        api: JiraAPI client
+        issue_key: Jira issue key
+        section_title: Heading text to locate
+        content_text: Plain text to append as paragraph
+        dry_run: If True, preview without writing
+
+    Returns:
+        Status string: "success", "skipped", or "failed".
+    """
+    print(f"\n{'=' * 60}")
+    print(f"Append-section on: {issue_key}")
+    print("=" * 60)
+
+    try:
+        issue = api.get_issue(issue_key, fields="description,summary")
+    except IssueNotFoundError:
+        print(f"  Issue not found: {issue_key}")
+        return "failed"
+    except APIError as e:
+        print(f"  API Error {e.status_code}: {e.reason}")
+        return "failed"
+
+    description = issue["fields"].get("description")
+    if not description:
+        print(f"  {issue_key} has no description — cannot append section")
+        return "skipped"
+
+    try:
+        new_description = append_after_section(description, section_title, content_text)
+    except ValueError as e:
+        print(f"  Error: {e}")
+        return "failed"
+
+    if dry_run:
+        print(f"  DRY RUN — would append paragraph after section '{section_title}'")
+        print(f"  Content: {content_text[:100]}")
+        return "success"
+
+    try:
+        api.update_description(issue_key, new_description)
+    except (IssueNotFoundError, APIError) as e:
+        print(f"  Failed to update: {e}")
+        return "failed"
+
+    print(f"  Appended paragraph after section '{section_title}'")
+    return "success"
+
+
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Update Jira issue descriptions via ADF text replacement",
+        description="Update Jira issue descriptions via ADF text replacement or section append",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -146,6 +305,10 @@ Examples:
   # Fix single issue
   python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \\
       --find "billboard_ids" --replace "billboard_codes"
+
+  # Append content after a section heading
+  python update_jira_description.py --issue {{PROJECT_KEY}}-2819 \\
+      --append-section "Technical Notes" --content "New paragraph here"
 
   # Dry run
   python update_jira_description.py --config fixes.json --dry-run
@@ -172,6 +335,16 @@ Config JSON format:
         default=[],
         help="Replacement text (use with --issue, repeatable)",
     )
+    parser.add_argument(
+        "--append-section",
+        metavar="SECTION_TITLE",
+        help="Heading text to append content after (use with --issue and --content)",
+    )
+    parser.add_argument(
+        "--content",
+        metavar="TEXT",
+        help="Plain text to append as paragraph (used with --append-section)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Preview changes only")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
 
@@ -180,14 +353,21 @@ Config JSON format:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if not args.config and not args.issue:
-        parser.error("Either --config or --issue is required")
-
-    if args.issue and len(args.find) != len(args.replace):
-        parser.error("--find and --replace must be provided in pairs")
-
-    if args.issue and not args.find:
-        parser.error("--find/--replace required with --issue")
+    # Validate mode
+    if args.append_section:
+        if not args.issue:
+            parser.error("--issue is required with --append-section")
+        if not args.content:
+            parser.error("--content is required with --append-section")
+        if args.find or args.config:
+            parser.error("--append-section cannot be combined with --find/--replace or --config")
+    else:
+        if not args.config and not args.issue:
+            parser.error("Either --config or --issue is required")
+        if args.issue and len(args.find) != len(args.replace):
+            parser.error("--find and --replace must be provided in pairs")
+        if args.issue and not args.find:
+            parser.error("--find/--replace required with --issue")
 
     try:
         api = create_api()
@@ -195,7 +375,18 @@ Config JSON format:
         logger.error("Credentials error: %s", e)
         return 1
 
-    # Build fix definitions
+    # --- Append-section mode ---
+    if args.append_section:
+        status = process_append_section(
+            api,
+            args.issue,
+            args.append_section,
+            args.content,
+            dry_run=args.dry_run,
+        )
+        return 0 if status in ("success", "skipped") else 1
+
+    # --- Find/replace mode ---
     fixes: dict[str, list[tuple[str, str]]] = {}
 
     if args.config:
@@ -203,7 +394,6 @@ Config JSON format:
     elif args.issue:
         fixes = {args.issue: list(zip(args.find, args.replace, strict=True))}
 
-    # Process
     print("=" * 60)
     print(f"Jira Description Updater ({len(fixes)} issue(s))")
     print(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'}")

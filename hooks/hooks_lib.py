@@ -14,6 +14,7 @@ Import pattern in hooks:
     from hooks_lib import log_event, allow, block, ...
 """
 
+import contextlib
 import json
 import os
 import re
@@ -24,10 +25,8 @@ from pathlib import Path
 # ── Constants ──────────────────────────────────────────────────────────────
 
 LOG_DIR = Path(os.environ.get("CLAUDE_PLUGIN_DATA", str(Path.home() / ".claude"))) / "hooks-logs"
-try:
+with contextlib.suppress(OSError):  # non-fatal: logging must never break a hook
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-except OSError:
-    pass  # non-fatal: logging must never break a hook
 
 # Matches: acli jira workitem create|edit --from-json <path>
 ACLI_FROM_JSON_RE = re.compile(
@@ -269,6 +268,9 @@ def build_hr_rules(board_id: str = "<board_id>") -> str:
         "- HR6: After ANY Jira write → cache_invalidate(issue_key, auto_refresh=true) immediately\n"
         f"- HR7: Sprint ID NEVER hardcoded — always jira_get_sprints_from_board(board_id={board_id}, state='active')\n"
         "- HR10: NEVER set sprint field (customfield_10020) on subtasks — inherited from parent\n"
+        "- HR11: Confluence write preference: prefer scripts/api/update_page_storage.py and"
+        " scripts/api/update_confluence_page.py over confluence_update_page MCP."
+        " MCP loses code-block formatting and can destroy macros. MCP is acceptable for READ-only.\n"
         "- Tool: jira_get_issue / jira_search ALWAYS require fields + limit params"
     )
 

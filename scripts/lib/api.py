@@ -55,6 +55,8 @@ class ConfluenceAPI:
         base_url: Confluence wiki base URL (e.g., https://example.atlassian.net/wiki)
         auth_header: Authorization header value (Basic auth)
         ssl_context: SSL context for HTTPS requests
+        retry_on_conflict: If True (default), retry once on HTTP 409 by re-fetching
+            the current page version before retrying.
 
     Example:
         >>> api = ConfluenceAPI(base_url, auth_header, ssl_context)
@@ -67,6 +69,7 @@ class ConfluenceAPI:
         base_url: str,
         auth_header: str,
         ssl_context: ssl.SSLContext | None = None,
+        retry_on_conflict: bool = True,
     ) -> None:
         """Initialize Confluence API client.
 
@@ -74,10 +77,14 @@ class ConfluenceAPI:
             base_url: Confluence wiki base URL (e.g., https://example.atlassian.net/wiki)
             auth_header: Authorization header value from get_auth_header()
             ssl_context: SSL context for HTTPS requests. If None, default context is used.
+            retry_on_conflict: If True, automatically retry once on HTTP 409 version
+                conflict by re-fetching the current page version. Set to False to
+                raise immediately on conflict.
         """
         self.base_url = base_url.rstrip("/")
         self.auth_header = auth_header
         self.ssl_context = ssl_context
+        self.retry_on_conflict = retry_on_conflict
         logger.debug("ConfluenceAPI initialized for %s", self.base_url)
 
     def _request(
@@ -208,6 +215,11 @@ class ConfluenceAPI:
     ) -> PageInfo:
         """Update an existing Confluence page.
 
+        On HTTP 409 (version conflict), if ``retry_on_conflict`` is True, the
+        method re-fetches the current page version and retries once. If the
+        retry also fails with 409, an ``APIError`` is raised with a message
+        that includes both the stale and current version numbers.
+
         Args:
             page_id: Page ID to update
             title: New page title
@@ -219,7 +231,7 @@ class ConfluenceAPI:
 
         Raises:
             PageNotFoundError: If page ID doesn't exist
-            APIError: If page update fails
+            APIError: If page update fails (includes version context on 409)
         """
         logger.info("Updating page %s to version %d", page_id, version + 1)
 
@@ -238,7 +250,37 @@ class ConfluenceAPI:
             },
         }
 
-        result = self._request("PUT", f"/rest/api/content/{page_id}", data)
+        try:
+            result = self._request("PUT", f"/rest/api/content/{page_id}", data)
+        except APIError as exc:
+            if exc.status_code != 409 or not self.retry_on_conflict:
+                raise
+
+            # 409 version conflict — re-fetch current version and retry once
+            stale_version = version
+            logger.warning(
+                "Page %s version conflict (stale=%d); re-fetching current version",
+                page_id,
+                stale_version,
+            )
+            current_page = self.get_page(page_id, expand="version")
+            current_version = current_page["version"]["number"]
+            logger.info("Retrying page %s update with version %d", page_id, current_version + 1)
+            data["version"]["number"] = current_version + 1
+
+            try:
+                result = self._request("PUT", f"/rest/api/content/{page_id}", data)
+            except APIError as retry_exc:
+                if retry_exc.status_code == 409:
+                    raise APIError(
+                        409,
+                        "Version conflict after retry",
+                        f"Page {page_id}: stale version={stale_version}, "
+                        f"current version={current_version}. "
+                        f"Original error: {retry_exc.details}",
+                    ) from retry_exc
+                raise
+
         logger.info("Updated page to version %s", result.get("version", {}).get("number"))
         return PageInfo(**result)
 
