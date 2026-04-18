@@ -7,7 +7,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from plugin.session.pre_prompt_skill_redirect import detect_intent
 
-
 # ── Bug detection ──────────────────────────────────────────────────────────
 
 def test_detects_english_create_bug():

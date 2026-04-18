@@ -2,12 +2,11 @@
 """Tests for D1 (start_plugin_resources_inject), D3 (user_prompt_mermaid_hint),
 and B2 (post_confluence_code_fix_suggest) hooks.
 """
+import contextlib
 import json
 import sys
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 # Ensure hooks/ is importable
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -21,8 +20,8 @@ class TestStartPluginResourcesInject:
 
     def _run(self, session_id: str, stdin_data: dict | None = None) -> tuple[str, int]:
         """Run the hook with patched stdin/stdout, return (stdout_output, exit_code)."""
-        from io import StringIO
         import importlib
+        from io import StringIO
 
         payload = json.dumps(stdin_data or {"session_id": session_id})
 
@@ -34,7 +33,7 @@ class TestStartPluginResourcesInject:
                 mod.main()
                 exit_code = 0
             except SystemExit as e:
-                exit_code = e.code or 0
+                exit_code = e.code if isinstance(e.code, int) else 0
             output = mock_stdout.getvalue()
 
         return output, exit_code
@@ -55,8 +54,8 @@ class TestStartPluginResourcesInject:
         flag = state_dir / f"{session_id}.resources_injected"
         assert not flag.exists()
 
-        from io import StringIO
         import importlib
+        from io import StringIO
         importlib.reload(mod)
         monkeypatch.setattr(mod, "_STATE_DIR", state_dir)
 
@@ -64,10 +63,8 @@ class TestStartPluginResourcesInject:
         captured = StringIO()
         with patch("sys.stdin", StringIO(payload)), \
              patch("sys.stdout", captured):
-            try:
+            with contextlib.suppress(SystemExit):
                 mod.main()
-            except SystemExit:
-                pass
 
         output = captured.getvalue()
         # Should emit a hookSpecificOutput JSON block
@@ -91,8 +88,9 @@ class TestStartPluginResourcesInject:
         # Pre-create the flag
         (state_dir / f"{session_id}.resources_injected").touch()
 
-        import plugin.session.start_plugin_resources_inject as mod
         import importlib
+
+        import plugin.session.start_plugin_resources_inject as mod
         importlib.reload(mod)
         monkeypatch.setattr(mod, "_STATE_DIR", state_dir)
 
@@ -101,10 +99,8 @@ class TestStartPluginResourcesInject:
         captured = StringIO()
         with patch("sys.stdin", StringIO(payload)), \
              patch("sys.stdout", captured):
-            try:
+            with contextlib.suppress(SystemExit):
                 mod.main()
-            except SystemExit:
-                pass
 
         # Second call: no output
         assert captured.getvalue().strip() == "", "Expected silent output on second call"
@@ -119,8 +115,9 @@ class TestUserPromptMermaidHint:
     def _run_with_prompt(self, prompt_text: str, monkeypatch) -> tuple[str, int]:
         monkeypatch.setenv("ATLASSIAN_PM_INTERNAL", "true")
 
-        import plugin.user.user_prompt_mermaid_hint as mod
         import importlib
+
+        import plugin.user.user_prompt_mermaid_hint as mod
         importlib.reload(mod)
 
         from io import StringIO
@@ -132,7 +129,7 @@ class TestUserPromptMermaidHint:
                 mod.main()
                 exit_code = 0
             except SystemExit as e:
-                exit_code = e.code or 0
+                exit_code = e.code if isinstance(e.code, int) else 0
 
         return captured.getvalue(), exit_code
 
@@ -175,8 +172,9 @@ class TestPostConfluenceCodeFixSuggest:
     def _run_with_event(self, tool_name: str, tool_input: dict, monkeypatch) -> tuple[str, int]:
         monkeypatch.setenv("ATLASSIAN_PM_INTERNAL", "true")
 
-        import plugin.quality.post_confluence_code_fix_suggest as mod
         import importlib
+
+        import plugin.quality.post_confluence_code_fix_suggest as mod
         importlib.reload(mod)
 
         from io import StringIO
@@ -193,7 +191,7 @@ class TestPostConfluenceCodeFixSuggest:
                 mod.main()
                 exit_code = 0
             except SystemExit as e:
-                exit_code = e.code or 0
+                exit_code = e.code if isinstance(e.code, int) else 0
 
         return captured.getvalue(), exit_code
 

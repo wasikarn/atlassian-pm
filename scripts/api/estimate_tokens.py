@@ -532,7 +532,7 @@ def print_comparison(result: dict) -> None:
 
     # Savings
     if result.get("savings"):
-        print(f"\n  Savings:")
+        print("\n  Savings:")
         if "fields_vs_full" in result["savings"]:
             pct = result["savings"]["fields_vs_full"]
             print(f"    fields param:    {pct}% reduction")

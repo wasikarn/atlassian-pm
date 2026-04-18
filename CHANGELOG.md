@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.16.2] - 2026-04-18
+
+### Added
+
+- **HR11 — Confluence write preference** (`hooks/hooks_lib.py`): prefer plugin scripts (`scripts/api/update_page_storage.py`, `update_confluence_page.py`) over `confluence_update_page` MCP. MCP loses code-block formatting and can destroy macros. MCP acceptable for READ-only.
+- **409 version-conflict auto-retry** (`scripts/lib/api.py`): `ConfluenceAPI.update_page()` now retries once on 409, re-fetching current version. Constructor flag `retry_on_conflict: bool = True` (default on). CLI flag `--no-retry-on-conflict` on `update_page_storage.py` and `update_confluence_page.py` to opt out.
+- **`--insert-after-section "<name>" --content "<body>"`** (`scripts/api/update_confluence_page.py`): insert a block after a heading, with case-insensitive fallback, fuzzy-suggestions on miss, `--dry-run` support, `--raw` mode for pre-formatted storage XML.
+- **`--append-section "<title>" --content "<text>"`** (`scripts/api/update_jira_description.py`): append ADF paragraph after a heading in the Jira description tree, respecting `--dry-run`.
+- **`--quiet` / `-q` flag** on 5 high-use scripts (`update_page_storage.py`, `fix_confluence_code_blocks.py`, `fix_confluence_panels.py`, `move_confluence_page.py`, `jira_batch_update.py`): suppress informational output, keep final machine-readable status line.
+- **`--quick` mode** for `apm-update-doc`, `apm-update-task`, `apm-update-epic` skills: skip Review phase for simple updates.
+- **Lite mode** in `apm-update-doc` skill: gated on single-op detection, jumps directly to target script — targets ~2K token reduction per invocation.
+- **Phase 0 complexity check** in the three update skills: classifies TRIVIAL / SIMPLE / COMPLEX and routes TRIVIAL direct to scripts, SIMPLE to `--quick`, COMPLEX through the full 5-phase workflow.
+- **D1 — SessionStart resource injection** (`hooks/plugin/session/start_plugin_resources_inject.py` + `hooks.json`): once-per-session compact list of plugin skills, scripts, and HR rules. Fires async, 10s timeout, silent on any error.
+- **D3 — UserPromptSubmit mermaid keyword hint** (`hooks/plugin/user/user_prompt_mermaid_hint.py` + `hooks.json`): matches `\bmermaid\b` (case-insensitive) and suggests `/atlassian-pm:apm-pretty-mermaid`.
+- **B2 — PostToolUse Confluence code-fix reminder** (`hooks/plugin/quality/post_confluence_code_fix_suggest.py` + `hooks.json`): on `confluence_update_page` MCP completion, suggest running `fix_confluence_code_blocks.py --page-id <N>` to recover any code blocks flattened by MCP.
+- **`_PageInfoRequired` TypedDict** split from `PageInfo` in `scripts/lib/api.py`: required fields (`id`, `title`, `version`, `body`) are now typed as present, optional ones (`type`, `space`, `ancestors`) remain opt-in — fixes `reportTypedDictNotRequiredAccess` across callers.
+
+### Fixed
+
+- **12 ruff errors** across `scripts/ai/calibrate.py`, `scripts/benchmark_hooks.py`, `scripts/benchmark_stop_hooks.py`, `scripts/lib/adf_validator.py`, `scripts/sprint/sprint_set_fields.py`, `scripts/story_outcome_record.py` (SIM115/SIM112/SIM102/B904/B905/B007/RUF002/RUF013/E741).
+
+### Tests
+
+- **18 validator tests** in `tests/scripts/test_adf_validator.py`:
+  - S7 (7 tests): para-break, pipe-table, bullet prefix, markdown heading detection; `markdown_strict` default/strict mode; code-mark exemption; deep nesting (panel > blockquote > paragraph).
+  - S8 (11 tests): story/task/subtask/qa per-type matrix; `dual_zone_strict` default/strict; Business-zone language leaks (SLA/service/method call); missing AC section.
+- **34 new tests** for `--insert-after-section`, `--append-section`, and 409 retry (`test_insert_confluence_section.py`, `test_append_jira_section.py`, `test_confluence_api_retry.py`).
+- **5 new tests** for `--quiet` help output (`test_quiet_flag.py`).
+- **Filled 27 previously-empty test stubs** in `tests/hooks/test_ai_hooks.py` (false-confidence gap flagged by audit) — all pass.
+- **10 new tests** for D1/D3/B2 hook behaviors (`hooks/tests/test_session_and_user_hooks.py`).
+
+### Migration Notes
+
+- No breaking changes. `--quiet` / `--quick` / `--insert-after-section` / `--append-section` / `--no-retry-on-conflict` are all opt-in; default behavior unchanged.
+- Scripts still take precedence over MCP for Confluence writes per new HR11 — see README Hard Rules section.
+- v3.17.0 will flip S7 + S8 defaults to FAIL (breaking) — retrofit {{PROJECT_KEY}}-9/{{PROJECT_KEY}}-10/{{PROJECT_KEY}}-11 and 12 more open tickets first. See `.omc/plans/v3.17.0-release.md` (if present locally).
+
 ## [3.16.1] - 2026-04-17
 
 ### Fixed

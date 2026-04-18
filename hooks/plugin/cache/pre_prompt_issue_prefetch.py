@@ -21,8 +21,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import inject_context, log_event, parse_stdin
 from config_loader import load_project_config
+from hooks_lib import inject_context, log_event, parse_stdin
 
 _HOOK       = "prompt-issue-prefetch"
 CACHE_DB    = Path.home() / ".cache" / "atlassian-pm" / "atlassian.db"

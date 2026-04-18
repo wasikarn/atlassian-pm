@@ -1,8 +1,9 @@
-import pytest
-import os
 import shutil
 import tempfile
 from pathlib import Path
+
+import pytest
+
 
 @pytest.fixture
 def temp_state_dir(monkeypatch):

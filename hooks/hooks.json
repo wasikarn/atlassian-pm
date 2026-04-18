@@ -115,6 +115,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "mcp__mcp-atlassian__confluence_update_page",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/quality/post_confluence_code_fix_suggest.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "mcp__mcp-atlassian__jira_get_issue|mcp__mcp-atlassian__jira_search",
         "hooks": [
           {
@@ -309,6 +319,12 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_prerequisite_check.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/session/start_plugin_resources_inject.py",
+            "timeout": 10,
+            "async": true
           }
         ]
       },
@@ -348,6 +364,11 @@
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/ai/intent_detect.py",
             "async": true,
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/run.sh\" hooks/plugin/user/user_prompt_mermaid_hint.py",
+            "timeout": 2
           }
         ]
       }

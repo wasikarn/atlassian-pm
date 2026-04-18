@@ -12,13 +12,12 @@ Silent exit 0 on no match or any error.
 Must be fast (<50ms) — no network calls, no disk I/O beyond stdin read.
 """
 
-import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "hooks"))
-from hooks_lib import allow, inject_context, parse_stdin  # noqa: E402
+from hooks_lib import allow, inject_context, parse_stdin
 
 _MERMAID_RE = re.compile(r"\bmermaid\b", re.IGNORECASE)
 

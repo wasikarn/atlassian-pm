@@ -26,7 +26,7 @@ class _HookResult(NamedTuple):
 
 PLUGIN_ROOT = Path(os.environ.get("CLAUDE_PLUGIN_ROOT", Path(__file__).resolve().parents[3]))
 sys.path.insert(0, str(PLUGIN_ROOT / "hooks"))
-from aggregator import _extract_contexts, _run_hook
+from aggregator import _extract_contexts
 
 HOOK1 = PLUGIN_ROOT / "hooks/plugin/session/start_subagent_context.py"
 HOOK2 = PLUGIN_ROOT / "hooks/plugin/session/start_intelligence_inject.py"

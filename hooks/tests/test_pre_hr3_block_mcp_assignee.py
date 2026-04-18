@@ -265,9 +265,9 @@ def test_block_message_contains_issue_key():
 
 def test_block_message_shows_acli_alternative():
     """Block message shows acli command alternative."""
+    import io
     import json
     from unittest.mock import patch
-    import io
 
     stdin_data = {
         "session_id": "test-session",
@@ -280,17 +280,16 @@ def test_block_message_shows_acli_alternative():
     # Capture stderr
     stderr_capture = io.StringIO()
 
-    with patch('sys.stdin.read', return_value=json.dumps(stdin_data)):
-        with patch('sys.stderr', stderr_capture):
-            from plugin.guards.pre_hr3_block_mcp_assignee import main
+    with patch('sys.stdin.read', return_value=json.dumps(stdin_data)), patch('sys.stderr', stderr_capture):
+        from plugin.guards.pre_hr3_block_mcp_assignee import main
 
-            try:
-                main()
-                assert False, "Should have blocked"
-            except SystemExit as e:
-                assert e.code == 1
-                stderr_output = stderr_capture.getvalue()
-                assert "acli" in stderr_output.lower()
+        try:
+            main()
+            assert False, "Should have blocked"
+        except SystemExit as e:
+            assert e.code == 1
+            stderr_output = stderr_capture.getvalue()
+            assert "acli" in stderr_output.lower()
 
 
 def test_allows_when_issue_key_missing():

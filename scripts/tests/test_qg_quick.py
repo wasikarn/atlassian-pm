@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Tests for scripts/ai/qg_quick.py"""
 
-import json
 import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from ai.qg_quick import _count_acs, _has_background, structural_check, run_quick_check
+from ai.qg_quick import _count_acs, run_quick_check, structural_check
 
 _VALID_ADF = {
     "version": 1,

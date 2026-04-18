@@ -15,7 +15,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import ACLI_FROM_JSON_RE as ACLI_RE, inject_context, log_event, parse_stdin
+from hooks_lib import ACLI_FROM_JSON_RE as ACLI_RE
+from hooks_lib import inject_context, log_event, parse_stdin
 from hooks_state import event_get_all_events
 
 _HOOK = "event-ac-check"

@@ -34,7 +34,7 @@ def _plugin_root() -> Path:
 PLUGIN_ROOT = _plugin_root()
 
 sys.path.insert(0, str(PLUGIN_ROOT / "hooks"))
-from hooks_lib import inject_context, parse_stdin  # noqa: E402
+from hooks_lib import inject_context  # noqa: E402
 
 # ── Session guard ──────────────────────────────────────────────────────────
 

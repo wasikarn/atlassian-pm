@@ -6,12 +6,12 @@ and prevent "Levitating..." hangs during stop-hooks.
 State is stored in /tmp/claude-hooks-state/{session_id}.db
 """
 
-import sqlite3
+import hashlib
 import json
 import os
+import sqlite3
 import sys
 import time
-import hashlib
 from pathlib import Path
 from typing import Any
 

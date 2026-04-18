@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "hooks"))
-from hooks_lib import allow, inject_context, parse_stdin  # noqa: E402
+from hooks_lib import allow, inject_context, parse_stdin
 
 _TOOL_NAME = "confluence_update_page"
 

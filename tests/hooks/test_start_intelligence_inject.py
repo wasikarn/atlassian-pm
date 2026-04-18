@@ -3,6 +3,7 @@ import json
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+
 _HOOK_DIR = Path(__file__).resolve().parents[2] / "hooks" / "plugin" / "session"
 sys.path.insert(0, str(_HOOK_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "hooks"))

@@ -1,12 +1,17 @@
-import pytest
 import json
-import os
 import time
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
+
+import pytest
+
 from hooks.hooks_state import (
-    get_state, set_state, _get_connection,
-    hr6_add_pending, hr6_get_pending, hr6_remove_pending, hr6_clear_all_pending
+    _get_connection,
+    get_state,
+    hr6_add_pending,
+    hr6_clear_all_pending,
+    hr6_get_pending,
+    hr6_remove_pending,
+    set_state,
 )
 
 # --- 1. WAL Concurrency Testing ---

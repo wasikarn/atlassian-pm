@@ -6,8 +6,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ai"))
 from claude_runner import run_claude, run_claude_json
 
@@ -72,9 +70,8 @@ def test_run_claude_returns_none_on_timeout():
 
 
 def test_run_claude_respects_recursion_guard():
-    with patch.dict(os.environ, {RECURSION_GUARD: "1"}):
-        with patch("subprocess.run") as mock_run:
-            result = run_claude("analyze this")
+    with patch.dict(os.environ, {RECURSION_GUARD: "1"}), patch("subprocess.run") as mock_run:
+        result = run_claude("analyze this")
     assert result is None
     mock_run.assert_not_called()
 
@@ -161,9 +158,8 @@ def test_run_claude_json_passes_json_schema_flag():
 
 
 def test_run_claude_json_respects_recursion_guard():
-    with patch.dict(os.environ, {RECURSION_GUARD: "1"}):
-        with patch("subprocess.run") as mock_run:
-            result = run_claude_json("prompt", SCHEMA)
+    with patch.dict(os.environ, {RECURSION_GUARD: "1"}), patch("subprocess.run") as mock_run:
+        result = run_claude_json("prompt", SCHEMA)
     assert result is None
     mock_run.assert_not_called()
 

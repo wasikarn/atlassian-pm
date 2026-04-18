@@ -16,7 +16,6 @@ Caller is responsible for any subprocess that reads stdin (pass input= if needed
 """
 
 import subprocess
-from typing import Any
 
 
 def run_parallel(

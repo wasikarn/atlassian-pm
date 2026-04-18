@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "hooks"))
 
-from lib.adf_validator import AdfValidator, detect_format  # noqa: E402
-from hooks_lib import detect_issue_type  # noqa: E402
+from hooks_lib import detect_issue_type
+from lib.adf_validator import AdfValidator, detect_format
 
 
 def main() -> None:

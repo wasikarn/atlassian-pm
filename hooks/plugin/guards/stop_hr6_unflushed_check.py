@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from hooks_lib import log_event, parse_stdin
-from hooks_state import hr6_clear_all_pending, hr6_get_pending, STATE_DIR
+from hooks_state import STATE_DIR, hr6_clear_all_pending, hr6_get_pending
 
 _HOOK = "hr6-stop-unflushed-check"
 

@@ -33,15 +33,20 @@ from .exceptions import APIError, PageNotFoundError
 logger = logging.getLogger(__name__)
 
 
-class PageInfo(TypedDict, total=False):
-    """Type definition for page information."""
+class _PageInfoRequired(TypedDict):
+    """Required page fields always returned by Confluence API."""
 
     id: str
     title: str
-    type: str
     version: dict[str, Any]
-    space: dict[str, Any]
     body: dict[str, Any]
+
+
+class PageInfo(_PageInfoRequired, total=False):
+    """Type definition for page information. Required: id/title/version/body. Optional via `expand`: type/space/ancestors."""
+
+    type: str
+    space: dict[str, Any]
     ancestors: list[dict[str, Any]]
 
 
@@ -264,7 +269,13 @@ class ConfluenceAPI:
                 stale_version,
             )
             current_page = self.get_page(page_id, expand="version")
-            current_version = current_page["version"]["number"]
+            current_version = current_page["version"].get("number")
+            if current_version is None:
+                raise APIError(
+                    409,
+                    "Conflict",
+                    f"retry failed: current page {page_id} missing version",
+                ) from exc
             logger.info("Retrying page %s update with version %d", page_id, current_version + 1)
             data["version"]["number"] = current_version + 1
 

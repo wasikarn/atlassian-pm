@@ -11,18 +11,13 @@ Workflow scenarios covered:
 6. Cache invalidation (HR6: after MCP writes)
 """
 
-import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 # Import fixtures from conftest
 from tests.integration.conftest import (
     make_adf_description,
     make_jira_issue,
 )
-
 
 # ── Workflow: Issue Creation ───────────────────────────────────────────────────
 

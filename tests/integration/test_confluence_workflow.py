@@ -10,14 +10,9 @@ Workflow scenarios covered:
 5. HR4 compliance (macros via Python scripts, not MCP)
 """
 
-import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
-import pytest
 
 from tests.integration.conftest import make_confluence_page
-
 
 # ── Workflow: Page Creation ────────────────────────────────────────────────────
 

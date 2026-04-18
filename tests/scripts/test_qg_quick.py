@@ -3,11 +3,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ai"))
 from qg_quick import content_check, run_quick_check, structural_check
-
 
 # ── fixtures ───────────────────────────────────────────────────────────────────
 

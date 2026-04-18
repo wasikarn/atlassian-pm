@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from hooks_lib import log_event, parse_stdin, get_tool_response
+from hooks_lib import get_tool_response, log_event, parse_stdin
 from hooks_state import response_size_track
 
 _HOOK = "response-size-log"

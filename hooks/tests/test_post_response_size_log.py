@@ -1,14 +1,12 @@
 """Tests for post_response_size_log hook."""
 
-import json
 import sys
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from hooks_lib import LOG_DIR
-from hooks_state import response_size_track, response_size_get_stats, _save, _load
+from hooks_state import response_size_get_stats, response_size_track
 
 
 @pytest.fixture(autouse=True)
@@ -24,8 +22,8 @@ def clean_state(tmp_path, monkeypatch):
     monkeypatch.setattr("hooks_lib.LOG_DIR", log_dir)
 
     # Clear in-process cache
-    import hooks_state
     import hooks_lib
+    import hooks_state
     hooks_state._cache.clear()
     hooks_lib.LOG_DIR = log_dir
 

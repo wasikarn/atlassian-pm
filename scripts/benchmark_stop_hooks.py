@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 
-def run_stop_hook(hook_path: str, session_id: str | None = None) -> tuple[float, dict]:
+def run_stop_hook(hook_path: str, session_id: str | None = None) -> tuple[float, dict, int]:
     """Run a stop hook and return execution time + result."""
     env = os.environ.copy()
     env["ATLASSIAN_PM_INTERNAL"] = "true"

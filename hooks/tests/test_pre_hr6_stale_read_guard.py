@@ -192,8 +192,8 @@ def test_allows_on_invalid_json():
 
 def test_block_message_shows_invalidation_hint():
     """Block message tells user to run cache_invalidate."""
-    import json
     import io
+    import json
     from unittest.mock import patch
 
     stdin_data = {
@@ -310,7 +310,7 @@ def test_allows_when_session_id_missing():
 def test_logs_on_allow():
     """Hook logs ALLOWED event when allowing."""
     import json
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     stdin_data = {
         "session_id": "test-session-log",
@@ -340,7 +340,7 @@ def test_logs_on_allow():
 def test_logs_on_block():
     """Hook logs BLOCKED event when blocking."""
     import json
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     stdin_data = {
         "session_id": "test-session-block",

@@ -11,7 +11,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "monitor"))
 import board_monitor  # type: ignore[import-untyped]
 
-
 # --- _write_pid ---
 
 def test_write_pid_no_existing_lock(tmp_path, monkeypatch):
@@ -42,9 +41,8 @@ def test_write_pid_permission_error_exits(tmp_path, monkeypatch):
     pid_file = tmp_path / "monitor.pid"
     pid_file.write_text("12345")
     monkeypatch.setattr(board_monitor, "_PID_FILE", pid_file)
-    with patch("os.kill", side_effect=PermissionError):
-        with pytest.raises(SystemExit) as exc:
-            board_monitor._write_pid()
+    with patch("os.kill", side_effect=PermissionError), pytest.raises(SystemExit) as exc:
+        board_monitor._write_pid()
     assert exc.value.code == 1
 
 

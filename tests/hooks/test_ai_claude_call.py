@@ -6,8 +6,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "hooks"))
 from plugin.ai.claude_call import claude_call, claude_call_json, extract_result
 
@@ -92,9 +90,8 @@ def test_claude_call_returns_none_on_file_not_found():
 
 
 def test_claude_call_respects_recursion_guard():
-    with patch.dict(os.environ, {RECURSION_GUARD: "1"}):
-        with patch("subprocess.run") as mock_run:
-            result = claude_call("classify this")
+    with patch.dict(os.environ, {RECURSION_GUARD: "1"}), patch("subprocess.run") as mock_run:
+        result = claude_call("classify this")
     assert result is None
     mock_run.assert_not_called()
 
@@ -190,9 +187,8 @@ def test_claude_call_json_passes_json_schema_flag():
 
 
 def test_claude_call_json_respects_recursion_guard():
-    with patch.dict(os.environ, {RECURSION_GUARD: "1"}):
-        with patch("subprocess.run") as mock_run:
-            result = claude_call_json("prompt", SCHEMA)
+    with patch.dict(os.environ, {RECURSION_GUARD: "1"}), patch("subprocess.run") as mock_run:
+        result = claude_call_json("prompt", SCHEMA)
     assert result is None
     mock_run.assert_not_called()
 

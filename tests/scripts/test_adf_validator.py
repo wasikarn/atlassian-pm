@@ -6,11 +6,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "lib"))
 from adf_validator import (
+    QG_THRESHOLD,
+    VALID_PANEL_TYPES,
     AdfValidator,
     CheckResult,
     CheckStatus,
-    QG_THRESHOLD,
-    VALID_PANEL_TYPES,
     ValidationReport,
     detect_format,
     extract_text,
@@ -19,7 +19,6 @@ from adf_validator import (
     get_section_content,
     walk_adf,
 )
-
 
 # ═══════════════════════════════════════════════════════════
 # Helpers
@@ -745,7 +744,8 @@ def test_s8_no_ac_section_warns_when_required():
 def test_auto_fix_returns_new_report():
     doc = _make_doc(_make_panel("highlight"))
     report = VALIDATOR.validate(doc, "task")
-    fixed_doc, new_report = VALIDATOR.auto_fix(doc, report)
+    result = VALIDATOR.auto_fix(doc, report)
+    fixed_doc = result[0]
     # fixed doc should have a valid panel
     panel = find_adf_nodes(fixed_doc, lambda n: n.get("type") == "panel")[0]
     assert panel["attrs"]["panelType"] in VALID_PANEL_TYPES
@@ -802,4 +802,4 @@ def test_validate_all_issue_types_return_report():
 
 
 def test_valid_panel_types_constant():
-    assert VALID_PANEL_TYPES == frozenset({"info", "success", "warning", "error", "note"})
+    assert frozenset({"info", "success", "warning", "error", "note"}) == VALID_PANEL_TYPES
