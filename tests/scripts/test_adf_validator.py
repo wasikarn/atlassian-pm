@@ -555,6 +555,193 @@ def test_fix_panel_types_leaves_valid_unchanged():
     assert fixed_count == 0
 
 
+# ═══════════════════════════════════════════════════════════
+# S7 — Markdown-in-text scan
+# ═══════════════════════════════════════════════════════════
+
+
+def test_s7_para_break_in_text_node_warns_by_default():
+    doc = _make_doc(_make_paragraph("line one\n\nline two"))
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.WARN
+    assert "para-break" in result.message
+
+
+def test_s7_para_break_in_text_node_fails_when_markdown_strict_true():
+    doc = _make_doc(_make_paragraph("line one\n\nline two"))
+    result = AdfValidator(markdown_strict=True)._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.FAIL
+    assert "para-break" in result.message
+
+
+def test_s7_pipe_table_row_detected():
+    doc = _make_doc(_make_paragraph("| col1 | col2 |"))
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.WARN
+    assert "pipe-table row" in result.message
+
+
+def test_s7_bullet_prefix_detected():
+    doc = _make_doc(_make_paragraph("- item one\n- item two"))
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.WARN
+    assert "bullet prefix" in result.message
+
+
+def test_s7_markdown_heading_detected():
+    doc = _make_doc(_make_paragraph("## My Heading"))
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.WARN
+    assert "markdown heading" in result.message
+
+
+def test_s7_code_marked_text_is_exempt():
+    text_node = {"type": "text", "text": "## heading inside code", "marks": [{"type": "code"}]}
+    doc = {"type": "doc", "version": 1, "content": [{"type": "paragraph", "content": [text_node]}]}
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.PASS
+
+
+def test_s7_deeply_nested_text_node_detected():
+    # bullet prefix inside panel > blockquote > paragraph > text
+    inner_text = {"type": "text", "text": "- nested bullet item"}
+    inner_para = {"type": "paragraph", "content": [inner_text]}
+    blockquote = {"type": "blockquote", "content": [inner_para]}
+    panel = _make_panel("info", blockquote)
+    doc = _make_doc(panel)
+    result = AdfValidator()._check_s7_markdown_in_text(doc)
+    assert result.status == CheckStatus.WARN
+    assert "bullet prefix" in result.message
+
+
+# ═══════════════════════════════════════════════════════════
+# S8 — Dual-zone AC check
+# ═══════════════════════════════════════════════════════════
+
+
+def _make_dual_zone_ac_doc(biz_h3: bool = True, dev_h3: bool = True) -> dict:
+    """Build an ADF doc with AC H2 section and optional Business/Developer H3 zones."""
+    ac_content: list[dict] = []
+    if biz_h3:
+        ac_content.append(_make_heading(3, "Acceptance Criteria — Business"))
+        ac_content.append(_make_paragraph("ผู้ใช้เห็น dashboard ของตัวเองทันทีหลังล็อกอิน"))
+    if dev_h3:
+        ac_content.append(_make_heading(3, "Acceptance Criteria — Developer"))
+        ac_content.append(
+            _make_paragraph(
+                "Given: user is logged in When: user visits dashboard Then: 200 OK"
+            )
+        )
+    return _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        *ac_content,
+    )
+
+
+def test_s8_story_missing_both_zones_warns_by_default():
+    # AC H2 present but no H3 zones at all
+    doc = _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        _make_paragraph("some criteria"),
+    )
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "Business AC zone" in result.message or "Developer AC zone" in result.message
+
+
+def test_s8_story_missing_both_zones_fails_when_strict():
+    doc = _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        _make_paragraph("some criteria"),
+    )
+    result = AdfValidator(dual_zone_strict=True)._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.FAIL
+
+
+def test_s8_story_missing_developer_zone_warns():
+    doc = _make_dual_zone_ac_doc(biz_h3=True, dev_h3=False)
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "Developer AC zone" in result.message
+
+
+def test_s8_story_with_both_zones_passes():
+    doc = _make_dual_zone_ac_doc(biz_h3=True, dev_h3=True)
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.PASS
+
+
+def test_s8_task_only_requires_developer_zone():
+    # Task: developer required, business optional — developer zone alone should pass
+    doc = _make_dual_zone_ac_doc(biz_h3=False, dev_h3=True)
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "task")
+    assert result.status == CheckStatus.PASS
+
+
+def test_s8_subtask_business_zone_skipped():
+    # Subtask: business=skip, developer=required — developer zone alone passes
+    doc = _make_dual_zone_ac_doc(biz_h3=False, dev_h3=True)
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "subtask")
+    assert result.status == CheckStatus.PASS
+
+
+def test_s8_qa_type_both_zones_optional():
+    # QA: both optional — no zones needed, passes regardless
+    doc = _make_doc(_make_paragraph("no AC structure needed for QA"))
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "qa")
+    assert result.status == CheckStatus.PASS
+
+
+def test_s8_business_zone_language_leak_sla_warns():
+    doc = _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        _make_heading(3, "Acceptance Criteria — Business"),
+        _make_paragraph("Response time must be under 30s for all users"),
+        _make_heading(3, "Acceptance Criteria — Developer"),
+        _make_paragraph("Given: request sent When: processed Then: 200 OK"),
+    )
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "SLA" in result.message or "30s" in result.message or "jargon" in result.message
+
+
+def test_s8_business_zone_language_leak_service_warns():
+    doc = _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        _make_heading(3, "Acceptance Criteria — Business"),
+        _make_paragraph("Notification is sent via Pusher to the connected client"),
+        _make_heading(3, "Acceptance Criteria — Developer"),
+        _make_paragraph("Given: event triggered When: pushed Then: client receives"),
+    )
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "service" in result.message.lower() or "jargon" in result.message.lower()
+
+
+def test_s8_business_zone_language_leak_method_call_warns():
+    doc = _make_doc(
+        _make_heading(2, "Acceptance Criteria"),
+        _make_heading(3, "Acceptance Criteria — Business"),
+        _make_paragraph("System calls AuthService.login() to authenticate the user"),
+        _make_heading(3, "Acceptance Criteria — Developer"),
+        _make_paragraph("Given: credentials valid When: login called Then: token returned"),
+    )
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "method" in result.message.lower() or "jargon" in result.message.lower()
+
+
+def test_s8_no_ac_section_warns_when_required():
+    # Story with no AC H2 at all → warn (grandfather mode)
+    doc = _make_doc(
+        _make_heading(2, "User Story"),
+        _make_paragraph("As a user I want to login"),
+    )
+    result = AdfValidator()._check_s8_dual_zone_ac(doc, "story")
+    assert result.status == CheckStatus.WARN
+    assert "AC section" in result.message or "No AC" in result.message
+
+
 def test_auto_fix_returns_new_report():
     doc = _make_doc(_make_panel("highlight"))
     report = VALIDATOR.validate(doc, "task")
