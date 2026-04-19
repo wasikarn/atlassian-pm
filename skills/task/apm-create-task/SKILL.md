@@ -5,7 +5,7 @@ agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, acli]
 allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_update_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  This skill creates a new Jira Task in vibe mode (fast, auto-detect type) by default. Use --thorough flag for full interview workflow.
+  Creates a new Jira Task in vibe mode (fast, auto-detect type) by default. Use --thorough flag for full interview workflow.
 
   Supports 4 task types: tech-debt, bug, chore, spike
   Supports modes: feature (default), qa, bug, spike, chore

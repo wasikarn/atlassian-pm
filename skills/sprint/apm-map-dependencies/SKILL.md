@@ -33,7 +33,7 @@ description: |
 
 Determine scope — sprint ID, issue list, or JQL query:
 
-`jira_search(jql="sprint = <id> ORDER BY rank", fields="summary,status,assignee,issuetype,issuelinks,priority,labels", limit=30)`
+`jira_search(jql="sprint = <id>", fields="summary,status,assignee,issuetype,issuelinks,priority,labels", limit=30)`
 
 Extract per item: key, summary, assignee, status, priority, issue links (Blocks/Relates/Duplicate), size estimate, service tag (`[BE]`, `[FE-Web]`, `[FE-Admin]`, `[QA]`).
 

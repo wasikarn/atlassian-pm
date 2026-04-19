@@ -77,6 +77,20 @@ else:
 "
 ```
 
+### Step 3 — Days Left in Sprint
+
+```bash
+python3 -c "
+from datetime import datetime, date
+end = '{{SPRINT_END_DATE}}'  # replace with actual endDate from Step 1
+try:
+    days = (datetime.strptime(end[:10], '%Y-%m-%d').date() - date.today()).days
+    print(f'{days} days left in sprint ({end[:10]})')
+except:
+    print('Sprint end date unknown')
+"
+```
+
 ### Step 4 — Pending HR State
 
 Check session state file for unflushed HR violations:
@@ -97,20 +111,6 @@ if not hr5 and not hr6:
     print('No pending HR violations')
 "
 fi
-```
-
-### Step 3 — Days Left in Sprint
-
-```bash
-python3 -c "
-from datetime import datetime, date
-end = '{{SPRINT_END_DATE}}'  # replace with actual endDate from Step 1
-try:
-    days = (datetime.strptime(end[:10], '%Y-%m-%d').date() - date.today()).days
-    print(f'{days} days left in sprint ({end[:10]})')
-except:
-    print('Sprint end date unknown')
-"
 ```
 
 ### Step 5 — Build Status Report

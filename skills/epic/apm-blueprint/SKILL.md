@@ -156,7 +156,7 @@ If any check fails → flag to user with the disagreement.
 > **🟢 AUTO** — Score → auto-fix → re-score. Escalate only if still < 90% after 2 attempts.
 > **HR1:** NEVER write to Confluence before QG ≥ 90%.
 
-Score against `shared-references/verification-checklist.md` — Blueprint Quality (B1-B8). Target: ≥ 90%.
+Score against `verification-checklist.md` — Blueprint Quality (B1-B8). Target: ≥ 90%.
 
 - S-tier (5 sections): `Blueprint Quality X/5 | Overall X%` (B1+B2+B4+B6+B8)
 - M/L-tier (8 sections): `Blueprint Quality X/8 | Overall X%` (B1-B8)
@@ -196,7 +196,7 @@ Convert published blueprint into `blueprint_backlog_map` for downstream skills.
 
 **🟡 REVIEW** — Present conversion plan to user. Proceed unless user objects.
 
-→ ADF format: see references/templates-core.md
+→ ADF format: see ../../../references/templates-core.md
 
 `blueprint_backlog_map` fields: `blueprint_page_id`, `blueprint_url`, `epic{title, source_sections}`, `tasks[]{title, objective_hint, acs_hint[], vs_label, sp_estimate, priority}`, `spikes[]{title, timebox, source}`, `dependencies[]{from, to, type}`, `non_goals[]`
 

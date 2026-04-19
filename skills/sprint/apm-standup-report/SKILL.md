@@ -4,6 +4,7 @@ context: fork
 agent: Explore
 model: haiku
 x-compatibility: [atlassian-cache, mcp-atlassian]
+allowed-tools: Read, Bash, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_get_sprint_issues, mcp__mcp-atlassian__jira_get_sprints_from_board, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_add_comment, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_sprint_issues
 description: |
   Generate daily standup digest from active sprint — categorizes issues by status per assignee, flags anomalies.
   Optional --post flag posts digest as comment to sprint Confluence page.

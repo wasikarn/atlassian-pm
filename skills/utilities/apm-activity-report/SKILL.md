@@ -39,26 +39,26 @@ argument-hint: "[--hours <N>] [--start <date>] [--end <date>] [--project <name>]
 ## Phase 2: Run Script
 
 ```bash
-python .claude/skills/utilities/activity-report/generate_report.py [args]
+python ${CLAUDE_SKILL_DIR}/generate_report.py [args]
 ```
 
 **Examples:**
 
 ```bash
 # Today
-python .claude/skills/utilities/activity-report/generate_report.py
+python ${CLAUDE_SKILL_DIR}/generate_report.py
 
 # Date range
-python .claude/skills/utilities/activity-report/generate_report.py --start 2026-02-05 --end 2026-02-06
+python ${CLAUDE_SKILL_DIR}/generate_report.py --start 2026-02-05 --end 2026-02-06
 
 # Last 48 hours, specific project
-python .claude/skills/utilities/activity-report/generate_report.py --hours 48 --project jira-generator
+python ${CLAUDE_SKILL_DIR}/generate_report.py --hours 48 --project jira-generator
 
 # Only decisions and bugs
-python .claude/skills/utilities/activity-report/generate_report.py --types decision,bugfix
+python ${CLAUDE_SKILL_DIR}/generate_report.py --types decision,bugfix
 
 # Save to file
-python .claude/skills/utilities/activity-report/generate_report.py --output report.md
+python ${CLAUDE_SKILL_DIR}/generate_report.py --output report.md
 ```
 
 ## Phase 3: Present

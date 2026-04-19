@@ -3,14 +3,15 @@ name: apm-sync-artifacts
 context: fork
 agent: general-purpose
 x-compatibility: [atlassian-cache, mcp-atlassian, mcp-confluence, acli]
+allowed-tools: Read, Bash, Agent, Write, Edit, TodoWrite, mcp__mcp-atlassian__jira_get_issue, mcp__mcp-atlassian__jira_search, mcp__mcp-atlassian__jira_update_issue, mcp__mcp-atlassian__confluence_get_page, mcp__mcp-atlassian__confluence_search, mcp__mcp-atlassian__confluence_update_page, mcp__plugin_atlassian-pm_atlassian-cache__cache_get_issue, mcp__plugin_atlassian-pm_atlassian-cache__cache_invalidate
 description: |
-  This skill should be used when Jira issues and Confluence pages have drifted out of alignment and need bidirectional sync. Syncs all related artifacts (Epic, Task, QA, Confluence) using an 8-phase workflow.
-  
+  Bidirectional sync for Jira issues and Confluence pages that have drifted out of alignment. Syncs all related artifacts (Epic, Task, QA, Confluence) using an 8-phase workflow.
+
   Phases: Identify Origin → Build Graph → Detect Changes → Impact Analysis → Explore (if needed) → Generate Updates → Execute Sync → Verify & Report
-  
-  Trigger phrases: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "this task is outdated", "cascade changes", "sync with parent", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
-  
-  This skill should NOT be used for initial issue creation (use create-task) or individual field updates (use update-task).
+
+  Triggers: "sync alignment", "sync all", "update related", "cascade all", "sync drift", "out of sync", "this task is outdated", "cascade changes", "sync with parent", "ซิงค์ artifacts", "อัปเดตทุกอย่าง"
+  Use when: Jira issues and Confluence pages have drifted out of alignment
+  Do NOT use for: initial issue creation (use create-task) or individual field updates (use update-task)
 argument-hint: "[issue-key-or-page-id] [changes]"
 effort: high
 ---
@@ -55,7 +56,7 @@ Epic (Jira)
 - `jira_get_issue(issue_key, fields="summary,status,issuetype,parent")`
 - Determine artifact type: Epic / Task
 - If Confluence page ID → `confluence_get_page(page_id)` → extract {{PROJECT_KEY}} keys → pivot to Jira
-- **⛔ GATE — DO NOT PROCEED** without user confirmation of starting artifact + description of what changed.
+- **⛔ GATE** — Requires user confirmation of starting artifact + description of what changed before proceeding.
 
 ### 2. Build Artifact Graph
 
@@ -67,7 +68,7 @@ Discovery algorithm:
    - if Task → parent_epic = issue.parent
 3. Walk DOWN:
    - jira_search("parent = EPIC_KEY AND issuetype = Task", fields="summary,status,issuetype,parent") → tasks
-   ⚠️ NEVER add ORDER BY to parent queries — JQL parse error (HR2)
+   ⚠️ Do not add ORDER BY to parent queries — causes JQL parse error (HR2)
 4. Walk SIDEWAYS (Jira → Confluence):
    - per task: confluence_search("{{PROJECT_KEY}}-XXX") → Tech Note
    - epic: confluence_search(epic_title) → Epic Doc
@@ -87,7 +88,7 @@ User describes changes, then classify:
 | Add AC / Modify AC / Technical detail | MEDIUM |
 | Remove AC / Change scope / Business value | HIGH |
 
-**⛔ GATE — DO NOT PROCEED** without user confirmation of change classification.
+**⛔ GATE** — Requires user confirmation of change classification before proceeding.
 
 ### 4. Impact Analysis
 
@@ -112,7 +113,7 @@ Fetch full description only for artifacts with impact = UPDATE:
 
 **Per Confluence page:** `confluence_get_page(page_id)` → surgical find/replace pairs, section update, or full rewrite → `{{artifacts_dir}}/sync-page-xxx.md`
 
-**⛔ GATE — DO NOT EXECUTE** any sync without user approval of ALL generated updates.
+**⛔ GATE** — Requires user approval of ALL generated updates before executing any sync.
 
 ### 7. Execute Sync
 

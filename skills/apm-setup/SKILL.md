@@ -430,4 +430,6 @@ See [references/domain-expert.md](references/domain-expert.md)
 
 ## References
 
-No shared reference dependencies — all configuration performed via Bash commands only.
+- [phase-scripts.md](references/phase-scripts.md) — Bash scripts for each phase
+- [error-handling.md](references/error-handling.md) — Per-phase error handling
+- [domain-expert.md](references/domain-expert.md) — Domain expert notes
